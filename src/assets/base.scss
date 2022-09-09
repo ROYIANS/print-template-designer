@@ -1,0 +1,40 @@
+:root {
+    --primary-color: #4579e1;
+    --primary-color-50: rgba(69, 121, 225, 0.5);
+    --primary-color-30: rgba(69, 121, 225, 0.3);
+}
+
+html, body {
+    height: 100%
+}
+
+i {
+    margin-right: 5px;
+}
+
+.height-all {
+    height: 100%;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #dddddd;
+    border-radius: 8px;
+}
+::-webkit-scrollbar-thumb {
+    border-radius: 8px;
+    background-color: var(--primary-color-30);
+    background-image: -webkit-linear-gradient(45deg,rgba(255, 255, 255, .2) 25%,
+            transparent 25%,
+            transparent 50%,
+            rgba(255, 255, 255, .2) 50%,
+            rgba(255, 255, 255, .2) 75%,
+            transparent 75%,
+            transparent);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: var(--primary-color-50);
+}
