@@ -10,7 +10,7 @@
       <el-aside width="300px" class="roy-designer-aside">
         <DesignerAside />
       </el-aside>
-      <el-main class="roy-designer-main">213</el-main>
+      <el-main class="roy-designer-main">开发中......</el-main>
     </el-container>
   </el-container>
 </template>

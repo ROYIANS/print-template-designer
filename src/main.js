@@ -7,6 +7,7 @@ import router from "./router";
 
 import "./assets/main.scss";
 import "normalize.css/normalize.css";
+import "animate.css";
 import "./assets/theme/index.css";
 import "remixicon/fonts/remixicon.css";
 

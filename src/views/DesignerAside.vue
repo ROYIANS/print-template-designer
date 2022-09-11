@@ -115,6 +115,7 @@ export default {
   }
   .roy-designer-aside__right_panel {
     width: calc(100% - 64px);
+    background: var(--prism-line-highlight-background);
   }
 }
 </style>
