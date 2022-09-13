@@ -54,7 +54,7 @@ export default {
   width: 30%;
   height: 95px;
   margin-bottom: 10px;
-  color: var(--roy-text-color-secondary);
+  color: var(--roy-text-color-regular);
   &:hover {
     box-shadow: rgba(0, 0, 0, 0.19) 0 10px 20px, rgba(0, 0, 0, 0.23) 0 6px 6px;
     cursor: grab;
