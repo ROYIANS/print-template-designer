@@ -1,6 +1,6 @@
 <template>
   <div class="roy-page-component">
-    <div class="roy-page-component__item">
+    <div draggable="true" class="roy-page-component__item">
       <i class="ri-heading"></i>
       <span>标题</span>
     </div>
