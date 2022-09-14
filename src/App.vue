@@ -10,17 +10,21 @@
       <el-aside width="300px" class="roy-designer-aside">
         <DesignerAside />
       </el-aside>
-      <el-main class="roy-designer-main">开发中......</el-main>
+      <el-main class="roy-designer-main">
+        <DesignerMain />
+      </el-main>
     </el-container>
   </el-container>
 </template>
 
 <script>
 import DesignerAside from "@/views/DesignerAside.vue";
+import DesignerMain from "@/views/DesignerMain.vue";
 export default {
   name: "PrintDesigner",
   components: {
     DesignerAside,
+    DesignerMain,
   },
 };
 </script>

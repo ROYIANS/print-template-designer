@@ -235,10 +235,11 @@ i {
 }
 
 ::-webkit-scrollbar {
-    width: 6px;
+    width: 8px;
+    height: 8px;
 }
 ::-webkit-scrollbar-track {
-    background: #dddddd;
+    background: var(--roy-bg-color-page);
     border-radius: 8px;
 }
 ::-webkit-scrollbar-thumb {
