@@ -18,7 +18,7 @@ jobs:
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@3.7.1
         with:
-          GITHUB_TOKEN: ${{ secrets.PRINT-TEMPLATE-DESIGNER-TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PRINT_TEMPLATE_DESIGNER_TOKEN }}
           BRANCH: master
           FOLDER: dist
           CLEAN: true
