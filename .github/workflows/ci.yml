@@ -19,8 +19,8 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@3.7.1
         with:
           GITHUB_TOKEN: ${{ secrets.PRINT_TEMPLATE_DESIGNER_TOKEN }}
-          BRANCH: master
+          BRANCH: preview
           FOLDER: dist
           CLEAN: true
-          REPOSITORY_NAME: royians/royians.github.io
-          TARGET_FOLDER: print-template-designer
+          REPOSITORY_NAME: royians/print-template-designer
+          TARGET_FOLDER: /
