@@ -7,4 +7,4 @@ A vue2 component for design a page for print / 一个使用Vue2的组件，用�
 
 ## 仅个人学习用
 
-本项目为本人学习可视化的简单学习探索项目
+本项目为本人学习可视化的简单学习探索项目，是个DEMO。写的也还不成熟，希望可以多多提建议。
