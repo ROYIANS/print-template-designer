@@ -1,5 +1,5 @@
 <template>
-  <div class="roy-designer-aside__main">
+  <section class="roy-designer-aside__main">
     <el-menu
       default-active="0"
       class="roy-designer-aside__menu"
@@ -23,7 +23,7 @@
         :is="curActiveComponent"
       />
     </keep-alive>
-  </div>
+  </section>
 </template>
 
 <script>
@@ -77,45 +77,3 @@ export default {
   },
 };
 </script>
-
-<style scoped lang="scss">
-.roy-designer-aside__main {
-  height: 100%;
-  width: 100%;
-  display: flex;
-  background: #fff;
-  .roy-designer-aside__menu {
-    height: 100%;
-    .el-menu-item {
-      overflow: hidden;
-      padding: 0;
-    }
-    .roy-designer-aside__menu__icon {
-      display: grid;
-      top: -7px;
-      position: relative;
-      align-items: center;
-      vertical-align: center;
-      align-content: center;
-      i {
-        padding: 0;
-        margin: 0;
-        font-size: 20px;
-      }
-      span {
-        line-height: 14px;
-        visibility: visible;
-        height: auto;
-        width: auto;
-        font-size: 8px;
-        top: -14px;
-        position: relative;
-      }
-    }
-  }
-  .roy-designer-aside__right_panel {
-    width: calc(100% - 64px);
-    background: var(--roy-bg-color-overlay);
-  }
-}
-</style>

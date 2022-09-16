@@ -1,110 +1,5 @@
 @import "./base.scss";
 
-body {
-  font-family: Helvetica Neue,Helvetica,PingFang SC,Microsoft YaHei,Arial,sans-serif;
-  font-weight: 400;
-  font-size: var(--roy-font-size-base);
-  color: var(--roy-text-color-primary);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-tap-highlight-color: transparent;
-
-  a {
-    color: var(--roy-color-primary);
-    text-decoration: none
-  }
-
-  a:hover,a:focus {
-    color: var(--roy-color-primary-light-3)
-  }
-
-  a:active {
-    color: var(--roy-color-primary-dark-2)
-  }
-
-  h1,h2,h3,h4,h5,h6 {
-    color: var(--roy-text-color-regular);
-    font-weight: inherit
-  }
-
-  h1:first-child,h2:first-child,h3:first-child,h4:first-child,h5:first-child,h6:first-child {
-    margin-top: 0
-  }
-
-  h1:last-child,h2:last-child,h3:last-child,h4:last-child,h5:last-child,h6:last-child {
-    margin-bottom: 0
-  }
-
-  h1 {
-    font-size: calc(var(--roy-font-size-base) + 6px)
-  }
-
-  h2 {
-    font-size: calc(var(--roy-font-size-base) + 4px)
-  }
-
-  h3 {
-    font-size: calc(var(--roy-font-size-base) + 2px)
-  }
-
-  h4,h5,h6,p {
-    font-size: inherit
-  }
-
-  p {
-    line-height: 1.8
-  }
-
-  p:first-child {
-    margin-top: 0
-  }
-
-  p:last-child {
-    margin-bottom: 0
-  }
-
-  sup,sub {
-    font-size: calc(var(--roy-font-size-base) - 1px)
-  }
-
-  small {
-    font-size: calc(var(--roy-font-size-base) - 2px)
-  }
-
-  hr {
-    margin-top: 20px;
-    margin-bottom: 20px;
-    border: 0;
-    border-top: 1px solid var(--roy-border-color-lighter)
-  }
-
-  .el-message {
-    border-radius: 2px;
-    padding: 10px 15px 10px 20px;
-    box-shadow: rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
-  }
-  .el-menu-item.is-active::before {
-    content: '';
-    width: 4px;
-    height: 80%;
-    background: var(--roy-color-primary);
-    position: absolute;
-    top: 10%;
-    border-radius: 0 10px 10px 0;
-    left: 0;
-  }
-
-  .el-menu {
-    background: var(--roy-bg-color);
-    border-right: solid 1px var(--roy-menu-border-color);
-  }
-  .el-menu-item {
-    i, span {
-      color: var(--roy-text-color-regular);
-    }
-  }
-}
-
 .roy-designer-container {
   background: var(--prism-background);
   width: 100%;
@@ -129,21 +24,109 @@ body {
 
   .roy-designer-aside {
     margin: 10px 5px 10px 10px;
+    .roy-designer-aside__main {
+      height: 100%;
+      width: 100%;
+      display: flex;
+      background: #fff;
+      .roy-designer-aside__menu {
+        height: 100%;
+        .el-menu-item {
+          overflow: hidden;
+          padding: 0;
+        }
+        .roy-designer-aside__menu__icon {
+          display: grid;
+          top: -7px;
+          position: relative;
+          align-items: center;
+          vertical-align: center;
+          align-content: center;
+          i {
+            padding: 0;
+            margin: 0;
+            font-size: 20px;
+          }
+          span {
+            line-height: 14px;
+            visibility: visible;
+            height: auto;
+            width: auto;
+            font-size: 8px;
+            top: -14px;
+            position: relative;
+          }
+        }
+      }
+      .roy-designer-aside__right_panel {
+        width: calc(100% - 64px);
+        background: var(--roy-bg-color-overlay);
+      }
+    }
   }
 
   .roy-designer-main {
     width: 60%;
-    margin: 10px 10px 10px 5px;
-    background-color: rgb(255, 255, 255);
-    background-image: linear-gradient(45deg, rgb(247, 247, 247) 25%, transparent 25%), linear-gradient(-45deg, rgb(247, 247, 247) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, rgb(247, 247, 247) 75%), linear-gradient(-45deg, transparent 75%, rgb(247, 247, 247) 75%);
-    background-size: 20px 20px;
-    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    margin: 5px;
     border-radius: 2px;
     overflow: auto;
-    padding: 15px;
-    @media (prefers-color-scheme: dark) {
-      background-color: #1c1c1c;
-      background-image: linear-gradient(45deg, #212121 25%, transparent 25%), linear-gradient(-45deg, #232323 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #232323 75%), linear-gradient(-45deg, transparent 75%, #232323 75%);
+    padding: 0;
+    .roy-designer-main__page {
+      height: calc(100% - 50px);
+      padding: 10px;
+      background-color: rgb(255, 255, 255);
+      background-image: linear-gradient(45deg, rgb(247, 247, 247) 25%, transparent 25%), linear-gradient(-45deg, rgb(247, 247, 247) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, rgb(247, 247, 247) 75%), linear-gradient(-45deg, transparent 75%, rgb(247, 247, 247) 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+      @media (prefers-color-scheme: dark) {
+        background-color: #1c1c1c;
+        background-image: linear-gradient(45deg, #212121 25%, transparent 25%), linear-gradient(-45deg, #232323 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #232323 75%), linear-gradient(-45deg, transparent 75%, #232323 75%);
+      }
+      #designer-page {
+        margin: auto;
+        padding: 15px;
+        background: var(--roy-bg-color);
+        box-shadow: rgba(0, 0, 0, 0.12) 0 1px 3px, rgba(0, 0, 0, 0.24) 0 1px 2px;
+        width: calc(210mm * 1.25);
+        height: calc(297mm * 1.25);
+      }
+    }
+    .roy-designer-main__toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      .roy-designer-main__toolbar_left {
+        display: flex;
+        justify-content: start;
+      }
+      .roy-designer-main__toolbar_right {
+        display: flex;
+        justify-content: end;
+      }
+      .roy-designer-main__toolbar__item {
+        cursor: pointer;
+        background: var(--roy-bg-color);
+        display: grid;
+        width: 18px;
+        height: 18px;
+        font-size: 10px;
+        line-height: 18px;
+        box-shadow: rgba(99, 99, 99, 0.2) 0 2px 8px 0;
+        padding: 4px;
+        text-align: center;
+        border-radius: 4px;
+        & + .roy-designer-main__toolbar__item {
+          margin-left: 5px;
+        }
+        &:hover {
+          background: var(--roy-bg-color-page);
+        }
+        i {
+          padding: 0;
+          margin: 0;
+          font-size: 14px;
+        }
+      }
     }
   }
 }
