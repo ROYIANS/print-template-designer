@@ -42,7 +42,7 @@ export default {
           textColor: window.getComputedStyle(elements[0]).color,
           height: 16,
           unit: 1,
-          zoom: 37.7952,
+          zoom: 50,
         });
       }
     },

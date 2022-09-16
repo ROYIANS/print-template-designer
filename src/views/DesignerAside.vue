@@ -20,6 +20,7 @@
     <keep-alive>
       <component
         class="roy-designer-aside__right_panel"
+        :key="curActiveComponentCode"
         :is="curActiveComponent"
       />
     </keep-alive>
@@ -49,8 +50,14 @@ export default {
         {
           name: "页面",
           code: "page",
-          icon: "ri-pages-line",
+          icon: "ri-stack-line",
           component: () => import("@/views/PageSetting.vue"),
+        },
+        {
+          name: "大纲",
+          code: "toc",
+          icon: "ri-pages-line",
+          component: () => import("@/views/PageTools.vue"),
         },
         {
           name: "工具",
@@ -58,13 +65,21 @@ export default {
           icon: "ri-magic-line",
           component: () => import("@/views/PageTools.vue"),
         },
+        {
+          name: "全局",
+          code: "setting",
+          icon: "ri-sound-module-line",
+          component: () => import("@/views/PageTools.vue"),
+        },
       ],
       curActiveComponent: null,
+      curActiveComponentCode: "",
     };
   },
   methods: {
     onMenuSelect(index) {
       this.curActiveComponent = this.menuList[index].component;
+      this.curActiveComponentCode = this.menuList[index].code;
     },
   },
   mounted() {
@@ -74,6 +89,7 @@ export default {
       duration: 3000,
     });
     this.curActiveComponent = this.menuList[0].component;
+    this.curActiveComponentCode = this.menuList[0].code;
   },
 };
 </script>
