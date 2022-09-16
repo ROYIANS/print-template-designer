@@ -1,8 +1,8 @@
 <!--
-* @description 标尺纵向
-* @filename RulerVertical.vue
+* @description 标尺横向
+* @filename RulerHorizontal.vue
 * @author ROYIANS
-* @date 2022/9/16 11:43
+* @date 2022/9/16 16:57
 !-->
 <template>
   <div ref="rulerDiv" class="roy-ruler"></div>
@@ -13,7 +13,7 @@ import commonMixin from "@/mixin/commonMixin";
 import Ruler from "@scena/ruler";
 
 /**
- * 标尺纵向
+ * 标尺横向
  */
 export default {
   name: "RulerHorizontal",
@@ -37,10 +37,10 @@ export default {
       let elements = document.getElementsByClassName("roy-ruler-outer-box");
       if (elements.length) {
         this.ruler = new Ruler(this.$refs.rulerDiv, {
-          type: "vertical",
+          type: "horizontal",
           backgroundColor: window.getComputedStyle(elements[0]).backgroundColor,
           textColor: window.getComputedStyle(elements[0]).color,
-          width: 16,
+          height: 16,
           unit: 1,
           zoom: 37.7952,
         });
