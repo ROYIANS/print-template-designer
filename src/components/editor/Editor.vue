@@ -6,14 +6,17 @@
 !-->
 <template>
   <el-main class="roy-designer-main__page">
-    <div id="designer-page">
-      <div>测试页面</div>
-    </div>
+    <Ruler>
+      <div id="designer-page">
+        <div>测试页面</div>
+      </div>
+    </Ruler>
   </el-main>
 </template>
 
 <script>
 import commonMixin from "@/mixin/commonMixin";
+import Ruler from "@/components/ruler/Ruler.vue";
 
 /**
  * 主编辑器
@@ -21,7 +24,9 @@ import commonMixin from "@/mixin/commonMixin";
 export default {
   name: "RoyEditor",
   mixins: [commonMixin],
-  components: {},
+  components: {
+    Ruler,
+  },
   props: {},
   data() {
     return {};
