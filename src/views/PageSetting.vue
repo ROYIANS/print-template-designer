@@ -6,6 +6,7 @@
         :key="index"
         :content="btn.content"
         :visible-arrow="false"
+        :open-delay="400"
         placement="bottom"
         effect="dark"
       >

@@ -28,7 +28,7 @@
       height: 100%;
       width: 100%;
       display: flex;
-      background: #fff;
+      background: var(--roy-bg-color-overlay);
       .roy-designer-aside__menu {
         height: 100%;
         .el-menu-item {

@@ -111,6 +111,16 @@ body {
             color: var(--roy-text-color-regular);
         }
     }
+
+    .halo-tree {
+        padding: 0;
+        .tree-node-el, .tree-expand {
+            background: var(--roy-bg-color-overlay);
+        }
+        .node-title:hover, .node-selected {
+            background: var(--roy-color-primary-light-5);
+        }
+    }
 }
 
 ::-webkit-scrollbar {
