@@ -57,7 +57,7 @@ export default {
           name: "大纲",
           code: "toc",
           icon: "ri-pages-line",
-          component: () => import("@/views/PageTools.vue"),
+          component: () => import("@/views/PageToc.vue"),
         },
         {
           name: "工具",
@@ -69,7 +69,7 @@ export default {
           name: "全局",
           code: "setting",
           icon: "ri-sound-module-line",
-          component: () => import("@/views/PageTools.vue"),
+          component: () => import("@/views/GlobalSetting.vue"),
         },
       ],
       curActiveComponent: null,
