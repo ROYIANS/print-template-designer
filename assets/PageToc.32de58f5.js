@@ -1,0 +1,1 @@
+import{n as t,c as o}from"./index.939b2dbb.js";const a={name:"PageToc",mixins:[o],components:{},props:{},data(){return{}},methods:{initMounted(){}},created(){},mounted(){this.initMounted()},watch:{}};var s=function(){var n=this,e=n._self._c;return e("el-main",{staticClass:"PageToc"},[n._v(" 1 ")])},_=[],c=t(a,s,_,!1,null,null,null,null);const l=c.exports;export{l as default};
