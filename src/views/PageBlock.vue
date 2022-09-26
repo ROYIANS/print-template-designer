@@ -45,6 +45,7 @@ export default {
     &:hover {
       cursor: grab;
       box-shadow: var(--roy-box-shadow-light);
+      transform: scale3d(1.05, 1.05, 1.05);
     }
     .el-col {
       height: 100%;

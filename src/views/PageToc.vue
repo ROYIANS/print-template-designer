@@ -5,11 +5,14 @@
 * @date 2022/9/26 15:10
 !-->
 <template>
-  <el-main class="PageToc"> 1 </el-main>
+  <el-main class="PageToc">
+    <v-tree :data="tocData" :radio="true" />
+  </el-main>
 </template>
 
 <script>
 import commonMixin from "@/mixin/commonMixin";
+import bigData from "@/mock/bigTree.json";
 
 /**
  * 页面大纲
@@ -20,10 +23,16 @@ export default {
   components: {},
   props: {},
   data() {
-    return {};
+    return {
+      tocData: [],
+    };
   },
   methods: {
-    initMounted() {},
+    initMounted() {
+      let treeData = bigData.data;
+      treeData[0].expanded = true;
+      this.tocData = treeData;
+    },
   },
   created() {},
   mounted() {
