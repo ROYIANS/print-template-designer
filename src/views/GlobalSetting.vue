@@ -5,7 +5,7 @@
 * @date 2022/9/26 15:11
 !-->
 <template>
-  <el-main class="GlobalSetting"> GlobalSetting </el-main>
+  <el-main class="GlobalSetting"> GlobalSetting</el-main>
 </template>
 
 <script>
@@ -23,9 +23,11 @@ export default {
     return {};
   },
   methods: {
-    initMounted() {},
+    initMounted() {
+    },
   },
-  created() {},
+  created() {
+  },
   mounted() {
     this.initMounted();
   },

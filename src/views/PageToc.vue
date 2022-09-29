@@ -34,7 +34,8 @@ export default {
       this.tocData = treeData;
     },
   },
-  created() {},
+  created() {
+  },
   mounted() {
     this.initMounted();
   },

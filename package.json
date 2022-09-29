@@ -1,6 +1,11 @@
 {
-  "name": "svg-print-template-designer",
-  "version": "0.0.0",
+  "name": "print-template-designer",
+  "version": "0.0.1",
+  "author": {
+    "email": "admin@royians.cn",
+    "name": "ROYIANS",
+    "url": "https://www.royians.cn"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",

@@ -1,6 +1,6 @@
 <template>
   <div class="roy-page-component">
-    <div draggable="true" class="roy-page-component__item">
+    <div class="roy-page-component__item" draggable="true">
       <i class="ri-heading"></i>
       <span>标题</span>
     </div>
@@ -33,7 +33,7 @@ export default {
 };
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .roy-page-component {
   overflow: auto;
   height: calc(100% - 16px);
@@ -42,6 +42,7 @@ export default {
   flex-flow: row wrap;
   place-content: flex-start space-between;
 }
+
 .roy-page-component__item {
   background: var(--roy-bg-color);
   border-radius: 6px;
@@ -55,6 +56,7 @@ export default {
   height: 95px;
   margin-bottom: 10px;
   color: var(--roy-text-color-regular);
+
   &:hover {
     box-shadow: rgba(0, 0, 0, 0.19) 0 10px 20px, rgba(0, 0, 0, 0.23) 0 6px 6px;
     cursor: grab;
@@ -63,10 +65,12 @@ export default {
     animation-delay: 1.5s;
     animation-iteration-count: infinite;
   }
+
   i {
     font-size: 32px;
     margin: 0;
   }
+
   span {
     font-size: 10px;
     padding-top: 10px;

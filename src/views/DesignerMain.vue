@@ -31,9 +31,11 @@ export default {
     return {};
   },
   methods: {
-    initMounted() {},
+    initMounted() {
+    },
   },
-  created() {},
+  created() {
+  },
   mounted() {
     this.initMounted();
   },

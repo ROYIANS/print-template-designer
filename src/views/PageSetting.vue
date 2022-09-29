@@ -5,20 +5,20 @@
         v-for="(btn, index) in buttons"
         :key="index"
         :content="btn.content"
-        :visible-arrow="false"
         :open-delay="400"
-        placement="bottom"
+        :visible-arrow="false"
         effect="dark"
+        placement="bottom"
       >
         <i :class="btn.icon"></i>
       </el-tooltip>
     </header>
     <el-row
-      :gutter="10"
       v-for="(page, index) in pages"
       :key="index"
       :class="page.active ? 'active' : ''"
       :data-index="index"
+      :gutter="10"
       @click.native="doActivePage(index)"
     >
       <el-col :span="4">{{ index + 1 }}</el-col>
@@ -32,6 +32,7 @@
 <script>
 import PageThumbnail from "@/views/PageThumbnail.vue";
 import html2canvas from "html2canvas";
+
 export default {
   name: "PageSetting",
   data() {
@@ -97,11 +98,12 @@ export default {
 };
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .roy-page-setting {
   overflow: auto;
   height: calc(100% - 16px);
   padding: 0 8px 8px 8px;
+
   header {
     height: 30px;
     width: calc(100% - 10px);
@@ -112,28 +114,35 @@ export default {
     left: 0;
     background: var(--roy-bg-color-overlay);
     z-index: 1;
+
     i {
       & + i {
         margin-left: 5px;
       }
+
       &:hover {
         color: var(--roy-color-primary);
         cursor: pointer;
       }
     }
   }
+
   .el-row {
     height: 100px;
     width: 100%;
     user-select: none;
+
     & + .el-row {
       margin-top: 10px;
     }
+
     .el-col {
       height: 100%;
+
       &:first-child {
         text-align: right;
       }
+
       &:last-child {
         cursor: pointer;
         background: var(--roy-bg-block-color);
@@ -141,12 +150,15 @@ export default {
         height: 100%;
       }
     }
+
     &:hover {
       opacity: 0.75;
     }
+
     &.active {
       .el-col {
         color: var(--roy-color-warning-dark-2);
+
         &:last-child {
           border: 2px solid var(--roy-color-warning-dark-2);
         }

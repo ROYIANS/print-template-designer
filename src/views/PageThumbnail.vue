@@ -43,7 +43,8 @@ export default {
       }
     },
   },
-  created() {},
+  created() {
+  },
   mounted() {
     this.initMounted();
   },

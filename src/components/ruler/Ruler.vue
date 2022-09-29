@@ -52,8 +52,59 @@ export default {
 </script>
 
 <style lang="scss">
-.Ruler {
-  height: 100%;
-  padding: 6px;
+.roy-ruler-box {
+  width: 100%;
+  height: calc(100% - 4px);
+  position: relative;
+
+  .roy-ruler-outer-box {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 16px;
+    height: 16px;
+    background: var(--prism-background);
+    box-sizing: border-box;
+  }
+
+  .roy-ruler-horizontal-wrapper {
+    position: absolute;
+    top: 0;
+    left: 16px;
+    width: calc(100% - 16px);
+    height: 16px;
+    overflow: hidden;
+  }
+
+  .roy-ruler-vertical-wrapper {
+    position: absolute;
+    left: 0;
+    top: 16px;
+    width: 16px;
+    height: calc(100% - 16px);
+  }
+
+  .roy-ruler-inner-box {
+    position: absolute;
+    left: 16px;
+    top: 16px;
+    width: calc(100% - 16px);
+    height: calc(100% - 16px);
+    overflow: auto;
+
+    .roy-ruler-inner-box-content {
+      position: absolute;
+      width: fit-content;
+      overflow: auto;
+      left: 16px;
+      top: 16px;
+      padding: 8px;
+    }
+  }
+
+  .roy-ruler {
+    width: 100%;
+    height: 100%;
+  }
 }
 </style>
