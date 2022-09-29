@@ -11,6 +11,8 @@
 <script>
 import commonMixin from "@/mixin/commonMixin";
 import Ruler from "@scena/ruler";
+import { nightModeStore } from "@/stores/night-mode.js";
+import { mapState } from "pinia";
 
 /**
  * 标尺横向
@@ -32,6 +34,9 @@ export default {
       ruler: null,
     };
   },
+  computed: {
+    ...mapState(nightModeStore, ["isNightMode"]),
+  },
   methods: {
     initMounted() {
       let elements = document.getElementsByClassName("roy-ruler-outer-box");
@@ -51,6 +56,16 @@ export default {
   mounted() {
     this.initMounted();
   },
-  watch: {},
+  watch: {
+    isNightMode() {
+      let elements = document.getElementsByClassName("roy-ruler-outer-box");
+      if (elements.length) {
+        this.ruler.backgroundColor = window.getComputedStyle(
+          elements[0]
+        ).backgroundColor;
+        this.ruler.textColor = window.getComputedStyle(elements[0]).color;
+      }
+    },
+  },
 };
 </script>
