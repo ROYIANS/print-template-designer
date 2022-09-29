@@ -14,11 +14,12 @@ import "remixicon/fonts/remixicon.css";
 import "vue-tree-halower2/dist/halower-tree.min.css"; // 你可以自定义树的样式
 
 Vue.use(PiniaVuePlugin);
-Vue.use(Element);
+Vue.use(Element, { size: "small" });
 Vue.use(VTree);
+Vue.config.productionTip = false;
 
 new Vue({
   router,
   pinia: createPinia(),
   render: (h) => h(App),
-}).$mount("#app");
+}).$mount("#roy-app");

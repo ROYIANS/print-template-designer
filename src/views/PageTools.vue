@@ -54,7 +54,7 @@ export default {
 };
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .roy-page-tools {
   overflow: auto;
   height: calc(100% - 16px);

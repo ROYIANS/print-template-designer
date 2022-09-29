@@ -30,11 +30,12 @@ export default {
 };
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .roy-page-block {
   overflow: auto;
   height: calc(100% - 16px);
   padding: 8px;
+
   section {
     padding: 0;
     background: var(--roy-bg-block-color);
@@ -42,14 +43,17 @@ export default {
     width: 100%;
     user-select: none;
     margin: 5px 0;
+
     &:hover {
       cursor: grab;
       box-shadow: var(--roy-box-shadow-light);
       transform: scale3d(1.05, 1.05, 1.05);
     }
+
     .el-col {
       height: 100%;
       border: 2px solid var(--roy-border-block-color);
+
       & + .el-col {
         border-left: none;
       }

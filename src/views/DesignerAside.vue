@@ -1,9 +1,9 @@
 <template>
   <section class="roy-designer-aside__main">
     <el-menu
-      default-active="0"
-      class="roy-designer-aside__menu"
       :collapse="true"
+      class="roy-designer-aside__menu"
+      default-active="0"
       @select="onMenuSelect"
     >
       <el-menu-item
@@ -19,9 +19,9 @@
     </el-menu>
     <keep-alive>
       <component
-        class="roy-designer-aside__right_panel"
-        :key="curActiveComponentCode"
         :is="curActiveComponent"
+        :key="curActiveComponentCode"
+        class="roy-designer-aside__right_panel"
       />
     </keep-alive>
   </section>
@@ -29,6 +29,7 @@
 
 <script>
 import commonMixin from "@/mixin/commonMixin";
+
 export default {
   name: "DesignerAside",
   mixins: [commonMixin],
@@ -93,3 +94,51 @@ export default {
   },
 };
 </script>
+
+<style lang="scss">
+.roy-designer-aside__main {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  background: var(--roy-bg-color-overlay);
+
+  .roy-designer-aside__menu {
+    height: 100%;
+
+    .el-menu-item {
+      overflow: hidden;
+      padding: 0;
+    }
+
+    .roy-designer-aside__menu__icon {
+      display: grid;
+      top: -7px;
+      position: relative;
+      align-items: center;
+      vertical-align: center;
+      align-content: center;
+
+      i {
+        padding: 0;
+        margin: 0;
+        font-size: 20px;
+      }
+
+      span {
+        line-height: 14px;
+        visibility: visible;
+        height: auto;
+        width: auto;
+        font-size: 8px;
+        top: -14px;
+        position: relative;
+      }
+    }
+  }
+
+  .roy-designer-aside__right_panel {
+    width: calc(100% - 64px);
+    background: var(--roy-bg-color-overlay);
+  }
+}
+</style>
