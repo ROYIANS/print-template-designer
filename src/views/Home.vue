@@ -58,11 +58,17 @@ export default {
     return {};
   },
   methods: {
-    initMounted() {},
+    initMounted() {
+      this.initConfig();
+    },
+    initConfig() {
+      const nightMode = nightModeStore();
+      nightMode.initNightMode();
+      document.getElementById("dn").checked = nightMode.isNightMode;
+    },
     dayNightChange(e) {
       const nightMode = nightModeStore();
       const isNightMode = e.target.checked;
-      document.body.setAttribute("theme", isNightMode ? "dark" : "day");
       nightMode.toggleNightMode(isNightMode);
     },
   },
