@@ -23,8 +23,8 @@
 
 <script>
 import commonMixin from "@/mixin/commonMixin";
-import RulerHorizontal from "@/components/ruler/RulerHorizontal.vue";
-import RulerVertical from "@/components/ruler/RulerVertical.vue";
+import RulerHorizontal from "./RulerHorizontal.vue";
+import RulerVertical from "./RulerVertical.vue";
 
 /**
  * 标尺工具

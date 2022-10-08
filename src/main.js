@@ -1,25 +1,19 @@
 import Vue from "vue";
-import { createPinia, PiniaVuePlugin } from "pinia";
+import store from "./stores/index.js";
 
 import App from "./App.vue";
 import Element from "element-ui";
 import router from "./router";
-import { VTree } from "vue-tree-halower2";
+import PrintDesigner from "./components/index.js";
 
-import "./assets/main.scss";
-import "normalize.css/normalize.css";
-import "animate.css";
-import "./assets/theme/index.css";
-import "remixicon/fonts/remixicon.css";
-import "vue-tree-halower2/dist/halower-tree.min.css"; // 你可以自定义树的样式
-
-Vue.use(PiniaVuePlugin);
 Vue.use(Element, { size: "small" });
-Vue.use(VTree);
+Vue.use(PrintDesigner, {
+  store,
+});
 Vue.config.productionTip = false;
 
 new Vue({
   router,
-  pinia: createPinia(),
+  store,
   render: (h) => h(App),
 }).$mount("#roy-app");

@@ -1,4 +1,4 @@
-body {
+#roy-print-template-designer {
   --primary-color-50: rgba(69, 121, 225, 0.5);
   --primary-color-30: rgba(69, 121, 225, 0.3);
   --prism-background: #f4f4f4;
@@ -145,7 +145,7 @@ body {
   --roy-menu-bar-background: #4978e4;
 }
 
-body[theme='dark'] {
+#roy-print-template-designer[theme='dark'] {
   --prism-background: #181818;
   --prism-line-highlight-background: #444444;
   --prism-selection-background: #444444;

@@ -63,32 +63,27 @@ export default {
         {
           name: "恢复",
           icon: "ri-arrow-go-forward-fill",
-          event: () => {
-          },
+          event: () => {},
         },
       ],
       toolbarRightConfig: [
         {
           name: "预览",
           icon: "ri-eye-2-fill",
-          event: () => {
-          },
+          event: () => {},
         },
         {
           name: "保存",
           icon: "ri-save-2-fill",
-          event: () => {
-          },
+          event: () => {},
         },
       ],
     };
   },
   methods: {
-    initMounted() {
-    },
+    initMounted() {},
   },
-  created() {
-  },
+  created() {},
   mounted() {
     this.initMounted();
   },
