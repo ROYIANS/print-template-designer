@@ -11,8 +11,7 @@
 <script>
 import commonMixin from "@/mixin/commonMixin";
 import Ruler from "@scena/ruler";
-import { nightModeStore } from "@/stores/night-mode.js";
-import { mapState } from "pinia";
+import { mapState } from "vuex";
 
 /**
  * 标尺横向
@@ -35,7 +34,9 @@ export default {
     };
   },
   computed: {
-    ...mapState(nightModeStore, ["isNightMode"]),
+    isNightMode() {
+      return this.$store.state.printTemplateModule.nightMode.isNightMode;
+    },
   },
   methods: {
     initMounted() {

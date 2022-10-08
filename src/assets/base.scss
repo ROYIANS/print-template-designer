@@ -1,14 +1,6 @@
 @import "./variable.scss";
 
-html, body, .height-all {
-  height: 100%
-}
-
-i {
-  margin-right: 5px;
-}
-
-body {
+#roy-print-template-designer {
   font-family: Helvetica Neue, Helvetica, PingFang SC, Microsoft YaHei, Arial, sans-serif;
   font-weight: 400;
   font-size: var(--roy-font-size-base);
@@ -124,6 +116,15 @@ body {
     }
   }
 
+  .splitter-pane-resizer {
+    background: #555!important;
+    background-clip: padding-box!important;
+    &.vertical {
+      height: calc(100% - 20px)!important;
+      margin: 10px 0 0 -5px!important;
+    }
+  }
+
   ::-webkit-scrollbar {
     width: 12px;
     height: 12px;
@@ -149,7 +150,7 @@ body {
   }
 }
 
-body[theme='dark'] {
+#roy-print-template-designer[theme='dark'] {
   ::-webkit-scrollbar-thumb {
     background: #424242;
   }

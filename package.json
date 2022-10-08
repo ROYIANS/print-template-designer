@@ -1,6 +1,6 @@
 {
   "name": "print-template-designer",
-  "version": "0.0.1",
+  "version": "0.0.6",
   "author": {
     "email": "admin@royians.cn",
     "name": "ROYIANS",
@@ -8,9 +8,25 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build --mode build",
+    "lib": "vite build --mode lib",
     "preview": "vite preview --port 4173 --open",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
+  },
+  "main": "lib/print-template-designer.umd.js",
+  "files": [
+    "lib"
+  ],
+  "exports": {
+    "./lib/style.css": "./lib/style.css",
+    ".": {
+      "import": "./lib/print-template-designer.es.js",
+      "require": "./lib/print-template-designer.umd.js"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/royians/print-template-designer.git"
   },
   "dependencies": {
     "@scena/ruler": "^0.10.0",
@@ -20,16 +36,16 @@
     "html2canvas": "^1.4.1",
     "lodash": "^4.17.21",
     "normalize.css": "^8.0.1",
-    "pinia": "^2.0.16",
     "remixicon": "^2.5.0",
     "vue": "^2.7.7",
     "vue-router": "^3.5.4",
+    "vue-splitpane": "^1.0.6",
     "vue-tree-halower2": "^1.0.2",
-    "vuedraggable": "^2.24.3"
+    "vuedraggable": "^2.24.3",
+    "vuex": "^3.1.1"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.1.0",
-    "@vitejs/plugin-legacy": "^2.0.0",
     "@vitejs/plugin-vue2": "^1.1.2",
     "@vue/eslint-config-prettier": "^7.0.0",
     "eslint": "8.22.0",
@@ -38,6 +54,6 @@
     "sass": "^1.54.9",
     "sass-loader": "^13.0.2",
     "terser": "^5.14.2",
-    "vite": "^3.0.2"
+    "vite": "^3.1.0"
   }
 }

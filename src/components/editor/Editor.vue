@@ -32,11 +32,9 @@ export default {
     return {};
   },
   methods: {
-    initMounted() {
-    },
+    initMounted() {},
   },
-  created() {
-  },
+  created() {},
   mounted() {
     this.initMounted();
   },
@@ -47,7 +45,7 @@ export default {
 <style lang="scss">
 .roy-designer-main__page {
   height: calc(100% - 50px);
-  padding: 0;
+  padding: 0 !important;
   margin: 0;
   background-color: rgb(255, 255, 255);
   background-image: linear-gradient(
@@ -71,7 +69,7 @@ export default {
   }
 }
 
-body[theme="dark"] {
+#roy-print-template-designer[theme="dark"] {
   .roy-designer-main__page {
     background-color: #1c1c1c;
     background-image: linear-gradient(45deg, #212121 25%, transparent 25%),

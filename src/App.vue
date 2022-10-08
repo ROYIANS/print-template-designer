@@ -1,9 +1,17 @@
 <template>
-  <router-view />
+  <PtdDesigner />
 </template>
 
 <script>
 export default {
-  name: "RoyPrintDesigner",
+  name: "App",
 };
 </script>
+
+<style>
+html,
+body,
+.height-all {
+  height: 100%;
+}
+</style>
