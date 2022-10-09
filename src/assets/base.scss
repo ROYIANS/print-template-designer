@@ -1,7 +1,7 @@
 @import "./variable.scss";
 
-#roy-print-template-designer {
-  font-family: Helvetica Neue, Helvetica, PingFang SC, Microsoft YaHei, Arial, sans-serif;
+.roy-designer-container {
+  font-family: Helvetica Neue, Helvetica, Arial, PingFang SC, Microsoft YaHei, WenQuanYi Micro Hei, sans-serif;
   font-weight: 400;
   font-size: var(--roy-font-size-base);
   color: var(--roy-text-color-primary);
@@ -132,6 +132,11 @@
 
   ::-webkit-scrollbar-track {
     background: transparent;
+    border-radius: 8px;
+  }
+
+  ::-webkit-scrollbar-track-piece {
+    background-color: transparent;
     border-radius: 8px;
   }
 

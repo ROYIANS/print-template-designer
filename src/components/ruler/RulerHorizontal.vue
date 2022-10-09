@@ -11,7 +11,6 @@
 <script>
 import commonMixin from "@/mixin/commonMixin";
 import Ruler from "@scena/ruler";
-import { mapState } from "vuex";
 
 /**
  * 标尺横向

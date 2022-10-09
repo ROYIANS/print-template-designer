@@ -14,7 +14,6 @@ export default {
   },
   actions: {
     toggleNightMode({ commit }, isNightMode) {
-      console.log(isNightMode);
       window.localStorage.setItem(
         `${STORAGE_PREFIX}NIGHT_MODE`,
         JSON.stringify(isNightMode)

@@ -51,10 +51,10 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .roy-ruler-box {
   width: 100%;
-  height: calc(100% - 4px);
+  height: calc(100% - 6px);
   position: relative;
 
   .roy-ruler-outer-box {

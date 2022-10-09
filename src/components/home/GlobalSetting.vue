@@ -33,7 +33,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .GlobalSetting {
   height: 100%;
   padding: 6px;

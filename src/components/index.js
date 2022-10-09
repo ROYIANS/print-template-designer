@@ -8,13 +8,14 @@
  * ╩╚═╚═╝ ╩ ╩╩ ╩╝╚╝╚═╝
  */
 import PtdDesigner from "./home/Home.vue";
+
 import "normalize.css/normalize.css";
-import "remixicon/fonts/remixicon.css";
-import "vue-tree-halower2/dist/halower-tree.min.css"; // 你可以自定义树的样式
+import "vue-tree-halower2/dist/halower-tree.min.css";
 import "animate.css";
-import "../assets/theme/index.css";
-import "../assets/main.scss";
+import "@/assets/main.scss";
+
 import NightModeStore from "../stores/modules/index.js";
+
 const componentsLib = {
   PtdDesigner,
 };

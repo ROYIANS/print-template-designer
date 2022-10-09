@@ -1,16 +1,19 @@
+@import "./theme/index.scss";
 @import "./base.scss";
-.roy-fade-enter-active {
-  animation: fadeIn 1s;
-}
+.roy-designer-container {
+  .roy-fade-enter-active {
+    animation: fadeIn 1s;
+  }
 
-.roy-fade-leave-active {
-  animation: fadeOut 1s;
-}
+  .roy-fade-leave-active {
+    animation: fadeOut 1s;
+  }
 
-.roy-slide-enter-active {
-  animation: slideInLeft 0.58s;
-}
+  .roy-slide-enter-active {
+    animation: slideInLeft 0.58s;
+  }
 
-.roy-slide-leave-active {
-  animation: slideOutLeft 0.8s;
+  .roy-slide-leave-active {
+    animation: slideOutLeft 0.8s;
+  }
 }

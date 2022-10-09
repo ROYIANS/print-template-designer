@@ -20,7 +20,8 @@ main.js
 ```javascript
 import store from './store'
 import PrintTemplateDesigner from 'print-template-designer'
-import 'print-template-designer/lib/style.css'
+import 'print-template-designer/lib/print-template-designer.css'
+import "remixicon/fonts/remixicon.css";
 
 Vue.use(PrintTemplateDesigner, { store })
 ```
@@ -36,8 +37,10 @@ app.vue
 
 需要安装以下依赖才可使用:
 
-- element-ui
+- vue
 - vuex
+- element-ui
+- remixicon
 
 ## 项目依赖
 
