@@ -6,17 +6,20 @@
 !-->
 <template>
   <el-main class="roy-designer-main__page">
-    <Ruler>
-      <div id="designer-page">
-        <div>测试页面</div>
-      </div>
-    </Ruler>
+    <MbRuler
+      :height="rulerHeight"
+      :width="rulerWidth"
+      :is-open-menu-feature="false"
+    />
+    <div id="designer-page">
+      <div>测试页面</div>
+    </div>
   </el-main>
 </template>
 
 <script>
 import commonMixin from "@/mixin/commonMixin";
-import Ruler from "@/components/ruler/Ruler.vue";
+import MbRuler from "@/components/mb-ruler/index.js";
 
 /**
  * 主编辑器
@@ -25,14 +28,20 @@ export default {
   name: "RoyEditor",
   mixins: [commonMixin],
   components: {
-    Ruler,
+    MbRuler,
   },
   props: {},
   data() {
-    return {};
+    return {
+      rulerHeight: 0,
+      rulerWidth: 0,
+    };
   },
   methods: {
-    initMounted() {},
+    initMounted() {
+      this.rulerHeight = this.$el.offsetHeight;
+      this.rulerWidth = this.$el.offsetWidth;
+    },
   },
   created() {},
   mounted() {
@@ -42,7 +51,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .roy-designer-main__page {
   height: calc(100% - 50px);
   padding: 0 !important;

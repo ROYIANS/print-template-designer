@@ -44,9 +44,12 @@
 </template>
 
 <script>
+import config from "../../../package.json";
 import { mapActions } from "vuex";
 import DesignerAside from "./DesignerAside.vue";
 import DesignerMain from "./DesignerMain.vue";
+
+const VERSION = config.version;
 
 /**
  * 主页
@@ -72,6 +75,13 @@ export default {
       toggleNightMode: "printTemplateModule/nightMode/toggleNightMode",
     }),
     initMounted() {
+      console.log(
+        `\n %c PrintTemplateDesigner® v${VERSION} %c ${new Date(
+          window.versionTime || new Date().getTime()
+        ).toLocaleString()}`,
+        "color:#fff;background:linear-gradient(90deg,#4579e1,#009688);padding:5px 0;",
+        "color:#000;background:linear-gradient(90deg,#009688,#ffffff);padding:5px 10px 5px 0px;"
+      );
       this.initConfig();
     },
     initConfig() {
@@ -91,7 +101,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .roy-designer-container {
   background: var(--prism-background);
   width: 100%;

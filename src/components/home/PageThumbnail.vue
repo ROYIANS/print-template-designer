@@ -51,7 +51,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .PageThumbnail {
   height: 100%;
   padding: 6px;

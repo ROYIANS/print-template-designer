@@ -102,7 +102,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .roy-designer-aside__main {
   height: 100%;
   width: 100%;

@@ -91,7 +91,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .roy-designer-main__toolbar {
   display: flex;
   justify-content: space-between;
