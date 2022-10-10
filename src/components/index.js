@@ -25,7 +25,9 @@ const install = function (Vue, opts = {}) {
     console.warn("[print-template-designer] 请提供store！");
     return;
   }
-  opts.store.registerModule(["printTemplateModule"], NightModeStore);
+  if (!opts.store.state.printTemplateModule) {
+    opts.store.registerModule(["printTemplateModule"], NightModeStore);
+  }
   Object.keys(componentsLib).forEach((key) => {
     Vue.component(key, componentsLib[key]);
   });

@@ -88,7 +88,6 @@ export default {
       this.initNightMode();
     },
     dayNightChange() {
-      console.log(!this.isNightMode);
       this.toggleNightMode(!this.isNightMode);
     },
     enterFullScreen() {},

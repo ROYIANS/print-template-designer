@@ -7,6 +7,7 @@ import router from "./router";
 import PrintDesigner from "./components/index.js";
 
 import "remixicon/fonts/remixicon.css";
+import "element-ui/lib/theme-chalk/index.css";
 
 Vue.use(Element, { size: "small" });
 Vue.use(PrintDesigner, {
