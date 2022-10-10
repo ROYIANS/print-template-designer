@@ -9,21 +9,22 @@
     "lib": "vue-cli-service build --target lib --inline-vue --name print-template-designer src/components/index.js --dest lib"
   },
   "dependencies": {
-    "core-js": "^3.8.3",
-    "vue": "^2.6.14",
-    "vuex": "^3.6.2",
     "@svgdotjs/svg.js": "^3.1.2",
     "animate.css": "^4.1.1",
+    "core-js": "^3.8.3",
     "element-ui": "^2.15.9",
     "html2canvas": "^1.4.1",
     "lodash": "^4.17.21",
     "normalize.css": "^8.0.1",
     "remixicon": "^2.5.0",
+    "vue": "^2.6.14",
     "vue-router": "^3.5.4",
+    "vue-sketch-ruler": "^1.0.3",
     "vue-splitpane": "^1.0.6",
     "vue-styled-components": "^1.6.0",
     "vue-tree-halower2": "^1.0.2",
-    "vuedraggable": "^2.24.3"
+    "vuedraggable": "^2.24.3",
+    "vuex": "^3.6.2"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
