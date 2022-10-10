@@ -99,12 +99,12 @@ export default {
 
   .roy-designer-main__toolbar_left {
     display: flex;
-    justify-content: start;
+    justify-content: flex-start;
   }
 
   .roy-designer-main__toolbar_right {
     display: flex;
-    justify-content: end;
+    justify-content: flex-end;
   }
 
   .roy-designer-main__toolbar__item {
