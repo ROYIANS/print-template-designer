@@ -34,6 +34,10 @@
 </template>
 <script>
 import SketchRuler from "vue-sketch-ruler";
+import CONSTANT from "@/utils/constant.js";
+import { mapState, mapActions } from "vuex";
+
+const { MIN_SCALE, MAX_SCALE } = CONSTANT;
 
 export default {
   name: "RoyEditor",
@@ -41,7 +45,6 @@ export default {
     return {
       rulerWidth: 0,
       rulerHeight: 0,
-      scale: 1.25, //658813476562495, //1,
       startX: -19,
       startY: -19,
       lines: {
@@ -52,8 +55,6 @@ export default {
       lang: "zh-CN", // 中英文
       isShowRuler: true, // 显示标尺
       isShowReferLine: true, // 显示参考线
-      rectWidth: 1080,
-      rectHeight: 1485 + 19,
       palette: {
         bgColor: "rgba(225,225,225, 0)",
         longfgColor: "#BABBBC",
@@ -70,18 +71,25 @@ export default {
     SketchRuler,
   },
   computed: {
+    ...mapState({
+      scale: (state) => state.printTemplateModule.rulerThings.scale,
+      rectWidth: (state) => state.printTemplateModule.rulerThings.rectWidth,
+      rectHeight: (state) => state.printTemplateModule.rulerThings.rectHeight,
+      needReDrawRuler: (state) =>
+        state.printTemplateModule.rulerThings.needReDrawRuler,
+    }),
     shadow() {
       return {
         x: 0,
         y: 0,
-        width: this.rectWidth,
-        height: this.rectHeight,
+        width: this.rectWidth * 5,
+        height: this.rectHeight * 5,
       };
     },
     canvasStyle() {
       return {
-        width: `${this.rectWidth}px`,
-        height: `${this.rectHeight}px`,
+        width: `${this.rectWidth * 5}px`,
+        height: `${this.rectHeight * 5}px`,
         transform: `scale(${this.scale})`,
       };
     },
@@ -90,6 +98,10 @@ export default {
     },
   },
   methods: {
+    ...mapActions({
+      reDrawRuler: "printTemplateModule/rulerThings/reDrawRuler",
+      setScale: "printTemplateModule/rulerThings/setScale",
+    }),
     handleLine(lines) {
       this.lines = lines;
     },
@@ -114,9 +126,12 @@ export default {
     handleWheel(e) {
       if (e.ctrlKey || e.metaKey) {
         e.preventDefault();
-        this.scale = parseFloat(
+        const nextScale = parseFloat(
           Math.max(0.2, this.scale - e.deltaY / 500).toFixed(2)
         );
+        if (nextScale <= MAX_SCALE && nextScale >= MIN_SCALE) {
+          this.setScale(nextScale);
+        }
       }
       this.$nextTick(() => {
         this.handleScroll();
@@ -138,15 +153,19 @@ export default {
           shortfgColor: "#C8CDD0",
           fontColor: "#7D8694",
           shadowColor: newVal ? "#444444" : "#E8E8E8",
-          lineColor: "#EB5648",
+          lineColor: "#4579e1",
           borderColor: newVal ? "#636466" : "#DADADC",
-          cornerActiveColor: "rgb(235, 86, 72, 0.6)",
+          cornerActiveColor: "#4579e1",
         };
-        this.startX = this.startX + 0.01;
-        this.startY = this.startY + 0.01;
+        this.reDrawRuler();
+      },
+    },
+    needReDrawRuler: {
+      handler() {
         this.$nextTick(() => {
-          this.startX = this.startX - 0.01;
-          this.startY = this.startY - 0.01;
+          this.handleScroll();
+          this.$refs.sketchRuler?.$children[0]?.$children[0]?.drawRuler();
+          this.$refs.sketchRuler?.$children[1]?.$children[0]?.drawRuler();
         });
       },
     },

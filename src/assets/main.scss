@@ -16,4 +16,10 @@
   .roy-slide-leave-active {
     animation: slideOutLeft 0.8s;
   }
+
+  .indicator .value {
+    // 修改标尺提示坐标背景色
+    background: #4579e1;
+    color: #fff;
+  }
 }
