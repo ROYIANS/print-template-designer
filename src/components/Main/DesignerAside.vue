@@ -36,37 +36,24 @@ export default {
   mixins: [commonMixin],
   data() {
     return {
-      showRight: true,
       menuList: [
         {
           name: "组件",
           code: "component",
-          icon: "ri-pencil-ruler-2-line",
+          icon: "ri-drag-drop-fill",
           component: () => import("./PageComponent.vue"),
         },
         {
-          name: "区块",
-          code: "blocks",
-          icon: "ri-layout-5-line",
-          component: () => import("./PageBlock.vue"),
-        },
-        {
-          name: "页面",
-          code: "page",
-          icon: "ri-stack-line",
-          component: () => import("./PageSetting.vue"),
-        },
-        {
-          name: "大纲",
+          name: "结构",
           code: "toc",
-          icon: "ri-pages-line",
+          icon: "ri-node-tree",
           component: () => import("./PageToc.vue"),
         },
         {
-          name: "工具",
-          code: "tools",
-          icon: "ri-magic-line",
-          component: () => import("./PageTools.vue"),
+          name: "属性",
+          code: "palette",
+          icon: "ri-palette-line",
+          component: () => import("./PagePalette.vue"),
         },
         {
           name: "全局",
@@ -79,6 +66,12 @@ export default {
       curActiveComponentCode: "",
     };
   },
+  props: {
+    showRight: {
+      type: Boolean,
+      default: true,
+    },
+  },
   computed: {
     asideStyle() {
       return this.showRight ? "width: 300px" : "width: 65px";
@@ -87,9 +80,9 @@ export default {
   methods: {
     onMenuSelect(index) {
       if (this.curActiveComponentCode === this.menuList[index].code) {
-        this.showRight = !this.showRight;
+        this.$emit("update:showRight", !this.showRight);
       } else {
-        this.showRight = true;
+        this.$emit("update:showRight", true);
       }
       this.curActiveComponent = this.menuList[index].component;
       this.curActiveComponentCode = this.menuList[index].code;

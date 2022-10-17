@@ -1,0 +1,45 @@
+@import '~shepherd.js/dist/css/shepherd.css';
+
+.shepherd-has-title.shepherd-element {
+  &[data-popper-placement="bottom"] {
+    margin-top: 24px !important;
+  }
+  &[data-popper-placement="left"] {
+    margin-right: 24px !important;
+  }
+  &[data-popper-placement="right"] {
+    margin-left: 24px !important;
+  }
+  &[data-popper-placement="top"] {
+    margin-bottom: 24px !important;
+  }
+  .shepherd-header {
+    height: 40px;
+    line-height: 40px;
+    background-color: #4579e1;
+    .shepherd-title {
+      color: #fff;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    .shepherd-cancel-icon {
+      color: #fff;
+    }
+  }
+  .shepherd-text {
+    font-size: 14px;
+    padding: 1em;
+    line-height: 1.6;
+  }
+  .shepherd-footer {
+    padding: 0 1em 1em;
+    .shepherd-button {
+      color: #fff;
+      height: 23px;
+      padding: 0 1rem;
+      line-height: 23px;
+      background-color: #4579e1;
+      font-size: 10px;
+    }
+  }
+}

@@ -1,28 +1,13 @@
 <template>
   <div class="roy-page-component">
-    <div class="roy-page-component__item" draggable="true">
-      <i class="ri-heading"></i>
-      <span>标题</span>
-    </div>
-    <div class="roy-page-component__item">
-      <i class="ri-emphasis-cn"></i>
-      <span>文本</span>
-    </div>
-    <div class="roy-page-component__item">
-      <i class="ri-separator"></i>
-      <span>分割线</span>
-    </div>
-    <div class="roy-page-component__item">
-      <i class="ri-table-2"></i>
-      <span>表格</span>
-    </div>
-    <div class="roy-page-component__item">
-      <i class="ri-link"></i>
-      <span>链接</span>
-    </div>
-    <div class="roy-page-component__item">
-      <i class="ri-image-2-line"></i>
-      <span>图片</span>
+    <div
+      v-for="item in componentItems"
+      :key="item.code"
+      class="roy-page-component__item"
+      draggable="true"
+    >
+      <i :class="item.icon"></i>
+      <span>{{ item.name }}</span>
     </div>
   </div>
 </template>
@@ -30,6 +15,47 @@
 <script>
 export default {
   name: "PageComponent",
+  data() {
+    return {
+      componentItems: [
+        {
+          icon: "ri-t-box-line",
+          code: "heading",
+          name: "文本",
+        },
+        {
+          icon: "ri-table-line",
+          code: "table",
+          name: "表格",
+        },
+        {
+          icon: "ri-layout-2-line",
+          code: "form",
+          name: "表单",
+        },
+        {
+          icon: "iconfont icon-xianduan",
+          code: "line",
+          name: "直线",
+        },
+        {
+          icon: "iconfont icon-xingzhuang-juxing",
+          code: "rectangle",
+          name: "矩形",
+        },
+        {
+          icon: "iconfont icon-xingzhuang-sanjiaoxing",
+          code: "triangle",
+          name: "三角形",
+        },
+        {
+          icon: "iconfont icon-xingzhuang-tuoyuanxing",
+          code: "circle",
+          name: "圆形",
+        },
+      ],
+    };
+  },
 };
 </script>
 
