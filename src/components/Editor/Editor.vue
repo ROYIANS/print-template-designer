@@ -1,10 +1,11 @@
 <template>
-  <div class="roy-designer-main__page">
+  <div class="roy-designer-main__page" :style="panelWidth">
     <SketchRuler
       ref="sketchRuler"
+      v-show="showRuler"
       :lang="lang"
       :thick="thick"
-      :scale="scale"
+      :scale="realScale"
       :width="rulerWidth"
       :height="rulerHeight"
       :startX="startX"
@@ -25,9 +26,7 @@
       @scroll="handleScroll"
     >
       <div ref="containerRef" class="screen-container">
-        <div id="designer-page" :style="canvasStyle">
-          <div>测试页面</div>
-        </div>
+        <div id="designer-page" :style="canvasStyle"></div>
       </div>
     </div>
   </div>
@@ -36,11 +35,18 @@
 import SketchRuler from "vue-sketch-ruler";
 import CONSTANT from "@/utils/constant.js";
 import { mapState, mapActions } from "vuex";
+import Big from "big.js";
 
 const { MIN_SCALE, MAX_SCALE } = CONSTANT;
 
 export default {
   name: "RoyEditor",
+  props: {
+    showRight: {
+      type: Boolean,
+      default: true,
+    },
+  },
   data() {
     return {
       rulerWidth: 0,
@@ -72,18 +78,22 @@ export default {
   },
   computed: {
     ...mapState({
-      scale: (state) => state.printTemplateModule.rulerThings.scale,
+      realScale: (state) => state.printTemplateModule.rulerThings.scale,
       rectWidth: (state) => state.printTemplateModule.rulerThings.rectWidth,
       rectHeight: (state) => state.printTemplateModule.rulerThings.rectHeight,
       needReDrawRuler: (state) =>
         state.printTemplateModule.rulerThings.needReDrawRuler,
+      showRuler: (state) => state.printTemplateModule.rulerThings.showRuler,
     }),
+    scale() {
+      return new Big(this.realScale).div(new Big(5));
+    },
     shadow() {
       return {
         x: 0,
         y: 0,
-        width: this.rectWidth * 5,
-        height: this.rectHeight * 5,
+        width: this.rectWidth,
+        height: this.rectHeight,
       };
     },
     canvasStyle() {
@@ -95,6 +105,11 @@ export default {
     },
     isNightMode() {
       return this.$store.state.printTemplateModule.nightMode.isNightMode;
+    },
+    panelWidth() {
+      return this.showRight
+        ? "width: calc(100vw - 330px);"
+        : "width: calc(100vw - 95px);";
     },
   },
   methods: {
@@ -115,9 +130,9 @@ export default {
         .getBoundingClientRect();
       // 标尺开始的刻度
       const startX =
-        (screensRect.left + this.thick - canvasRect.left) / this.scale;
+        (screensRect.left + this.thick - canvasRect.left) / this.realScale;
       const startY =
-        (screensRect.top + this.thick - canvasRect.top) / this.scale;
+        (screensRect.top + this.thick - canvasRect.top) / this.realScale;
 
       this.startX = startX;
       this.startY = startY;
@@ -142,7 +157,8 @@ export default {
     this.rulerWidth = this.$el.offsetWidth;
     this.rulerHeight = this.$el.offsetHeight;
     this.$refs.screensRef.scrollLeft =
-      this.$refs.containerRef.getBoundingClientRect().width / 2 - 300; // 300 = #screens.width / 2
+      this.$refs.containerRef.getBoundingClientRect().width / 2 -
+      this.rectWidth;
   },
   watch: {
     isNightMode: {
@@ -158,6 +174,18 @@ export default {
           cornerActiveColor: "#4579e1",
         };
         this.reDrawRuler();
+      },
+    },
+    showRight: {
+      handler() {
+        this.$nextTick(() => {
+          this.rulerWidth = this.$el.offsetWidth;
+          this.rulerHeight = this.$el.offsetHeight;
+          this.$refs.screensRef.scrollLeft =
+            this.$refs.containerRef.getBoundingClientRect().width / 2 -
+            this.rectWidth;
+          this.reDrawRuler();
+        });
       },
     },
     needReDrawRuler: {
@@ -186,7 +214,6 @@ export default {
 }
 .roy-designer-main__page {
   position: absolute;
-  width: calc(100vw - 330px);
   height: calc(100% - 100px);
   border: 1px solid var(--roy-border-color);
   padding: 0 !important;

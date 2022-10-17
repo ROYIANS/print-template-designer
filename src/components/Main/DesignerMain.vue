@@ -6,15 +6,19 @@
 !-->
 <template>
   <section class="height-all">
-    <ToolBar />
-    <Editor />
+    <ToolBar>
+      <template v-slot:roy-designer-toolbar-slot>
+        <slot name="roy-designer-toolbar-slot"></slot>
+      </template>
+    </ToolBar>
+    <Editor :show-right="showRight" />
   </section>
 </template>
 
 <script>
 import commonMixin from "@/mixin/commonMixin";
-import ToolBar from "@/components/toolbar/ToolBar.vue";
-import Editor from "@/components/editor/Editor.vue";
+import ToolBar from "@/components/ToolBar/ToolBar.vue";
+import Editor from "@/components/Editor/Editor.vue";
 
 /**
  * 主操作视图
@@ -26,7 +30,12 @@ export default {
     ToolBar,
     Editor,
   },
-  props: {},
+  props: {
+    showRight: {
+      type: Boolean,
+      default: true,
+    },
+  },
   data() {
     return {};
   },

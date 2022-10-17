@@ -22,9 +22,12 @@
       </el-tooltip>
     </section>
     <section>
-      <strong>这是模板名称位置</strong>
+      <slot name="roy-designer-toolbar-slot"></slot>
     </section>
     <section class="roy-designer-main__toolbar_right">
+      <div class="roy-designer-main__toolbar__setting">
+        <span>{{ rectWidth }}/{{ rectHeight }}</span>
+      </div>
       <div class="roy-designer-main__toolbar__zoom">
         <div
           class="roy-designer-main__toolbar__item"
@@ -40,37 +43,6 @@
           <i class="ri-zoom-in-line"></i>
         </div>
       </div>
-      <div class="roy-designer-main__toolbar__setting">
-        <span>{{ rectWidth }}/{{ rectHeight }}</span>
-        <div class="roy-designer-main__toolbar__item" @click="showPagerConfig">
-          <i class="ri-settings-2-line"></i>
-        </div>
-        <div class="roy-designer-main__toolbar__item" @click="rotatePage">
-          <i class="ri-clockwise-line"></i>
-        </div>
-        <div v-show="showPager" class="roy-designer-main__toolbar__pages">
-          <el-row>
-            <el-col :span="6">纸张大小:</el-col>
-            <el-col :span="18">
-              <div class="roy-designer-main__toolbar__pages__container">
-                <div
-                  v-for="page in Object.values(pages)"
-                  :key="page.name"
-                  class="roy-designer-main__toolbar__pages__item"
-                  :class="
-                    currentPage === page.name
-                      ? 'roy-designer-main__toolbar__pages__item--active'
-                      : ''
-                  "
-                  @click="currentPage = page.name"
-                >
-                  {{ page.name }}
-                </div>
-              </div>
-            </el-col>
-          </el-row>
-        </div>
-      </div>
     </section>
   </el-header>
 </template>
@@ -79,6 +51,9 @@
 import commonMixin from "@/mixin/commonMixin";
 import { mapActions, mapState } from "vuex";
 import Big from "big.js";
+import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas";
+import toast from "@/utils/toast";
 
 /**
  * 顶部工具栏
@@ -90,59 +65,64 @@ export default {
   props: {},
   data() {
     return {
-      showPager: false,
       toolbarLeftConfig: [
         {
           name: "撤销",
           icon: "ri-arrow-go-back-fill",
           event: () => {
-            alert("撤销");
+            toast("撤销");
           },
         },
         {
           name: "恢复",
           icon: "ri-arrow-go-forward-fill",
-          event: () => {},
+          event: () => {
+            toast("恢复");
+          },
         },
         {
-          name: "预览",
-          icon: "ri-eye-2-fill",
-          event: () => {},
-        },
-        {
-          name: "保存",
-          icon: "ri-save-2-fill",
-          event: () => {},
+          name: "显示/隐藏标尺",
+          icon: "ri-ruler-2-line",
+          event: () => {
+            this.toggleRuler();
+          },
         },
         {
           name: "锁定",
           icon: "ri-lock-2-line",
-          event: () => {},
+          event: () => {
+            toast("锁定");
+            html2canvas(document.querySelector("#designer-page"), {
+              scale: "5",
+            }).then((canvas) => {
+              let doc = new jsPDF();
+              doc.addImage(
+                canvas.toDataURL("image/jpeg"),
+                "JPEG",
+                0,
+                0,
+                210,
+                297
+              );
+              doc.save("a4.pdf");
+            });
+          },
         },
         {
           name: "组合/拆分",
           icon: "ri-collage-line",
-          event: () => {},
+          event: () => {
+            toast("组合/拆分");
+          },
+        },
+        {
+          name: "切换纸张方向",
+          icon: "ri-clockwise-line",
+          event: () => {
+            this.rotatePage();
+          },
         },
       ],
-      pages: {
-        A3: {
-          name: "A3",
-          w: 297,
-          h: 420,
-        },
-        A4: {
-          name: "A4",
-          w: 210,
-          h: 297,
-        },
-        B5: {
-          name: "B5",
-          w: 176,
-          h: 250,
-        },
-      },
-      currentPage: "A4",
     };
   },
   computed: {
@@ -152,7 +132,7 @@ export default {
       rectHeight: (state) => state.printTemplateModule.rulerThings.rectHeight,
     }),
     scale100() {
-      let currentScale = new Big(this.scale);
+      let currentScale = new Big(this.scale).div(new Big(5));
       let num100 = new Big(100);
       return currentScale.mul(num100).toNumber();
     },
@@ -164,6 +144,7 @@ export default {
       reDrawRuler: "printTemplateModule/rulerThings/reDrawRuler",
       setRect: "printTemplateModule/rulerThings/setRect",
       rotateRect: "printTemplateModule/rulerThings/rotateRect",
+      toggleRuler: "printTemplateModule/rulerThings/toggleRuler",
     }),
     smallerScale() {
       this.setSmallerScale();
@@ -172,9 +153,6 @@ export default {
     biggerScale() {
       this.setBiggerScale();
       this.reDrawRuler();
-    },
-    showPagerConfig() {
-      this.showPager = !this.showPager;
     },
     rotatePage() {
       this.rotateRect();
@@ -186,13 +164,7 @@ export default {
   mounted() {
     this.initMounted();
   },
-  watch: {
-    currentPage(newVal) {
-      let page = this.pages[newVal];
-      this.setRect(page);
-      this.reDrawRuler();
-    },
-  },
+  watch: {},
 };
 </script>
 
@@ -225,42 +197,6 @@ export default {
       span {
         padding: 0 10px;
       }
-      .roy-designer-main__toolbar__pages {
-        position: absolute;
-        background: var(--roy-bg-color);
-        top: 30px;
-        right: 0;
-        width: 300px;
-        padding: 20px;
-        z-index: 1000;
-        box-shadow: rgba(99, 99, 99, 0.2) 0 2px 8px 0;
-        .roy-designer-main__toolbar__pages__container {
-          display: flex;
-          flex-flow: row wrap;
-          place-content: flex-start;
-        }
-        .roy-designer-main__toolbar__pages__item {
-          width: 40px;
-          height: 50px;
-          font-size: 16px;
-          line-height: 50px;
-          text-align: center;
-          border: 1px solid #ccc;
-          user-select: none;
-          cursor: pointer;
-          &:hover {
-            border: 1px solid #4579e1;
-            background: var(--prism-background);
-          }
-          & + .roy-designer-main__toolbar__pages__item {
-            margin-left: 5px;
-          }
-          &.roy-designer-main__toolbar__pages__item--active {
-            border: 1px solid #4579e1;
-            color: #4579e1;
-          }
-        }
-      }
     }
   }
 
@@ -283,6 +219,11 @@ export default {
 
     &:hover {
       background: var(--roy-bg-color-page);
+    }
+
+    &:active {
+      color: var(--roy-color-primary);
+      box-shadow: rgba(99, 99, 99, 0.4) 0 2px 8px 0;
     }
 
     i {

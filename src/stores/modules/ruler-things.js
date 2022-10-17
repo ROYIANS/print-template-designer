@@ -6,26 +6,33 @@ const { MIN_SCALE, MAX_SCALE } = CONSTANT;
 export default {
   namespaced: true,
   state: () => ({
-    scale: 1,
+    // 这里的scale应该是乘以5以后的
+    scale: 5,
     rectWidth: 210,
     rectHeight: 297,
     needReDrawRuler: 0,
+    showRuler: true,
   }),
   mutations: {
     setScale(state, payload) {
-      state.scale = payload.scale;
+      let nextScale = new Big(payload.scale);
+      state.scale = new Big(nextScale).times(new Big(5));
     },
     setBiggerScale(state) {
-      let currentScale = new Big(state.scale);
+      let currentScaleTime5 = new Big(state.scale);
+      let currentScale = currentScaleTime5.div(new Big(5));
       let stepScale = new Big(0.1);
       let nextScale = currentScale.plus(stepScale).toNumber();
-      state.scale = nextScale > MAX_SCALE ? MAX_SCALE : nextScale;
+      let myNextScale = nextScale > MAX_SCALE ? MAX_SCALE : nextScale;
+      state.scale = new Big(myNextScale).times(new Big(5));
     },
     setSmallerScale(state) {
-      let currentScale = new Big(state.scale);
+      let currentScaleTime5 = new Big(state.scale);
+      let currentScale = currentScaleTime5.div(new Big(5));
       let stepScale = new Big(0.1);
       let nextScale = currentScale.minus(stepScale).toNumber();
-      state.scale = nextScale < MIN_SCALE ? MIN_SCALE : nextScale;
+      let myNextScale = nextScale < MIN_SCALE ? MIN_SCALE : nextScale;
+      state.scale = new Big(myNextScale).times(new Big(5));
     },
     setReDrawRuler(state) {
       state.needReDrawRuler += 1;
@@ -38,6 +45,9 @@ export default {
       const tmpHeight = state.rectHeight;
       state.rectHeight = Number(state.rectWidth);
       state.rectWidth = Number(tmpHeight);
+    },
+    toggleRuler(state) {
+      state.showRuler = !state.showRuler;
     },
   },
   actions: {
@@ -58,6 +68,9 @@ export default {
     },
     rotateRect({ commit }) {
       commit("rotateRect");
+    },
+    toggleRuler({ commit }) {
+      commit("toggleRuler");
     },
   },
 };
