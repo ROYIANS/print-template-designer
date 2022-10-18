@@ -56,7 +56,7 @@ import shepherd from "@/components/RoyUserTour/userTour";
 export default {
   name: "App",
   mounted() {
-    toast("欢迎使用ROYIANS的打印模板设计器，欢迎star&fork", "info");
+    toast("欢迎使用ROYIANS的打印模板设计器，仅个人学习使用", "info");
   },
   data() {
     return {

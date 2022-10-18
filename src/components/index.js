@@ -10,7 +10,6 @@
 import PtdDesigner from "./Main/Home.vue";
 
 import "normalize.css/normalize.css";
-import "vue-tree-halower2/dist/halower-tree.min.css";
 import "animate.css";
 import "@/assets/main.scss";
 import "@/assets/iconfont/iconfont.css";

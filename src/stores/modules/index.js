@@ -1,6 +1,6 @@
 import { state, mutations, actions, getters } from "./global.js";
 import nightMode from "./night-mode.js";
-import rulerThings from "@/stores/modules/ruler-things.js";
+import rulerThings from "./ruler-things.js";
 
 export default {
   namespaced: true,
