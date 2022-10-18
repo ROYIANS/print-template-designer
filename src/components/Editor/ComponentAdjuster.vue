@@ -358,8 +358,15 @@ export default {
         hasMove = true;
         const curX = moveEvent.clientX;
         const curY = moveEvent.clientY;
-        pos.top = curY - startY + startTop;
-        pos.left = curX - startX + startLeft;
+        const editorRectInfo = this.editor;
+        pos.top = Math.min(
+          Math.max(0, curY - startY + startTop),
+          editorRectInfo.offsetHeight - pos.height
+        );
+        pos.left = Math.min(
+          Math.max(0, curX - startX + startLeft),
+          editorRectInfo.offsetWidth - pos.width
+        );
 
         // 修改当前组件样式
         this.$store.commit("printTemplateModule/setShapeStyle", pos);
