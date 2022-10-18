@@ -196,6 +196,8 @@ export default {
   padding: 5px 14px;
   line-height: 1;
   color: #333;
+  display: flex;
+  align-items: center;
 }
 
 .roy-context .roy-context-item.roy-context-item--hover {
@@ -264,7 +266,7 @@ export default {
 }
 
 .roy-context--default .roy-context-item--hover {
-  background-color: var(--roy-color-primary);
+  background-color: #4579e1;
 }
 
 .roy-context--bright .roy-context-item--hover {
@@ -273,5 +275,16 @@ export default {
 
 .roy-context--dark .roy-context-item--hover {
   background-color: #2d3035;
+}
+.roy-context--dark {
+  background: #222222;
+  box-shadow: 2px 2px 8px 0 rgba(0, 0, 0, 0.2);
+  border: 1px solid #111111;
+}
+.roy-context--dark .roy-context-item {
+  color: #ccc;
+}
+.roy-context-item i {
+  padding: 0 10px 0 0;
 }
 </style>

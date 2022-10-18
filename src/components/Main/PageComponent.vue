@@ -1,10 +1,11 @@
 <template>
-  <div class="roy-page-component">
+  <div class="roy-page-component" @dragstart="handleDragStart">
     <div
-      v-for="item in componentItems"
+      v-for="(item, index) in componentItems"
       :key="item.code"
       class="roy-page-component__item"
       draggable="true"
+      :data-index="index"
     >
       <i :class="item.icon"></i>
       <span>{{ item.name }}</span>
@@ -13,48 +14,18 @@
 </template>
 
 <script>
+import { componentList } from "@/components/config/componentList.js";
 export default {
   name: "PageComponent",
   data() {
     return {
-      componentItems: [
-        {
-          icon: "ri-t-box-line",
-          code: "heading",
-          name: "文本",
-        },
-        {
-          icon: "ri-table-line",
-          code: "table",
-          name: "表格",
-        },
-        {
-          icon: "ri-layout-2-line",
-          code: "form",
-          name: "表单",
-        },
-        {
-          icon: "iconfont icon-xianduan",
-          code: "line",
-          name: "直线",
-        },
-        {
-          icon: "iconfont icon-xingzhuang-juxing",
-          code: "rectangle",
-          name: "矩形",
-        },
-        {
-          icon: "iconfont icon-xingzhuang-sanjiaoxing",
-          code: "triangle",
-          name: "三角形",
-        },
-        {
-          icon: "iconfont icon-xingzhuang-tuoyuanxing",
-          code: "circle",
-          name: "圆形",
-        },
-      ],
+      componentItems: componentList,
     };
+  },
+  methods: {
+    handleDragStart(e) {
+      e.dataTransfer.setData("index", e.target.dataset.index);
+    },
   },
 };
 </script>
