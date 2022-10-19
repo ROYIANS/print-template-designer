@@ -83,6 +83,7 @@ import ComponentAdjuster from '@/components/Editor/ComponentAdjuster'
 import { getComponentRotatedStyle, getShapeStyle } from '@/utils/style-util.js'
 import Big from 'big.js'
 import RoyText from '@/components/PageComponents/RoyText'
+import RoyGroup from '@/components/PageComponents/RoyGroup'
 import Area from '@/components/Editor/Area'
 import commonMixin from '@/mixin/commonMixin'
 import { $, isPreventDrop } from '@/utils/html-util.js'
@@ -101,6 +102,7 @@ export default {
     ContextItem,
     ComponentAdjuster,
     RoyText,
+    RoyGroup,
     Area
   },
   props: {
@@ -143,8 +145,60 @@ export default {
       width: 0,
       height: 0,
       isShowArea: false,
-      svgFilterAttrs: ['width', 'height', 'top', 'left', 'rotate'],
-      contextMenu: [
+      svgFilterAttrs: ['width', 'height', 'top', 'left', 'rotate']
+    }
+  },
+  computed: {
+    ...mapState({
+      realScale: (state) => state.printTemplateModule.rulerThings.scale,
+      rectWidth: (state) => state.printTemplateModule.rulerThings.rectWidth,
+      rectHeight: (state) => state.printTemplateModule.rulerThings.rectHeight,
+      needReDrawRuler: (state) =>
+        state.printTemplateModule.rulerThings.needReDrawRuler,
+      showRuler: (state) => state.printTemplateModule.rulerThings.showRuler,
+      componentData: (state) => state.printTemplateModule.componentData,
+      curComponent: (state) => state.printTemplateModule.curComponent,
+      editor: (state) => state.printTemplateModule.editor
+    }),
+    contextTheme() {
+      return this.isNightMode ? 'dark' : 'default'
+    },
+    contextMenu() {
+      if (!this.curComponent) {
+        return [
+          {
+            code: 'setting',
+            icon: 'ri-list-settings-line',
+            label: '属性',
+            status: 'default',
+            event: () => {}
+          },
+          {
+            code: 'paste',
+            icon: 'ri-clipboard-line',
+            label: '粘贴',
+            status: 'default',
+            event: () => {
+              this.$store.commit('printTemplateModule/paste', true)
+              this.$store.commit('printTemplateModule/recordSnapshot')
+            }
+          }
+        ]
+      }
+      if (this.curComponent.isLock) {
+        return [
+          {
+            code: 'unlock',
+            icon: 'ri-lock-unlock-line',
+            label: '解锁',
+            status: 'default',
+            event: () => {
+              this.$store.commit('printTemplateModule/unlock')
+            }
+          }
+        ]
+      }
+      return [
         {
           code: 'setting',
           icon: 'ri-list-settings-line',
@@ -171,16 +225,6 @@ export default {
           }
         },
         {
-          code: 'paste',
-          icon: 'ri-clipboard-line',
-          label: '粘贴',
-          status: 'default',
-          event: () => {
-            this.$store.commit('printTemplateModule/paste', true)
-            this.$store.commit('printTemplateModule/recordSnapshot')
-          }
-        },
-        {
           code: 'del',
           icon: 'ri-delete-bin-line',
           label: '删除',
@@ -197,15 +241,6 @@ export default {
           status: 'default',
           event: () => {
             this.$store.commit('printTemplateModule/lock')
-          }
-        },
-        {
-          code: 'unlock',
-          icon: 'ri-lock-unlock-line',
-          label: '解锁',
-          status: 'default',
-          event: () => {
-            this.$store.commit('printTemplateModule/unlock')
           }
         },
         {
@@ -249,22 +284,6 @@ export default {
           }
         }
       ]
-    }
-  },
-  computed: {
-    ...mapState({
-      realScale: (state) => state.printTemplateModule.rulerThings.scale,
-      rectWidth: (state) => state.printTemplateModule.rulerThings.rectWidth,
-      rectHeight: (state) => state.printTemplateModule.rulerThings.rectHeight,
-      needReDrawRuler: (state) =>
-        state.printTemplateModule.rulerThings.needReDrawRuler,
-      showRuler: (state) => state.printTemplateModule.rulerThings.showRuler,
-      componentData: (state) => state.printTemplateModule.componentData,
-      curComponent: (state) => state.printTemplateModule.curComponent,
-      editor: (state) => state.printTemplateModule.editor
-    }),
-    contextTheme() {
-      return this.isNightMode ? 'dark' : 'default'
     },
     scale() {
       return new Big(this.realScale).div(new Big(5)).toNumber()
@@ -585,7 +604,7 @@ export default {
   background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
 
   #designer-page {
-    background: var(--roy-bg-color);
+    background: #fff;
     box-shadow: rgba(0, 0, 0, 0.12) 0 1px 3px, rgba(0, 0, 0, 0.24) 0 1px 2px;
     position: absolute;
     top: 60px;
@@ -610,6 +629,9 @@ export default {
       linear-gradient(-45deg, #232323 25%, transparent 25%),
       linear-gradient(45deg, transparent 75%, #232323 75%),
       linear-gradient(-45deg, transparent 75%, #232323 75%);
+  }
+  #designer-page {
+    filter: brightness(0.6);
   }
 }
 </style>

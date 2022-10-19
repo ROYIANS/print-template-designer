@@ -39,6 +39,13 @@
       "font_class": "rotate-ccw",
       "unicode": "e66a",
       "unicode_decimal": 58986
+    },
+    {
+      "icon_id": "22383584",
+      "name": "纸张方向",
+      "font_class": "zhizhangfangxiang",
+      "unicode": "edf5",
+      "unicode_decimal": 60917
     }
   ]
 }

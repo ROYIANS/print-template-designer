@@ -66,6 +66,10 @@ export const mutations = {
     state.curComponentIndex = index
   },
 
+  setPropValue({ curComponent }, propValue) {
+    Vue.set(curComponent, 'propValue', propValue)
+  },
+
   setShapeStyle({ curComponent }, { top, left, width, height, rotate }) {
     if (top) {
       curComponent.style.top = Math.round(top)
