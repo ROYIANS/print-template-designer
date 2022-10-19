@@ -13,9 +13,11 @@
   a {
     color: var(--roy-color-primary);
     text-decoration: none;
+
     &:hover, &:focus {
       color: var(--roy-color-primary-light-3)
     }
+
     &:active {
       color: var(--roy-color-primary-dark-2)
     }
@@ -118,11 +120,12 @@
   }
 
   .splitter-pane-resizer {
-    background: #555!important;
-    background-clip: padding-box!important;
+    background: #555 !important;
+    background-clip: padding-box !important;
+
     &.vertical {
-      height: calc(100% - 20px)!important;
-      margin: 10px 0 0 -5px!important;
+      height: calc(100% - 20px) !important;
+      margin: 10px 0 0 -5px !important;
     }
   }
 

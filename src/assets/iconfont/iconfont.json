@@ -32,6 +32,13 @@
       "font_class": "xianduan",
       "unicode": "e602",
       "unicode_decimal": 58882
+    },
+    {
+      "icon_id": "18957316",
+      "name": "rotate-ccw",
+      "font_class": "rotate-ccw",
+      "unicode": "e66a",
+      "unicode_decimal": 58986
     }
   ]
 }

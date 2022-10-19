@@ -6,8 +6,8 @@
 !-->
 <template>
   <el-container
-    class="roy-designer-container"
     id="roy-print-template-designer"
+    class="roy-designer-container"
     theme="day"
   >
     <el-header class="roy-designer-header" height="40px">
@@ -53,62 +53,62 @@
 </template>
 
 <script>
-import config from "../../../package.json";
-import { mapActions } from "vuex";
-import DesignerAside from "./DesignerAside.vue";
-import DesignerMain from "./DesignerMain.vue";
+import config from '../../../package.json'
+import { mapActions } from 'vuex'
+import DesignerAside from './DesignerAside.vue'
+import DesignerMain from './DesignerMain.vue'
 
-const VERSION = config.version;
+const VERSION = config.version
 
 /**
  * 主页
  */
 export default {
-  name: "RoyPrintDesigner",
+  name: 'RoyPrintDesigner',
   components: {
     DesignerAside,
-    DesignerMain,
+    DesignerMain
   },
   props: {},
   data() {
     return {
-      defaultExpendAside: true,
-    };
+      defaultExpendAside: true
+    }
   },
   computed: {
     isNightMode() {
-      return this.$store.state.printTemplateModule.nightMode.isNightMode;
-    },
+      return this.$store.state.printTemplateModule.nightMode.isNightMode
+    }
   },
   methods: {
     ...mapActions({
-      initNightMode: "printTemplateModule/nightMode/initNightMode",
-      toggleNightMode: "printTemplateModule/nightMode/toggleNightMode",
+      initNightMode: 'printTemplateModule/nightMode/initNightMode',
+      toggleNightMode: 'printTemplateModule/nightMode/toggleNightMode'
     }),
     initMounted() {
       console.log(
         `\n %c PrintTemplateDesigner® v${VERSION} %c ${new Date(
           window.printTemplateVersionTime || new Date().getTime()
         ).toLocaleString()}`,
-        "color:#fff;background:linear-gradient(90deg,#4579e1,#009688);padding:5px 0;",
-        "color:#000;background:linear-gradient(90deg,#009688,#ffffff);padding:5px 10px 5px 0px;"
-      );
-      this.initConfig();
+        'color:#fff;background:linear-gradient(90deg,#4579e1,#009688);padding:5px 0;',
+        'color:#000;background:linear-gradient(90deg,#009688,#ffffff);padding:5px 10px 5px 0px;'
+      )
+      this.initConfig()
     },
     initConfig() {
-      this.initNightMode();
+      this.initNightMode()
     },
     dayNightChange() {
-      this.toggleNightMode(!this.isNightMode);
+      this.toggleNightMode(!this.isNightMode)
     },
-    enterFullScreen() {},
+    enterFullScreen() {}
   },
   created() {},
   mounted() {
-    this.initMounted();
+    this.initMounted()
   },
-  watch: {},
-};
+  watch: {}
+}
 </script>
 
 <style lang="scss" scoped>
@@ -128,6 +128,7 @@ export default {
       display: flex;
       height: 100%;
       align-items: center;
+
       i {
         margin-right: 5px;
       }
@@ -151,6 +152,7 @@ export default {
       overflow: hidden;
       padding: 0 20px;
       cursor: pointer;
+
       i {
         position: absolute;
         top: 0;
@@ -158,6 +160,7 @@ export default {
         padding: 0 8px;
         font-size: 14px;
         cursor: pointer;
+
         &:hover {
           background: var(--roy-color-primary-light-3);
         }

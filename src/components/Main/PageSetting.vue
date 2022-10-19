@@ -30,72 +30,72 @@
 </template>
 
 <script>
-import PageThumbnail from "./PageThumbnail.vue";
-import html2canvas from "html2canvas";
+import PageThumbnail from './PageThumbnail.vue'
+import html2canvas from 'html2canvas'
 
 export default {
-  name: "PageSetting",
+  name: 'PageSetting',
   data() {
     return {
       pages: [],
       buttons: [
         {
-          icon: "ri-file-line",
-          content: "新增空白页",
+          icon: 'ri-file-line',
+          content: '新增空白页'
         },
         {
-          icon: "ri-file-copy-line",
-          content: "复制",
+          icon: 'ri-file-copy-line',
+          content: '复制'
         },
         {
-          icon: "ri-delete-bin-4-line",
-          content: "删除",
+          icon: 'ri-delete-bin-4-line',
+          content: '删除'
         },
         {
-          icon: "ri-arrow-up-fill",
-          content: "上移",
+          icon: 'ri-arrow-up-fill',
+          content: '上移'
         },
         {
-          icon: "ri-arrow-down-fill",
-          content: "下移",
+          icon: 'ri-arrow-down-fill',
+          content: '下移'
         },
         {
-          icon: "ri-align-top",
-          content: "置顶",
+          icon: 'ri-align-top',
+          content: '置顶'
         },
         {
-          icon: "ri-align-bottom",
-          content: "置底",
-        },
-      ],
-    };
+          icon: 'ri-align-bottom',
+          content: '置底'
+        }
+      ]
+    }
   },
   components: {
-    PageThumbnail,
+    PageThumbnail
   },
   methods: {
     doActivePage(index) {
       for (let i = 0; i < this.pages.length; i++) {
-        this.$set(this.pages[i], "active", i === index);
+        this.$set(this.pages[i], 'active', i === index)
       }
-    },
+    }
   },
   async mounted() {
     for (let i = 0; i < 3; i++) {
       let element = await html2canvas(
-        document.querySelector("#designer-page"),
+        document.querySelector('#designer-page'),
         {
-          scale: "0.6",
+          scale: '0.6'
         }
-      );
-      element.style.width = "auto";
-      element.style.height = "96px";
+      )
+      element.style.width = 'auto'
+      element.style.height = '96px'
       this.pages.push({
-        canvas: element,
-      });
+        canvas: element
+      })
     }
-  },
-};
+  }
+}
 </script>
 
 <style lang="scss" scoped>

@@ -48,18 +48,18 @@
 </template>
 
 <script>
-import commonMixin from "@/mixin/commonMixin";
-import { mapActions, mapState } from "vuex";
-import Big from "big.js";
-import { jsPDF } from "jspdf";
-import html2canvas from "html2canvas";
-import toast from "@/utils/toast";
+import commonMixin from '@/mixin/commonMixin'
+import { mapActions, mapState } from 'vuex'
+import Big from 'big.js'
+import { jsPDF } from 'jspdf'
+import html2canvas from 'html2canvas'
+import toast from '@/utils/toast'
 
 /**
  * 顶部工具栏
  */
 export default {
-  name: "ToolBar",
+  name: 'ToolBar',
   mixins: [commonMixin],
   components: {},
   props: {},
@@ -67,105 +67,105 @@ export default {
     return {
       toolbarLeftConfig: [
         {
-          name: "撤销",
-          icon: "ri-arrow-go-back-fill",
+          name: '撤销',
+          icon: 'ri-arrow-go-back-fill',
           event: () => {
-            toast("撤销");
-          },
+            toast('撤销')
+          }
         },
         {
-          name: "恢复",
-          icon: "ri-arrow-go-forward-fill",
+          name: '恢复',
+          icon: 'ri-arrow-go-forward-fill',
           event: () => {
-            toast("恢复");
-          },
+            toast('恢复')
+          }
         },
         {
-          name: "显示/隐藏标尺",
-          icon: "ri-ruler-2-line",
+          name: '显示/隐藏标尺',
+          icon: 'ri-ruler-2-line',
           event: () => {
-            this.toggleRuler();
-          },
+            this.toggleRuler()
+          }
         },
         {
-          name: "锁定",
-          icon: "ri-lock-2-line",
+          name: '锁定',
+          icon: 'ri-lock-2-line',
           event: () => {
-            toast("锁定");
-            html2canvas(document.querySelector("#designer-page"), {
-              scale: "5",
+            toast('锁定')
+            html2canvas(document.querySelector('#designer-page'), {
+              scale: '5'
             }).then((canvas) => {
-              let doc = new jsPDF();
+              let doc = new jsPDF()
               doc.addImage(
-                canvas.toDataURL("image/jpeg"),
-                "JPEG",
+                canvas.toDataURL('image/jpeg'),
+                'JPEG',
                 0,
                 0,
                 210,
                 297
-              );
-              doc.save("a4.pdf");
-            });
-          },
+              )
+              doc.save('a4.pdf')
+            })
+          }
         },
         {
-          name: "组合/拆分",
-          icon: "ri-collage-line",
+          name: '组合/拆分',
+          icon: 'ri-collage-line',
           event: () => {
-            toast("组合/拆分");
-          },
+            toast('组合/拆分')
+          }
         },
         {
-          name: "切换纸张方向",
-          icon: "ri-clockwise-line",
+          name: '切换纸张方向',
+          icon: 'ri-clockwise-line',
           event: () => {
-            this.rotatePage();
-          },
-        },
-      ],
-    };
+            this.rotatePage()
+          }
+        }
+      ]
+    }
   },
   computed: {
     ...mapState({
       scale: (state) => state.printTemplateModule.rulerThings.scale,
       rectWidth: (state) => state.printTemplateModule.rulerThings.rectWidth,
-      rectHeight: (state) => state.printTemplateModule.rulerThings.rectHeight,
+      rectHeight: (state) => state.printTemplateModule.rulerThings.rectHeight
     }),
     scale100() {
-      let currentScale = new Big(this.scale).div(new Big(5));
-      let num100 = new Big(100);
-      return currentScale.mul(num100).toNumber();
-    },
+      let currentScale = new Big(this.scale).div(new Big(5))
+      let num100 = new Big(100)
+      return currentScale.mul(num100).toNumber()
+    }
   },
   methods: {
     ...mapActions({
-      setBiggerScale: "printTemplateModule/rulerThings/setBiggerScale",
-      setSmallerScale: "printTemplateModule/rulerThings/setSmallerScale",
-      reDrawRuler: "printTemplateModule/rulerThings/reDrawRuler",
-      setRect: "printTemplateModule/rulerThings/setRect",
-      rotateRect: "printTemplateModule/rulerThings/rotateRect",
-      toggleRuler: "printTemplateModule/rulerThings/toggleRuler",
+      setBiggerScale: 'printTemplateModule/rulerThings/setBiggerScale',
+      setSmallerScale: 'printTemplateModule/rulerThings/setSmallerScale',
+      reDrawRuler: 'printTemplateModule/rulerThings/reDrawRuler',
+      setRect: 'printTemplateModule/rulerThings/setRect',
+      rotateRect: 'printTemplateModule/rulerThings/rotateRect',
+      toggleRuler: 'printTemplateModule/rulerThings/toggleRuler'
     }),
     smallerScale() {
-      this.setSmallerScale();
-      this.reDrawRuler();
+      this.setSmallerScale()
+      this.reDrawRuler()
     },
     biggerScale() {
-      this.setBiggerScale();
-      this.reDrawRuler();
+      this.setBiggerScale()
+      this.reDrawRuler()
     },
     rotatePage() {
-      this.rotateRect();
-      this.reDrawRuler();
+      this.rotateRect()
+      this.reDrawRuler()
     },
-    initMounted() {},
+    initMounted() {}
   },
   created() {},
   mounted() {
-    this.initMounted();
+    this.initMounted()
   },
-  watch: {},
-};
+  watch: {}
+}
 </script>
 
 <style lang="scss" scoped>
@@ -177,6 +177,7 @@ export default {
   .roy-designer-main__toolbar_left {
     display: flex;
     justify-content: flex-start;
+
     .roy-designer-main__toolbar__divide {
       width: 1px;
       height: 18px;
@@ -188,12 +189,14 @@ export default {
   .roy-designer-main__toolbar_right {
     display: flex;
     justify-content: flex-end;
+
     .roy-designer-main__toolbar__zoom,
     .roy-designer-main__toolbar__setting {
       display: flex;
       justify-content: flex-start;
       align-items: center;
       position: relative;
+
       span {
         padding: 0 10px;
       }

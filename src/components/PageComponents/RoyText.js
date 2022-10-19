@@ -7,26 +7,26 @@
  * ╠╦╝║ ║╚╦╝║╠═╣║║║╚═╗
  * ╩╚═╚═╝ ╩ ╩╩ ╩╝╚╝╚═╝
  */
-import { StyledText } from "@/components/PageComponents/style";
+import { StyledText } from '@/components/PageComponents/style'
 
 export default {
-  name: "RoyText",
+  name: 'RoyText',
   props: {
     element: {
       type: Object,
-      default: () => {},
+      default: () => {}
     },
     propValue: {
       type: String,
-      default: "",
-    },
+      default: ''
+    }
   },
   render() {
-    const style = this.element.style || {};
+    const style = this.element.style || {}
     return (
       <StyledText props={style}>
         <div domPropsInnerHTML={this.propValue}></div>
       </StyledText>
-    );
-  },
-};
+    )
+  }
+}

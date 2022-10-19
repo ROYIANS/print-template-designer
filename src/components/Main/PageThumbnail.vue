@@ -18,37 +18,37 @@
 </template>
 
 <script>
-import commonMixin from "@/mixin/commonMixin";
+import commonMixin from '@/mixin/commonMixin'
 
 /**
  * 缩略图
  */
 export default {
-  name: "PageThumbnail",
+  name: 'PageThumbnail',
   mixins: [commonMixin],
   components: {},
   props: {
     element: {
       type: HTMLElement,
-      default: null,
-    },
+      default: null
+    }
   },
   data() {
-    return {};
+    return {}
   },
   methods: {
     initMounted() {
       if (this.element !== null) {
-        this.$refs.thumbnail.appendChild(this.element);
+        this.$refs.thumbnail.appendChild(this.element)
       }
-    },
+    }
   },
   created() {},
   mounted() {
-    this.initMounted();
+    this.initMounted()
   },
-  watch: {},
-};
+  watch: {}
+}
 </script>
 
 <style lang="scss" scoped>

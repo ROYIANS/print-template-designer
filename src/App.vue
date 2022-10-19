@@ -26,8 +26,8 @@
         <i
           v-for="(tool, index) in headIconConfig"
           :key="index"
-          class="roy-header-icon"
           :class="tool.icon"
+          class="roy-header-icon"
           @click="tool.event"
         ></i>
       </div>
@@ -51,138 +51,139 @@
 </template>
 
 <script>
-import toast from "@/utils/toast";
-import shepherd from "@/components/RoyUserTour/userTour";
+import toast from '@/utils/toast'
+import shepherd from '@/components/RoyUserTour/userTour'
+
 export default {
-  name: "App",
+  name: 'App',
   mounted() {
-    toast("欢迎使用ROYIANS的打印模板设计器，仅个人学习使用", "info");
+    toast('欢迎使用ROYIANS的打印模板设计器，仅个人学习使用', 'info')
   },
   data() {
     return {
       toolbarSlotConfig: [
         {
-          name: "从报表配置拉取表格",
-          icon: "ri-table-line",
+          name: '从报表配置拉取表格',
+          icon: 'ri-table-line',
           event: () => {
-            toast("从报表配置拉取表格(开发者自定义事件)");
-          },
-        },
+            toast('从报表配置拉取表格(开发者自定义事件)')
+          }
+        }
       ],
       headIconConfig: [
         {
-          name: "Github",
-          icon: "ri-github-fill",
+          name: 'Github',
+          icon: 'ri-github-fill',
           event: () => {
-            toast("跳转到Github", "info");
+            toast('跳转到Github', 'info')
             window.open(
-              "https://github.com/ROYIANS/print-template-designer",
-              "_blank"
-            );
-          },
-        },
-      ],
-    };
+              'https://github.com/ROYIANS/print-template-designer',
+              '_blank'
+            )
+          }
+        }
+      ]
+    }
   },
   methods: {
     showUserGuide() {
-      const driver = shepherd();
+      const driver = shepherd()
       driver.addSteps([
         {
           attachTo: {
-            element: document.querySelector("#royians-guide"),
-            on: "auto",
+            element: document.querySelector('#royians-guide'),
+            on: 'auto'
           },
-          title: "打印模板设计器界面指引",
-          text: "欢迎使用！接下来介绍整个界面。",
+          title: '打印模板设计器界面指引',
+          text: '欢迎使用！接下来介绍整个界面。',
           buttons: [
             {
               action() {
-                return this.next();
+                return this.next()
               },
-              text: "下一步",
-            },
-          ],
+              text: '下一步'
+            }
+          ]
         },
         {
           attachTo: {
             element: this.$refs.designer.$el.querySelector(
-              ".roy-designer-header"
+              '.roy-designer-header'
             ),
-            on: "auto",
+            on: 'auto'
           },
-          title: "打印模板设计器界面指引",
-          text: "这是标题栏，左侧显示”打印模板设计器”字样和当前模板名称，右侧是开发者自定义插槽和夜间模式切换按钮。",
+          title: '打印模板设计器界面指引',
+          text: '这是标题栏，左侧显示”打印模板设计器”字样和当前模板名称，右侧是开发者自定义插槽和夜间模式切换按钮。',
           buttons: [
             {
               action() {
-                return this.next();
+                return this.next()
               },
-              text: "下一步",
-            },
-          ],
+              text: '下一步'
+            }
+          ]
         },
         {
           attachTo: {
             element: this.$refs.designer.$el.querySelector(
-              ".roy-designer-aside"
+              '.roy-designer-aside'
             ),
-            on: "auto",
+            on: 'auto'
           },
-          title: "打印模板设计器界面指引",
-          text: "这是左侧面板，包含四个模块。",
+          title: '打印模板设计器界面指引',
+          text: '这是左侧面板，包含四个模块。',
           buttons: [
             {
               action() {
-                return this.next();
+                return this.next()
               },
-              text: "下一步",
-            },
-          ],
+              text: '下一步'
+            }
+          ]
         },
         {
           attachTo: {
             element:
-              this.$refs.designer.$el.querySelector(".roy-designer-main"),
-            on: "bottom-start",
+              this.$refs.designer.$el.querySelector('.roy-designer-main'),
+            on: 'bottom-start'
           },
-          title: "打印模板设计器界面指引",
-          text: "这是右侧面版，包含一个工具栏和一个主窗口。",
+          title: '打印模板设计器界面指引',
+          text: '这是右侧面版，包含一个工具栏和一个主窗口。',
           buttons: [
             {
               action() {
-                return this.next();
+                return this.next()
               },
-              text: "下一步",
-            },
-          ],
+              text: '下一步'
+            }
+          ]
         },
         {
           attachTo: {
-            element: document.querySelector("#royians-guide"),
-            on: "auto",
+            element: document.querySelector('#royians-guide'),
+            on: 'auto'
           },
-          title: "打印模板设计器界面指引",
-          text: "本系统由ROYIANS设计，欢迎使用。",
+          title: '打印模板设计器界面指引',
+          text: '本系统由ROYIANS设计，欢迎使用。',
           buttons: [
             {
               action() {
-                return this.cancel();
+                return this.cancel()
               },
-              text: "完成",
-            },
-          ],
-        },
-      ]);
-      driver.start();
+              text: '完成'
+            }
+          ]
+        }
+      ])
+      driver.start()
     },
     exportJSON() {
-      toast("导出成功，请查看控制台！", "success");
+      toast('导出成功，请查看控制台！', 'success')
     },
     exportPDF() {},
-    printPreview() {},
-  },
-};
+    printPreview() {}
+  }
+}
 </script>
 
 <style lang="scss">
@@ -191,10 +192,12 @@ body,
 .height-all {
   height: 100%;
 }
+
 .head-slot {
   display: flex;
   height: 40px;
   align-items: center;
+
   .el-button,
   .el-button--mini {
     background: transparent !important;
@@ -202,23 +205,28 @@ body,
     border: none !important;
     display: inline-flex !important;
     align-items: center !important;
+
     i {
       padding-right: 5px;
       font-size: 14px !important;
     }
+
     &:hover {
       background: var(--roy-color-primary-light-3) !important;
     }
   }
+
   .roy-header-icon {
     padding: 0 8px;
     font-size: 14px;
     cursor: pointer;
+
     &:hover {
       background: var(--roy-color-primary-light-3);
     }
   }
 }
+
 .toolbar-slot-item {
   cursor: pointer;
   background: var(--roy-bg-color);

@@ -18,74 +18,78 @@
 
 <script>
 export default {
-  name: "VContextmenuSubmenu",
+  name: 'VContextmenuSubmenu',
 
   props: {
     title: {
       type: String,
-      default: "",
+      default: ''
     },
-    disabled: Boolean,
+    disabled: Boolean
   },
 
   data() {
     return {
       hover: false,
-      submenuPlacement: [],
-    };
+      submenuPlacement: []
+    }
   },
   computed: {
     classname() {
       return {
-        "v-contextmenu-item": true,
-        "v-contextmenu-submenu": true,
-        "v-contextmenu-item--hover": this.hover,
-        "v-contextmenu-item--disabled": this.disabled,
-      };
+        'v-contextmenu-item': true,
+        'v-contextmenu-submenu': true,
+        'v-contextmenu-item--hover': this.hover,
+        'v-contextmenu-item--disabled': this.disabled
+      }
     },
     submenuCls() {
-      return ["v-contextmenu", ...this.submenuPlacement];
-    },
+      return ['v-contextmenu', ...this.submenuPlacement]
+    }
   },
 
   methods: {
     handleMouseenter(event) {
-      if (this.disabled) return;
+      if (this.disabled) {
+        return
+      }
 
-      const { target } = event;
-      const targetDimension = target.getBoundingClientRect();
+      const { target } = event
+      const targetDimension = target.getBoundingClientRect()
 
-      this.hover = true;
+      this.hover = true
 
-      this.$emit("mouseenter", this, event);
+      this.$emit('mouseenter', this, event)
 
       this.$nextTick(() => {
-        const submenuWidth = this.$refs.submenu.clientWidth;
-        const submenuHeight = this.$refs.submenu.clientHeight;
-        const submenuPlacement = [];
+        const submenuWidth = this.$refs.submenu.clientWidth
+        const submenuHeight = this.$refs.submenu.clientHeight
+        const submenuPlacement = []
 
         if (targetDimension.right + submenuWidth >= window.innerWidth) {
-          submenuPlacement.push("left");
+          submenuPlacement.push('left')
         } else {
-          submenuPlacement.push("right");
+          submenuPlacement.push('right')
         }
 
         if (targetDimension.bottom + submenuHeight >= window.innerHeight) {
-          submenuPlacement.push("bottom");
+          submenuPlacement.push('bottom')
         } else {
-          submenuPlacement.push("top");
+          submenuPlacement.push('top')
         }
 
-        this.submenuPlacement = submenuPlacement;
-      });
+        this.submenuPlacement = submenuPlacement
+      })
     },
     handleMouseleave(event) {
-      if (this.disabled) return;
+      if (this.disabled) {
+        return
+      }
 
-      this.hover = false;
+      this.hover = false
 
-      this.$emit("mouseleave", this, event);
-    },
-  },
-};
+      this.$emit('mouseleave', this, event)
+    }
+  }
+}
 </script>

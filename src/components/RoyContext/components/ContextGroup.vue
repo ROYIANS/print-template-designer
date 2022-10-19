@@ -8,27 +8,29 @@
 
 <script>
 export default {
-  name: "ContextGroup",
+  name: 'ContextGroup',
 
   props: {
     maxWidth: {
       type: [Number, String],
-      default: undefined,
-    },
+      default: undefined
+    }
   },
 
   computed: {
     menusStyle() {
-      if (!this.maxWidth) return null;
+      if (!this.maxWidth) {
+        return null
+      }
 
       return {
-        "max-width":
-          typeof this.maxWidth === "number"
+        'max-width':
+          typeof this.maxWidth === 'number'
             ? `${this.maxWidth}px`
             : this.maxWidth,
-        "overflow-x": "auto",
-      };
-    },
-  },
-};
+        'overflow-x': 'auto'
+      }
+    }
+  }
+}
 </script>

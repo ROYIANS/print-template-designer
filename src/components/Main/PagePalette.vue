@@ -16,13 +16,13 @@
 
 <script>
 export default {
-  name: "PagePalette",
+  name: 'PagePalette',
   data() {
     return {
-      curClickComponent: null,
-    };
-  },
-};
+      curClickComponent: null
+    }
+  }
+}
 </script>
 
 <style lang="scss" scoped>
@@ -30,18 +30,21 @@ export default {
   overflow: auto;
   height: calc(100% - 16px);
   padding: 8px;
+
   .roy-page-tools__empty {
     font-size: 10px;
     height: 100%;
     width: 100%;
     display: flex;
     flex-flow: row wrap;
+
     i {
       font-size: 28px;
       width: 100%;
       align-self: end;
       text-align: center;
     }
+
     div {
       text-align: center;
     }

@@ -1,9 +1,9 @@
-import Toast from "@/components/RoyToast";
+import Toast from '@/components/RoyToast'
 
-export default function toast(message = "", type = "warning", duration = 3000) {
+export default function toast(message = '', type = 'warning', duration = 3000) {
   Toast({
     status: type,
     message: message,
-    duration: duration,
-  });
+    duration: duration
+  })
 }

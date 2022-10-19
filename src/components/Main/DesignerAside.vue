@@ -1,5 +1,5 @@
 <template>
-  <section class="roy-designer-aside__main" :style="asideStyle">
+  <section :style="asideStyle" class="roy-designer-aside__main">
     <el-menu
       :collapse="true"
       class="roy-designer-aside__menu"
@@ -19,8 +19,8 @@
     </el-menu>
     <keep-alive>
       <component
-        v-show="showRight"
         :is="curActiveComponent"
+        v-show="showRight"
         :key="curActiveComponentCode"
         class="roy-designer-aside__right_panel"
       />
@@ -29,70 +29,70 @@
 </template>
 
 <script>
-import commonMixin from "@/mixin/commonMixin";
+import commonMixin from '@/mixin/commonMixin'
 
 export default {
-  name: "DesignerAside",
+  name: 'DesignerAside',
   mixins: [commonMixin],
   data() {
     return {
       menuList: [
         {
-          name: "组件",
-          code: "component",
-          icon: "ri-drag-drop-fill",
-          component: () => import("./PageComponent.vue"),
+          name: '组件',
+          code: 'component',
+          icon: 'ri-drag-drop-fill',
+          component: () => import('./PageComponent.vue')
         },
         {
-          name: "结构",
-          code: "toc",
-          icon: "ri-node-tree",
-          component: () => import("./PageToc.vue"),
+          name: '结构',
+          code: 'toc',
+          icon: 'ri-node-tree',
+          component: () => import('./PageToc.vue')
         },
         {
-          name: "属性",
-          code: "palette",
-          icon: "ri-palette-line",
-          component: () => import("./PagePalette.vue"),
+          name: '属性',
+          code: 'palette',
+          icon: 'ri-palette-line',
+          component: () => import('./PagePalette.vue')
         },
         {
-          name: "全局",
-          code: "setting",
-          icon: "ri-sound-module-line",
-          component: () => import("./GlobalSetting.vue"),
-        },
+          name: '全局',
+          code: 'setting',
+          icon: 'ri-sound-module-line',
+          component: () => import('./GlobalSetting.vue')
+        }
       ],
       curActiveComponent: null,
-      curActiveComponentCode: "",
-    };
+      curActiveComponentCode: ''
+    }
   },
   props: {
     showRight: {
       type: Boolean,
-      default: true,
-    },
+      default: true
+    }
   },
   computed: {
     asideStyle() {
-      return this.showRight ? "width: 300px" : "width: 65px";
-    },
+      return this.showRight ? 'width: 300px' : 'width: 65px'
+    }
   },
   methods: {
     onMenuSelect(index) {
       if (this.curActiveComponentCode === this.menuList[index].code) {
-        this.$emit("update:showRight", !this.showRight);
+        this.$emit('update:showRight', !this.showRight)
       } else {
-        this.$emit("update:showRight", true);
+        this.$emit('update:showRight', true)
       }
-      this.curActiveComponent = this.menuList[index].component;
-      this.curActiveComponentCode = this.menuList[index].code;
-    },
+      this.curActiveComponent = this.menuList[index].component
+      this.curActiveComponentCode = this.menuList[index].code
+    }
   },
   mounted() {
-    this.curActiveComponent = this.menuList[0].component;
-    this.curActiveComponentCode = this.menuList[0].code;
-  },
-};
+    this.curActiveComponent = this.menuList[0].component
+    this.curActiveComponentCode = this.menuList[0].code
+  }
+}
 </script>
 
 <style lang="scss" scoped>

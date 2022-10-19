@@ -14,9 +14,9 @@ export default {
   defaultStepOptions: {
     // 显示关闭按钮
     cancelIcon: {
-      enabled: true,
+      enabled: true
     },
-    scrollTo: { behavior: "smooth", block: "center" },
+    scrollTo: { behavior: 'smooth', block: 'center' },
     // 高亮元素四周要填充的空白像素
     modalOverlayOpeningPadding: 8,
     // 空白像素的圆角
@@ -24,16 +24,16 @@ export default {
     buttons: [
       {
         action() {
-          return this.back();
+          return this.back()
         },
-        text: "上一步",
+        text: '上一步'
       },
       {
         action() {
-          return this.next();
+          return this.next()
         },
-        text: "下一步",
-      },
-    ],
-  },
-};
+        text: '下一步'
+      }
+    ]
+  }
+}
