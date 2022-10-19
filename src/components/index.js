@@ -7,39 +7,41 @@
  * ╠╦╝║ ║╚╦╝║╠═╣║║║╚═╗
  * ╩╚═╚═╝ ╩ ╩╩ ╩╝╚╝╚═╝
  */
-import PtdDesigner from "./Main/Home.vue";
+import PtdDesigner from './Main/Home.vue'
 
-import "normalize.css/normalize.css";
-import "animate.css";
-import "@/assets/main.scss";
-import "@/assets/iconfont/iconfont.css";
+import 'normalize.css/normalize.css'
+import 'animate.css'
+import '@/assets/main.scss'
+import '@/assets/iconfont/iconfont.css'
 
-import NightModeStore from "../stores/modules/index.js";
+import NightModeStore from '../stores/modules/index.js'
 
 const componentsLib = {
-  PtdDesigner,
-};
+  PtdDesigner
+}
 const install = function (Vue, opts = {}) {
-  if (install.installed) return;
+  if (install.installed) {
+    return
+  }
   if (!opts.store) {
-    console.warn("[print-template-designer] 请提供store！");
-    return;
+    console.warn('[print-template-designer] 请提供store！')
+    return
   }
   if (!opts.store.state.printTemplateModule) {
     // 注册module
-    opts.store.registerModule(["printTemplateModule"], NightModeStore);
+    opts.store.registerModule(['printTemplateModule'], NightModeStore)
   }
   Object.keys(componentsLib).forEach((key) => {
     // 注册组件
-    Vue.component(key, componentsLib[key]);
-  });
-};
-const Api = {
-  version: "ROY-PRINT-DESIGNER@0.0.6",
-  install,
-};
-// auto install
-if (typeof window !== "undefined" && window.Vue) {
-  install(window.Vue);
+    Vue.component(key, componentsLib[key])
+  })
 }
-export default Api;
+const Api = {
+  version: 'ROY-PRINT-DESIGNER@0.0.6',
+  install
+}
+// auto install
+if (typeof window !== 'undefined' && window.Vue) {
+  install(window.Vue)
+}
+export default Api

@@ -1,6 +1,6 @@
-import { state, mutations, actions, getters } from "./global.js";
-import nightMode from "./night-mode.js";
-import rulerThings from "./ruler-things.js";
+import { actions, getters, mutations, state } from './global.js'
+import nightMode from './night-mode.js'
+import rulerThings from './ruler-things.js'
 
 export default {
   namespaced: true,
@@ -10,6 +10,6 @@ export default {
   getters,
   modules: {
     nightMode,
-    rulerThings,
-  },
-};
+    rulerThings
+  }
+}

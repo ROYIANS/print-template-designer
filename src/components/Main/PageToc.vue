@@ -9,8 +9,8 @@
     <div
       v-for="(item, index) in componentData"
       :key="index"
-      class="roy-page-toc__list"
       :class="{ actived: transformIndex(index) === curComponentIndex }"
+      class="roy-page-toc__list"
       @click="onClick(transformIndex(index))"
     >
       <span :class="getComponent(index).icon" style="padding-right: 5px"></span>
@@ -34,79 +34,80 @@
 </template>
 
 <script>
-import commonMixin from "@/mixin/commonMixin";
-import { mapState } from "vuex";
+import commonMixin from '@/mixin/commonMixin'
+import { mapState } from 'vuex'
 
 /**
  * 页面大纲
  */
 export default {
-  name: "PageToc",
+  name: 'PageToc',
   mixins: [commonMixin],
   components: {},
   props: {},
   data() {
-    return {};
+    return {}
   },
   computed: {
     ...mapState({
       componentData: (state) => state.printTemplateModule.componentData,
       curComponent: (state) => state.printTemplateModule.curComponent,
-      curComponentIndex: (state) => state.printTemplateModule.curComponentIndex,
-    }),
+      curComponentIndex: (state) => state.printTemplateModule.curComponentIndex
+    })
   },
   methods: {
     initMounted() {},
     getComponent(index) {
-      return this.componentData[this.componentData.length - 1 - index];
+      return this.componentData[this.componentData.length - 1 - index]
     },
 
     transformIndex(index) {
-      return this.componentData.length - 1 - index;
+      return this.componentData.length - 1 - index
     },
     onClick(index) {
-      this.setCurComponent(index);
+      this.setCurComponent(index)
     },
     deleteComponent() {
       setTimeout(() => {
-        this.$store.commit("printTemplateModule/deleteComponent");
-        this.$store.commit("printTemplateModule/recordSnapshot");
-      });
+        this.$store.commit('printTemplateModule/deleteComponent')
+        this.$store.commit('printTemplateModule/recordSnapshot')
+      })
     },
 
     upComponent() {
       setTimeout(() => {
-        this.$store.commit("printTemplateModule/upComponent");
-        this.$store.commit("printTemplateModule/recordSnapshot");
-      });
+        this.$store.commit('printTemplateModule/upComponent')
+        this.$store.commit('printTemplateModule/recordSnapshot')
+      })
     },
 
     downComponent() {
       setTimeout(() => {
-        this.$store.commit("printTemplateModule/downComponent");
-        this.$store.commit("printTemplateModule/recordSnapshot");
-      });
+        this.$store.commit('printTemplateModule/downComponent')
+        this.$store.commit('printTemplateModule/recordSnapshot')
+      })
     },
 
     setCurComponent(index) {
-      this.$store.commit("printTemplateModule/setCurComponent", {
+      this.$store.commit('printTemplateModule/setCurComponent', {
         component: this.componentData[index],
-        index,
-      });
-    },
+        index
+      })
+    }
   },
   created() {},
   mounted() {
-    this.initMounted();
+    this.initMounted()
   },
-  watch: {},
-};
+  watch: {}
+}
 </script>
 
 <style lang="scss" scoped>
 .roy-page-toc {
   height: 100%;
   padding: 6px;
+
   .roy-page-toc__list {
     height: 30px;
     cursor: grab;
@@ -131,13 +132,16 @@ export default {
       }
     }
   }
+
   .roy-page-toc__buttons {
     position: absolute;
     right: 10px;
     display: none;
+
     span {
       cursor: pointer;
       padding: 5px;
+
       &:hover {
         background: var(--roy-menu-item-hover-fill);
       }

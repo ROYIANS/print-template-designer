@@ -12,7 +12,7 @@
 
 <script>
 export default {
-  name: "PageBlock",
+  name: 'PageBlock',
   data() {
     return {
       blocks: [
@@ -23,11 +23,11 @@ export default {
         [8, 16],
         [16, 8],
         [4, 8, 4, 8],
-        [8, 4, 8, 4],
-      ],
-    };
-  },
-};
+        [8, 4, 8, 4]
+      ]
+    }
+  }
+}
 </script>
 
 <style lang="scss" scoped>

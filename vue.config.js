@@ -1,5 +1,5 @@
-const { defineConfig } = require("@vue/cli-service");
+const { defineConfig } = require('@vue/cli-service')
 module.exports = defineConfig({
   transpileDependencies: true,
-  publicPath: "/print-template-designer",
-});
+  publicPath: '/print-template-designer'
+})

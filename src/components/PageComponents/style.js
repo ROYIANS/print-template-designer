@@ -7,46 +7,46 @@
  * ╠╦╝║ ║╚╦╝║╠═╣║║║╚═╗
  * ╩╚═╚═╝ ╩ ╩╩ ╩╝╚╝╚═╝
  */
-import styled from "vue-styled-components";
+import styled from 'vue-styled-components'
 
 const defaultProps = {
   color: {
     type: String,
-    default: "#212121",
+    default: '#212121'
   },
   background: {
     type: String,
-    default: "#FFFFFF",
+    default: '#FFFFFF'
   },
   border: {
     type: String,
-    default: "none",
+    default: 'none'
   },
   borderRadius: {
     type: String,
-    default: "inherit",
+    default: 'inherit'
   },
   padding: {
     type: String,
-    default: "0 0 0 0",
+    default: '0 0 0 0'
   },
   margin: {
     type: String,
-    default: "0 0 0 0",
+    default: '0 0 0 0'
   },
   fontSize: {
     type: Number,
-    default: 12,
+    default: 12
   },
   zIndex: {
     type: Number,
-    default: 1,
-  },
-};
+    default: 1
+  }
+}
 
-const textProps = Object.assign(defaultProps, {});
+const textProps = Object.assign(defaultProps, {})
 
-export const StyledText = styled("div", textProps)`
+export const StyledText = styled('div', textProps)`
   position: absolute;
   color: ${(props) => props.color};
   background: ${(props) => props.background};
@@ -56,4 +56,4 @@ export const StyledText = styled("div", textProps)`
   margin: ${(props) => props.margin};
   font-size: ${(props) => `${props.fontSize}pt`};
   z-index: ${(props) => props.zIndex};
-`;
+`

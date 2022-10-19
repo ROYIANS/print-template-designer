@@ -1,22 +1,22 @@
-import Vue from "vue";
-import store from "./stores/index.js";
+import Vue from 'vue'
+import store from './stores/index.js'
 
-import App from "./App.vue";
-import Element from "element-ui";
-import router from "./router";
-import PrintDesigner from "./components/index.js";
+import App from './App.vue'
+import Element from 'element-ui'
+import router from './router'
+import PrintDesigner from './components/index.js'
 
-import "remixicon/fonts/remixicon.css";
-import "element-ui/lib/theme-chalk/index.css";
+import 'remixicon/fonts/remixicon.css'
+import 'element-ui/lib/theme-chalk/index.css'
 
-Vue.use(Element, { size: "small" });
+Vue.use(Element, { size: 'small' })
 Vue.use(PrintDesigner, {
-  store,
-});
-Vue.config.productionTip = false;
+  store
+})
+Vue.config.productionTip = false
 
 new Vue({
   router,
   store,
-  render: (h) => h(App),
-}).$mount("#roy-app");
+  render: (h) => h(App)
+}).$mount('#roy-app')

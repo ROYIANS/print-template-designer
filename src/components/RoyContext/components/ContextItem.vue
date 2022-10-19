@@ -14,57 +14,63 @@
 
 <script>
 export default {
-  name: "ContextItem",
+  name: 'ContextItem',
 
-  inject: ["$$contextmenu"],
+  inject: ['$$contextmenu'],
 
   props: {
     divider: Boolean,
     disabled: Boolean,
     autoHide: {
       type: Boolean,
-      default: true,
-    },
+      default: true
+    }
   },
 
   data() {
     return {
-      hover: false,
-    };
+      hover: false
+    }
   },
   computed: {
     classname() {
       return {
-        "roy-context-item": !this.divider,
-        "roy-context-item--hover": this.hover,
-        "roy-context-item--disabled": this.disabled,
-      };
-    },
+        'roy-context-item': !this.divider,
+        'roy-context-item--hover': this.hover,
+        'roy-context-item--disabled': this.disabled
+      }
+    }
   },
 
   methods: {
     handleMouseenter(event) {
-      if (this.disabled) return;
+      if (this.disabled) {
+        return
+      }
 
-      this.hover = true;
+      this.hover = true
 
-      this.$emit("mouseenter", this, event);
+      this.$emit('mouseenter', this, event)
     },
     handleMouseleave(event) {
-      if (this.disabled) return;
+      if (this.disabled) {
+        return
+      }
 
-      this.hover = false;
+      this.hover = false
 
-      this.$emit("mouseleave", this, event);
+      this.$emit('mouseleave', this, event)
     },
 
     handleClick(event) {
-      if (this.disabled) return;
+      if (this.disabled) {
+        return
+      }
 
-      this.$emit("click", this, event);
+      this.$emit('click', this, event)
 
-      this.autoHide && this.$$contextmenu.hide();
-    },
-  },
-};
+      this.autoHide && this.$$contextmenu.hide()
+    }
+  }
+}
 </script>

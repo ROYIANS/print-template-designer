@@ -3,9 +3,9 @@
     <div
       v-for="(item, index) in componentItems"
       :key="item.code"
+      :data-index="index"
       class="roy-page-component__item"
       draggable="true"
-      :data-index="index"
     >
       <i :class="item.icon"></i>
       <span>{{ item.name }}</span>
@@ -14,20 +14,21 @@
 </template>
 
 <script>
-import { componentList } from "@/components/config/componentList.js";
+import { componentList } from '@/components/config/componentList.js'
+
 export default {
-  name: "PageComponent",
+  name: 'PageComponent',
   data() {
     return {
-      componentItems: componentList,
-    };
+      componentItems: componentList
+    }
   },
   methods: {
     handleDragStart(e) {
-      e.dataTransfer.setData("index", e.target.dataset.index);
-    },
-  },
-};
+      e.dataTransfer.setData('index', e.target.dataset.index)
+    }
+  }
+}
 </script>
 
 <style lang="scss" scoped>
