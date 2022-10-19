@@ -47,6 +47,9 @@ const defaultProps = {
 const textProps = Object.assign(defaultProps, {})
 
 export const StyledText = styled('div', textProps)`
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
   position: absolute;
   color: ${(props) => props.color};
   background: ${(props) => props.background};

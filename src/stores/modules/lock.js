@@ -1,11 +1,13 @@
+import Vue from 'vue'
+
 export default {
   mutations: {
     lock({ curComponent }) {
-      curComponent.isLock = true
+      Vue.set(curComponent, 'isLock', true)
     },
 
     unlock({ curComponent }) {
-      curComponent.isLock = false
+      Vue.set(curComponent, 'isLock', false)
     }
   }
 }

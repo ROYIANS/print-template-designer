@@ -1,4 +1,4 @@
-import store from './index'
+import store from '../index.js'
 import generateID from '@/utils/generateID'
 import eventBus from '@/utils/eventBus'
 import decomposeComponent from '@/utils/decomposeComponent'
@@ -32,7 +32,7 @@ export default {
     compose({ componentData, areaData, editor }) {
       const components = []
       areaData.components.forEach((component) => {
-        if (component.component !== 'Group') {
+        if (component.component !== 'RoyGroup') {
           components.push(component)
         } else {
           // 如果要组合的组件中，已经存在组合数据，则需要提前拆分
@@ -50,9 +50,9 @@ export default {
 
       const groupComponent = {
         id: generateID(),
-        component: 'Group',
+        component: 'RoyGroup',
         label: '组合',
-        icon: 'zuhe',
+        icon: 'ri-shape-line',
         ...commonAttr,
         style: {
           ...commonStyle,

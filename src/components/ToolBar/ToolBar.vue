@@ -16,7 +16,13 @@
         effect="dark"
         placement="bottom"
       >
-        <div class="roy-designer-main__toolbar__item" @click="tool.event">
+        <div
+          class="roy-designer-main__toolbar__item"
+          :class="
+            tool.disabled ? `roy-designer-main__toolbar__item--disabled` : ``
+          "
+          @click="tool.event"
+        >
           <i :class="tool.icon"></i>
         </div>
       </el-tooltip>
@@ -51,8 +57,6 @@
 import commonMixin from '@/mixin/commonMixin'
 import { mapActions, mapState } from 'vuex'
 import Big from 'big.js'
-import { jsPDF } from 'jspdf'
-import html2canvas from 'html2canvas'
 import toast from '@/utils/toast'
 
 /**
@@ -64,8 +68,23 @@ export default {
   components: {},
   props: {},
   data() {
-    return {
-      toolbarLeftConfig: [
+    return {}
+  },
+  computed: {
+    ...mapState({
+      scale: (state) => state.printTemplateModule.rulerThings.scale,
+      rectWidth: (state) => state.printTemplateModule.rulerThings.rectWidth,
+      rectHeight: (state) => state.printTemplateModule.rulerThings.rectHeight,
+      curComponent: (state) => state.printTemplateModule.curComponent,
+      areaData: (state) => state.printTemplateModule.areaData
+    }),
+    scale100() {
+      let currentScale = new Big(this.scale).div(new Big(5))
+      let num100 = new Big(100)
+      return currentScale.mul(num100).toNumber()
+    },
+    toolbarLeftConfig() {
+      return [
         {
           name: '撤销',
           icon: 'ri-arrow-go-back-fill',
@@ -88,53 +107,50 @@ export default {
           }
         },
         {
-          name: '锁定',
-          icon: 'ri-lock-2-line',
+          name: this.curComponent && this.curComponent.isLock ? '解锁' : '锁定',
+          icon:
+            this.curComponent && this.curComponent.isLock
+              ? 'ri-lock-unlock-line'
+              : 'ri-lock-2-line',
+          disabled: !this.curComponent,
           event: () => {
-            toast('锁定')
-            html2canvas(document.querySelector('#designer-page'), {
-              scale: '5'
-            }).then((canvas) => {
-              let doc = new jsPDF()
-              doc.addImage(
-                canvas.toDataURL('image/jpeg'),
-                'JPEG',
-                0,
-                0,
-                210,
-                297
-              )
-              doc.save('a4.pdf')
-            })
+            if (this.curComponent.isLock) {
+              this.$store.commit('printTemplateModule/unlock')
+            } else {
+              this.$store.commit('printTemplateModule/lock')
+            }
           }
         },
         {
-          name: '组合/拆分',
-          icon: 'ri-collage-line',
+          name: this.areaData.components.length ? '组合' : '拆分',
+          icon: this.areaData.components.length
+            ? 'ri-merge-cells-horizontal'
+            : 'ri-split-cells-horizontal',
+          disabled:
+            (!this.curComponent ||
+              this.curComponent.isLock ||
+              this.curComponent.component !== 'RoyGroup') &&
+            !this.areaData.components.length,
           event: () => {
-            toast('组合/拆分')
+            if (this.areaData.components.length) {
+              // 组合
+              this.$store.commit('printTemplateModule/compose')
+              this.$store.commit('printTemplateModule/recordSnapshot')
+            } else {
+              // 拆分
+              this.$store.commit('printTemplateModule/decompose')
+              this.$store.commit('printTemplateModule/recordSnapshot')
+            }
           }
         },
         {
           name: '切换纸张方向',
-          icon: 'ri-clockwise-line',
+          icon: 'iconfont icon-zhizhangfangxiang bold',
           event: () => {
             this.rotatePage()
           }
         }
       ]
-    }
-  },
-  computed: {
-    ...mapState({
-      scale: (state) => state.printTemplateModule.rulerThings.scale,
-      rectWidth: (state) => state.printTemplateModule.rulerThings.rectWidth,
-      rectHeight: (state) => state.printTemplateModule.rulerThings.rectHeight
-    }),
-    scale100() {
-      let currentScale = new Big(this.scale).div(new Big(5))
-      let num100 = new Big(100)
-      return currentScale.mul(num100).toNumber()
     }
   },
   methods: {
@@ -215,6 +231,12 @@ export default {
     padding: 4px;
     text-align: center;
     border-radius: 4px;
+
+    &.roy-designer-main__toolbar__item--disabled {
+      opacity: 0.8;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
 
     & + .roy-designer-main__toolbar__item {
       margin-left: 5px;

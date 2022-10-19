@@ -1,4 +1,4 @@
-import store from './index'
+import store from '../index.js'
 import { deepCopy } from '@/utils/html-util.js'
 
 // 设置画布默认数据 https://github.com/woai3c/visual-drag-demo/issues/92
