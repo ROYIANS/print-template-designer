@@ -58,6 +58,8 @@
             :start="start"
             :width="width"
           />
+          <!-- 标线 -->
+          <EditorLine />
         </div>
       </div>
     </div>
@@ -83,10 +85,12 @@ import ComponentAdjuster from '@/components/Editor/ComponentAdjuster'
 import { getComponentRotatedStyle, getShapeStyle } from '@/utils/style-util.js'
 import Big from 'big.js'
 import RoyText from '@/components/PageComponents/RoyText'
+import RoySimpleText from '@/components/PageComponents/RoySimpleText'
 import RoyGroup from '@/components/PageComponents/RoyGroup'
 import Area from '@/components/Editor/Area'
 import commonMixin from '@/mixin/commonMixin'
 import { $, isPreventDrop } from '@/utils/html-util.js'
+import EditorLine from '@/components/Editor/EditorLine'
 
 const { MIN_SCALE, MAX_SCALE } = CONSTANT
 
@@ -97,11 +101,13 @@ export default {
   },
   mixins: [commonMixin],
   components: {
+    EditorLine,
     SketchRuler,
     Context,
     ContextItem,
     ComponentAdjuster,
     RoyText,
+    RoySimpleText,
     RoyGroup,
     Area
   },
@@ -171,7 +177,9 @@ export default {
             icon: 'ri-list-settings-line',
             label: '属性',
             status: 'default',
-            event: () => {}
+            event: () => {
+              this.$store.commit('printTemplateModule/setGlobalCount')
+            }
           },
           {
             code: 'paste',
@@ -204,7 +212,9 @@ export default {
           icon: 'ri-list-settings-line',
           label: '属性',
           status: 'default',
-          event: () => {}
+          event: () => {
+            this.$store.commit('printTemplateModule/setPaletteCount')
+          }
         },
         {
           code: 'copy',
@@ -333,20 +343,20 @@ export default {
 
       const startX = e.clientX
       const startY = e.clientY
-      this.start.x = startX - this.editorX
-      this.start.y = startY - this.editorY
+      this.start.x = (startX - this.editorX) / this.scale
+      this.start.y = (startY - this.editorY) / this.scale
       // 展示选中区域
       this.isShowArea = true
 
       const move = (moveEvent) => {
-        this.width = Math.abs(moveEvent.clientX - startX)
-        this.height = Math.abs(moveEvent.clientY - startY)
+        this.width = Math.abs((moveEvent.clientX - startX) / this.scale)
+        this.height = Math.abs((moveEvent.clientY - startY) / this.scale)
         if (moveEvent.clientX < startX) {
-          this.start.x = moveEvent.clientX - this.editorX
+          this.start.x = (moveEvent.clientX - this.editorX) / this.scale
         }
 
         if (moveEvent.clientY < startY) {
-          this.start.y = moveEvent.clientY - this.editorY
+          this.start.y = (moveEvent.clientY - this.editorY) / this.scale
         }
       }
 

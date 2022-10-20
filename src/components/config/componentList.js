@@ -19,14 +19,32 @@ export const commonAttr = {
 
 export const componentList = [
   {
-    icon: 'ri-t-box-line',
-    code: 'heading',
+    icon: 'ri-text',
+    code: 'text',
     name: '文本',
-    component: 'RoyText',
+    component: 'RoySimpleText',
     propValue: '双击编辑文本',
     style: {
-      width: 100,
-      height: 100,
+      width: 200,
+      height: 50,
+      fontSize: 10,
+      background: 'transparent',
+      rotate: 0
+    },
+    groupStyle: {}
+  },
+  {
+    icon: 'ri-t-box-line',
+    code: 'long-text',
+    name: '长文本',
+    component: 'RoyText',
+    propValue:
+      '<p><span style="font-size: 16pt; font-family: 仿宋;">双击</span><span style="color: rgb(255, 255, 255); background-color: rgb(0, 0, 0); font-size: 16pt; font-family: 仿宋;">编辑</span><span style="font-size: 16pt; font-family: 仿宋;">文本</span></p>',
+    style: {
+      width: 500,
+      height: 200,
+      fontSize: 12,
+      background: 'transparent',
       rotate: 0
     },
     groupStyle: {}

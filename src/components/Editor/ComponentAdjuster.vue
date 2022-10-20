@@ -101,7 +101,8 @@ export default {
   },
   computed: {
     ...mapState({
-      editor: (state) => state.printTemplateModule.editor
+      editor: (state) => state.printTemplateModule.editor,
+      curComponent: (state) => state.printTemplateModule.curComponent
     }),
     pointList() {
       if (this.element.component === 'RoyLine') {
@@ -160,8 +161,7 @@ export default {
       }
     },
     getCursor() {
-      // const rotate = mod360(curComponent.style.rotate); // 取余 360
-      const rotate = mod360(0) // 取余 360
+      const rotate = mod360(this.curComponent?.style?.rotate || 0) // 取余 360
       const result = {}
       let lastMatchIndex = -1 // 从上一个命中的角度的索引开始匹配下一个，降低时间复杂度
 
@@ -252,8 +252,7 @@ export default {
       // 获取画布位移信息
       const editorRectInfo = this.editor.getBoundingClientRect()
 
-      // 获取 point 与实际拖动基准点的差值 @justJokee
-      // fix https://github.com/woai3c/visual-drag-demo/issues/26#issue-937686285
+      // 获取 point 与实际拖动基准点的差值
       const pointRect = e.target.getBoundingClientRect()
       // 当前点击圆点相对于画布的中心坐标
       const curPoint = {
