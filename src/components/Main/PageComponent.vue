@@ -38,7 +38,7 @@ export default {
   padding: 8px;
   display: flex;
   flex-flow: row wrap;
-  place-content: flex-start space-between;
+  place-content: flex-start;
 }
 
 .roy-page-component__item {
@@ -54,7 +54,7 @@ export default {
   min-width: 67px;
   max-width: 69px;
   height: 95px;
-  margin-bottom: 10px;
+  margin: 0 4px 10px 0;
   color: var(--roy-text-color-regular);
 
   &:hover {

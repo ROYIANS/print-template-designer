@@ -6,29 +6,41 @@
 !-->
 <template>
   <el-main class="roy-page-toc">
-    <div
-      v-for="(item, index) in componentData"
-      :key="index"
-      :class="{ actived: transformIndex(index) === curComponentIndex }"
-      class="roy-page-toc__list"
-      @click="onClick(transformIndex(index))"
-    >
-      <span :class="getComponent(index).icon" style="padding-right: 5px"></span>
-      <span>{{ getComponent(index).label }}</span>
-      <div class="roy-page-toc__buttons">
-        <span
-          class="ri-arrow-up-line"
-          @click="upComponent(transformIndex(index))"
-        ></span>
-        <span
-          class="ri-arrow-down-line"
-          @click="downComponent(transformIndex(index))"
-        ></span>
-        <span
-          class="ri-delete-bin-4-line"
-          @click="deleteComponent(transformIndex(index))"
-        ></span>
+    <div v-if="componentData.length">
+      <div
+        v-for="(item, index) in componentData"
+        :key="index"
+        :class="{ activated: transformIndex(index) === curComponentIndex }"
+        class="roy-page-toc__list"
+        @click="onClick(transformIndex(index))"
+      >
+        <i :class="getComponent(index).icon" style="padding-right: 5px"></i>
+        <span>{{ getComponent(index).label }}</span>
+        <div class="roy-page-toc__buttons">
+          <span
+            class="ri-arrow-up-line"
+            @click="upComponent(transformIndex(index))"
+          ></span>
+          <span
+            class="ri-arrow-down-line"
+            @click="downComponent(transformIndex(index))"
+          ></span>
+          <span
+            class="ri-delete-bin-4-line"
+            @click="deleteComponent(transformIndex(index))"
+          ></span>
+        </div>
       </div>
+    </div>
+    <div
+      v-else
+      class="roy-page-toc__empty animate__animated animate__headShake"
+    >
+      <i
+        class="ri-door-lock-box-line animate__backInUp"
+        style="color: var(--roy-color-warning)"
+      />
+      <div>当前没有组件，您可以通过拖拽添加组件</div>
     </div>
   </el-main>
 </template>
@@ -108,6 +120,24 @@ export default {
   height: 100%;
   padding: 6px;
 
+  .roy-page-toc__empty {
+    font-size: 10px;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-flow: row wrap;
+    i {
+      font-size: 28px;
+      width: 100%;
+      align-self: end;
+      text-align: center;
+    }
+
+    div {
+      text-align: center;
+    }
+  }
+
   .roy-page-toc__list {
     height: 30px;
     cursor: grab;
@@ -120,12 +150,22 @@ export default {
     position: relative;
     user-select: none;
 
+    i {
+      font-size: 12px;
+    }
+
+    &.activated {
+      color: var(--roy-color-primary);
+      background: var(--roy-color-primary-light-7);
+    }
+
     &:active {
       cursor: grabbing;
     }
 
     &:hover {
       background-color: rgba(200, 200, 200, 0.2);
+      color: var(--roy-text-color-primary);
 
       .roy-page-toc__buttons {
         display: block;

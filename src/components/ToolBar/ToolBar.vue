@@ -57,7 +57,6 @@
 import commonMixin from '@/mixin/commonMixin'
 import { mapActions, mapState } from 'vuex'
 import Big from 'big.js'
-import toast from '@/utils/toast'
 
 /**
  * 顶部工具栏
@@ -89,14 +88,14 @@ export default {
           name: '撤销',
           icon: 'ri-arrow-go-back-fill',
           event: () => {
-            toast('撤销')
+            this.$store.commit('printTemplateModule/undo')
           }
         },
         {
           name: '恢复',
           icon: 'ri-arrow-go-forward-fill',
           event: () => {
-            toast('恢复')
+            this.$store.commit('printTemplateModule/redo')
           }
         },
         {
@@ -121,28 +120,28 @@ export default {
             }
           }
         },
-        {
-          name: this.areaData.components.length ? '组合' : '拆分',
-          icon: this.areaData.components.length
-            ? 'ri-merge-cells-horizontal'
-            : 'ri-split-cells-horizontal',
-          disabled:
-            (!this.curComponent ||
-              this.curComponent.isLock ||
-              this.curComponent.component !== 'RoyGroup') &&
-            !this.areaData.components.length,
-          event: () => {
-            if (this.areaData.components.length) {
-              // 组合
-              this.$store.commit('printTemplateModule/compose')
-              this.$store.commit('printTemplateModule/recordSnapshot')
-            } else {
-              // 拆分
-              this.$store.commit('printTemplateModule/decompose')
-              this.$store.commit('printTemplateModule/recordSnapshot')
-            }
-          }
-        },
+        // {
+        //   name: this.areaData.components.length ? '组合' : '拆分',
+        //   icon: this.areaData.components.length
+        //     ? 'ri-merge-cells-horizontal'
+        //     : 'ri-split-cells-horizontal',
+        //   disabled:
+        //     (!this.curComponent ||
+        //       this.curComponent.isLock ||
+        //       this.curComponent.component !== 'RoyGroup') &&
+        //     !this.areaData.components.length,
+        //   event: () => {
+        //     if (this.areaData.components.length) {
+        //       // 组合
+        //       this.$store.commit('printTemplateModule/compose')
+        //       this.$store.commit('printTemplateModule/recordSnapshot')
+        //     } else {
+        //       // 拆分
+        //       this.$store.commit('printTemplateModule/decompose')
+        //       this.$store.commit('printTemplateModule/recordSnapshot')
+        //     }
+        //   }
+        // },
         {
           name: '切换纸张方向',
           icon: 'iconfont icon-zhizhangfangxiang bold',

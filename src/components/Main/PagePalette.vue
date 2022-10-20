@@ -1,6 +1,20 @@
 <template>
   <div class="roy-page-tools">
-    <div v-if="curClickComponent"></div>
+    <div v-if="curComponent && curComponent.id">
+      <el-form ref="form" :model="formData">
+        <el-form-item
+          v-for="(formItem, index) in formItemConfig"
+          :key="index"
+          :label="formItem.title"
+        >
+          <component
+            :is="formItem.component"
+            v-model="formData[`${formItem.field}`]"
+            v-bind="formItem.props"
+          />
+        </el-form-item>
+      </el-form>
+    </div>
     <div
       v-else
       class="roy-page-tools__empty animate__animated animate__headShake"
@@ -15,12 +29,41 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
+import commonMixin from '@/mixin/commonMixin'
+
 export default {
   name: 'PagePalette',
+  mixins: [commonMixin],
+  computed: {
+    ...mapState({
+      curComponent: (state) => state.printTemplateModule.curComponent
+    }),
+    formItemConfig() {
+      let curComponentCode = this.curComponent?.component || 'no'
+      return this.formItemConfigs[curComponentCode] || []
+    }
+  },
   data() {
     return {
-      curClickComponent: null
+      formData: {},
+      formItemConfigs: {
+        RoyText: [
+          {
+            title: '宽度',
+            field: 'width',
+            component: 'elInput',
+            props: {
+              type: 'number'
+            }
+          }
+        ],
+        RoySimpleText: []
+      }
     }
+  },
+  mounted() {
+    this.formData = this.deepCopy(this.curComponent || {})
   }
 }
 </script>

@@ -8,28 +8,35 @@
 <!-- * ╩╚═╚═╝ ╩ ╩╩ ╩╝╚╝╚═╝-->
 <!-- */-->
 <template>
-  <StyledText v-bind="style">
+  <StyledText v-bind="style" @dblclick="onDblClick">
+    <RoyModal :show.sync="showEditor">
+      <div
+        class="roy-wang-editor"
+        :style="`transform:rotate(${-style.rotate}deg)`"
+        @mousedown="handleMouseDown"
+      >
+        <Toolbar
+          style="border-bottom: 1px solid #ccc"
+          :editor="wangEditor"
+          :defaultConfig="toolbarConfig"
+        />
+        <Editor
+          v-model="html"
+          style="height: 300px"
+          :defaultConfig="editorConfig"
+          :mode="mode"
+          @onCreated="onCreated"
+          @onBlur="onBlur"
+        />
+      </div>
+    </RoyModal>
     <div v-html="propValue"></div>
-    <div class="roy-wang-editor" v-if="showEditor" @mousedown="handleMouseDown">
-      <Toolbar
-        style="border-bottom: 1px solid #ccc"
-        :editor="wangEditor"
-        :defaultConfig="toolbarConfig"
-      />
-      <Editor
-        v-model="html"
-        style="height: 200px"
-        :defaultConfig="editorConfig"
-        :mode="mode"
-        @onCreated="onCreated"
-        @onBlur="onBlur"
-      />
-    </div>
   </StyledText>
 </template>
 
 <script>
 import { StyledText } from '@/components/PageComponents/style'
+import RoyModal from '@/components/RoyModal/RoyModal'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 import '@wangeditor/editor/dist/css/style.css'
 import { mapState } from 'vuex'
@@ -49,7 +56,8 @@ export default {
   components: {
     Editor,
     Toolbar,
-    StyledText
+    StyledText,
+    RoyModal
   },
   computed: {
     ...mapState({
@@ -57,14 +65,12 @@ export default {
     }),
     style() {
       return this.element.style || {}
-    },
-    showEditor() {
-      return this.curComponent?.id === this.element?.id
     }
   },
   data() {
     return {
       wangEditor: null,
+      showEditor: false,
       html: this.propValue,
       toolbarConfig: {
         toolbarKeys: [
@@ -93,11 +99,12 @@ export default {
           'header3',
           'header4',
           'header5',
-          'redo',
           'undo',
+          'redo',
           'enter',
           'bulletedList',
-          'numberedList'
+          'numberedList',
+          'fullScreen'
         ]
       },
       editorConfig: {
@@ -140,16 +147,19 @@ export default {
   methods: {
     onCreated(editor) {
       this.wangEditor = Object.seal(editor) // 一定要用 Object.seal() ，否则会报错
-      console.log(this.wangEditor.getAllMenuKeys())
     },
     onBlur() {
       this.$store.commit('printTemplateModule/setPropValue', this.html)
+    },
+    onDblClick() {
+      this.showEditor = true
     },
     handleMouseDown(e) {
       e.stopPropagation()
     }
   },
   created() {},
+  watch: {},
   beforeDestroy() {
     const editor = this.wangEditor
     if (editor == null) return

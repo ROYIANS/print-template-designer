@@ -4,6 +4,7 @@ import compose from '@/stores/modules/compose.js'
 import snapshot from '@/stores/modules/snapshot.js'
 import copy from '@/stores/modules/copy.js'
 import lock from '@/stores/modules/lock.js'
+import store from '@/stores/index.js'
 
 export const state = {
   ...compose.state,
@@ -36,7 +37,9 @@ export const state = {
   curComponentIndex: null,
   // 点击画布时是否点中组件，主要用于取消选中组件用。
   // 如果没点中组件，并且在画布空白处弹起鼠标，则取消当前组件的选中状态
-  isClickComponent: false
+  isClickComponent: false,
+  globalCount: 0,
+  paletteCount: 0
 }
 export const getters = {}
 export const mutations = {
@@ -67,7 +70,28 @@ export const mutations = {
   },
 
   setPropValue({ curComponent }, propValue) {
-    Vue.set(curComponent, 'propValue', propValue)
+    if (curComponent) {
+      Vue.set(curComponent, 'propValue', propValue)
+      store.commit('printTemplateModule/recordSnapshot')
+    }
+  },
+
+  setPropValueOfOne({ componentData }, { propValue, id }) {
+    if (componentData.length) {
+      let newComponentValue = null
+      let newComponentIndex = null
+      for (let i = 0; i < componentData.length; i++) {
+        if (componentData[i].id === id) {
+          newComponentIndex = i
+          newComponentValue = componentData[i]
+          newComponentValue.propValue = propValue
+        }
+      }
+      if (newComponentIndex !== null) {
+        Vue.set(componentData, newComponentIndex, newComponentValue)
+        store.commit('printTemplateModule/recordSnapshot')
+      }
+    }
   },
 
   setShapeStyle({ curComponent }, { top, left, width, height, rotate }) {
@@ -117,6 +141,14 @@ export const mutations = {
     if (/\d/.test(index)) {
       state.componentData.splice(index, 1)
     }
+  },
+
+  setGlobalCount(state) {
+    state.globalCount++
+  },
+
+  setPaletteCount(state) {
+    state.paletteCount++
   }
 }
 export const actions = {}

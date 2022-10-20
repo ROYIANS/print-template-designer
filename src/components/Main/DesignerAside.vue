@@ -8,6 +8,7 @@
     >
       <el-menu-item
         v-for="(menu, index) in menuList"
+        ref="menuItem"
         :key="menu.code"
         :index="`${index}`"
       >
@@ -30,6 +31,7 @@
 
 <script>
 import commonMixin from '@/mixin/commonMixin'
+import { mapState } from 'vuex'
 
 export default {
   name: 'DesignerAside',
@@ -73,6 +75,10 @@ export default {
     }
   },
   computed: {
+    ...mapState({
+      paletteCount: (state) => state.printTemplateModule.paletteCount,
+      globalCount: (state) => state.printTemplateModule.globalCount
+    }),
     asideStyle() {
       return this.showRight ? 'width: 300px' : 'width: 65px'
     }
@@ -86,11 +92,39 @@ export default {
       }
       this.curActiveComponent = this.menuList[index].component
       this.curActiveComponentCode = this.menuList[index].code
+    },
+    clickPaletteMenu() {
+      this.$refs.menuItem.forEach((item) => {
+        if (
+          item.$vnode.key === 'palette' &&
+          this.curActiveComponentCode !== 'palette'
+        ) {
+          item.$el.click()
+        }
+      })
+    },
+    clickGlobalMenu() {
+      this.$refs.menuItem.forEach((item) => {
+        if (
+          item.$vnode.key === 'setting' &&
+          this.curActiveComponentCode !== 'setting'
+        ) {
+          item.$el.click()
+        }
+      })
     }
   },
   mounted() {
     this.curActiveComponent = this.menuList[0].component
     this.curActiveComponentCode = this.menuList[0].code
+  },
+  watch: {
+    paletteCount() {
+      this.clickPaletteMenu()
+    },
+    globalCount() {
+      this.clickGlobalMenu()
+    }
   }
 }
 </script>

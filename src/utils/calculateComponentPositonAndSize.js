@@ -329,7 +329,6 @@ function calculateRight(
   needLockProportion,
   pointInfo
 ) {
-  debugger
   const { symmetricPoint, curPoint } = pointInfo
   const rotatedcurPosition = calculateRotatedPointCoordinate(
     curPosition,
