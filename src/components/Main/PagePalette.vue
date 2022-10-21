@@ -50,20 +50,125 @@ export default {
       formItemConfigs: {
         RoyText: [
           {
+            title: '坐标-x',
+            field: 'left',
+            component: 'elInput',
+            props: {
+              type: 'number',
+              size: 'mini'
+            }
+          },
+          {
+            title: '坐标-y',
+            field: 'top',
+            component: 'elInput',
+            props: {
+              type: 'number',
+              size: 'mini'
+            }
+          },
+          {
             title: '宽度',
             field: 'width',
             component: 'elInput',
             props: {
-              type: 'number'
+              type: 'number',
+              size: 'mini'
+            }
+          },
+          {
+            title: '背景',
+            field: 'background',
+            component: 'el-color-picker',
+            props: {
+              size: 'mini'
+            }
+          },
+          {
+            title: '文本颜色',
+            field: 'color',
+            component: 'el-color-picker',
+            props: {
+              size: 'mini'
+            }
+          },
+          {
+            title: '旋转角度',
+            field: 'rotate',
+            component: 'elInput',
+            props: {
+              type: 'number',
+              size: 'mini'
             }
           }
         ],
-        RoySimpleText: []
+        RoySimpleText: [
+          {
+            title: '坐标-x',
+            field: 'left',
+            component: 'elInput',
+            props: {
+              type: 'number',
+              size: 'mini'
+            }
+          },
+          {
+            title: '坐标-y',
+            field: 'top',
+            component: 'elInput',
+            props: {
+              type: 'number',
+              size: 'mini'
+            }
+          },
+          {
+            title: '宽度',
+            field: 'width',
+            component: 'elInput',
+            props: {
+              type: 'number',
+              size: 'mini'
+            }
+          },
+          {
+            title: '高度',
+            field: 'height',
+            component: 'elInput',
+            props: {
+              type: 'number',
+              size: 'mini'
+            }
+          },
+          {
+            title: '背景',
+            field: 'background',
+            component: 'el-color-picker',
+            props: {
+              size: 'mini'
+            }
+          },
+          {
+            title: '文本颜色',
+            field: 'color',
+            component: 'el-color-picker',
+            props: {
+              size: 'mini'
+            }
+          }
+        ]
       }
     }
   },
-  mounted() {
-    this.formData = this.deepCopy(this.curComponent || {})
+  mounted() {},
+  watch: {
+    curComponent: {
+      handler() {
+        if (this.curComponent) {
+          this.formData = this.curComponent.style
+        }
+      },
+      deep: true
+    }
   }
 }
 </script>
@@ -90,6 +195,29 @@ export default {
 
     div {
       text-align: center;
+    }
+  }
+}
+</style>
+
+<style lang="scss">
+.roy-page-tools {
+  .el-form {
+    .el-form-item {
+      margin: 0;
+      .el-form-item__label {
+        font-size: 12px;
+        padding: 6px 5px;
+        margin: 4px;
+        line-height: 12px;
+        &:before {
+          content: '';
+          width: 1px;
+          height: 80%;
+          margin-right: 5px;
+          border-left: var(--roy-color-primary) 3px solid;
+        }
+      }
     }
   }
 }

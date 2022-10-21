@@ -9,6 +9,7 @@
       <el-menu-item
         v-for="(menu, index) in menuList"
         ref="menuItem"
+        style="padding: 0; text-align: center"
         :key="menu.code"
         :index="`${index}`"
       >
@@ -56,6 +57,12 @@ export default {
           code: 'palette',
           icon: 'ri-palette-line',
           component: () => import('./PagePalette.vue')
+        },
+        {
+          name: '数据源',
+          code: 'datasource',
+          icon: 'ri-database-2-line',
+          component: () => import('./DataSource.vue')
         },
         {
           name: '全局',
@@ -149,9 +156,6 @@ export default {
       display: grid;
       top: -7px;
       position: relative;
-      align-items: center;
-      vertical-align: center;
-      align-content: center;
 
       i {
         padding: 0;

@@ -9,7 +9,7 @@
  */
 import styled from 'vue-styled-components'
 
-const defaultProps = {
+const commonProps = {
   color: {
     type: String,
     default: '#212121'
@@ -41,10 +41,42 @@ const defaultProps = {
   zIndex: {
     type: Number,
     default: 1
+  },
+  fontFamily: {
+    type: String,
+    default: 'default'
+  },
+  lineHeight: {
+    type: String,
+    default: '1'
+  },
+  letterSpacing: {
+    type: String,
+    default: '0'
+  },
+  justifyContent: {
+    type: String,
+    default: 'flex-start'
+  },
+  alignItems: {
+    type: String,
+    default: 'flex-start'
+  },
+  borderWidth: {
+    type: Number,
+    default: 0
+  },
+  borderColor: {
+    type: String,
+    default: '#212121'
+  },
+  borderType: {
+    type: String,
+    default: 'solid'
   }
 }
 
-const textProps = Object.assign(defaultProps, {})
+const textProps = Object.assign(commonProps, {})
 
 export const StyledText = styled('div', textProps)`
   width: 100%;
@@ -58,5 +90,39 @@ export const StyledText = styled('div', textProps)`
   padding: ${(props) => props.padding};
   margin: ${(props) => props.margin};
   font-size: ${(props) => `${props.fontSize}pt`};
+  font-family: ${(props) =>
+    props.fontFamily === 'default'
+      ? 'LXGW New Clear Gothic Book, Helvetica Neue, Helvetica, Arial, PingFang SC, Microsoft YaHei, WenQuanYi Micro Hei, sans-serif'
+      : `${props.fontFamily}`};
   z-index: ${(props) => props.zIndex};
+  line-height: ${(props) => props.lineHeight};
+  letter-spacing: ${(props) => `${props.letterSpacing}px`};
+  border: ${(props) =>
+    `${props.borderWidth}px ${props.borderType} ${props.borderColor}`};
+`
+
+export const StyledSimpleText = styled('div', textProps)`
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: absolute;
+  display: flex;
+  justify-content: ${(props) => props.justifyContent};
+  align-items: ${(props) => props.alignItems};
+  color: ${(props) => props.color};
+  background: ${(props) => props.background};
+  border: ${(props) => props.border};
+  border-radius: ${(props) => props.borderRadius};
+  padding: ${(props) => props.padding};
+  margin: ${(props) => props.margin};
+  font-size: ${(props) => `${props.fontSize}pt`};
+  font-family: ${(props) =>
+    props.fontFamily === 'default'
+      ? 'LXGW New Clear Gothic Book, Helvetica Neue, Helvetica, Arial, PingFang SC, Microsoft YaHei, WenQuanYi Micro Hei, sans-serif'
+      : `${props.fontFamily}`};
+  z-index: ${(props) => props.zIndex};
+  line-height: ${(props) => props.lineHeight};
+  letter-spacing: ${(props) => `${props.letterSpacing}px`};
+  border: ${(props) =>
+    `${props.borderWidth}px ${props.borderType} ${props.borderColor}`};
 `

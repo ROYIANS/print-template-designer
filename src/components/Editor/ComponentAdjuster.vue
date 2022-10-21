@@ -13,7 +13,7 @@
   >
     <span
       v-show="isActive"
-      class="iconfont icon-rotate-ccw roy-component-adjuster__rotate"
+      class="ri-checkbox-blank-circle-line roy-component-adjuster__rotate"
       @mousedown="handleRotate"
     ></span>
     <span
@@ -389,7 +389,13 @@ export default {
           // 后面两个参数代表鼠标移动方向
           // curY - startY > 0 true 表示向下移动 false 表示向上移动
           // curX - startX > 0 true 表示向右移动 false 表示向左移动
-          eventBus.$emit('move', curY - startY > 0, curX - startX > 0)
+          eventBus.$emit(
+            'move',
+            curY - startY > 0,
+            curX - startX > 0,
+            curX,
+            curY
+          )
         })
       }
 
@@ -432,11 +438,20 @@ export default {
     transform: translateX(-50%);
     cursor: grab;
     color: var(--roy-text-color-regular);
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 10px;
+    font-weight: 400;
 
     &:active {
       cursor: grabbing;
+    }
+
+    &:after {
+      content: '';
+      height: 20px;
+      border-right: var(--roy-text-color-regular) dashed 1px;
+      position: absolute;
+      left: 5.5px;
+      top: 12px;
     }
   }
 

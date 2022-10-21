@@ -8,8 +8,11 @@ import PrintDesigner from './components/index.js'
 
 import 'remixicon/fonts/remixicon.css'
 import 'element-ui/lib/theme-chalk/index.css'
+import VXETable from 'vxe-table'
+import 'vxe-table/lib/style.css'
 
-Vue.use(Element, { size: 'small' })
+Vue.use(Element, { size: 'mini' })
+Vue.use(VXETable)
 Vue.use(PrintDesigner, {
   store
 })
