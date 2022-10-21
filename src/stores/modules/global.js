@@ -69,14 +69,7 @@ export const mutations = {
     state.curComponentIndex = index
   },
 
-  setPropValue({ curComponent }, propValue) {
-    if (curComponent) {
-      Vue.set(curComponent, 'propValue', propValue)
-      store.commit('printTemplateModule/recordSnapshot')
-    }
-  },
-
-  setPropValueOfOne({ componentData }, { propValue, id }) {
+  setPropValue({ componentData }, { propValue, id }) {
     if (componentData.length) {
       let newComponentValue = null
       let newComponentIndex = null

@@ -5,10 +5,15 @@
 * @date 2022/10/20 11:24
 !-->
 <template>
-  <StyledText v-bind="style" class="RoySimpleText" @dblclick="setEdit">
-    <div
+  <div
+    style="width: 100%; height: 100%"
+    class="RoySimpleText"
+    @dblclick="setEdit"
+  >
+    <StyledSimpleText
       ref="editArea"
       class="edit-area"
+      v-bind="style"
       :contenteditable="canEdit"
       :class="{ 'can-edit': canEdit }"
       tabindex="0"
@@ -16,12 +21,12 @@
       @mousedown="handleMousedown"
       @blur="handleBlur"
       v-html="propValue"
-    ></div>
-  </StyledText>
+    ></StyledSimpleText>
+  </div>
 </template>
 
 <script>
-import { StyledText } from '@/components/PageComponents/style'
+import { StyledSimpleText } from '@/components/PageComponents/style'
 import commonMixin from '@/mixin/commonMixin'
 import { mapState } from 'vuex'
 
@@ -32,7 +37,7 @@ export default {
   name: 'RoySimpleText',
   mixins: [commonMixin],
   components: {
-    StyledText
+    StyledSimpleText
   },
   props: {
     element: {
@@ -68,9 +73,9 @@ export default {
       }
       this.canEdit = true
       // 全选
-      this.selectText(this.$refs.editArea)
+      this.selectText(this.$refs.editArea.$el)
       // 聚焦
-      this.$refs.editArea.focus()
+      this.$refs.editArea.$el.focus()
     },
     selectText(element) {
       const selection = window.getSelection()
@@ -115,9 +120,9 @@ export default {
     },
     canEdit(newVal) {
       if (!newVal) {
-        this.$store.commit('printTemplateModule/setPropValueOfOne', {
+        this.$store.commit('printTemplateModule/setPropValue', {
           id: this.element.id,
-          propValue: this.$refs.editArea.innerHTML
+          propValue: this.$refs.editArea.$el.innerHTML
         })
       }
     }
@@ -128,12 +133,10 @@ export default {
 <style lang="scss">
 .RoySimpleText {
   .edit-area {
-    display: table-cell;
     width: 100%;
     height: 100%;
     outline: none;
     word-break: break-all;
-    padding: 4px;
   }
   .can-edit {
     height: 100%;

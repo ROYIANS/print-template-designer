@@ -8,7 +8,7 @@
 <!-- * ╩╚═╚═╝ ╩ ╩╩ ╩╝╚╝╚═╝-->
 <!-- */-->
 <template>
-  <StyledText v-bind="style" @dblclick="onDblClick">
+  <div style="width: 100%; height: 100%" @dblclick="onDblClick">
     <RoyModal :show.sync="showEditor">
       <div
         class="roy-wang-editor"
@@ -30,8 +30,8 @@
         />
       </div>
     </RoyModal>
-    <div v-html="propValue"></div>
-  </StyledText>
+    <StyledText v-bind="style" v-html="propValue"></StyledText>
+  </div>
 </template>
 
 <script>
@@ -92,7 +92,6 @@ export default {
           'justifyCenter',
           'justifyJustify',
           'lineHeight',
-          'divider',
           'headerSelect',
           'header1',
           'header2',
@@ -149,7 +148,10 @@ export default {
       this.wangEditor = Object.seal(editor) // 一定要用 Object.seal() ，否则会报错
     },
     onBlur() {
-      this.$store.commit('printTemplateModule/setPropValue', this.html)
+      this.$store.commit('printTemplateModule/setPropValue', {
+        id: this.element.id,
+        propValue: this.html
+      })
     },
     onDblClick() {
       this.showEditor = true

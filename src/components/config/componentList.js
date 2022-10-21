@@ -28,7 +28,7 @@ export const componentList = [
       width: 200,
       height: 50,
       fontSize: 10,
-      background: 'transparent',
+      background: undefined,
       rotate: 0
     },
     groupStyle: {}
@@ -44,7 +44,7 @@ export const componentList = [
       width: 500,
       height: 200,
       fontSize: 12,
-      background: 'transparent',
+      background: undefined,
       rotate: 0
     },
     groupStyle: {}

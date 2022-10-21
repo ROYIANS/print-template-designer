@@ -74,6 +74,8 @@
         <span>{{ item.label }}</span>
       </ContextItem>
     </Context>
+    <!-- 坐标-->
+    <EditorCoordinate />
   </div>
 </template>
 <script>
@@ -91,6 +93,7 @@ import Area from '@/components/Editor/Area'
 import commonMixin from '@/mixin/commonMixin'
 import { $, isPreventDrop } from '@/utils/html-util.js'
 import EditorLine from '@/components/Editor/EditorLine'
+import EditorCoordinate from '@/components/Editor/EditorCoordinate'
 
 const { MIN_SCALE, MAX_SCALE } = CONSTANT
 
@@ -101,6 +104,7 @@ export default {
   },
   mixins: [commonMixin],
   components: {
+    EditorCoordinate,
     EditorLine,
     SketchRuler,
     Context,
