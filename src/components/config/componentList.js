@@ -26,7 +26,6 @@ export const componentList = [
     propValue: '双击编辑文本',
     style: {
       color: '#212121',
-      border: 'none',
       borderRadius: 'inherit',
       padding: '0 0 0 0',
       margin: '0 0 0 0',
@@ -35,14 +34,18 @@ export const componentList = [
       letterSpacing: '1',
       borderWidth: 0,
       borderColor: '#212121',
-      borderType: 'solid',
+      borderType: 'none',
       width: 200,
       height: 50,
       fontSize: 10,
       background: undefined,
       rotate: 0,
       justifyContent: 'flex-start',
-      alignItems: 'flex-start'
+      alignItems: 'flex-start',
+      fontWeight: 'normal',
+      fontStyle: 'normal',
+      isUnderLine: false,
+      isDelLine: false
     },
     groupStyle: {}
   },

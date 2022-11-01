@@ -72,7 +72,23 @@ const commonProps = {
   },
   borderType: {
     type: String,
-    default: 'solid'
+    default: 'none'
+  },
+  fontWeight: {
+    type: String,
+    default: 'normal'
+  },
+  fontStyle: {
+    type: String,
+    default: 'normal'
+  },
+  isUnderLine: {
+    type: Boolean,
+    default: false
+  },
+  isDelLine: {
+    type: Boolean,
+    default: false
   }
 }
 
@@ -85,7 +101,6 @@ export const StyledText = styled('div', textProps)`
   position: absolute;
   color: ${(props) => props.color};
   background: ${(props) => props.background};
-  border: ${(props) => props.border};
   border-radius: ${(props) => props.borderRadius};
   padding: ${(props) => props.padding};
   margin: ${(props) => props.margin};
@@ -97,8 +112,14 @@ export const StyledText = styled('div', textProps)`
   z-index: ${(props) => props.zIndex};
   line-height: ${(props) => props.lineHeight};
   letter-spacing: ${(props) => `${props.letterSpacing}px`};
-  border: ${(props) =>
-    `${props.borderWidth}px ${props.borderType} ${props.borderColor}`};
+  border: ${(props) => {
+    const { borderWidth, borderType, borderColor } = props
+    if (borderType === 'none') {
+      return borderType
+    } else {
+      return `${borderWidth}px ${borderType} ${borderColor}`
+    }
+  }};
 `
 
 export const StyledSimpleText = styled('div', textProps)`
@@ -125,4 +146,20 @@ export const StyledSimpleText = styled('div', textProps)`
   letter-spacing: ${(props) => `${props.letterSpacing}px`};
   border: ${(props) =>
     `${props.borderWidth}px ${props.borderType} ${props.borderColor}`};
+  font-weight: ${(props) => `${props.fontWeight}`};
+  font-style: ${(props) => `${props.fontStyle}`};
+  text-decoration: ${(props) => {
+    const { isUnderLine, isDelLine } = props
+    const propsValue = {
+      underline: isUnderLine,
+      'line-through': isDelLine
+    }
+    if (isUnderLine || isDelLine) {
+      return Object.keys(propsValue)
+        .filter((item) => propsValue[item])
+        .join(' ')
+    } else {
+      return 'none'
+    }
+  }};
 `

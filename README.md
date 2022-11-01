@@ -26,8 +26,17 @@ import store from './store'
 import PrintTemplateDesigner from 'print-template-designer'
 import 'print-template-designer/lib/print-template-designer.css'
 import "remixicon/fonts/remixicon.css";
+import 'vxe-table/lib/style.css'
+import 'element-ui/lib/theme-chalk/index.css'
+import VXETable from 'vxe-table'
+import Element from 'element-ui'
+
+Vue.use(VXETable)
+Vue.use(Element, { size: 'mini' })
 
 Vue.use(PrintTemplateDesigner, { store })
+// 需要全局设置$VXETable,用于注册渲染器等逻辑。
+Vue.prototype.$VXETable = VXETable
 ```
 
 app.vue

@@ -16,6 +16,7 @@ Vue.use(VXETable)
 Vue.use(PrintDesigner, {
   store
 })
+Vue.prototype.$VXETable = VXETable
 Vue.config.productionTip = false
 
 new Vue({

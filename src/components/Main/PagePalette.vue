@@ -35,6 +35,8 @@
 <script>
 import { mapState } from 'vuex'
 import commonMixin from '@/mixin/commonMixin'
+import { renderers } from '@/components/config/renderers'
+import { paletteConfigList } from '@/components/config/paletteConfig'
 
 export default {
   name: 'PagePalette',
@@ -65,133 +67,20 @@ export default {
         }
       },
       formData: {},
-      formItemConfigs: {
-        RoyText: [
-          {
-            title: '坐标-X',
-            field: 'left',
-            align: 'left',
-            span: 24,
-            itemRender: {
-              name: '$input',
-              props: {
-                type: 'number',
-                size: 'mini'
-              }
-            }
-          },
-          {
-            title: '坐标-Y',
-            field: 'top',
-            span: 24,
-            itemRender: {
-              name: '$input',
-              props: {
-                type: 'number',
-                size: 'mini'
-              }
-            }
-          },
-          {
-            title: '宽度',
-            field: 'width',
-            align: 'left',
-            span: 24,
-            itemRender: {
-              name: '$input',
-              props: {
-                type: 'number',
-                size: 'mini'
-              }
-            }
-          },
-          {
-            title: '高度',
-            field: 'height',
-            span: 24,
-            itemRender: {
-              name: '$input',
-              props: {
-                type: 'number',
-                size: 'mini'
-              }
-            }
-          }
-        ],
-        RoySimpleText: [
-          {
-            title: '坐标-X',
-            field: 'left',
-            span: 24,
-            itemRender: {
-              name: '$input',
-              props: {
-                type: 'number',
-                size: 'mini'
-              }
-            }
-          },
-          {
-            title: '坐标-Y',
-            field: 'top',
-            span: 24,
-            itemRender: {
-              name: '$input',
-              props: {
-                type: 'number',
-                size: 'mini'
-              }
-            }
-          },
-          {
-            title: '水平对齐方式',
-            field: 'justifyContent',
-            span: 24,
-            itemRender: {
-              name: '$radio',
-              options: [
-                {
-                  label: '居左',
-                  value: 'flex-start'
-                },
-                {
-                  label: '居中',
-                  value: 'center'
-                },
-                {
-                  label: '居右',
-                  value: 'flex-end'
-                }
-              ]
-            }
-          },
-          {
-            title: '垂直对齐方式',
-            field: 'alignItems',
-            span: 24,
-            itemRender: {
-              name: '$radio',
-              options: [
-                {
-                  label: '居上',
-                  value: 'flex-start'
-                },
-                {
-                  label: '居中',
-                  value: 'center'
-                },
-                {
-                  label: '居下',
-                  value: 'flex-end'
-                }
-              ]
-            }
-          }
-        ]
+      formItemConfigs: paletteConfigList
+    }
+  },
+  methods: {
+    registerTableRender(renderers) {
+      // 注册渲染器
+      for (let i in renderers) {
+        this.$VXETable.renderer.add(i, renderers[i])
       }
     }
   },
-  mounted() {},
+  mounted() {
+    this.registerTableRender(renderers)
+  },
   watch: {
     curComponent: {
       handler() {
@@ -199,7 +88,8 @@ export default {
           this.formData = this.curComponent.style
         }
       },
-      deep: true
+      deep: true,
+      immediate: true
     }
   }
 }
@@ -251,6 +141,53 @@ export default {
   }
   .vxe-form--item {
     float: inherit !important;
+  }
+  .vxe-input--inner {
+    border-radius: unset;
+    background: transparent;
+    color: var(--roy-text-color-primary);
+    border-color: var(--roy-border-color);
+  }
+}
+
+.roy-btn-radio-group {
+  .roy-btn-radio-group__btn {
+    background: var(--roy-bg-color-page);
+    height: 24px;
+    width: 24px;
+    font-size: 14px;
+    line-height: 24px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    &:hover {
+      color: #ffffff !important;
+      background: var(--roy-color-primary-light-3);
+    }
+    & + .roy-btn-radio-group__btn {
+      margin-left: 5px;
+    }
+    &.roy-btn-radio-group__btn--active {
+      background: var(--roy-color-primary);
+      color: #fff;
+    }
+  }
+}
+
+.roy-color-picker {
+  width: 100%;
+
+  .el-color-picker__color {
+    border-radius: 0;
+  }
+  .el-color-picker__trigger {
+    padding: 0;
+    margin: 0;
+    width: 100% !important;
+    border: none;
+    border-radius: unset;
   }
 }
 </style>
