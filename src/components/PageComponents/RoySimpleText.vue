@@ -18,7 +18,8 @@
       :class="{ 'can-edit': canEdit }"
       tabindex="0"
       @paste="clearStyle"
-      @mousedown="handleMousedown"
+      @mousedown="handleMouseDown"
+      @keydown="handleKeyDown"
       @blur="handleBlur"
       v-html="propValue"
     ></StyledSimpleText>
@@ -87,14 +88,15 @@ export default {
     handleBlur() {
       this.canEdit = false
     },
-    handleMousedown(e) {
+    handleMouseDown(e) {
       if (this.canEdit) {
         e.stopPropagation()
       }
     },
-    handleMouseDown(e) {
-      if (this.canEdit) {
-        e.stopPropagation()
+    handleKeyDown(e) {
+      if (this.canEdit && [13].includes(e.keyCode)) {
+        // 先禁止default事件。然后以后再考虑如何换行
+        e.preventDefault()
       }
     },
     clearStyle(e) {

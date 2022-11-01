@@ -58,6 +58,7 @@ export default {
   name: 'App',
   mounted() {
     toast('欢迎使用ROYIANS的打印模板设计器，仅个人学习使用', 'info')
+    console.log('contributed by ROYIANS@Little-Dreamland﹢')
   },
   data() {
     return {

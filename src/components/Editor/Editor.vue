@@ -79,7 +79,7 @@
   </div>
 </template>
 <script>
-import SketchRuler from 'vue-sketch-ruler'
+import SketchRuler from '../SketchRuler/sketchRuler.vue'
 import CONSTANT from '@/utils/constant.js'
 import { mapActions, mapState } from 'vuex'
 import { Context, ContextItem, directive } from '@/components/RoyContext'

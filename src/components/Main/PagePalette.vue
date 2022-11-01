@@ -1,19 +1,23 @@
 <template>
   <div class="roy-page-tools">
     <div v-if="curComponent && curComponent.id">
-      <el-form ref="form" :model="formData">
-        <el-form-item
-          v-for="(formItem, index) in formItemConfig"
-          :key="index"
-          :label="formItem.title"
-        >
-          <component
-            :is="formItem.component"
-            v-model="formData[`${formItem.field}`]"
-            v-bind="formItem.props"
-          />
-        </el-form-item>
-      </el-form>
+      <vxe-form
+        ref="form"
+        sync-resize
+        :title-overflow="formGlobalConfigIn.titleOverflow"
+        :data="formData"
+        :items="formItemConfig"
+        :rules="{}"
+        :span="formGlobalConfigIn.span"
+        :align="formGlobalConfigIn.align"
+        :valid-config="formGlobalConfigIn.validConfig"
+        :size="formGlobalConfigIn.size"
+        :title-align="formGlobalConfigIn.titleAlign"
+        :title-width="formGlobalConfigIn.titleWidth"
+        :title-colon="formGlobalConfigIn.titleColon"
+        :prevent-submit="formGlobalConfigIn.preventSubmit"
+        :loading="formGlobalConfigIn.loading"
+      />
     </div>
     <div
       v-else
@@ -46,113 +50,141 @@ export default {
   },
   data() {
     return {
+      formGlobalConfigIn: {
+        titleOverflow: true,
+        span: 8,
+        align: 'left',
+        size: 'medium',
+        titleAlign: 'right',
+        titleWidth: '200',
+        titleColon: false,
+        preventSubmit: false,
+        loading: false,
+        validConfig: {
+          autoPos: true
+        }
+      },
       formData: {},
       formItemConfigs: {
         RoyText: [
           {
-            title: '坐标-x',
+            title: '坐标-X',
             field: 'left',
-            component: 'elInput',
-            props: {
-              type: 'number',
-              size: 'mini'
+            align: 'left',
+            span: 24,
+            itemRender: {
+              name: '$input',
+              props: {
+                type: 'number',
+                size: 'mini'
+              }
             }
           },
           {
-            title: '坐标-y',
+            title: '坐标-Y',
             field: 'top',
-            component: 'elInput',
-            props: {
-              type: 'number',
-              size: 'mini'
+            span: 24,
+            itemRender: {
+              name: '$input',
+              props: {
+                type: 'number',
+                size: 'mini'
+              }
             }
           },
           {
             title: '宽度',
             field: 'width',
-            component: 'elInput',
-            props: {
-              type: 'number',
-              size: 'mini'
-            }
-          },
-          {
-            title: '背景',
-            field: 'background',
-            component: 'el-color-picker',
-            props: {
-              size: 'mini'
-            }
-          },
-          {
-            title: '文本颜色',
-            field: 'color',
-            component: 'el-color-picker',
-            props: {
-              size: 'mini'
-            }
-          },
-          {
-            title: '旋转角度',
-            field: 'rotate',
-            component: 'elInput',
-            props: {
-              type: 'number',
-              size: 'mini'
-            }
-          }
-        ],
-        RoySimpleText: [
-          {
-            title: '坐标-x',
-            field: 'left',
-            component: 'elInput',
-            props: {
-              type: 'number',
-              size: 'mini'
-            }
-          },
-          {
-            title: '坐标-y',
-            field: 'top',
-            component: 'elInput',
-            props: {
-              type: 'number',
-              size: 'mini'
-            }
-          },
-          {
-            title: '宽度',
-            field: 'width',
-            component: 'elInput',
-            props: {
-              type: 'number',
-              size: 'mini'
+            align: 'left',
+            span: 24,
+            itemRender: {
+              name: '$input',
+              props: {
+                type: 'number',
+                size: 'mini'
+              }
             }
           },
           {
             title: '高度',
             field: 'height',
-            component: 'elInput',
-            props: {
-              type: 'number',
-              size: 'mini'
+            span: 24,
+            itemRender: {
+              name: '$input',
+              props: {
+                type: 'number',
+                size: 'mini'
+              }
+            }
+          }
+        ],
+        RoySimpleText: [
+          {
+            title: '坐标-X',
+            field: 'left',
+            span: 24,
+            itemRender: {
+              name: '$input',
+              props: {
+                type: 'number',
+                size: 'mini'
+              }
             }
           },
           {
-            title: '背景',
-            field: 'background',
-            component: 'el-color-picker',
-            props: {
-              size: 'mini'
+            title: '坐标-Y',
+            field: 'top',
+            span: 24,
+            itemRender: {
+              name: '$input',
+              props: {
+                type: 'number',
+                size: 'mini'
+              }
             }
           },
           {
-            title: '文本颜色',
-            field: 'color',
-            component: 'el-color-picker',
-            props: {
-              size: 'mini'
+            title: '水平对齐方式',
+            field: 'justifyContent',
+            span: 24,
+            itemRender: {
+              name: '$radio',
+              options: [
+                {
+                  label: '居左',
+                  value: 'flex-start'
+                },
+                {
+                  label: '居中',
+                  value: 'center'
+                },
+                {
+                  label: '居右',
+                  value: 'flex-end'
+                }
+              ]
+            }
+          },
+          {
+            title: '垂直对齐方式',
+            field: 'alignItems',
+            span: 24,
+            itemRender: {
+              name: '$radio',
+              options: [
+                {
+                  label: '居上',
+                  value: 'flex-start'
+                },
+                {
+                  label: '居中',
+                  value: 'center'
+                },
+                {
+                  label: '居下',
+                  value: 'flex-end'
+                }
+              ]
             }
           }
         ]
@@ -202,23 +234,23 @@ export default {
 
 <style lang="scss">
 .roy-page-tools {
-  .el-form {
-    .el-form-item {
-      margin: 0;
-      .el-form-item__label {
-        font-size: 12px;
-        padding: 6px 5px;
-        margin: 4px;
-        line-height: 12px;
-        &:before {
-          content: '';
-          width: 1px;
-          height: 80%;
-          margin-right: 5px;
-          border-left: var(--roy-color-primary) 3px solid;
-        }
-      }
+  .vxe-form.size--medium .vxe-form--item-inner {
+    display: grid;
+  }
+  .vxe-form--item-title {
+    font-size: 10px;
+    text-align: left !important;
+    margin-bottom: 5px;
+    .vxe-form--item-title-label:before {
+      content: '';
+      width: 1px;
+      height: 80%;
+      margin-right: 5px;
+      border-left: var(--roy-color-primary) 3px solid;
     }
+  }
+  .vxe-form--item {
+    float: inherit !important;
   }
 }
 </style>
