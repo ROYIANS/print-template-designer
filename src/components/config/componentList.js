@@ -25,11 +25,24 @@ export const componentList = [
     component: 'RoySimpleText',
     propValue: '双击编辑文本',
     style: {
+      color: '#212121',
+      border: 'none',
+      borderRadius: 'inherit',
+      padding: '0 0 0 0',
+      margin: '0 0 0 0',
+      fontFamily: 'default',
+      lineHeight: '1',
+      letterSpacing: '1',
+      borderWidth: 0,
+      borderColor: '#212121',
+      borderType: 'solid',
       width: 200,
       height: 50,
       fontSize: 10,
       background: undefined,
-      rotate: 0
+      rotate: 0,
+      justifyContent: 'flex-start',
+      alignItems: 'flex-start'
     },
     groupStyle: {}
   },
