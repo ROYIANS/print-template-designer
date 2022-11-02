@@ -105,6 +105,20 @@ export const paletteConfigList = {
           max: 4
         }
       }
+    },
+    {
+      title: '旋转角度（°）',
+      field: 'rotate',
+      span: 24,
+      itemRender: {
+        name: '$input',
+        props: {
+          type: 'number',
+          size: 'mini',
+          min: 0,
+          max: 360
+        }
+      }
     }
   ],
   RoySimpleText: [
@@ -380,6 +394,359 @@ export const paletteConfigList = {
           size: 'mini',
           min: 0,
           max: 4
+        }
+      }
+    },
+    {
+      title: '旋转角度（°）',
+      field: 'rotate',
+      span: 24,
+      itemRender: {
+        name: '$input',
+        props: {
+          type: 'number',
+          size: 'mini',
+          min: 0,
+          max: 360
+        }
+      }
+    }
+  ],
+  RoyRect: [
+    {
+      title: '坐标-X',
+      field: 'left',
+      span: 24,
+      itemRender: {
+        name: '$input',
+        props: {
+          type: 'number',
+          size: 'mini'
+        }
+      }
+    },
+    {
+      title: '坐标-Y',
+      field: 'top',
+      span: 24,
+      itemRender: {
+        name: '$input',
+        props: {
+          type: 'number',
+          size: 'mini'
+        }
+      }
+    },
+    {
+      title: '宽度',
+      field: 'width',
+      span: 24,
+      itemRender: {
+        name: '$input',
+        props: {
+          type: 'number',
+          size: 'mini'
+        }
+      }
+    },
+    {
+      title: '高度',
+      field: 'height',
+      span: 24,
+      itemRender: {
+        name: '$input',
+        props: {
+          type: 'number',
+          size: 'mini'
+        }
+      }
+    },
+    {
+      title: '背景颜色',
+      field: 'background',
+      span: 24,
+      itemRender: {
+        name: '$colorPicker',
+        props: {}
+      }
+    },
+    {
+      title: '边框类型',
+      field: 'borderType',
+      span: 24,
+      itemRender: {
+        name: '$select',
+        options: [
+          {
+            label: '无',
+            value: 'none'
+          },
+          {
+            label: '实线',
+            value: 'solid'
+          },
+          {
+            label: '线虚线',
+            value: 'dashed'
+          },
+          {
+            label: '点虚线',
+            value: 'dotted'
+          }
+        ]
+      }
+    },
+    {
+      title: '边框颜色',
+      field: 'borderColor',
+      span: 24,
+      itemRender: {
+        name: '$colorPicker',
+        props: {}
+      }
+    },
+    {
+      title: '边框宽度',
+      field: 'borderWidth',
+      span: 24,
+      itemRender: {
+        name: '$input',
+        props: {
+          type: 'number',
+          size: 'mini',
+          min: 0,
+          max: 4
+        }
+      }
+    },
+    {
+      title: '旋转角度（°）',
+      field: 'rotate',
+      span: 24,
+      itemRender: {
+        name: '$input',
+        props: {
+          type: 'number',
+          size: 'mini',
+          min: 0,
+          max: 360
+        }
+      }
+    }
+  ],
+  RoyCircle: [
+    {
+      title: '坐标-X',
+      field: 'left',
+      span: 24,
+      itemRender: {
+        name: '$input',
+        props: {
+          type: 'number',
+          size: 'mini'
+        }
+      }
+    },
+    {
+      title: '坐标-Y',
+      field: 'top',
+      span: 24,
+      itemRender: {
+        name: '$input',
+        props: {
+          type: 'number',
+          size: 'mini'
+        }
+      }
+    },
+    {
+      title: '宽度',
+      field: 'width',
+      span: 24,
+      itemRender: {
+        name: '$input',
+        props: {
+          type: 'number',
+          size: 'mini'
+        }
+      }
+    },
+    {
+      title: '高度',
+      field: 'height',
+      span: 24,
+      itemRender: {
+        name: '$input',
+        props: {
+          type: 'number',
+          size: 'mini'
+        }
+      }
+    },
+    {
+      title: '背景颜色',
+      field: 'background',
+      span: 24,
+      itemRender: {
+        name: '$colorPicker',
+        props: {}
+      }
+    },
+    {
+      title: '边框类型',
+      field: 'borderType',
+      span: 24,
+      itemRender: {
+        name: '$select',
+        options: [
+          {
+            label: '无',
+            value: 'none'
+          },
+          {
+            label: '实线',
+            value: 'solid'
+          },
+          {
+            label: '线虚线',
+            value: 'dashed'
+          },
+          {
+            label: '点虚线',
+            value: 'dotted'
+          }
+        ]
+      }
+    },
+    {
+      title: '边框颜色',
+      field: 'borderColor',
+      span: 24,
+      itemRender: {
+        name: '$colorPicker',
+        props: {}
+      }
+    },
+    {
+      title: '边框宽度',
+      field: 'borderWidth',
+      span: 24,
+      itemRender: {
+        name: '$input',
+        props: {
+          type: 'number',
+          size: 'mini',
+          min: 0,
+          max: 4
+        }
+      }
+    },
+    {
+      title: '旋转角度（°）',
+      field: 'rotate',
+      span: 24,
+      itemRender: {
+        name: '$input',
+        props: {
+          type: 'number',
+          size: 'mini',
+          min: 0,
+          max: 360
+        }
+      }
+    }
+  ],
+  RoyLine: [
+    {
+      title: '坐标-X',
+      field: 'left',
+      span: 24,
+      itemRender: {
+        name: '$input',
+        props: {
+          type: 'number',
+          size: 'mini'
+        }
+      }
+    },
+    {
+      title: '坐标-Y',
+      field: 'top',
+      span: 24,
+      itemRender: {
+        name: '$input',
+        props: {
+          type: 'number',
+          size: 'mini'
+        }
+      }
+    },
+    {
+      title: '宽度',
+      field: 'width',
+      span: 24,
+      itemRender: {
+        name: '$input',
+        props: {
+          type: 'number',
+          size: 'mini'
+        }
+      }
+    },
+    {
+      title: '粗细',
+      field: 'height',
+      span: 24,
+      itemRender: {
+        name: '$select',
+        options: [
+          {
+            label: '极细',
+            value: 0.5
+          },
+          {
+            label: '细',
+            value: 1
+          },
+          {
+            label: '正常',
+            value: 1.5
+          },
+          {
+            label: '粗',
+            value: 2
+          },
+          {
+            label: '极粗',
+            value: 4
+          },
+          {
+            label: '粗粗粗',
+            value: 6
+          }
+        ]
+      }
+    },
+    {
+      title: '颜色',
+      field: 'background',
+      span: 24,
+      itemRender: {
+        name: '$colorPicker',
+        props: {}
+      }
+    },
+    {
+      title: '旋转角度（°）',
+      field: 'rotate',
+      span: 24,
+      itemRender: {
+        name: '$input',
+        props: {
+          type: 'number',
+          size: 'mini',
+          min: 0,
+          max: 360
         }
       }
     }

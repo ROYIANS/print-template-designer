@@ -8,7 +8,7 @@
  * ╩╚═╚═╝ ╩ ╩╩ ╩╝╚╝╚═╝
  */
 const MIN_WIDTH = 30
-const MIN_HEIGHT = 30
+const MIN_HEIGHT = 1
 
 import { calculateRotatedPointCoordinate, getCenterPoint } from './translate.js'
 

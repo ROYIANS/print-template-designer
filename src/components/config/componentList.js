@@ -81,24 +81,49 @@ export const componentList = [
     icon: 'iconfont icon-xianduan',
     code: 'line',
     name: '直线',
-    component: 'RoyLine'
+    component: 'RoyLine',
+    propValue: '',
+    style: {
+      width: 200,
+      height: 1,
+      background: '#000',
+      rotate: 0
+    },
+    groupStyle: {}
   },
   {
     icon: 'iconfont icon-xingzhuang-juxing',
     code: 'rectangle',
     name: '矩形',
-    component: 'RoyRect'
-  },
-  {
-    icon: 'iconfont icon-xingzhuang-sanjiaoxing',
-    code: 'triangle',
-    name: '三角形',
-    component: 'RoyTri'
+    component: 'RoyRect',
+    propValue: '',
+    style: {
+      borderRadius: 'inherit',
+      borderWidth: 1,
+      borderColor: '#212121',
+      borderType: 'solid',
+      width: 200,
+      height: 200,
+      background: undefined,
+      rotate: 0
+    },
+    groupStyle: {}
   },
   {
     icon: 'iconfont icon-xingzhuang-tuoyuanxing',
     code: 'circle',
     name: '圆形',
-    component: 'RoyCircle'
+    component: 'RoyCircle',
+    propValue: '',
+    style: {
+      borderWidth: 1,
+      borderColor: '#212121',
+      borderType: 'solid',
+      width: 200,
+      height: 200,
+      background: '#ffffff',
+      rotate: 0
+    },
+    groupStyle: {}
   }
 ]

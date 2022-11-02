@@ -88,6 +88,9 @@ import { getComponentRotatedStyle, getShapeStyle } from '@/utils/style-util.js'
 import Big from 'big.js'
 import RoyText from '@/components/PageComponents/RoyText'
 import RoySimpleText from '@/components/PageComponents/RoySimpleText'
+import RoyRect from '@/components/PageComponents/RoyRect'
+import RoyLine from '@/components/PageComponents/RoyLine'
+import RoyCircle from '@/components/PageComponents/RoyCircle'
 import RoyGroup from '@/components/PageComponents/RoyGroup'
 import Area from '@/components/Editor/Area'
 import commonMixin from '@/mixin/commonMixin'
@@ -113,6 +116,9 @@ export default {
     RoyText,
     RoySimpleText,
     RoyGroup,
+    RoyRect,
+    RoyLine,
+    RoyCircle,
     Area
   },
   props: {
