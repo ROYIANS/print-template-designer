@@ -25,6 +25,7 @@
 <script>
 import commonMixin from '@/mixin/commonMixin'
 import RoyText from '@/components/PageComponents/RoyText'
+import RoyRect from '@/components/PageComponents/RoyRect'
 
 /**
  * roy-group
@@ -33,7 +34,8 @@ export default {
   name: 'RoyGroup',
   mixins: [commonMixin],
   components: {
-    RoyText
+    RoyText,
+    RoyRect
   },
   props: {
     propValue: {

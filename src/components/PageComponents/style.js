@@ -92,7 +92,18 @@ const commonProps = {
   }
 }
 
-const textProps = Object.assign(commonProps, {})
+const textProps = Object.assign({}, commonProps, {})
+
+const lineProps = Object.assign({}, commonProps, {})
+
+const circleProps = Object.assign({}, commonProps, {})
+
+const rectProps = Object.assign({}, commonProps, {
+  borderWidth: {
+    type: Number,
+    default: 1
+  }
+})
 
 export const StyledText = styled('div', textProps)`
   width: 100%;
@@ -162,4 +173,50 @@ export const StyledSimpleText = styled('div', textProps)`
       return 'none'
     }
   }};
+`
+
+export const StyledRect = styled('div', rectProps)`
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: absolute;
+  background: ${(props) => props.background};
+  border-radius: ${(props) => props.borderRadius};
+  z-index: ${(props) => props.zIndex};
+  border: ${(props) => {
+    const { borderWidth, borderType, borderColor } = props
+    if (borderType === 'none') {
+      return borderType
+    } else {
+      return `${borderWidth}px ${borderType} ${borderColor}`
+    }
+  }};
+`
+
+export const StyledCircle = styled('div', circleProps)`
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: absolute;
+  background: ${(props) => props.background};
+  border-radius: 100%;
+  z-index: ${(props) => props.zIndex};
+  border: ${(props) => {
+    const { borderWidth, borderType, borderColor } = props
+    if (borderType === 'none') {
+      return borderType
+    } else {
+      return `${borderWidth}px ${borderType} ${borderColor}`
+    }
+  }};
+`
+
+export const StyledLine = styled('div', lineProps)`
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: absolute;
+  background: ${(props) => props.background};
+  z-index: ${(props) => props.zIndex};
+  border: none;
 `
