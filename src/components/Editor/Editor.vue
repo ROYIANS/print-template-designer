@@ -90,6 +90,7 @@ import RoyText from '@/components/PageComponents/RoyText'
 import RoySimpleText from '@/components/PageComponents/RoySimpleText'
 import RoyRect from '@/components/PageComponents/RoyRect'
 import RoyLine from '@/components/PageComponents/RoyLine'
+import RoyStar from '@/components/PageComponents/RoyStar'
 import RoyCircle from '@/components/PageComponents/RoyCircle'
 import RoyGroup from '@/components/PageComponents/RoyGroup'
 import Area from '@/components/Editor/Area'
@@ -119,6 +120,7 @@ export default {
     RoyRect,
     RoyLine,
     RoyCircle,
+    RoyStar,
     Area
   },
   props: {

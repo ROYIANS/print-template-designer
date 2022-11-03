@@ -10,6 +10,14 @@
 import styled from 'vue-styled-components'
 
 const commonProps = {
+  width: {
+    type: [Number, String],
+    default: 10
+  },
+  height: {
+    type: [Number, String],
+    default: 10
+  },
   color: {
     type: String,
     default: '#212121'
@@ -35,11 +43,11 @@ const commonProps = {
     default: '0 0 0 0'
   },
   fontSize: {
-    type: Number,
+    type: [Number, String],
     default: 12
   },
   zIndex: {
-    type: Number,
+    type: [Number, String],
     default: 1
   },
   fontFamily: {
@@ -63,7 +71,7 @@ const commonProps = {
     default: 'flex-start'
   },
   borderWidth: {
-    type: Number,
+    type: [Number, String],
     default: 0
   },
   borderColor: {
@@ -95,6 +103,8 @@ const commonProps = {
 const textProps = Object.assign({}, commonProps, {})
 
 const lineProps = Object.assign({}, commonProps, {})
+
+const starProps = Object.assign({}, commonProps, {})
 
 const circleProps = Object.assign({}, commonProps, {})
 
@@ -219,4 +229,19 @@ export const StyledLine = styled('div', lineProps)`
   background: ${(props) => props.background};
   z-index: ${(props) => props.zIndex};
   border: none;
+`
+
+export const StyledStar = styled('div', starProps)`
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: absolute;
+  border: none;
+  padding: 0;
+  margin: 0;
+  color: ${(props) => props.background};
+  .roy-star-icon {
+    font-size: ${(props) => `${props.height}px!important`};
+    line-height: ${(props) => `${props.height}px!important`};
+  }
 `

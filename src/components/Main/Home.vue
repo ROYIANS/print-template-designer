@@ -13,7 +13,7 @@
     <el-header class="roy-designer-header" height="40px">
       <div class="roy-designer-header__text">
         <i class="ri-pen-nib-line"></i>
-        <span>打印模板设计器 | 新建模板</span>
+        <span>打印模板设计器 | {{ pageConfig.title }}</span>
       </div>
       <div class="roy-designer__right">
         <div>
@@ -54,7 +54,7 @@
 
 <script>
 import config from '../../../package.json'
-import { mapActions } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 import DesignerAside from './DesignerAside.vue'
 import DesignerMain from './DesignerMain.vue'
 
@@ -76,9 +76,11 @@ export default {
     }
   },
   computed: {
-    isNightMode() {
-      return this.$store.state.printTemplateModule.nightMode.isNightMode
-    }
+    ...mapState({
+      isNightMode: (state) => state.printTemplateModule.nightMode.isNightMode,
+      pageConfig: (state) => state.printTemplateModule.pageConfig,
+      componentData: (state) => state.printTemplateModule.componentData
+    })
   },
   methods: {
     ...mapActions({
