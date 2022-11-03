@@ -173,6 +173,11 @@ export default {
       let page = this.pages[newVal]
       this.setRect(page)
       this.reDrawRuler()
+      this.$store.commit('printTemplateModule/setPageSize', {
+        pageSize: newVal,
+        w: page.w,
+        h: page.h
+      })
     }
   }
 }

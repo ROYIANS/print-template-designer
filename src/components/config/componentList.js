@@ -125,5 +125,20 @@ export const componentList = [
       rotate: 0
     },
     groupStyle: {}
+  },
+  {
+    icon: 'iconfont icon-kongwujiaoxing',
+    code: 'star',
+    name: '五角星',
+    component: 'RoyStar',
+    propValue: '',
+    style: {
+      width: 200,
+      height: 200,
+      background: '#FF0000',
+      icon: 'icon-shiwujiaoxing',
+      rotate: 0
+    },
+    groupStyle: {}
   }
 ]

@@ -1,30 +1,6 @@
 export const paletteConfigList = {
   RoyText: [
     {
-      title: '坐标-X',
-      field: 'left',
-      span: 24,
-      itemRender: {
-        name: '$input',
-        props: {
-          type: 'number',
-          size: 'mini'
-        }
-      }
-    },
-    {
-      title: '坐标-Y',
-      field: 'top',
-      span: 24,
-      itemRender: {
-        name: '$input',
-        props: {
-          type: 'number',
-          size: 'mini'
-        }
-      }
-    },
-    {
       title: '宽度',
       field: 'width',
       span: 24,
@@ -122,30 +98,6 @@ export const paletteConfigList = {
     }
   ],
   RoySimpleText: [
-    {
-      title: '坐标-X',
-      field: 'left',
-      span: 24,
-      itemRender: {
-        name: '$input',
-        props: {
-          type: 'number',
-          size: 'mini'
-        }
-      }
-    },
-    {
-      title: '坐标-Y',
-      field: 'top',
-      span: 24,
-      itemRender: {
-        name: '$input',
-        props: {
-          type: 'number',
-          size: 'mini'
-        }
-      }
-    },
     {
       title: '宽度',
       field: 'width',
@@ -414,30 +366,6 @@ export const paletteConfigList = {
   ],
   RoyRect: [
     {
-      title: '坐标-X',
-      field: 'left',
-      span: 24,
-      itemRender: {
-        name: '$input',
-        props: {
-          type: 'number',
-          size: 'mini'
-        }
-      }
-    },
-    {
-      title: '坐标-Y',
-      field: 'top',
-      span: 24,
-      itemRender: {
-        name: '$input',
-        props: {
-          type: 'number',
-          size: 'mini'
-        }
-      }
-    },
-    {
       title: '宽度',
       field: 'width',
       span: 24,
@@ -535,30 +463,6 @@ export const paletteConfigList = {
     }
   ],
   RoyCircle: [
-    {
-      title: '坐标-X',
-      field: 'left',
-      span: 24,
-      itemRender: {
-        name: '$input',
-        props: {
-          type: 'number',
-          size: 'mini'
-        }
-      }
-    },
-    {
-      title: '坐标-Y',
-      field: 'top',
-      span: 24,
-      itemRender: {
-        name: '$input',
-        props: {
-          type: 'number',
-          size: 'mini'
-        }
-      }
-    },
     {
       title: '宽度',
       field: 'width',
@@ -658,30 +562,6 @@ export const paletteConfigList = {
   ],
   RoyLine: [
     {
-      title: '坐标-X',
-      field: 'left',
-      span: 24,
-      itemRender: {
-        name: '$input',
-        props: {
-          type: 'number',
-          size: 'mini'
-        }
-      }
-    },
-    {
-      title: '坐标-Y',
-      field: 'top',
-      span: 24,
-      itemRender: {
-        name: '$input',
-        props: {
-          type: 'number',
-          size: 'mini'
-        }
-      }
-    },
-    {
       title: '宽度',
       field: 'width',
       span: 24,
@@ -734,6 +614,70 @@ export const paletteConfigList = {
       itemRender: {
         name: '$colorPicker',
         props: {}
+      }
+    },
+    {
+      title: '旋转角度（°）',
+      field: 'rotate',
+      span: 24,
+      itemRender: {
+        name: '$input',
+        props: {
+          type: 'number',
+          size: 'mini',
+          min: 0,
+          max: 360
+        }
+      }
+    }
+  ],
+  RoyStar: [
+    {
+      title: '大小',
+      field: 'height',
+      span: 24,
+      itemRender: {
+        name: '$input',
+        props: {
+          type: 'number',
+          size: 'mini',
+          min: 0
+        }
+      }
+    },
+    {
+      title: '颜色',
+      field: 'background',
+      span: 24,
+      itemRender: {
+        name: '$colorPicker',
+        props: {}
+      }
+    },
+    {
+      title: '样式',
+      field: 'icon',
+      span: 24,
+      itemRender: {
+        name: '$select',
+        options: [
+          {
+            label: '实心五角星',
+            value: 'icon-shiwujiaoxing'
+          },
+          {
+            label: '空心五角星',
+            value: 'icon-kongwujiaoxing'
+          },
+          {
+            label: '圆润五角星',
+            value: 'icon-shoucang'
+          },
+          {
+            label: '双线五角星',
+            value: 'icon-wujiaoxing'
+          }
+        ]
       }
     },
     {

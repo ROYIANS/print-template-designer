@@ -15,8 +15,12 @@ export const state = {
   pageConfig: {
     // 页面大小
     pageSize: 'A4',
-    // 页面方向 h 横向长 v 纵向长
-    pageDirection: 'h',
+    // 页面方向 l 横向长 p 纵向长
+    pageDirection: 'p',
+    // 页面长度：cm
+    pageWidth: 210,
+    // 页面高度：cm
+    pageHeight: 297,
     // 页面标题/模板标题
     title: '新建模板',
     // 默认缩放比例：100%
@@ -67,6 +71,16 @@ export const mutations = {
   setCurComponent(state, { component, index }) {
     state.curComponent = component
     state.curComponentIndex = index
+  },
+
+  setPageSize(state, { pageSize, w, h }) {
+    state.pageConfig.pageSize = pageSize
+    state.pageConfig.pageWidth = w
+    state.pageConfig.pageHeight = h
+  },
+
+  setPageConfig(state, pageConfig) {
+    state.pageConfig = pageConfig
   },
 
   setPropValue({ componentData }, { propValue, id }) {

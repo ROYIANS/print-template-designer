@@ -18,6 +18,7 @@
 import commonMixin from '@/mixin/commonMixin'
 import eventBus from '@/utils/eventBus'
 import { mapState } from 'vuex'
+import Big from 'big.js'
 
 /**
  * 坐标
@@ -51,8 +52,12 @@ export default {
         this.showCoordinate = true
         this.x = curX
         this.y = curY
-        this.left = this.curComponent.style.left
-        this.top = this.curComponent.style.top
+        this.left = new Big(this.curComponent.style.left)
+          .div(new Big(5))
+          .toNumber()
+        this.top = new Big(this.curComponent.style.top)
+          .div(new Big(5))
+          .toNumber()
       })
 
       eventBus.$on('unmove', () => {

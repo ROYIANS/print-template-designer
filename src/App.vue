@@ -13,7 +13,7 @@
         <el-button
           icon="ri-printer-cloud-line"
           size="mini"
-          @click="printPreview"
+          v-print="'#designer-page'"
         >
           打印预览
         </el-button>
@@ -23,6 +23,25 @@
         <el-button icon="ri-braces-line" size="mini" @click="exportJSON">
           导出配置信息
         </el-button>
+        <el-upload
+          class="roy-upload-file"
+          action=""
+          :file-list="fileList"
+          :show-file-list="false"
+          :auto-upload="false"
+          :limit="1"
+          :on-change="importFile"
+          :accept="'.rptd'"
+        >
+          <el-button
+            icon="ri-contacts-book-upload-line"
+            size="mini"
+            type="file"
+            slot="trigger"
+          >
+            导入模板数据
+          </el-button>
+        </el-upload>
         <i
           v-for="(tool, index) in headIconConfig"
           :key="index"
@@ -53,15 +72,29 @@
 <script>
 import toast from '@/utils/toast'
 import shepherd from '@/components/RoyUserTour/userTour'
+import { jsPDF } from 'jspdf'
+import html2canvas from 'html2canvas'
+import { mapState } from 'vuex'
+import print from 'vue-print-nb'
 
 export default {
   name: 'App',
+  directives: {
+    print
+  },
   mounted() {
     toast('欢迎使用ROYIANS的打印模板设计器，仅个人学习使用', 'info')
     console.log('contributed by ROYIANS@Little-Dreamland﹢')
   },
+  computed: {
+    ...mapState({
+      pageConfig: (state) => state.printTemplateModule.pageConfig,
+      componentData: (state) => state.printTemplateModule.componentData
+    })
+  },
   data() {
     return {
+      fileList: [],
       toolbarSlotConfig: [
         {
           name: '从报表配置拉取表格',
@@ -178,11 +211,80 @@ export default {
       ])
       driver.start()
     },
-    exportJSON() {
-      toast('导出成功，请查看控制台！', 'success')
+    importFile({ raw }) {
+      let reader = new FileReader()
+      reader.readAsText(raw, 'UTF-8')
+      reader.onload = (e) => {
+        this.$confirm('确定要读取该文件？将覆盖当前编辑内容！', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          const result = e.target.result.toString()
+          let resultParsed = []
+          try {
+            resultParsed = JSON.parse(result)
+            if (!resultParsed.pageConfig || !resultParsed.componentData) {
+              toast('文件格式错误，转换内容失败', 'warning')
+              return
+            }
+          } catch (e) {
+            toast('文件损坏，转换内容失败', 'warning')
+          }
+          this.$store.commit(
+            'printTemplateModule/setComponentData',
+            resultParsed.componentData
+          )
+          this.$store.commit(
+            'printTemplateModule/setPageConfig',
+            resultParsed.pageConfig
+          )
+        })
+      }
     },
-    exportPDF() {},
-    printPreview() {}
+    exportJSON() {
+      let eleA = document.createElement('a')
+      eleA.download = `${this.pageConfig.title}.rptd`
+
+      eleA.style.display = 'none'
+
+      const saveData = {
+        pageConfig: this.pageConfig,
+        componentData: this.componentData
+      }
+
+      const blob = new Blob([JSON.stringify(saveData)])
+      eleA.href = URL.createObjectURL(blob)
+
+      document.body.appendChild(eleA)
+
+      eleA.click()
+      document.body.removeChild(eleA)
+      toast('导出成功！', 'success')
+    },
+    exportPDF() {
+      html2canvas(document.querySelector('#designer-page'), {
+        scale: '5'
+      }).then((canvas) => {
+        let doc = new jsPDF({
+          orientation: this.pageConfig.pageDirection,
+          format: this.pageConfig.pageSize,
+          unit: 'mm'
+        })
+        doc.addImage({
+          imageData: canvas.toDataURL('image/jpeg'),
+          format: 'JPEG',
+          x: 0,
+          y: 0,
+          width: this.pageConfig.pageWidth,
+          height: this.pageConfig.pageHeight
+        })
+        doc.save('打印预览.pdf')
+      })
+    },
+    printPreview() {
+      // this.print('designer-page')
+    }
   }
 }
 </script>
@@ -198,6 +300,13 @@ body,
   display: flex;
   height: 40px;
   align-items: center;
+
+  .roy-upload-file {
+    .el-upload {
+      align-items: center;
+      display: flex;
+    }
+  }
 
   .el-button,
   .el-button--mini {
