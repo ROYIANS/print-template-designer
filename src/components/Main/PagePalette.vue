@@ -1,5 +1,5 @@
 <template>
-  <div class="roy-page-tools">
+  <div v-if="initCompleted" class="roy-page-tools">
     <div v-if="curComponent && curComponent.id">
       <vxe-form
         ref="form"
@@ -52,6 +52,7 @@ export default {
   },
   data() {
     return {
+      initCompleted: false,
       formGlobalConfigIn: {
         titleOverflow: true,
         span: 8,
@@ -71,15 +72,18 @@ export default {
     }
   },
   methods: {
-    registerTableRender(renderers) {
+    async registerTableRender(renderers) {
       // 注册渲染器
       for (let i in renderers) {
         this.$VXETable.renderer.add(i, renderers[i])
       }
     }
   },
-  mounted() {
-    this.registerTableRender(renderers)
+  async mounted() {
+    await this.registerTableRender(renderers)
+    this.$nextTick(() => {
+      this.initCompleted = true
+    })
   },
   watch: {
     curComponent: {

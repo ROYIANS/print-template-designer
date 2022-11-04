@@ -10,7 +10,7 @@
 import PtdDesigner from './Main/Home.vue'
 
 import 'normalize.css/normalize.css'
-import 'animate.css'
+import '@/assets/animate.css'
 import '@/assets/main.scss'
 import '@/assets/iconfont/iconfont.css'
 
@@ -37,7 +37,9 @@ const install = function (Vue, opts = {}) {
   })
 }
 const Api = {
-  version: 'ROY-PRINT-DESIGNER@0.0.13-dev',
+  version: 'ROY-PRINT-DESIGNER@0.0.17-dev',
+  PtdDesigner,
+  NightModeStore,
   install
 }
 // auto install
