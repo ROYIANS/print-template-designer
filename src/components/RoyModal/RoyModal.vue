@@ -108,7 +108,7 @@ export default {
   left: 0;
   transform: scale(0);
   background: rgba(0, 0, 0, 0.7);
-  z-index: 999;
+  z-index: 99999;
   &.roy-modal-sketch {
     transform: scale(1);
     .roy-modal-modal-background {

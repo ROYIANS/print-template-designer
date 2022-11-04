@@ -330,8 +330,8 @@ export default {
     },
     panelWidth() {
       return this.showRight
-        ? 'width: calc(100vw - 330px);'
-        : 'width: calc(100vw - 95px);'
+        ? 'width: calc(100% - 330px);'
+        : 'width: calc(100% - 95px);'
     }
   },
   methods: {
