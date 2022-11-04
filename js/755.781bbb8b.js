@@ -1,2 +1,0 @@
-"use strict";(self["webpackChunkprint_template_designer"]=self["webpackChunkprint_template_designer"]||[]).push([[755],{15755:function(t,e,n){n.r(e),n.d(e,{default:function(){return o}});var a=function(){var t=this,e=t._self._c;return e("el-main",{staticClass:"DataSource"},[t._v(" 1 ")])},r=[],u=n(21917),i={name:"DataSource",mixins:[u.Z],components:{},props:{},data(){return{}},methods:{initMounted(){}},created(){},mounted(){this.initMounted()},watch:{}},s=i,l=n(1001),c=(0,l.Z)(s,a,r,!1,null,null,null),o=c.exports}}]);
-//# sourceMappingURL=755.781bbb8b.js.map
