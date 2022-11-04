@@ -1,13 +1,26 @@
 {
   "name": "print-template-designer",
-  "version": "0.0.7",
+  "version": "0.0.13-dev",
   "private": false,
+  "author": {
+    "email": "admin@royians.cn",
+    "name": "ROYIANS",
+    "url": "https://www.royians.cn"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/royians/print-template-designer.git"
+  },
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "lib": "vue-cli-service build --target lib --inline-vue --name print-template-designer src/components/index.js --dest lib"
+    "lib": "vue-cli-service build --target lib --name print-template-designer --dest lib src/components/index.js"
   },
+  "main": "lib/print-template-designer.umd.js",
+  "files": [
+    "lib"
+  ],
   "dependencies": {
     "@wangeditor/editor": "^5.1.22",
     "@wangeditor/editor-for-vue": "^1.0.2",

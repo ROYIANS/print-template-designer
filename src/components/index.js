@@ -37,7 +37,7 @@ const install = function (Vue, opts = {}) {
   })
 }
 const Api = {
-  version: 'ROY-PRINT-DESIGNER@0.0.7',
+  version: 'ROY-PRINT-DESIGNER@0.0.13-dev',
   install
 }
 // auto install
