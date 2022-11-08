@@ -405,6 +405,12 @@ export default {
         })
         doc.save('打印预览.pdf')
       })
+    },
+    getTemplateData() {
+      return {
+        pageConfig: this.pageConfig,
+        componentData: this.componentData
+      }
     }
   },
   created() {},

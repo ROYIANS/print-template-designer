@@ -46,8 +46,10 @@
           >
             <component
               :is="item.component"
+              :active="item.id === (curComponent || {}).id"
               :id="'roy-component-' + item.id"
               :element="item"
+              :scale="scale"
               :prop-value="item.propValue"
             />
           </ComponentAdjuster>
@@ -92,6 +94,7 @@ import RoyRect from '@/components/PageComponents/RoyRect'
 import RoyLine from '@/components/PageComponents/RoyLine'
 import RoyStar from '@/components/PageComponents/RoyStar'
 import RoyCircle from '@/components/PageComponents/RoyCircle'
+import RoySimpleTable from '@/components/PageComponents/RoyTable/RoySimpleTable.vue'
 import RoyGroup from '@/components/PageComponents/RoyGroup'
 import Area from '@/components/Editor/Area'
 import commonMixin from '@/mixin/commonMixin'
@@ -121,6 +124,7 @@ export default {
     RoyLine,
     RoyCircle,
     RoyStar,
+    RoySimpleTable,
     Area
   },
   props: {

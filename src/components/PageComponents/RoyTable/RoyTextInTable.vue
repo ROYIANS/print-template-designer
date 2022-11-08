@@ -8,7 +8,11 @@
 <!-- * ╩╚═╚═╝ ╩ ╩╩ ╩╝╚╝╚═╝-->
 <!-- */-->
 <template>
-  <div style="width: 100%; height: 100%" @dblclick="onDblClick">
+  <div
+    style="width: 100%; height: 100%"
+    @click="activeCell"
+    @dblclick="onDblClick"
+  >
     <RoyModal
       v-if="showEditor"
       :show.sync="showEditor"
@@ -43,7 +47,7 @@ import '@wangeditor/editor/dist/css/style.css'
 import { mapState } from 'vuex'
 
 export default {
-  name: 'RoyText',
+  name: 'RoyTextInTable',
   props: {
     element: {
       type: Object,
@@ -144,14 +148,13 @@ export default {
     }
   },
   methods: {
+    activeCell() {
+      this.$emit('activeCell', {
+        id: this.element.id
+      })
+    },
     onCreated(editor) {
       this.wangEditor = Object.seal(editor) // 一定要用 Object.seal() ，否则会报错
-    },
-    onBlur() {
-      this.$store.commit('printTemplateModule/setPropValue', {
-        id: this.element.id,
-        propValue: this.html
-      })
     },
     onDblClick() {
       this.showEditor = true
@@ -163,7 +166,7 @@ export default {
   created() {},
   watch: {
     html() {
-      this.onBlur()
+      this.$emit('update:propValue', this.html)
     }
   },
   beforeDestroy() {

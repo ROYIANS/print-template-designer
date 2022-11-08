@@ -1,5 +1,5 @@
 <!--
-* @description RoySimpleText
+* @description RoySimpleTextInTable
 * @filename RoySimpleText.vue
 * @author ROYIANS
 * @date 2022/10/20 11:24
@@ -8,7 +8,8 @@
   <div
     style="width: 100%; height: 100%"
     class="RoySimpleText"
-    @click="setEdit"
+    @dblclick="setEdit"
+    @click="activeCell"
     @contextmenu="setEdit"
   >
     <StyledSimpleText
@@ -36,7 +37,7 @@ import { mapState } from 'vuex'
  *
  */
 export default {
-  name: 'RoySimpleText',
+  name: 'RoySimpleTextInTable',
   mixins: [commonMixin],
   components: {
     StyledSimpleText
@@ -49,6 +50,10 @@ export default {
     propValue: {
       type: String,
       default: ''
+    },
+    curId: {
+      type: String,
+      default: ''
     }
   },
   computed: {
@@ -59,7 +64,7 @@ export default {
       return this.element.style || {}
     },
     mayEdit() {
-      return this.curComponent?.id === this.element?.id
+      return this.curId === this.element?.id
     }
   },
   data() {
@@ -69,6 +74,11 @@ export default {
   },
   methods: {
     initMounted() {},
+    activeCell() {
+      this.$emit('activeCell', {
+        id: this.element.id
+      })
+    },
     setEdit() {
       if (this.element.isLock) {
         return
@@ -123,10 +133,7 @@ export default {
     },
     canEdit(newVal) {
       if (!newVal) {
-        this.$store.commit('printTemplateModule/setPropValue', {
-          id: this.element.id,
-          propValue: this.$refs.editArea.$el.innerHTML
-        })
+        this.$emit('update:propValue', this.$refs.editArea.$el.innerHTML)
       }
     }
   }

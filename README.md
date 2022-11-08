@@ -74,3 +74,10 @@ app.vue
 - [printer-editor](https://github.com/xinglie/printer-editor)
 - [visual-drag-demo](https://github.com/woai3c/visual-drag-demo)
 - [vue-email-editor](https://github.com/unlayer/vue-email-editor)
+
+## 参考文章
+
+- [slatejs 编辑器表格---选区](https://juejin.cn/post/7077766418841731108)
+- [slatejs 编辑器表格---合并单元格](https://juejin.cn/post/7080046216259567646)
+- [slatejs 编辑器表格---拆分单元格](https://juejin.cn/post/7080710896082747399)
+- [slatejs 编辑器表格---插入行](https://juejin.cn/post/7118925563858780174)

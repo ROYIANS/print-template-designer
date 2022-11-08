@@ -1,6 +1,6 @@
 <template>
   <div v-if="initCompleted" class="roy-page-tools">
-    <div v-if="curComponent && curComponent.id">
+    <div v-if="curActiveComponent && curActiveComponent.id">
       <vxe-form
         ref="form"
         sync-resize
@@ -43,11 +43,15 @@ export default {
   mixins: [commonMixin],
   computed: {
     ...mapState({
-      curComponent: (state) => state.printTemplateModule.curComponent
+      curComponent: (state) => state.printTemplateModule.curComponent,
+      curTableCell: (state) => state.printTemplateModule.curTableCell
     }),
     formItemConfig() {
-      let curComponentCode = this.curComponent?.component || 'no'
+      let curComponentCode = this.curActiveComponent?.component || 'no'
       return this.formItemConfigs[curComponentCode] || []
+    },
+    curActiveComponent() {
+      return this.curTableCell || this.curComponent
     }
   },
   data() {
@@ -86,10 +90,10 @@ export default {
     })
   },
   watch: {
-    curComponent: {
+    curActiveComponent: {
       handler() {
-        if (this.curComponent) {
-          this.formData = this.curComponent.style
+        if (this.curActiveComponent) {
+          this.formData = this.curActiveComponent.style
         }
       },
       deep: true,

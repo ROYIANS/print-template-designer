@@ -66,15 +66,33 @@ export const componentList = [
     groupStyle: {}
   },
   {
-    icon: 'ri-table-line',
+    icon: 'ri-table-2',
     code: 'table',
-    name: '表格',
+    name: '单元格',
+    component: 'RoySimpleTable',
+    propValue: {},
+    style: {
+      width: 'auto',
+      height: 'auto',
+      fontSize: 12,
+      background: undefined,
+      borderWidth: 2,
+      borderColor: '#212121',
+      borderType: 'solid',
+      rotate: 0
+    },
+    groupStyle: {}
+  },
+  {
+    icon: 'ri-table-line',
+    code: 'complex-table',
+    name: '列表格',
     component: 'RoyTable'
   },
   {
     icon: 'ri-layout-2-line',
     code: 'form',
-    name: '表单',
+    name: '数据表格',
     component: 'RoyForm'
   },
   {
