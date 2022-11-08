@@ -7,18 +7,24 @@
 <template>
   <div
     :style="adjusterStyle"
+    ref="adjuster"
     class="roy-component-adjuster"
     @click="selectCurComponent"
     @mousedown="handleMouseDownOnShape"
   >
     <span
-      v-show="isActive"
+      v-show="isActive && showRotate"
       class="ri-checkbox-blank-circle-line roy-component-adjuster__rotate"
       @mousedown="handleRotate"
     ></span>
     <span
       v-show="element.isLock"
       class="ri-lock-fill roy-component-adjuster__lock"
+    ></span>
+    <span
+      class="roy-component-adjuster__move"
+      :class="element.icon"
+      @mousedown="handleMouseMoveItem"
     ></span>
     <div
       v-for="item in isActive ? pointList : []"
@@ -27,7 +33,9 @@
       :style="getPointStyle(item)"
       @mousedown="handleMouseDownOnPoint(item, $event)"
     ></div>
-    <slot ref="slot"></slot>
+    <div ref="slot" class="adjuster-container">
+      <slot></slot>
+    </div>
   </div>
 </template>
 
@@ -105,13 +113,22 @@ export default {
       curComponent: (state) => state.printTemplateModule.curComponent
     }),
     pointList() {
-      if (this.element.component === 'RoyLine') {
+      const isTable = ['RoySimpleTable', 'RoyTable', 'RoyForm'].includes(
+        this.element.component
+      )
+      if (isTable) {
+        return []
+      }
+      if (['RoyLine'].includes(this.element.component)) {
         return ['r', 'l']
       }
       return ['lt', 't', 'rt', 'r', 'rb', 'b', 'lb', 'l']
     },
     isActive() {
       return this.active && !this.element.isLock
+    },
+    showRotate() {
+      return !['RoySimpleTable'].includes(this.element?.component || '')
     },
     adjusterStyle() {
       return {
@@ -337,7 +354,6 @@ export default {
       e.preventDefault()
     },
     handleMouseDownOnShape(e) {
-      // 将当前点击组件的事件传播出去，目前的消费是 VText 组件 https://github.com/woai3c/visual-drag-demo/issues/90
       this.$nextTick(() => eventBus.$emit('componentClick'))
 
       this.$store.commit('printTemplateModule/setInEditorStatus', true)
@@ -356,7 +372,12 @@ export default {
       }
 
       this.cursors = this.getCursor() // 根据旋转角度获取光标位置
-
+    },
+    handleMouseMoveItem(e) {
+      if (!this.isActive) {
+        return
+      }
+      let adjuster = this.$refs.slot
       const pos = { ...this.defaultStyle }
       const startY = e.clientY
       const startX = e.clientX
@@ -373,11 +394,11 @@ export default {
         const editorRectInfo = this.editor
         pos.top = Math.min(
           Math.max(0, (curY - startY) / this.scale + startTop),
-          editorRectInfo.offsetHeight - pos.height
+          editorRectInfo.offsetHeight - adjuster.offsetHeight
         )
         pos.left = Math.min(
           Math.max(0, (curX - startX) / this.scale + startLeft),
-          editorRectInfo.offsetWidth - pos.width
+          editorRectInfo.offsetWidth - adjuster.offsetWidth
         )
 
         // 修改当前组件样式
@@ -427,7 +448,6 @@ export default {
   user-select: none;
 
   &:hover {
-    cursor: move;
     border: 0.5px dotted var(--roy-text-color-secondary);
   }
 
@@ -462,6 +482,23 @@ export default {
     z-index: 9;
   }
 
+  .roy-component-adjuster__move {
+    position: absolute;
+    top: 0;
+    left: -25px;
+    z-index: 9;
+    padding: 2px;
+    border-radius: 1px;
+    font-weight: 100;
+    cursor: move;
+    background: var(--roy-color-warning-dark-2);
+    opacity: 0.8;
+    color: #fff;
+    &:active {
+      background: var(--roy-color-primary-light-5);
+    }
+  }
+
   [class^='roy-component-adjuster__shape-point--'] {
     position: absolute;
     background: transparent;
@@ -470,6 +507,10 @@ export default {
     height: 6px;
     border-radius: 2px;
     z-index: 9;
+  }
+
+  .adjuster-container {
+    cursor: initial;
   }
 }
 </style>

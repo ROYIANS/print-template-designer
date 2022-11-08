@@ -115,6 +115,8 @@ const rectProps = Object.assign({}, commonProps, {
   }
 })
 
+const simpleTableProps = Object.assign({}, commonProps, {})
+
 export const StyledText = styled('div', textProps)`
   width: 100%;
   height: 100%;
@@ -243,5 +245,69 @@ export const StyledStar = styled('div', starProps)`
   .roy-star-icon {
     font-size: ${(props) => `${props.height}px!important`};
     line-height: ${(props) => `${props.height}px!important`};
+  }
+`
+
+export const StyledSimpleTable = styled('div', simpleTableProps)`
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  border: none;
+  padding: 0;
+  margin: 0;
+  color: ${(props) => props.color};
+  background: ${(props) => props.background};
+
+  table {
+    border-collapse: separate;
+    border-spacing: 0;
+    border-top: ${(props) => {
+      const { borderWidth, borderType, borderColor } = props
+      if (borderType === 'none') {
+        return borderType
+      } else {
+        return `${borderWidth}px ${borderType} ${borderColor}`
+      }
+    }};
+    border-left: ${(props) => {
+      const { borderWidth, borderType, borderColor } = props
+      if (borderType === 'none') {
+        return borderType
+      } else {
+        return `${borderWidth}px ${borderType} ${borderColor}`
+      }
+    }};
+  }
+
+  td {
+    position: relative;
+    border: ${(props) => {
+      const { borderWidth, borderType, borderColor } = props
+      if (borderType === 'none') {
+        return borderType
+      } else {
+        return `${borderWidth}px ${borderType} ${borderColor}`
+      }
+    }};
+    border-top: none;
+    border-left: none;
+  }
+
+  .roy-simple-table-cell--selected {
+    background: #d4e7f5;
+  }
+
+  .roy-simple-table__cell__corner {
+    width: 8px;
+    height: 8px;
+    background: var(--roy-color-primary);
+    box-shadow: rgba(99, 99, 99, 0.2) 0 2px 8px 0;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    opacity: 0.5;
+    cursor: nw-resize !important;
+    z-index: 1;
   }
 `

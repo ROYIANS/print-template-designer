@@ -171,6 +171,16 @@
     background: var(--roy-color-primary-dark-2);
     color: #fff;
   }
+
+  @media print {
+    @page {
+      size: A4 portrait;
+      margin: 0;
+    }
+    .roy-component-adjuster__move, .roy-simple-table-cell__icon {
+      display: none;
+    }
+  }
 }
 
 #roy-print-template-designer[theme='dark'] {

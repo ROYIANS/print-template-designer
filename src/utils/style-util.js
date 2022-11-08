@@ -4,9 +4,9 @@ export function getShapeStyle(style) {
   const result = {}
   ;['width', 'height', 'top', 'left', 'rotate'].forEach((attr) => {
     if (attr !== 'rotate') {
-      result[attr] = style[attr] + 'px'
+      result[attr] = isNaN(style[attr]) ? style[attr] : `${style[attr]}px`
     } else {
-      result.transform = 'rotate(' + style[attr] + 'deg)'
+      result.transform = `rotate(${style[attr]}deg)`
     }
   })
 
