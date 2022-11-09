@@ -35,8 +35,9 @@ Vue.use(VXETable)
 Vue.use(Element, { size: 'mini' })
 
 Vue.use(PrintTemplateDesigner, { store })
-// 需要全局设置$VXETable,用于注册渲染器等逻辑。
+// 需要全局设置$VXETable、$XModal用于注册渲染器等逻辑。
 Vue.prototype.$VXETable = VXETable
+Vue.prototype.$XModal = VXETable.modal
 ```
 
 app.vue

@@ -336,31 +336,31 @@ export default {
         let reader = new FileReader()
         reader.readAsText(file, 'UTF-8')
         reader.onload = (e) => {
-          this.$confirm('确定要读取该文件？将覆盖当前编辑内容！', '提示', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            type: 'warning'
-          }).then(() => {
-            const result = e.target.result.toString()
-            let resultParsed = []
-            try {
-              resultParsed = JSON.parse(result)
-              if (!resultParsed.pageConfig || !resultParsed.componentData) {
-                toast('文件格式错误，转换内容失败', 'warning')
-                return
+          this.$XModal
+            .confirm('确定要读取该文件？将覆盖当前编辑内容！')
+            .then((type) => {
+              if (type === 'confirm') {
+                const result = e.target.result.toString()
+                let resultParsed = []
+                try {
+                  resultParsed = JSON.parse(result)
+                  if (!resultParsed.pageConfig || !resultParsed.componentData) {
+                    toast('文件格式错误，转换内容失败', 'warning')
+                    return
+                  }
+                } catch (e) {
+                  toast('文件损坏，转换内容失败', 'warning')
+                }
+                this.$store.commit(
+                  'printTemplateModule/setComponentData',
+                  resultParsed.componentData
+                )
+                this.$store.commit(
+                  'printTemplateModule/setPageConfig',
+                  resultParsed.pageConfig
+                )
               }
-            } catch (e) {
-              toast('文件损坏，转换内容失败', 'warning')
-            }
-            this.$store.commit(
-              'printTemplateModule/setComponentData',
-              resultParsed.componentData
-            )
-            this.$store.commit(
-              'printTemplateModule/setPageConfig',
-              resultParsed.pageConfig
-            )
-          })
+            })
         }
       } catch (e) {
         toast(`读取文件错误：${e.message}`, 'warning')
@@ -408,6 +408,7 @@ export default {
     },
     getTemplateData() {
       return {
+        type: 'rptd',
         pageConfig: this.pageConfig,
         componentData: this.componentData
       }

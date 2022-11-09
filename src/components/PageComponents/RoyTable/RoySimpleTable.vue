@@ -25,10 +25,7 @@
               :key="index"
               :colspan="getItColSpan(row, col)"
               :rowspan="getItRowSpan(row, col)"
-              :style="{
-                width: `${tableData[`${row}-${col}`].width}px`,
-                height: `${tableData[`${row}-${col}`].height}px`
-              }"
+              style="padding: 0"
               @mousedown.stop="(e) => handleCellMousedown(e, row, col)"
               @mouseenter.stop.prevent="handleCellMouseenter(row, col)"
               @mouseup="handleMouseUp"
@@ -44,6 +41,10 @@
                 :cur-id="curClickedId"
                 :element="tableData[`${row}-${col}`]"
                 :prop-value.sync="tableData[`${row}-${col}`].propValue"
+                :style="{
+                  width: `${tableData[`${row}-${col}`].width}px`,
+                  height: `${tableData[`${row}-${col}`].height}px`
+                }"
                 @activeCell="onCellActive"
               />
               <div
@@ -61,8 +62,8 @@
 <script>
 import { mapState } from 'vuex'
 import { Context, ContextItem, directive } from '@/components/RoyContext'
-import RoySimpleText from './RoySimpleTextInTable.vue'
-import RoyText from '@/components/PageComponents/RoyTable/RoyTextInTable'
+import RoySimpleTextIn from './RoySimpleTextInTable.vue'
+import RoyTextIn from '@/components/PageComponents/RoyTable/RoyTextInTable'
 import commonMixin from '@/mixin/commonMixin'
 import toast from '@/utils/toast'
 import { StyledSimpleTable } from '@/components/PageComponents/style'
@@ -71,17 +72,15 @@ const defaultTableCell = {
   icon: 'ri-text',
   code: 'text',
   name: '文本',
-  component: 'RoySimpleText',
+  component: 'RoySimpleTextIn',
   propValue: '',
-  rowSpan: 1,
-  colSpan: 1,
   width: 100,
   height: 30,
   textStyle: {
     width: '100%',
     height: '100%',
     fontSize: 12,
-    background: 'transparent',
+    background: null,
     rotate: 0
   },
   simpleTextStyle: {},
@@ -99,7 +98,7 @@ const defaultTableCell = {
     width: '100%',
     height: '100%',
     fontSize: 12,
-    background: 'transparent',
+    background: null,
     rotate: 0,
     justifyContent: 'flex-start',
     alignItems: 'center',
@@ -108,27 +107,6 @@ const defaultTableCell = {
     isUnderLine: false,
     isDelLine: false
   },
-  groupStyle: {}
-}
-
-const defaultTableTextCell = {
-  icon: 'ri-text',
-  code: 'text',
-  name: '文本',
-  component: 'RoyText',
-  width: 100,
-  height: 30,
-  propValue:
-    '<p><span style="font-size: 16pt; font-family: 仿宋;">双击</span><span style="color: rgb(255, 255, 255); background-color: rgb(0, 0, 0); font-size: 16pt; font-family: 仿宋;">编辑</span><span style="font-size: 16pt; font-family: 仿宋;">文本</span></p>',
-  style: {
-    width: '100%',
-    height: '100%',
-    fontSize: 12,
-    background: 'transparent',
-    rotate: 0
-  },
-  rowSpan: 1,
-  colSpan: 1,
   groupStyle: {}
 }
 
@@ -141,8 +119,8 @@ export default {
   components: {
     Context,
     ContextItem,
-    RoyText,
-    RoySimpleText,
+    RoyTextIn,
+    RoySimpleTextIn,
     StyledSimpleTable
   },
   props: {
@@ -168,21 +146,24 @@ export default {
       // 这块其实初始设置 tableConfig： {cols: 3, rows: 2} 就可以 把tabelDate设置成计算属性，layoutDetail 用js生成更方便
       tableConfig: {
         cols: 2,
-        rows: 1,
-        layoutDetail: [
-          {
-            colSpan: 1,
-            rowSpan: 1
-          }
-        ]
+        rows: 2,
+        layoutDetail: []
       },
       tableData: {
         '1-1': {
-          ...defaultTableCell,
+          ...this.deepCopy(defaultTableCell),
           id: this.getUuid()
         },
         '1-2': {
-          ...defaultTableTextCell,
+          ...this.deepCopy(defaultTableCell),
+          id: this.getUuid()
+        },
+        '2-1': {
+          ...this.deepCopy(defaultTableCell),
+          id: this.getUuid()
+        },
+        '2-2': {
+          ...this.deepCopy(defaultTableCell),
           id: this.getUuid()
         }
       },
@@ -267,7 +248,7 @@ export default {
           label: '属性',
           status: 'default',
           event: () => {
-            this.$store.commit('printTemplateModule/setGlobalCount')
+            this.$store.commit('printTemplateModule/setPaletteCount')
           }
         }
       ]
@@ -276,11 +257,12 @@ export default {
   created() {},
   mounted() {
     if (this.propValue.tableConfig) {
-      this.tableConfig = this.propValue.tableConfig
+      this.tableConfig = this.deepCopy(this.propValue.tableConfig)
     }
     if (this.propValue.tableData) {
-      this.tableConfig = this.propValue.tableData
+      this.tableData = this.deepCopy(this.propValue.tableData)
     }
+    this.reRenderTableLayout()
   },
   computed: {
     ...mapState({
@@ -355,6 +337,8 @@ export default {
     },
     handleCellMousedown(e, x, y) {
       this.$refs['simple-table-contextmenu'].hide()
+      this.$store.commit('printTemplateModule/setInEditorStatus', true)
+      this.$store.commit('printTemplateModule/setClickComponentStatus', true)
       this.$store.commit('printTemplateModule/setCurTableCell', {
         component: this.tableData[`${x}-${y}`]
       })
@@ -538,20 +522,35 @@ export default {
     handleMouseDownOnResize(row, col, e) {
       e.stopPropagation()
       e.preventDefault()
-      const tdEleRect = e.target.parentElement?.getBoundingClientRect()
-      if (!tdEleRect) {
+      const element = this.tableData[`${row}-${col}`]
+      const curIndex = (row - 1) * this.tableConfig.cols + col - 1
+      const curTableConfig = this.tableConfig.layoutDetail[curIndex]
+      if (!element) {
+        return
+      }
+      const comEle = document.getElementById(`roy-component-${element.id}`)
+      if (!comEle) {
         return
       }
       const move = (moveEvent) => {
-        const { x, y } = tdEleRect
-        const newX = moveEvent.clientX
-        const newY = moveEvent.clientY
+        const { width, height } = comEle.getBoundingClientRect()
+        const deltaX = moveEvent.movementX
+        const deltaY = moveEvent.movementY
 
         for (let ir = 1; ir <= this.tableConfig.rows; ir++) {
-          this.tableData[`${ir}-${col}`].width = (newX - x) / this.scale
+          const irIndex = (ir - 1) * this.tableConfig.cols + col - 1
+          const irCellConfig = this.tableConfig.layoutDetail[irIndex]
+          if (irCellConfig.colSpan === curTableConfig.colSpan) {
+            this.tableData[`${ir}-${col}`].width = (width + deltaX) / this.scale
+          }
         }
         for (let ic = 1; ic <= this.tableConfig.cols; ic++) {
-          this.tableData[`${row}-${ic}`].height = (newY - y) / this.scale
+          const icIndex = (row - 1) * this.tableConfig.cols + ic - 1
+          const icCellConfig = this.tableConfig.layoutDetail[icIndex]
+          if (icCellConfig.rowSpan === curTableConfig.rowSpan) {
+            this.tableData[`${row}-${ic}`].height =
+              (height + deltaY) / this.scale
+          }
         }
       }
       const up = () => {
@@ -560,9 +559,33 @@ export default {
       }
       document.addEventListener('mousemove', move)
       document.addEventListener('mouseup', up)
+    },
+    setTablePropValue() {
+      this.$store.commit('printTemplateModule/setPropValue', {
+        id: this.element.id,
+        propValue: {
+          tableData: this.tableData,
+          tableConfig: this.tableConfig
+        }
+      })
     }
   },
-  watch: {}
+  watch: {
+    tableData: {
+      handler() {
+        this.setTablePropValue()
+      },
+      deep: true,
+      immediate: true
+    },
+    tableConfig: {
+      handler() {
+        this.setTablePropValue()
+      },
+      deep: true,
+      immediate: true
+    }
+  }
 }
 </script>
 

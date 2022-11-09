@@ -11,6 +11,7 @@ export const renderers = {
                 field,
                 defaultValue,
                 isRadio = true,
+                customCallBack,
                 options: inOpt
               } = group
               if (inOpt && inOpt.length) {
@@ -25,8 +26,8 @@ export const renderers = {
                       }
                       title={option.label}
                       onClick={() => {
-                        if (option.customCallBack) {
-                          option.customCallBack(params, field, option)
+                        if (customCallBack) {
+                          customCallBack(params, field, option)
                         } else {
                           if (!isRadio) {
                             value === data[field]

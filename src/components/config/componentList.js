@@ -38,7 +38,7 @@ export const componentList = [
       width: 200,
       height: 50,
       fontSize: 10,
-      background: undefined,
+      background: null,
       rotate: 0,
       justifyContent: 'flex-start',
       alignItems: 'flex-start',
@@ -60,7 +60,7 @@ export const componentList = [
       width: 500,
       height: 200,
       fontSize: 12,
-      background: undefined,
+      background: null,
       rotate: 0
     },
     groupStyle: {}
@@ -75,10 +75,9 @@ export const componentList = [
       width: 'auto',
       height: 'auto',
       fontSize: 12,
-      background: undefined,
+      background: '#FFFFFF',
       borderWidth: 2,
       borderColor: '#212121',
-      borderType: 'solid',
       rotate: 0
     },
     groupStyle: {}
@@ -122,7 +121,7 @@ export const componentList = [
       borderType: 'solid',
       width: 200,
       height: 200,
-      background: undefined,
+      background: null,
       rotate: 0
     },
     groupStyle: {}

@@ -41,6 +41,7 @@ export default {
       }
 
       data.id = generateID()
+      data.label = `${data.name}-${data.id}`
       store.commit('printTemplateModule/addComponent', {
         component: deepCopy(data)
       })

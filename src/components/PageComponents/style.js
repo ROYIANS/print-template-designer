@@ -24,7 +24,7 @@ const commonProps = {
   },
   background: {
     type: String,
-    default: '#FFFFFF'
+    default: 'transparent'
   },
   border: {
     type: String,
@@ -251,8 +251,7 @@ export const StyledStar = styled('div', starProps)`
 export const StyledSimpleTable = styled('div', simpleTableProps)`
   width: 100%;
   height: 100%;
-  overflow: hidden;
-  position: relative;
+  position: absolute;
   border: none;
   padding: 0;
   margin: 0;
@@ -260,38 +259,15 @@ export const StyledSimpleTable = styled('div', simpleTableProps)`
   background: ${(props) => props.background};
 
   table {
+    table-layout: fixed;
     border-collapse: separate;
-    border-spacing: 0;
-    border-top: ${(props) => {
-      const { borderWidth, borderType, borderColor } = props
-      if (borderType === 'none') {
-        return borderType
-      } else {
-        return `${borderWidth}px ${borderType} ${borderColor}`
-      }
-    }};
-    border-left: ${(props) => {
-      const { borderWidth, borderType, borderColor } = props
-      if (borderType === 'none') {
-        return borderType
-      } else {
-        return `${borderWidth}px ${borderType} ${borderColor}`
-      }
-    }};
+    border-spacing: ${(props) => `${props.borderWidth}px`};
+    background-color: ${(props) => `${props.borderColor}`};
   }
 
   td {
     position: relative;
-    border: ${(props) => {
-      const { borderWidth, borderType, borderColor } = props
-      if (borderType === 'none') {
-        return borderType
-      } else {
-        return `${borderWidth}px ${borderType} ${borderColor}`
-      }
-    }};
-    border-top: none;
-    border-left: none;
+    background-color: ${(props) => `${props.background || '#FFF'}`};
   }
 
   .roy-simple-table-cell--selected {

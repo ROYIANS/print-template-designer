@@ -15,7 +15,7 @@
         @click="onClick(transformIndex(index))"
       >
         <i :class="getComponent(index).icon" style="padding-right: 5px"></i>
-        <span>{{ getComponent(index).label }}</span>
+        <span class="roy-page-toc__label">{{ getComponent(index).label }}</span>
         <div class="roy-page-toc__buttons">
           <span
             class="ri-arrow-up-line"
@@ -149,6 +149,14 @@ export default {
     padding: 0 10px;
     position: relative;
     user-select: none;
+
+    .roy-page-toc__label {
+      text-align: left;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      width: 50%;
+      overflow: hidden;
+    }
 
     i {
       font-size: 12px;

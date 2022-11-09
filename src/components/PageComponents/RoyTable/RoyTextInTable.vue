@@ -120,6 +120,7 @@ export default {
               '黑体',
               '楷体',
               '仿宋',
+              '宋体',
               'Arial',
               'Tahoma',
               'Verdana'
