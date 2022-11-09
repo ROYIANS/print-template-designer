@@ -80,6 +80,9 @@ export default {
       })
     },
     setEdit() {
+      if (this.canEdit) {
+        return
+      }
       if (this.element.isLock) {
         return
       }

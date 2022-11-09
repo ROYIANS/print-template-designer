@@ -25,7 +25,11 @@
               :key="index"
               :colspan="getItColSpan(row, col)"
               :rowspan="getItRowSpan(row, col)"
-              style="padding: 0"
+              :style="{
+                width: `${tableData[`${row}-${col}`].width}px`,
+                height: `${tableData[`${row}-${col}`].height}px`,
+                padding: '0'
+              }"
               @mousedown.stop="(e) => handleCellMousedown(e, row, col)"
               @mouseenter.stop.prevent="handleCellMouseenter(row, col)"
               @mouseup="handleMouseUp"
@@ -256,13 +260,18 @@ export default {
   },
   created() {},
   mounted() {
+    let preSettled = false
     if (this.propValue.tableConfig) {
+      preSettled = true
       this.tableConfig = this.deepCopy(this.propValue.tableConfig)
     }
     if (this.propValue.tableData) {
+      preSettled = true
       this.tableData = this.deepCopy(this.propValue.tableData)
     }
-    this.reRenderTableLayout()
+    if (!preSettled) {
+      this.reRenderTableLayout()
+    }
   },
   computed: {
     ...mapState({
