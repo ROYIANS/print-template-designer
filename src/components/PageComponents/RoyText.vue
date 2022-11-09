@@ -115,6 +115,7 @@ export default {
             fontFamilyList: [
               '黑体',
               '楷体',
+              '宋体',
               '仿宋',
               'Arial',
               'Tahoma',

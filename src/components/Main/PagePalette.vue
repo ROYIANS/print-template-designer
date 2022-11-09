@@ -1,8 +1,29 @@
 <template>
   <div v-if="initCompleted" class="roy-page-tools">
     <div v-if="curActiveComponent && curActiveComponent.id">
+      <el-divider v-if="settingFormItemConfig.length" content-position="left">
+        属性设置
+      </el-divider>
       <vxe-form
-        ref="form"
+        ref="setting-form"
+        sync-resize
+        :title-overflow="formGlobalConfigIn.titleOverflow"
+        :data="settingFormData"
+        :items="settingFormItemConfig"
+        :rules="{}"
+        :span="formGlobalConfigIn.span"
+        :align="formGlobalConfigIn.align"
+        :valid-config="formGlobalConfigIn.validConfig"
+        :size="formGlobalConfigIn.size"
+        :title-align="formGlobalConfigIn.titleAlign"
+        :title-width="formGlobalConfigIn.titleWidth"
+        :title-colon="formGlobalConfigIn.titleColon"
+        :prevent-submit="formGlobalConfigIn.preventSubmit"
+        :loading="formGlobalConfigIn.loading"
+      />
+      <el-divider content-position="left">样式设置</el-divider>
+      <vxe-form
+        ref="paletteForm"
         sync-resize
         :title-overflow="formGlobalConfigIn.titleOverflow"
         :data="formData"
@@ -36,7 +57,10 @@
 import { mapState } from 'vuex'
 import commonMixin from '@/mixin/commonMixin'
 import { renderers } from '@/components/config/renderers'
-import { paletteConfigList } from '@/components/config/paletteConfig'
+import {
+  paletteConfigList,
+  settingConfigList
+} from '@/components/config/paletteConfig'
 
 export default {
   name: 'PagePalette',
@@ -49,6 +73,10 @@ export default {
     formItemConfig() {
       let curComponentCode = this.curActiveComponent?.component || 'no'
       return this.formItemConfigs[curComponentCode] || []
+    },
+    settingFormItemConfig() {
+      let curComponentCode = this.curActiveComponent?.component || 'no'
+      return this.settingFormItemConfigs[curComponentCode] || []
     },
     curActiveComponent() {
       return this.curTableCell || this.curComponent
@@ -72,7 +100,9 @@ export default {
         }
       },
       formData: {},
-      formItemConfigs: paletteConfigList
+      formItemConfigs: paletteConfigList,
+      settingFormData: {},
+      settingFormItemConfigs: settingConfigList
     }
   },
   methods: {
@@ -94,6 +124,7 @@ export default {
       handler() {
         if (this.curActiveComponent) {
           this.formData = this.curActiveComponent.style
+          this.settingFormData = this.curActiveComponent
         }
       },
       deep: true,
