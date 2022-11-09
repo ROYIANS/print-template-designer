@@ -49,6 +49,10 @@ export default {
     propValue: {
       type: String,
       default: ''
+    },
+    bindValue: {
+      type: String,
+      default: ''
     }
   },
   computed: {
@@ -70,6 +74,9 @@ export default {
   methods: {
     initMounted() {},
     setEdit() {
+      if (this.canEdit) {
+        return
+      }
       if (this.element.isLock) {
         return
       }
