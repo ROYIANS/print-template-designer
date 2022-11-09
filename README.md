@@ -5,9 +5,9 @@ A vue2 component for design a page for print / 一个使用Vue2的组件，用�
 
 [Click Here | 点击这里预览](https://royians.github.io/print-template-designer/)
 
-## 仅个人研究学习用
+## 仅个人研究学习用，并不保证可用性和健壮性
 
-本项目为本人在学习可视化的学习探索项目，是个DEMO。写的也还不成熟，希望可以多多提建议。主要参考了文末几位dalao的项目和文章。
+本项目为本人在学习可视化的学习探索项目，是个DEMO。写的也还不成熟，希望可以多多提建议。主要参考了文末几位dalao的项目和文章，在此基础上进行编写代码。主要是为了锻炼自己的代码能力和设计能力。
 
 ## 截图
 
