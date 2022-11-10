@@ -13,6 +13,7 @@ import 'normalize.css/normalize.css'
 import '@/assets/animate.css'
 import '@/assets/main.scss'
 import '@/assets/iconfont/iconfont.css'
+import '@wangeditor/editor/dist/css/style.css'
 
 import NightModeStore from '../stores/modules/index.js'
 

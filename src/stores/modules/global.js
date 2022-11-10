@@ -37,6 +37,27 @@ export const state = {
   // 是否在编辑器中，用于判断复制、粘贴组件时是否生效，如果在编辑器外，则无视这些操作
   isInEditor: false,
   componentData: [],
+  dataSource: [
+    {
+      title: '当前日期（中文）',
+      field: 'curDateChn',
+      typeName: '字符',
+      type: String
+    },
+    {
+      title: '当前日期（数字）',
+      field: 'curDateNum',
+      typeName: '字符',
+      type: String
+    },
+    {
+      title: '当前日期时间（数字）',
+      field: 'curDateTime',
+      typeName: '字符',
+      type: String
+    }
+  ],
+  dataSet: {},
   curComponent: null,
   curTableCell: null,
   curComponentIndex: null,
@@ -105,6 +126,32 @@ export const mutations = {
         store.commit('printTemplateModule/recordSnapshot')
       }
     }
+  },
+
+  setBindValue({ componentData }, { bindValue, id }) {
+    if (componentData.length) {
+      let newComponentValue = null
+      let newComponentIndex = null
+      for (let i = 0; i < componentData.length; i++) {
+        if (componentData[i].id === id) {
+          newComponentIndex = i
+          newComponentValue = componentData[i]
+          newComponentValue.bindValue = bindValue
+        }
+      }
+      if (newComponentIndex !== null) {
+        Vue.set(componentData, newComponentIndex, newComponentValue)
+        store.commit('printTemplateModule/recordSnapshot')
+      }
+    }
+  },
+
+  setDataSource(state, dataSource) {
+    state.dataSource = dataSource
+  },
+
+  setDataSet(state, dataSet) {
+    state.dataSet = dataSet
   },
 
   setShapeStyle({ curComponent }, { top, left, width, height, rotate }) {

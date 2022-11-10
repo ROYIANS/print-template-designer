@@ -97,6 +97,14 @@ export default {
       type: [Object, Boolean],
       default: false
     },
+    preDataSource: {
+      type: [Array, Boolean],
+      default: false
+    },
+    preDataSet: {
+      type: [Object, Boolean],
+      default: false
+    },
     config: {
       type: Object,
       default: () => {
@@ -186,6 +194,15 @@ export default {
           'printTemplateModule/setPageConfig',
           this.prePageConfig
         )
+      }
+      if (this.preDataSource) {
+        this.$store.commit(
+          'printTemplateModule/setDataSource',
+          this.preDataSource
+        )
+      }
+      if (this.preDataSet) {
+        this.$store.commit('printTemplateModule/setDataSet', this.preDataSet)
       }
     },
     dayNightChange() {

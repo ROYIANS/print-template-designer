@@ -45,6 +45,7 @@
                 :cur-id="curClickedId"
                 :element="tableData[`${row}-${col}`]"
                 :prop-value.sync="tableData[`${row}-${col}`].propValue"
+                :bind-value.sync="tableData[`${row}-${col}`].bindValue"
                 :style="{
                   width: `${tableData[`${row}-${col}`].width}px`,
                   height: `${tableData[`${row}-${col}`].height}px`

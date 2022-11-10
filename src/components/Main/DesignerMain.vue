@@ -28,6 +28,7 @@ import ToolBar from '@/components/ToolBar/ToolBar.vue'
 import Editor from '@/components/Editor/Editor.vue'
 import { componentList } from '@/components/config/componentList'
 import { mapState } from 'vuex'
+import toast from '@/utils/toast'
 
 /**
  * 主操作视图
@@ -76,6 +77,8 @@ export default {
 
         this.$store.commit('printTemplateModule/addComponent', { component })
         this.$store.commit('printTemplateModule/recordSnapshot')
+      } else {
+        toast('拖拽元素非页面组件，此次拖拽无效', 'info')
       }
     },
 
