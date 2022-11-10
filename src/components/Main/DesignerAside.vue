@@ -14,7 +14,11 @@
         :index="`${index}`"
       >
         <div class="roy-designer-aside__menu__icon">
-          <i :class="menu.icon"></i>
+          <i
+            :class="
+              curActiveComponentCode === menu.code ? menu.activeIcon : menu.icon
+            "
+          ></i>
           <span>{{ menu.name }}</span>
         </div>
       </el-menu-item>
@@ -43,31 +47,36 @@ export default {
         {
           name: '组件',
           code: 'component',
-          icon: 'ri-drag-drop-fill',
+          icon: 'ri-drag-drop-line',
+          activeIcon: 'ri-drag-drop-fill',
           component: () => import('./PageComponent.vue')
         },
         {
           name: '结构',
           code: 'toc',
-          icon: 'ri-node-tree',
+          icon: 'ri-building-2-line',
+          activeIcon: 'ri-building-2-fill',
           component: () => import('./PageToc.vue')
         },
         {
           name: '属性',
           code: 'palette',
           icon: 'ri-palette-line',
+          activeIcon: 'ri-palette-fill',
           component: () => import('./PagePalette.vue')
         },
         {
           name: '数据源',
           code: 'datasource',
           icon: 'ri-database-2-line',
+          activeIcon: 'ri-database-2-fill',
           component: () => import('./DataSource.vue')
         },
         {
           name: '全局',
           code: 'setting',
-          icon: 'ri-sound-module-line',
+          icon: 'ri-settings-6-line',
+          activeIcon: 'ri-settings-6-fill',
           component: () => import('./GlobalSetting.vue')
         }
       ],

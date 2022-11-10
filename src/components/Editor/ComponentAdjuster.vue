@@ -22,6 +22,11 @@
       class="ri-lock-fill roy-component-adjuster__lock"
     ></span>
     <span
+      v-show="element.bindValue"
+      class="ri-link-unlink-m roy-component-adjuster__bind"
+      @click="unlinkElement"
+    ></span>
+    <span
       class="roy-component-adjuster__move"
       :class="element.icon"
       @mousedown="handleMouseMoveItem"
@@ -248,6 +253,16 @@ export default {
 
       document.addEventListener('mousemove', move)
       document.addEventListener('mouseup', up)
+    },
+    unlinkElement() {
+      this.$store.commit('printTemplateModule/setBindValue', {
+        id: this.element.id,
+        bindValue: null
+      })
+      this.$store.commit('printTemplateModule/setPropValue', {
+        id: this.element.id,
+        propValue: ''
+      })
     },
     handleMouseDownOnPoint(point, e) {
       this.$store.commit('printTemplateModule/setInEditorStatus', true)
@@ -488,15 +503,32 @@ export default {
     left: -25px;
     z-index: 9;
     padding: 2px;
-    border-radius: 1px;
+    font-size: 10px;
+    border-radius: 2px;
     font-weight: 100;
     cursor: move;
-    background: var(--roy-color-warning-dark-2);
-    opacity: 0.8;
-    color: #fff;
-    &:active {
-      background: var(--roy-color-primary-light-5);
+    background: var(--roy-color-primary-light-7);
+    color: #aaaaaa;
+    &:hover {
+      color: #212121;
     }
+    &:active {
+      color: #212121;
+      background: var(--roy-color-primary-light-3);
+    }
+  }
+
+  .roy-component-adjuster__bind {
+    position: absolute;
+    top: 20px;
+    left: -25px;
+    z-index: 9;
+    cursor: pointer;
+    border-radius: 2px;
+    padding: 2px;
+    font-size: 10px;
+    background: #ffffff;
+    color: #999;
   }
 
   [class^='roy-component-adjuster__shape-point--'] {

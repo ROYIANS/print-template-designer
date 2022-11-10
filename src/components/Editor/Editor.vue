@@ -51,6 +51,7 @@
               :element="item"
               :scale="scale"
               :prop-value="item.propValue"
+              :bind-value="item.bindValue"
             />
           </ComponentAdjuster>
           <!-- 选中区域 -->

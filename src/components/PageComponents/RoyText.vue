@@ -39,8 +39,14 @@
 import { StyledText } from '@/components/PageComponents/style'
 import RoyModal from '@/components/RoyModal/RoyModal'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
-import '@wangeditor/editor/dist/css/style.css'
+import {
+  toolBarConfig,
+  editorConfig,
+  mode,
+  menuConfig
+} from '@/components/config/editorConfig'
 import { mapState } from 'vuex'
+import { Boot } from '@wangeditor/editor'
 
 export default {
   name: 'RoyText',
@@ -73,75 +79,9 @@ export default {
       wangEditor: null,
       showEditor: false,
       html: this.propValue,
-      toolbarConfig: {
-        toolbarKeys: [
-          'bold',
-          'underline',
-          'italic',
-          'through',
-          'sub',
-          'sup',
-          'clearStyle',
-          'color',
-          'bgColor',
-          'fontSize',
-          'fontFamily',
-          'indent',
-          'delIndent',
-          'justifyLeft',
-          'justifyRight',
-          'justifyCenter',
-          'justifyJustify',
-          'lineHeight',
-          'headerSelect',
-          'header1',
-          'header2',
-          'header3',
-          'header4',
-          'header5',
-          'undo',
-          'redo',
-          'enter',
-          'bulletedList',
-          'numberedList'
-        ]
-      },
-      editorConfig: {
-        placeholder: '请输入内容...',
-        scroll: true,
-        autoFocus: true,
-        MENU_CONF: {
-          fontFamily: {
-            fontFamilyList: [
-              '黑体',
-              '楷体',
-              '宋体',
-              '仿宋',
-              'Arial',
-              'Tahoma',
-              'Verdana'
-            ]
-          },
-          fontSize: {
-            fontSizeList: [
-              '10pt',
-              '12pt',
-              '13pt',
-              '14pt',
-              '15pt',
-              '16pt',
-              '19pt',
-              '22pt',
-              '24pt',
-              '29pt',
-              '32pt',
-              '40pt',
-              '48pt'
-            ]
-          }
-        }
-      },
-      mode: 'simple' // or 'default'
+      toolbarConfig: toolBarConfig,
+      editorConfig: editorConfig,
+      mode: mode
     }
   },
   methods: {
@@ -161,7 +101,9 @@ export default {
       e.stopPropagation()
     }
   },
-  created() {},
+  created() {
+    Boot.registerMenu(menuConfig)
+  },
   watch: {
     html() {
       this.onBlur()

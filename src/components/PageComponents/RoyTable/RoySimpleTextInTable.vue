@@ -11,13 +11,19 @@
     @dblclick="setEdit"
     @click="activeCell"
     @contextmenu="setEdit"
+    @drop="handleDrop"
+    @dragenter="handleDragEnter"
+    @dragleave="handleDragLeave"
   >
     <StyledSimpleText
       ref="editArea"
       class="edit-area"
       v-bind="style"
       :contenteditable="canEdit"
-      :class="{ 'can-edit': canEdit }"
+      :class="{
+        'can-edit': canEdit,
+        'is-drag-over': dragOver
+      }"
       tabindex="0"
       @paste="clearStyle"
       @mousedown="handleMouseDown"
@@ -32,6 +38,7 @@
 import { StyledSimpleText } from '@/components/PageComponents/style'
 import commonMixin from '@/mixin/commonMixin'
 import { mapState } from 'vuex'
+import toast from '@/utils/toast'
 
 /**
  *
@@ -51,6 +58,10 @@ export default {
       type: String,
       default: ''
     },
+    bindValue: {
+      type: Object,
+      default: null
+    },
     curId: {
       type: String,
       default: ''
@@ -58,7 +69,8 @@ export default {
   },
   computed: {
     ...mapState({
-      curComponent: (state) => state.printTemplateModule.curComponent
+      curComponent: (state) => state.printTemplateModule.curComponent,
+      dataSource: (state) => state.printTemplateModule.dataSource
     }),
     style() {
       return this.element.style || {}
@@ -69,7 +81,8 @@ export default {
   },
   data() {
     return {
-      canEdit: false
+      canEdit: false,
+      dragOver: false
     }
   },
   methods: {
@@ -81,6 +94,9 @@ export default {
     },
     setEdit() {
       if (this.canEdit) {
+        return
+      }
+      if (this.bindValue) {
         return
       }
       if (this.element.isLock) {
@@ -122,6 +138,30 @@ export default {
       }
 
       this.$emit('input', this.element, e.target.innerHTML)
+    },
+    handleDrop(e) {
+      e.preventDefault()
+      e.stopPropagation()
+
+      this.dragOver = false
+
+      const index = e.dataTransfer.getData('datasource-index')
+      if (index) {
+        let bindingDataSource = this.dataSource[index]
+        if (bindingDataSource) {
+          this.$emit('update:bindValue', bindingDataSource)
+          this.$emit('update:propValue', `[绑定:${bindingDataSource.title}]`)
+          this.canEdit = false
+        }
+      } else {
+        toast('拖拽元素非数据源元素，此次拖拽无效', 'info')
+      }
+    },
+    handleDragEnter() {
+      this.dragOver = true
+    },
+    handleDragLeave() {
+      this.dragOver = false
     }
   },
   created() {},
@@ -150,6 +190,10 @@ export default {
     height: 100%;
     outline: none;
     word-break: break-all;
+  }
+  .is-drag-over {
+    border: 2px solid var(--roy-color-warning);
+    background: #cccccc;
   }
   .can-edit {
     height: 100%;
