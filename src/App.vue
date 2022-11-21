@@ -1,36 +1,47 @@
 <template>
-  <PtdDesigner ref="designer">
-    <template v-slot:roy-designer-header-slot>
-      <div class="head-slot">
-        <i
-          v-for="(tool, index) in headIconConfig"
-          :key="index"
-          :class="tool.icon"
-          class="roy-header-icon"
-          @click="tool.event"
-        ></i>
-      </div>
-    </template>
-    <template v-slot:roy-designer-toolbar-slot>
-      <el-tooltip
-        v-for="(tool, index) in toolbarSlotConfig"
-        :key="index"
-        :content="tool.name"
-        :open-delay="600"
-        :visible-arrow="false"
-        effect="dark"
-        placement="bottom"
-      >
-        <div class="toolbar-slot-item" @click="tool.event">
-          <i :class="tool.icon"></i>
+  <div style="height: 100%">
+    <PtdDesigner ref="designer">
+      <template v-slot:roy-designer-header-slot>
+        <div class="head-slot">
+          <i
+            v-for="(tool, index) in headIconConfig"
+            :key="index"
+            :class="tool.icon"
+            class="roy-header-icon"
+            @click="tool.event"
+          ></i>
         </div>
-      </el-tooltip>
-    </template>
-  </PtdDesigner>
+      </template>
+      <template v-slot:roy-designer-toolbar-slot>
+        <el-tooltip
+          v-for="(tool, index) in toolbarSlotConfig"
+          :key="index"
+          :content="tool.name"
+          :open-delay="600"
+          :visible-arrow="false"
+          effect="dark"
+          placement="bottom"
+        >
+          <div class="toolbar-slot-item" @click="tool.event">
+            <i :class="tool.icon"></i>
+          </div>
+        </el-tooltip>
+      </template>
+    </PtdDesigner>
+    <PtdViewer
+      v-if="viewerVisible"
+      :visible.sync="viewerVisible"
+      :component-data="componentData"
+      :page-config="pageConfig"
+      :data-set="dataSet"
+      :data-source="dataSource"
+    />
+  </div>
 </template>
 
 <script>
 import toast from '@/utils/toast'
+import PtdViewer from '@/components/Viewer/PtdViewer'
 import { mapState } from 'vuex'
 
 export default {
@@ -39,10 +50,15 @@ export default {
     toast('欢迎使用ROYIANS的打印模板设计器，仅个人学习使用', 'info')
     console.log('contributed by ROYIANS@Little-Dreamland﹢')
   },
+  components: {
+    PtdViewer
+  },
   computed: {
     ...mapState({
       pageConfig: (state) => state.printTemplateModule.pageConfig,
-      componentData: (state) => state.printTemplateModule.componentData
+      componentData: (state) => state.printTemplateModule.componentData,
+      dataSource: (state) => state.printTemplateModule.dataSource,
+      dataSet: (state) => state.printTemplateModule.dataSet
     })
   },
   data() {
@@ -68,11 +84,23 @@ export default {
               '_blank'
             )
           }
+        },
+        {
+          name: 'ShowViewer',
+          icon: 'ri-focus-2-line',
+          event: () => {
+            this.showViewer()
+          }
         }
-      ]
+      ],
+      viewerVisible: false
     }
   },
-  methods: {}
+  methods: {
+    showViewer() {
+      this.viewerVisible = true
+    }
+  }
 }
 </script>
 

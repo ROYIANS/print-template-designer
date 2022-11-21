@@ -11,7 +11,7 @@
     theme="day"
   >
     <el-header class="roy-designer-header" height="40px">
-      <div class="roy-designer-header__text">
+      <div id="tttt" class="roy-designer-header__text">
         <i class="ri-pen-nib-line"></i>
         <span>打印模板设计器 | {{ pageConfig.title }}</span>
       </div>
@@ -26,12 +26,6 @@
             :class="tool.icon"
             :title="tool.name"
             @click="tool.event"
-          ></i>
-          <i
-            v-if="configIn.toolbarConfig.showPreView"
-            class="ri-printer-cloud-line"
-            title="预览"
-            v-print="'#designer-page'"
           ></i>
           <i
             v-if="configIn.toolbarConfig.showNightMode && isNightMode"
@@ -70,9 +64,6 @@ import DesignerAside from './DesignerAside.vue'
 import DesignerMain from './DesignerMain.vue'
 import shepherd from '@/components/RoyUserTour/userTour'
 import toast from '@/utils/toast'
-import html2canvas from 'html2canvas'
-import { jsPDF } from 'jspdf'
-import print from 'vue-print-nb'
 
 const VERSION = config.version
 
@@ -84,9 +75,6 @@ export default {
   components: {
     DesignerAside,
     DesignerMain
-  },
-  directives: {
-    print
   },
   props: {
     preComponentData: {
@@ -117,8 +105,7 @@ export default {
       defaultExpendAside: true,
       configIn: {
         toolbarConfig: {
-          buttons: ['guide', 'exportPdf', 'exportTemplate', 'importTemplate'],
-          showPreView: true,
+          buttons: ['guide', 'exportTemplate', 'importTemplate'],
           showNightMode: true
         }
       },
@@ -128,12 +115,6 @@ export default {
           name: '界面指引',
           icon: 'ri-question-line',
           event: this.showUserGuide
-        },
-        {
-          code: 'exportPdf',
-          name: '导出PDF',
-          icon: 'ri-file-pdf-line',
-          event: this.exportPDF
         },
         {
           code: 'exportTemplate',
@@ -402,26 +383,6 @@ export default {
       eleA.click()
       document.body.removeChild(eleA)
       toast('导出成功！', 'success')
-    },
-    exportPDF() {
-      html2canvas(document.querySelector('#designer-page'), {
-        scale: '5'
-      }).then((canvas) => {
-        let doc = new jsPDF({
-          orientation: this.pageConfig.pageDirection,
-          format: this.pageConfig.pageSize,
-          unit: 'mm'
-        })
-        doc.addImage({
-          imageData: canvas.toDataURL('image/jpeg'),
-          format: 'JPEG',
-          x: 0,
-          y: 0,
-          width: this.pageConfig.pageWidth,
-          height: this.pageConfig.pageHeight
-        })
-        doc.save('打印预览.pdf')
-      })
     },
     getTemplateData() {
       return {
