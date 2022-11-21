@@ -17,10 +17,14 @@ export const state = {
     pageSize: 'A4',
     // 页面方向 l 横向长 p 纵向长
     pageDirection: 'p',
-    // 页面长度：cm
+    // 页面长度：mm
     pageWidth: 210,
-    // 页面高度：cm
+    // 页面高度：mm
     pageHeight: 297,
+    // 页面下边距
+    pageMarginBottom: 1,
+    // 页面上边距
+    pageMarginTop: 1,
     // 页面标题/模板标题
     title: '新建模板',
     // 默认缩放比例：100%

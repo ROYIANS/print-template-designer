@@ -143,6 +143,18 @@ export const StyledText = styled('div', textProps)`
       return `${borderWidth}px ${borderType} ${borderColor}`
     }
   }};
+  table {
+    table-layout: fixed;
+    border-collapse: separate;
+    border-spacing: 1px;
+    background-color: #000000;
+    padding: 1px;
+  }
+
+  td {
+    position: relative;
+    background-color: #fff;
+  }
 `
 
 export const StyledSimpleText = styled('div', textProps)`

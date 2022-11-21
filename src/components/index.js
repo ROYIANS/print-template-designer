@@ -8,6 +8,7 @@
  * ╩╚═╚═╝ ╩ ╩╩ ╩╝╚╝╚═╝
  */
 import PtdDesigner from './Main/Home.vue'
+import PtdViewer from './Viewer/PtdViewer'
 
 import 'normalize.css/normalize.css'
 import '@/assets/animate.css'
@@ -18,7 +19,8 @@ import '@wangeditor/editor/dist/css/style.css'
 import NightModeStore from '../stores/modules/index.js'
 
 const componentsLib = {
-  PtdDesigner
+  PtdDesigner,
+  PtdViewer
 }
 const install = function (Vue, opts = {}) {
   if (install.installed) {
@@ -40,6 +42,7 @@ const install = function (Vue, opts = {}) {
 const Api = {
   version: 'ROY-PRINT-DESIGNER@0.0.18-dev',
   PtdDesigner,
+  PtdViewer,
   NightModeStore,
   install
 }
