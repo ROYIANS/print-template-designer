@@ -170,6 +170,7 @@ export default {
       this.reDrawRuler()
     },
     rotatePage() {
+      this.$store.commit('printTemplateModule/togglePageDirection')
       this.rotateRect()
       this.reDrawRuler()
     },

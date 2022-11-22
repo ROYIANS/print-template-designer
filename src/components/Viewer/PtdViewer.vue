@@ -18,7 +18,13 @@
         <i class="ri-sticky-note-2-line"></i>
         <span>页面内容为空</span>
       </div>
-      <div v-else ref="viewer" class="roy-viewer" id="roy-viewer"></div>
+      <div
+        v-else
+        ref="viewer"
+        class="roy-viewer"
+        id="roy-viewer"
+        :class="isExportPDF ? '' : 'is-show-border'"
+      ></div>
       <div ref="tempHolder" class="roy-temp-holder"></div>
       <div class="roy-viewer-right-conor">
         <div class="roy-viewer-btn" @click="exportPdf">
@@ -38,10 +44,11 @@
 import commonMixin from '@/mixin/commonMixin'
 import RoyModal from '@/components/RoyModal/RoyModal'
 import RoyLoading from '@/components/RoyLoading'
-import generateViewerElement from '@/components/Viewer/viewer'
+import { generateViewerElement } from '@/components/Viewer/viewer'
 import html2canvas from 'html2canvas'
 import { jsPDF } from 'jspdf'
 import print from 'vue-print-nb'
+import toast from '@/utils/toast'
 
 /**
  * 打印模板预览组件
@@ -124,6 +131,7 @@ export default {
           renderPage.forEach((el) => {
             viewerElement.appendChild(el)
           })
+          toast('建议导出PDF后再打印，更精准', 'warning', 10000)
         } else {
           this.isBlankPage = true
         }
@@ -153,13 +161,18 @@ export default {
         const canvas = await html2canvas(pages[i], {
           scale: '5'
         })
+        const isNormalPage = this.pageConfig.pageDirection === 'p'
         doc.addImage({
           imageData: canvas.toDataURL('image/jpeg'),
           format: 'JPEG',
           x: 0,
           y: 0,
-          width: this.pageConfig.pageWidth,
-          height: this.pageConfig.pageHeight
+          width: isNormalPage
+            ? this.pageConfig.pageWidth
+            : this.pageConfig.pageHeight,
+          height: isNormalPage
+            ? this.pageConfig.pageHeight
+            : this.pageConfig.pageWidth
         })
       }
       doc.save(`${this.pageConfig.title || '预览'}.pdf`)
@@ -194,11 +207,14 @@ export default {
     width: 100%;
     background: #efefef;
     display: block;
+    overflow: auto;
     .roy-preview-page {
-      margin-left: auto;
-      margin-right: auto;
+      margin: 20px auto;
+    }
+  }
+  .is-show-border {
+    .roy-preview-page {
       border: solid 1px #000;
-      margin-bottom: 0.2in;
     }
   }
   .roy-temp-holder {
@@ -213,8 +229,8 @@ export default {
     background: #fff;
   }
   .roy-viewer-right-conor {
-    right: 15px;
-    bottom: 15px;
+    right: 25px;
+    bottom: 25px;
     position: absolute;
     .roy-viewer-btn {
       width: 100px;
@@ -249,5 +265,33 @@ export default {
       border: none;
     }
   }
+}
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: #f4f4f4;
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-track-piece {
+  background-color: #f4f4f4;
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 2px;
+  background: #e2e2e2;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #d9d9d9;
+}
+
+::selection {
+  background: #3e6dcb;
+  color: #fff;
 }
 </style>

@@ -1,6 +1,10 @@
 <template>
   <div style="height: 100%">
-    <PtdDesigner ref="designer">
+    <PtdDesigner
+      ref="designer"
+      :pre-data-source="preDataSource"
+      :pre-data-set="preDataSet"
+    >
       <template v-slot:roy-designer-header-slot>
         <div class="head-slot">
           <i
@@ -93,6 +97,31 @@ export default {
           }
         }
       ],
+      preDataSource: [
+        {
+          title: '当前日期（中文）',
+          field: 'curDateChn',
+          typeName: '字符',
+          type: String
+        },
+        {
+          title: '当前日期（数字）',
+          field: 'curDateNum',
+          typeName: '字符',
+          type: String
+        },
+        {
+          title: '当前日期时间（数字）',
+          field: 'curDateTime',
+          typeName: '字符',
+          type: String
+        }
+      ],
+      preDataSet: {
+        curDateTime: () => {
+          return new Date()
+        }
+      },
       viewerVisible: false
     }
   },

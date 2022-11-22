@@ -1,9 +1,18 @@
 import html2canvas from 'html2canvas'
 import Vue from 'vue'
 import { CONFIG } from '@/components/Viewer/viewer-constant'
-import { StyledText } from '@/components/PageComponents/style'
+import {
+  StyledCircle,
+  StyledLine,
+  StyledRect,
+  StyledSimpleText,
+  StyledStar,
+  StyledText,
+  StyledSimpleTable
+} from '@/components/PageComponents/style'
+import { AutoTable } from '@/components/Viewer/auto-table'
 
-export default async function generateViewerElement(
+export async function generateViewerElement(
   componentData,
   pagerConfig,
   dataSource,
@@ -26,7 +35,7 @@ export default async function generateViewerElement(
   return pageList
 }
 
-const renderMain = {
+export const renderMain = {
   async render({
     componentData,
     pagerConfig,
@@ -60,11 +69,16 @@ const renderMain = {
       fontSize,
       fontFamily,
       pageMarginBottom,
-      pageMarginTop
+      pageMarginTop,
+      pageDirection
     } = pagerConfig
     const newPage = document.createElement('div')
     newPage.style.width = `${pageWidth * COMMON_SCALE}px`
     newPage.style.height = `${pageHeight * COMMON_SCALE}px`
+    if (pageDirection === 'l') {
+      newPage.style.width = `${pageHeight * COMMON_SCALE}px`
+      newPage.style.height = `${pageWidth * COMMON_SCALE}px`
+    }
     newPage.style.marginTop = `${pageMarginTop * COMMON_SCALE}px`
     newPage.style.marginBottom = `${pageMarginBottom * COMMON_SCALE}px`
     newPage.style.background = background
@@ -78,6 +92,38 @@ const renderMain = {
     pageSet.pageList.push(newPage)
     return newPage
   },
+  async renderRoySimpleText({ element, dataSet, pageSet, pagerConfig }) {
+    let StyledSimpleTextConstructor = Vue.extend(StyledSimpleText)
+    const { propValue, bindValue, style } = element
+    let afterPropValue = propValue
+    if (bindValue) {
+      const { field } = bindValue
+      if (dataSet[field] && dataSet[field] instanceof Function) {
+        afterPropValue = dataSet[field]()
+      } else {
+        afterPropValue = dataSet[field]
+      }
+    }
+    let newPage = pageSet.curPage
+    if (newPage === null) {
+      newPage = await renderMain.renderPage(pagerConfig, pageSet)
+    }
+    const instance = new StyledSimpleTextConstructor({
+      propsData: style
+    })
+    instance.$mount()
+    const newElement = instance.$el
+    newElement.style.width = `${style.width}px`
+    newElement.style.height = `${style.height}px`
+    newElement.style.position = 'absolute'
+    newElement.style.left = `${style.left}px`
+    newElement.style.top = `${style.top}px`
+    newElement.style.transform = `rotate(${style.rotate}deg)`
+    newElement.style.overflow = 'hidden'
+    newElement.innerHTML = afterPropValue
+    newPage.appendChild(newElement)
+    instance.$destroy()
+  },
   async renderRoyText({
     element,
     dataSource,
@@ -86,75 +132,283 @@ const renderMain = {
     pagerConfig,
     tempHolder
   }) {
-    console.log(dataSet, dataSource)
     const { COMMON_SCALE } = CONFIG
-    const { pageHeight, pageMarginBottom, pageMarginTop } = pagerConfig
-    const realPageHeight = pageHeight * COMMON_SCALE
+    const {
+      pageHeight,
+      pageWidth,
+      pageDirection,
+      pageMarginBottom,
+      pageMarginTop
+    } = pagerConfig
+    const realPageHeight =
+      (pageDirection === 'p' ? pageHeight : pageWidth) * COMMON_SCALE
     const realPageMarginBottom = pageMarginBottom * COMMON_SCALE
     const realPageMarginTop = pageMarginTop * COMMON_SCALE
     let StyledTextConstructor = Vue.extend(StyledText)
     const { propValue, style } = element
-    if (pageSet.curPage === null) {
-      await renderMain.renderPage(pagerConfig, pageSet)
+    const afterPropValue = renderUtil.replaceTextWithDataSource(
+      propValue,
+      dataSet,
+      dataSource
+    )
+    let newPage = pageSet.curPage
+    if (newPage === null) {
+      newPage = await renderMain.renderPage(pagerConfig, pageSet)
     }
-    if (pageSet.curPage !== null) {
-      const instance = new StyledTextConstructor({
+    const instance = new StyledTextConstructor({
+      propsData: style
+    })
+    instance.$mount()
+    const newElement = instance.$el
+    newElement.style.width = `${style.width}px`
+    newElement.style.height = 'auto'
+    newElement.style.position = 'absolute'
+    newElement.style.left = `${style.left}px`
+    newElement.style.top = `${style.top}px`
+    newElement.innerHTML = afterPropValue
+    tempHolder.appendChild(newElement)
+    await renderUtil.wait()
+    const richTextImgList = await renderUtil.splitRichText(newElement)
+    const appendImage = async (imgList, imgIndex, page) => {
+      let newTextRootEle = document.createElement('div')
+      newTextRootEle.style.width = `${style.width}px`
+      newTextRootEle.style.position = 'absolute'
+      newTextRootEle.style.left = `${style.left}px`
+      const firstInitTop =
+        style.top < realPageMarginTop ? realPageMarginTop : style.top
+      newTextRootEle.style.top = `${
+        imgIndex === 0 ? firstInitTop : realPageMarginTop
+      }px`
+      newTextRootEle.style.display = 'inline-grid'
+      let maxHeight = realPageHeight - realPageMarginBottom - style.top
+      let curHeight = 0
+      let recurve = false
+      for (let i = imgIndex; i < imgList.length; i++) {
+        const imgData = imgList[i]
+        curHeight += imgData.height
+        if (!recurve) {
+          maxHeight = realPageHeight - realPageMarginBottom
+        }
+        if (curHeight > maxHeight) {
+          if (!recurve) {
+            const newPage = await renderMain.renderPage(pagerConfig, pageSet)
+            await appendImage(imgList, i, newPage)
+          }
+          recurve = true
+          break
+        } else {
+          const img = document.createElement('img')
+          img.src = imgData.src
+          img.style.width = `${imgData.width}px`
+          img.style.height = `${imgData.height}px`
+          newTextRootEle.appendChild(img)
+        }
+      }
+      page.appendChild(newTextRootEle)
+    }
+    if (richTextImgList && richTextImgList.length) {
+      await appendImage(richTextImgList, 0, newPage)
+    }
+    tempHolder.removeChild(newElement)
+    instance.$destroy()
+  },
+  async renderRoySimpleTable({
+    element,
+    dataSource,
+    dataSet,
+    pageSet,
+    pagerConfig,
+    tempHolder
+  }) {
+    const { COMMON_SCALE } = CONFIG
+    let StyledSimpleTableConstructor = Vue.extend(StyledSimpleTable)
+    let newPage = pageSet.curPage
+    if (newPage === null) {
+      newPage = await renderMain.renderPage(pagerConfig, pageSet)
+    }
+    const { style } = element
+    const {
+      pageHeight,
+      pageWidth,
+      pageDirection,
+      pageMarginBottom,
+      pageMarginTop
+    } = pagerConfig
+    const realPageHeight =
+      (pageDirection === 'p' ? pageHeight : pageWidth) * COMMON_SCALE
+    const realPageMarginBottom = pageMarginBottom * COMMON_SCALE
+    const realPageMarginTop = pageMarginTop * COMMON_SCALE
+    console.log(realPageMarginTop)
+    let maxHeight = realPageHeight - realPageMarginBottom - style.top
+
+    let autoTable = new AutoTable({
+      type: element.component,
+      propValue: element.propValue,
+      pagerConfig: pagerConfig,
+      tempHolder: tempHolder,
+      dataSource: dataSource,
+      dataSet: dataSet
+    })
+    let tableHtml = autoTable.getOriginTableItem()
+
+    const instance = new StyledSimpleTableConstructor({
+      propsData: style
+    })
+    instance.$mount()
+    const newElement = instance.$el
+    newElement.style.width = `${style.width}px`
+    newElement.style.position = 'absolute'
+    newElement.style.left = `${style.left}px`
+    newElement.style.top = `${style.top}px`
+    newElement.style.transform = `rotate(${style.rotate}deg)`
+    newElement.innerHTML = tableHtml
+    tempHolder.appendChild(newElement)
+    instance.$destroy()
+    const tdElements = newElement.getElementsByClassName('roy-simple-table-row')
+    let curHeight = 0
+    let curHtml = ''
+    let tables = []
+    let overflowPages = []
+    let maxTableWidth = 0
+    for (let i = 0; i < tdElements.length; i++) {
+      let curTd = tdElements[i]
+      let lastHeight = curHeight
+      curHeight += curTd.clientHeight
+      maxTableWidth =
+        maxTableWidth > curTd.clientWidth ? maxTableWidth : curTd.clientWidth
+      if (curHeight > maxHeight) {
+        tables.push(curHtml)
+        if (lastHeight > maxHeight) {
+          overflowPages.push(tables.length - 1)
+        }
+        curHeight = realPageMarginTop + curTd.clientHeight
+        curHtml = curTd.outerHTML
+        maxHeight = realPageHeight - realPageMarginBottom
+      } else {
+        curHtml += curTd.outerHTML
+        if (i === tdElements.length - 1) {
+          // 最后一个元素
+          tables.push(curHtml)
+        }
+      }
+    }
+    tables.forEach(async (table, index) => {
+      if (index !== 0) {
+        newPage = await renderMain.renderPage(pagerConfig, pageSet)
+      }
+      const instanceTable = new StyledSimpleTableConstructor({
         propsData: style
       })
-      instance.$mount()
-      const newElement = instance.$el
-      newElement.style.width = `${style.width}px`
-      newElement.style.height = 'auto'
-      newElement.style.position = 'absolute'
-      newElement.style.left = `${style.left}px`
-      newElement.style.top = `${style.top}px`
-      newElement.innerHTML = propValue
-      tempHolder.appendChild(newElement)
-      await renderUtil.wait()
-      const richTextImgList = await renderUtil.splitRichText(newElement)
-      const appendImage = async (imgList, imgIndex, page) => {
-        let newTextRootEle = document.createElement('div')
-        newTextRootEle.style.width = `${style.width}px`
-        newTextRootEle.style.position = 'absolute'
-        newTextRootEle.style.left = `${style.left}px`
-        newTextRootEle.style.top = `${
-          style.top < realPageMarginTop ? realPageMarginTop : style.top
+      instanceTable.$mount()
+      const newTable = instanceTable.$el
+      if (overflowPages.includes(index)) {
+        newTable.style.height = `${
+          realPageHeight - realPageMarginBottom - realPageMarginTop
         }px`
-        newTextRootEle.style.display = 'inline-grid'
-        const maxHeight = realPageHeight - realPageMarginBottom - style.top
-        let curHeight = 0
-        let recurve = false
-        for (let i = imgIndex; i < imgList.length; i++) {
-          const imgData = imgList[i]
-          curHeight += imgData.height
-          if (curHeight > maxHeight) {
-            debugger
-            if (!recurve) {
-              const newPage = await renderMain.renderPage(pagerConfig, pageSet)
-              await appendImage(imgList, i, newPage)
-            }
-            recurve = true
-            break
-          } else {
-            const img = document.createElement('img')
-            img.src = imgData.src
-            img.style.width = `${imgData.width}px`
-            img.style.height = `${imgData.height}px`
-            newTextRootEle.appendChild(img)
-          }
-        }
-        page.appendChild(newTextRootEle)
+        newTable.style.overflow = 'hidden'
       }
-      if (richTextImgList && richTextImgList.length) {
-        await appendImage(richTextImgList, 0, pageSet.curPage)
-      }
-      tempHolder.removeChild(newElement)
-      instance.$destroy()
+      newTable.style.width = `${style.width}px`
+      newTable.style.position = 'absolute'
+      newTable.style.left = `${style.left}px`
+      newTable.style.top = `${index === 0 ? style.top : realPageMarginTop}px`
+      newTable.style.transform = `rotate(${style.rotate}deg)`
+      newTable.innerHTML = `<table style='width: ${maxTableWidth}px'>${table}</table>`
+      newPage.appendChild(newTable)
+      instanceTable.$destroy()
+    })
+    tempHolder.removeChild(newElement)
+  },
+  async renderRoyCircle({ element, pagerConfig, pageSet }) {
+    let StyledCircleConstructor = Vue.extend(StyledCircle)
+    let newPage = pageSet.curPage
+    if (newPage === null) {
+      newPage = await renderMain.renderPage(pagerConfig, pageSet)
     }
+    const { style } = element
+    const instance = new StyledCircleConstructor({
+      propsData: style
+    })
+    instance.$mount()
+    const newElement = instance.$el
+    newElement.style.width = `${style.width}px`
+    newElement.style.height = `${style.height}px`
+    newElement.style.position = 'absolute'
+    newElement.style.left = `${style.left}px`
+    newElement.style.top = `${style.top}px`
+    newElement.style.transform = `rotate(${style.rotate}deg)`
+    newPage.appendChild(newElement)
+    instance.$destroy()
+  },
+  async renderRoyRect({ element, pagerConfig, pageSet }) {
+    let StyledRectConstructor = Vue.extend(StyledRect)
+    let newPage = pageSet.curPage
+    if (newPage === null) {
+      newPage = await renderMain.renderPage(pagerConfig, pageSet)
+    }
+    const { style } = element
+    const instance = new StyledRectConstructor({
+      propsData: style
+    })
+    instance.$mount()
+    const newElement = instance.$el
+    newElement.style.width = `${style.width}px`
+    newElement.style.height = `${style.height}px`
+    newElement.style.position = 'absolute'
+    newElement.style.left = `${style.left}px`
+    newElement.style.top = `${style.top}px`
+    newElement.style.transform = `rotate(${style.rotate}deg)`
+    newPage.appendChild(newElement)
+    instance.$destroy()
+  },
+  async renderRoyLine({ element, pagerConfig, pageSet }) {
+    let StyledLineConstructor = Vue.extend(StyledLine)
+    let newPage = pageSet.curPage
+    if (newPage === null) {
+      newPage = await renderMain.renderPage(pagerConfig, pageSet)
+    }
+    const { style } = element
+    const instance = new StyledLineConstructor({
+      propsData: style
+    })
+    instance.$mount()
+    const newElement = instance.$el
+    newElement.style.width = `${style.width}px`
+    newElement.style.height = `${style.height}px`
+    newElement.style.position = 'absolute'
+    newElement.style.left = `${style.left}px`
+    newElement.style.top = `${style.top}px`
+    newElement.style.transform = `rotate(${style.rotate}deg)`
+    newPage.appendChild(newElement)
+    instance.$destroy()
+  },
+  async renderRoyStar({ element, pagerConfig, pageSet }) {
+    let StyledStarConstructor = Vue.extend(StyledStar)
+    let newPage = pageSet.curPage
+    if (newPage === null) {
+      newPage = await renderMain.renderPage(pagerConfig, pageSet)
+    }
+    const { style } = element
+    const instance = new StyledStarConstructor({
+      propsData: style
+    })
+    instance.$mount()
+    const newElement = instance.$el
+    newElement.style.width = `${style.width}px`
+    newElement.style.height = `${style.height}px`
+    newElement.style.position = 'absolute'
+    newElement.style.left = `${style.left}px`
+    newElement.style.top = `${style.top}px`
+    newElement.style.transform = `rotate(${style.rotate}deg)`
+    // <span class="iconfont roy-star-icon" :class="style.icon"></span>
+    const star = document.createElement('span')
+    star.classList.add(...['iconfont', 'roy-star-icon', style.icon])
+    newElement.appendChild(star)
+    newPage.appendChild(newElement)
+    instance.$destroy()
   }
 }
 
-const renderUtil = {
+export const renderUtil = {
   wait: (time = 10) => {
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -162,10 +416,20 @@ const renderUtil = {
       }, time)
     })
   },
+  replaceTextWithDataSource: (value, dataSet, dataSource) => {
+    console.log(dataSource)
+    return `${value}`.replace(/\[::[^[\]:]*::]/g, (word) => {
+      const field = word.substring(3, word.length - 3)
+      if (dataSet[field] && dataSet[field] instanceof Function) {
+        return dataSet[field]()
+      }
+      return dataSet[field]
+    })
+  },
   splitRichText: async (myElement) => {
     const scrollY = 0
     let canvasThing = await html2canvas(myElement, {
-      scale: devicePixelRatio + 2
+      scale: devicePixelRatio * 2
     })
     const generateRangeSelection = (elements, { y: elY, height: elH }) => {
       const range = document.createRange()
@@ -256,8 +520,7 @@ const renderUtil = {
         res.push(firstSelect)
         return res
       }
-      const finalArrRes = finalArr(selections)
-      return finalArrRes
+      return finalArr(selections)
     }
     const getSomeThing = (rect, selection) => {
       let res = []
@@ -333,12 +596,12 @@ const renderUtil = {
         canvasContext.clearRect(0, 0, elementWidth, eleHeight)
         aIn = ele
       }
-      for (let elee of smThing) {
-        renderImg(elee)
+      for (let ele of smThing) {
+        renderImg(ele)
       }
       return canvasImageList
     }
 
-    return getCanvasList(someThing, canvasThing, devicePixelRatio + 2)
+    return getCanvasList(someThing, canvasThing, devicePixelRatio * 2)
   }
 }
