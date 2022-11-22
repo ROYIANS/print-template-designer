@@ -21,10 +21,10 @@ export const state = {
     pageWidth: 210,
     // 页面高度：mm
     pageHeight: 297,
-    // 页面下边距
-    pageMarginBottom: 1,
-    // 页面上边距
-    pageMarginTop: 1,
+    // 页面下边距 mm
+    pageMarginBottom: 8,
+    // 页面上边距 mm
+    pageMarginTop: 8,
     // 页面标题/模板标题
     title: '新建模板',
     // 默认缩放比例：100%
@@ -41,26 +41,7 @@ export const state = {
   // 是否在编辑器中，用于判断复制、粘贴组件时是否生效，如果在编辑器外，则无视这些操作
   isInEditor: false,
   componentData: [],
-  dataSource: [
-    {
-      title: '当前日期（中文）',
-      field: 'curDateChn',
-      typeName: '字符',
-      type: String
-    },
-    {
-      title: '当前日期（数字）',
-      field: 'curDateNum',
-      typeName: '字符',
-      type: String
-    },
-    {
-      title: '当前日期时间（数字）',
-      field: 'curDateTime',
-      typeName: '字符',
-      type: String
-    }
-  ],
+  dataSource: [],
   dataSet: {},
   curComponent: null,
   curTableCell: null,
@@ -108,6 +89,11 @@ export const mutations = {
     state.pageConfig.pageSize = pageSize
     state.pageConfig.pageWidth = w
     state.pageConfig.pageHeight = h
+  },
+
+  togglePageDirection(state) {
+    const direction = state.pageConfig.pageDirection
+    state.pageConfig.pageDirection = direction === 'p' ? 'l' : 'p'
   },
 
   setPageConfig(state, pageConfig) {
