@@ -115,13 +115,20 @@ const rectProps = Object.assign({}, commonProps, {
   }
 })
 
-const simpleTableProps = Object.assign({}, commonProps, {})
+const simpleTableProps = Object.assign({}, commonProps, {
+  isRelative: {
+    type: Boolean,
+    default: false
+  }
+})
+
+const complexTableProps = Object.assign({}, commonProps, {})
 
 export const StyledText = styled('div', textProps)`
   width: 100%;
   height: 100%;
   overflow: hidden;
-  position: absolute;
+  position: relative;
   color: ${(props) => props.color};
   background: ${(props) => props.background};
   border-radius: ${(props) => props.borderRadius};
@@ -163,6 +170,7 @@ export const StyledSimpleText = styled('div', textProps)`
   overflow: hidden;
   position: absolute;
   display: flex;
+  text-align: center;
   justify-content: ${(props) => props.justifyContent};
   align-items: ${(props) => props.alignItems};
   color: ${(props) => props.color};
@@ -263,7 +271,7 @@ export const StyledStar = styled('div', starProps)`
 export const StyledSimpleTable = styled('div', simpleTableProps)`
   width: 100%;
   height: 100%;
-  position: absolute;
+  position: ${(props) => (props.isRelative ? 'relative' : 'absolute')};
   border: none;
   padding: 0;
   margin: 0;
@@ -271,7 +279,8 @@ export const StyledSimpleTable = styled('div', simpleTableProps)`
   background: ${(props) => props.background};
 
   table {
-    table-layout: fixed;
+    width: 100%;
+    //table-layout: fixed;
     border-collapse: separate;
     border-spacing: ${(props) => `${props.borderWidth}px`};
     background-color: ${(props) => `${props.borderColor}`};
@@ -297,5 +306,50 @@ export const StyledSimpleTable = styled('div', simpleTableProps)`
     opacity: 0.5;
     cursor: nw-resize !important;
     z-index: 1;
+  }
+`
+
+export const StyledComplexTable = styled('div', complexTableProps)`
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  border: none;
+  padding: 0;
+  margin: 0;
+  color: ${(props) => props.color};
+  background: ${(props) => props.background};
+
+  table {
+    width: 100%;
+  }
+
+  .roy-complex-table__body {
+    margin: ${(props) => `-${props.borderWidth - 0.5}px`} 0;
+  }
+
+  .roy-complex-table__body table {
+    //table-layout: fixed;
+    border-collapse: separate;
+    border-spacing: ${(props) => `${props.borderWidth}px`};
+    background-color: ${(props) => `${props.borderColor}`};
+  }
+  .roy-complex-table__body td,
+  .roy-complex-table__body th {
+    position: relative;
+    background-color: ${(props) => `${props.background || '#FFF'}`};
+  }
+  .roy-complex-table__prefix,
+  .roy-complex-table__suffix {
+    overflow: hidden;
+  }
+
+  .roy-complex-table__container {
+    border-spacing: 0;
+    border-collapse: separate;
+  }
+
+  .roy-complex-table__container > tr > td {
+    padding: 0;
+    margin: 0;
   }
 `

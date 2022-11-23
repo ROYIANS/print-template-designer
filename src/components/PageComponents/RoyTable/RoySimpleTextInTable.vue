@@ -151,6 +151,7 @@ export default {
         if (bindingDataSource) {
           this.$emit('update:bindValue', bindingDataSource)
           this.$emit('update:propValue', `[绑定:${bindingDataSource.title}]`)
+          this.$emit('componentUpdated', `[绑定:${bindingDataSource.title}]`)
           this.canEdit = false
         }
       } else {
@@ -177,6 +178,7 @@ export default {
     canEdit(newVal) {
       if (!newVal) {
         this.$emit('update:propValue', this.$refs.editArea.$el.innerHTML)
+        this.$emit('componentUpdated', this.$refs.editArea.$el.innerHTML)
       }
     }
   }

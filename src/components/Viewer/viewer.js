@@ -312,7 +312,7 @@ export const renderMain = {
       newTable.style.left = `${style.left}px`
       newTable.style.top = `${index === 0 ? style.top : realPageMarginTop}px`
       newTable.style.transform = `rotate(${style.rotate}deg)`
-      newTable.innerHTML = `<table style='width: ${maxTableWidth}px'>${table}</table>`
+      newTable.innerHTML = `<table style='width: ${maxTableWidth}px;table-layout: auto'>${table}</table>`
       newPage.appendChild(newTable)
       instanceTable.$destroy()
     })

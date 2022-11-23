@@ -51,6 +51,11 @@
                   height: `${tableData[`${row}-${col}`].height}px`
                 }"
                 @activeCell="onCellActive"
+                @componentUpdated="
+                  (value) => {
+                    componentUpdated(row, col, value)
+                  }
+                "
               />
               <div
                 v-if="getIsActiveCell(row, col) && selectedCells.length === 1"
@@ -470,6 +475,24 @@ export default {
           const curIndex = (i - 1) * tableConfig.cols + j - 1
           this.tableConfig.layoutDetail[curIndex].groupId = groupId
           if (curIndex === startIndex) {
+            let curTableData = this.tableData[`${i}-${j}`]
+            let startCellData = this.tableData[`${startX}-${startY}`]
+            let endCellData = this.tableData[`${endX}-${endY}`]
+            let startComponent = document
+              .getElementById(`roy-component-${startCellData.id}`)
+              .getBoundingClientRect()
+            let endComponent = document
+              .getElementById(`roy-component-${endCellData.id}`)
+              .getBoundingClientRect()
+            const { x: startAriaX, y: startAriaY } = startComponent
+            const {
+              x: endAriaX,
+              y: endAriaY,
+              width: endWidth,
+              height: endHeight
+            } = endComponent
+            curTableData.width = Math.abs(endAriaX - startAriaX) + endWidth
+            curTableData.height = Math.abs(endAriaY - startAriaY) + endHeight
             this.tableConfig.layoutDetail[curIndex].rowSpan = endX - startX + 1
             this.tableConfig.layoutDetail[curIndex].colSpan = endY - startY + 1
           } else {
@@ -571,13 +594,21 @@ export default {
       document.addEventListener('mouseup', up)
     },
     setTablePropValue() {
+      const propValue = {
+        tableData: this.tableData,
+        tableConfig: this.tableConfig
+      }
       this.$store.commit('printTemplateModule/setPropValue', {
         id: this.element.id,
-        propValue: {
-          tableData: this.tableData,
-          tableConfig: this.tableConfig
-        }
+        propValue
       })
+      this.$emit('update:propValue', propValue)
+      this.$emit('componentUpdated', propValue)
+    },
+    componentUpdated(row, col, value) {
+      let curTableCell = this.tableData[`${row}-${col}`]
+      curTableCell.propValue = value
+      this.setTablePropValue()
     }
   },
   watch: {

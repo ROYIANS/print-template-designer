@@ -56,7 +56,7 @@ export class AutoTable {
     const { tableConfig, tableData } = this.propValue
     const { rows, cols } = tableConfig
     const hiddenTdMap = this.getHiddenTd()
-    const tableHeadStart = '<table>'
+    const tableHeadStart = '<table style="width: auto">'
     const tableHeadEnd = '</table>'
     const tableBodyStart = '<tbody>'
     const tableBodyEnd = '</tbody>'
@@ -83,8 +83,12 @@ export class AutoTable {
               <td
                 style='
                   ${notShowThisTd ? 'display: none;' : ''}
+                  ${
+                    curTableData.component !== 'RoyTextIn'
+                      ? `height: ${curTableData.height}px`
+                      : ''
+                  }
                   width: ${curTableData.width}px;
-                  height: auto;
                   padding: 0;
                 '
                 rowspan='${rowSpan}'
@@ -120,6 +124,7 @@ export class AutoTable {
     newElement.style.height = `${element.height}px`
     newElement.style.position = 'static'
     newElement.innerHTML = afterPropValue
+    newElement.style.height = `${element.height}px`
     const res = newElement.outerHTML
     instance.$destroy()
     return res

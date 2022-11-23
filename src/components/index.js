@@ -9,6 +9,8 @@
  */
 import PtdDesigner from './Main/Home.vue'
 import PtdViewer from './Viewer/PtdViewer'
+import { Boot } from '@wangeditor/editor'
+import { menuConfig } from '@/components/config/editorConfig'
 
 import 'normalize.css/normalize.css'
 import '@/assets/animate.css'
@@ -34,6 +36,8 @@ const install = function (Vue, opts = {}) {
     // 注册module
     opts.store.registerModule(['printTemplateModule'], NightModeStore)
   }
+  // 富文本编辑器添加菜单
+  Boot.registerMenu(menuConfig)
   Object.keys(componentsLib).forEach((key) => {
     // 注册组件
     Vue.component(key, componentsLib[key])
