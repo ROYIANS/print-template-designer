@@ -118,7 +118,7 @@ export default {
       curComponent: (state) => state.printTemplateModule.curComponent
     }),
     pointList() {
-      const isTable = ['RoySimpleTable', 'RoyTable', 'RoyForm'].includes(
+      const isTable = ['RoySimpleTable', 'RoyComplexTable'].includes(
         this.element.component
       )
       if (isTable) {
@@ -133,7 +133,9 @@ export default {
       return this.active && !this.element.isLock
     },
     showRotate() {
-      return !['RoySimpleTable'].includes(this.element?.component || '')
+      return !['RoySimpleTable', 'RoyComplexTable'].includes(
+        this.element?.component || ''
+      )
     },
     adjusterStyle() {
       return {
@@ -543,6 +545,8 @@ export default {
 
   .adjuster-container {
     cursor: initial;
+    width: 100%;
+    height: 100%;
   }
 }
 </style>

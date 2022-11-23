@@ -42,11 +42,9 @@ import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 import {
   toolBarConfig,
   editorConfig,
-  mode,
-  menuConfig
+  mode
 } from '@/components/config/editorConfig'
 import { mapState } from 'vuex'
-import { Boot } from '@wangeditor/editor'
 
 export default {
   name: 'RoyText',
@@ -101,9 +99,7 @@ export default {
       e.stopPropagation()
     }
   },
-  created() {
-    Boot.registerMenu(menuConfig)
-  },
+  created() {},
   watch: {
     html() {
       this.onBlur()

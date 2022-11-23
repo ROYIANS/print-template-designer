@@ -43,11 +43,9 @@
 import { StyledText } from '@/components/PageComponents/style'
 import RoyModal from '@/components/RoyModal/RoyModal'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
-import { Boot } from '@wangeditor/editor'
 import {
   toolBarConfig,
   editorConfig,
-  menuConfig,
   mode
 } from '@/components/config/editorConfig'
 import { mapState } from 'vuex'
@@ -104,12 +102,11 @@ export default {
       e.stopPropagation()
     }
   },
-  created() {
-    Boot.registerMenu(menuConfig)
-  },
+  created() {},
   watch: {
     html() {
       this.$emit('update:propValue', this.html)
+      this.$emit('componentUpdated', this.html)
     }
   },
   beforeDestroy() {

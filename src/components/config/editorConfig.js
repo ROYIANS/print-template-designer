@@ -89,7 +89,7 @@ export const toolBarConfig = {
     'enter',
     'bulletedList',
     'numberedList',
-    'dataSource'
+    'royDataSource'
   ]
 }
 
@@ -132,7 +132,7 @@ export const editorConfig = {
 export const mode = 'default' // or 'default'
 
 export const menuConfig = {
-  key: 'dataSource', // 定义 menu key ：要保证唯一、不重复（重要）
+  key: 'royDataSource', // 定义 menu key ：要保证唯一、不重复（重要）
   factory() {
     return new DataSourceMenu()
   }

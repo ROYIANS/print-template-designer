@@ -85,14 +85,19 @@ export const componentList = [
   {
     icon: 'ri-table-line',
     code: 'complex-table',
-    name: '列表格',
-    component: 'RoyTable'
-  },
-  {
-    icon: 'ri-layout-2-line',
-    code: 'form',
-    name: '数据表格',
-    component: 'RoyForm'
+    name: '复杂表格',
+    component: 'RoyComplexTable',
+    propValue: {},
+    style: {
+      width: 'auto',
+      height: 'auto',
+      fontSize: 12,
+      background: '#FFFFFF',
+      borderWidth: 2,
+      borderColor: '#212121',
+      rotate: 0
+    },
+    groupStyle: {}
   },
   {
     icon: 'iconfont icon-xianduan',

@@ -64,6 +64,7 @@ import DesignerAside from './DesignerAside.vue'
 import DesignerMain from './DesignerMain.vue'
 import shepherd from '@/components/RoyUserTour/userTour'
 import toast from '@/utils/toast'
+import commonMixin from '@/mixin/commonMixin'
 
 const VERSION = config.version
 
@@ -76,6 +77,7 @@ export default {
     DesignerAside,
     DesignerMain
   },
+  mixins: [commonMixin],
   props: {
     preComponentData: {
       type: [Array, Boolean],
@@ -338,25 +340,27 @@ export default {
             .confirm('确定要读取该文件？将覆盖当前编辑内容！')
             .then((type) => {
               if (type === 'confirm') {
-                const result = e.target.result.toString()
-                let resultParsed = []
+                const result = e.target.result
+                let resultParsed
                 try {
-                  resultParsed = JSON.parse(result)
+                  resultParsed = JSON.parse(`${result}`)
+                  console.log(resultParsed.componentData)
                   if (!resultParsed.pageConfig || !resultParsed.componentData) {
                     toast('文件格式错误，转换内容失败', 'warning')
                     return
                   }
+                  this.$store.commit(
+                    'printTemplateModule/setComponentData',
+                    resultParsed.componentData
+                  )
+                  console.log(resultParsed.componentData)
+                  this.$store.commit(
+                    'printTemplateModule/setPageConfig',
+                    resultParsed.pageConfig
+                  )
                 } catch (e) {
                   toast('文件损坏，转换内容失败', 'warning')
                 }
-                this.$store.commit(
-                  'printTemplateModule/setComponentData',
-                  resultParsed.componentData
-                )
-                this.$store.commit(
-                  'printTemplateModule/setPageConfig',
-                  resultParsed.pageConfig
-                )
               }
             })
         }

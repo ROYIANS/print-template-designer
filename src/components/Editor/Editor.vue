@@ -96,6 +96,7 @@ import RoyLine from '@/components/PageComponents/RoyLine'
 import RoyStar from '@/components/PageComponents/RoyStar'
 import RoyCircle from '@/components/PageComponents/RoyCircle'
 import RoySimpleTable from '@/components/PageComponents/RoyTable/RoySimpleTable.vue'
+import RoyComplexTable from '@/components/PageComponents/RoyTable/RoyComplexTable'
 import RoyGroup from '@/components/PageComponents/RoyGroup'
 import Area from '@/components/Editor/Area'
 import commonMixin from '@/mixin/commonMixin'
@@ -126,6 +127,7 @@ export default {
     RoyCircle,
     RoyStar,
     RoySimpleTable,
+    RoyComplexTable,
     Area
   },
   props: {
