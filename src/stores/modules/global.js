@@ -50,7 +50,8 @@ export const state = {
   // 如果没点中组件，并且在画布空白处弹起鼠标，则取消当前组件的选中状态
   isClickComponent: false,
   globalCount: 0,
-  paletteCount: 0
+  paletteCount: 0,
+  curTableSettingId: null
 }
 export const getters = {}
 export const mutations = {
@@ -142,6 +143,10 @@ export const mutations = {
 
   setDataSet(state, dataSet) {
     state.dataSet = dataSet
+  },
+
+  setCurTableSettingId(state, id) {
+    state.curTableSettingId = id
   },
 
   setShapeStyle({ curComponent }, { top, left, width, height, rotate }) {

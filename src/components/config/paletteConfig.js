@@ -1,4 +1,5 @@
 import { deepCopy } from '@/utils/html-util'
+import store from '@/stores/index'
 
 export const paletteConfigList = {
   RoyText: [
@@ -731,6 +732,40 @@ export const paletteConfigList = {
       }
     }
   ],
+  RoyComplexTable: [
+    {
+      title: '背景颜色',
+      field: 'background',
+      span: 24,
+      itemRender: {
+        name: '$colorPicker',
+        props: {}
+      }
+    },
+    {
+      title: '边框颜色',
+      field: 'borderColor',
+      span: 24,
+      itemRender: {
+        name: '$colorPicker',
+        props: {}
+      }
+    },
+    {
+      title: '边框宽度',
+      field: 'borderWidth',
+      span: 24,
+      itemRender: {
+        name: '$input',
+        props: {
+          type: 'number',
+          size: 'mini',
+          min: 0,
+          max: 4
+        }
+      }
+    }
+  ],
   RoyTextIn: [
     {
       title: '背景颜色',
@@ -1008,6 +1043,140 @@ export const settingConfigList = {
                 content: 'ri-t-box-line',
                 value: 'RoyTextIn',
                 label: '富文本'
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  RoyComplexTable: [
+    {
+      title: '展示头部留白',
+      span: 24,
+      itemRender: {
+        name: '$btnRadioGroup',
+        options: [
+          {
+            field: 'showPrefix',
+            isRadio: false,
+            options: [
+              {
+                type: 'icon',
+                content: 'ri-check-line',
+                value: true,
+                label: '是'
+              },
+              {
+                type: 'icon',
+                content: 'ri-close-line',
+                value: false,
+                label: '否'
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      title: '展示头部单元格',
+      span: 24,
+      itemRender: {
+        name: '$btnRadioGroup',
+        options: [
+          {
+            field: 'showHead',
+            isRadio: false,
+            options: [
+              {
+                type: 'icon',
+                content: 'ri-check-line',
+                value: true,
+                label: '是'
+              },
+              {
+                type: 'icon',
+                content: 'ri-close-line',
+                value: false,
+                label: '否'
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      title: '展示尾部单元格',
+      span: 24,
+      itemRender: {
+        name: '$btnRadioGroup',
+        options: [
+          {
+            field: 'showFoot',
+            isRadio: false,
+            options: [
+              {
+                type: 'icon',
+                content: 'ri-check-line',
+                value: true,
+                label: '是'
+              },
+              {
+                type: 'icon',
+                content: 'ri-close-line',
+                value: false,
+                label: '否'
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      title: '展示尾部留白',
+      span: 24,
+      itemRender: {
+        name: '$btnRadioGroup',
+        options: [
+          {
+            field: 'showSuffix',
+            isRadio: false,
+            options: [
+              {
+                type: 'icon',
+                content: 'ri-check-line',
+                value: true,
+                label: '是'
+              },
+              {
+                type: 'icon',
+                content: 'ri-close-line',
+                value: false,
+                label: '否'
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      title: '数据表格设置',
+      span: 24,
+      itemRender: {
+        name: '$btnRadioGroup',
+        options: [
+          {
+            field: 'bodyDataSetting',
+            isRadio: false,
+            customCallBack: ({ data }) => {
+              store.commit('printTemplateModule/setCurTableSettingId', data.id)
+            },
+            options: [
+              {
+                type: 'icon',
+                content: 'ri-settings-5-line',
+                value: 'none',
+                label: '设置'
               }
             ]
           }

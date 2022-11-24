@@ -341,9 +341,8 @@ export default {
             .then((type) => {
               if (type === 'confirm') {
                 const result = e.target.result
-                let resultParsed
                 try {
-                  resultParsed = JSON.parse(`${result}`)
+                  const resultParsed = JSON.parse(`${result}`)
                   console.log(resultParsed.componentData)
                   if (!resultParsed.pageConfig || !resultParsed.componentData) {
                     toast('文件格式错误，转换内容失败', 'warning')

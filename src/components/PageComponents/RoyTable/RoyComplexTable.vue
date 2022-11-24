@@ -5,15 +5,15 @@
 * @date 2022/11/23 9:55
 !-->
 <template>
-  <div class="roy-complex-table">
+  <div v-if="initCompleted" class="roy-complex-table">
     <StyledComplexTable v-bind="style">
       <table class="roy-complex-table__container">
-        <tr>
+        <tr v-if="element.showPrefix">
           <td>
             <div class="roy-complex-table__prefix">
               <RoyTextInTable
                 key="prefix"
-                style="min-height: 50px; min-width: 200px"
+                style="min-height: 40px; min-width: 200px"
                 :element="prefixTextElement"
                 :prop-value.sync="prefixTextElement.propValue"
                 @componentUpdated="componentUpdated"
@@ -21,7 +21,7 @@
             </div>
           </td>
         </tr>
-        <tr>
+        <tr v-if="element.showHead">
           <td>
             <div class="roy-complex-table__head">
               <RoySimpleTable
@@ -37,29 +37,27 @@
         <tr>
           <td>
             <div class="roy-complex-table__body">
-              <table>
+              <table :style="`width: ${bodyTableWidth}px`">
                 <thead>
-                  <tr>
-                    <th v-for="(item, index) in tableCols" :key="index">
+                  <tr :style="`height: ${tableRowHeight}px`">
+                    <th
+                      v-for="(item, index) in tableCols"
+                      :key="index"
+                      :style="{
+                        width: `${item.width}px`
+                      }"
+                    >
                       {{ item.title }}
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td :colspan="tableCols.length">
-                      <div
-                        style="
-                          height: 30px;
-                          display: flex;
-                          justify-content: center;
-                          align-items: center;
-                          color: #ccc;
-                          background: rgb(246, 246, 246);
-                        "
-                      >
-                        自动填充
-                      </div>
+                  <tr :style="`height: ${tableRowHeight}px`">
+                    <td
+                      :colspan="tableCols.length"
+                      :style="`height: ${tableRowHeight}px`"
+                    >
+                      <div class="roy-complex-table__auto_fill">自动填充</div>
                     </td>
                   </tr>
                 </tbody>
@@ -67,7 +65,7 @@
             </div>
           </td>
         </tr>
-        <tr>
+        <tr v-if="element.showFoot">
           <td>
             <div class="roy-complex-table__foot">
               <RoySimpleTable
@@ -80,12 +78,12 @@
             </div>
           </td>
         </tr>
-        <tr>
+        <tr v-if="element.showSuffix">
           <td>
             <div class="roy-complex-table__suffix">
               <RoyTextInTable
-                key="prefix"
-                style="min-height: 50px; min-width: 200px"
+                key="suffix"
+                style="min-height: 40px; min-width: 200px"
                 :element="suffixTextElement"
                 :prop-value.sync="suffixTextElement.propValue"
                 @componentUpdated="componentUpdated"
@@ -95,6 +93,12 @@
         </tr>
       </table>
     </StyledComplexTable>
+    <TableDataSetting
+      v-if="showTableDataSetting"
+      :visible="showTableDataSetting"
+      :table-config="bodyDataTableElement"
+      @onSave="handleTableSettingSave"
+    />
   </div>
 </template>
 
@@ -103,7 +107,9 @@ import commonMixin from '@/mixin/commonMixin'
 import RoyTextInTable from './RoyTextInTable'
 import RoySimpleTable from './RoySimpleTable'
 import ResizeObserver from '@/components/PageComponents/RoyTable/ResizeObserver'
+import TableDataSetting from '@/components/PageComponents/RoyTable/TableDataSetting'
 import { StyledComplexTable } from '@/components/PageComponents/style'
+import { mapState } from 'vuex'
 
 const defaultTextProp = {
   icon: 'ri-text',
@@ -141,36 +147,29 @@ const defaultSimpleTableProp = {
 }
 
 const defaultDataTableProp = {
+  tableRowHeight: 30,
+  tableDataSource: '',
   tableCols: [
     {
       field: 'field1',
       title: '表头R1',
+      width: 100,
+      align: 'center',
       formatter: 'text'
     },
     {
       field: 'field2',
       title: '表头R2',
+      width: 100,
+      align: 'center',
       formatter: 'text'
     },
     {
       field: 'field3',
       title: '表头R3',
+      width: 100,
+      align: 'center',
       formatter: 'text'
-    },
-    {
-      field: 'field4',
-      title: '表头R4',
-      formatter: 'text'
-    },
-    {
-      field: 'field5',
-      title: '表头R5',
-      formatter: 'text'
-    },
-    {
-      field: 'field6',
-      title: '表头R6',
-      formatter: 'money'
     }
   ]
 }
@@ -184,7 +183,8 @@ export default {
   components: {
     RoyTextInTable,
     RoySimpleTable,
-    StyledComplexTable
+    StyledComplexTable,
+    TableDataSetting
   },
   props: {
     element: {
@@ -204,15 +204,37 @@ export default {
     }
   },
   computed: {
+    ...mapState({
+      curTableSettingId: (state) => state.printTemplateModule.curTableSettingId
+    }),
+    showTableDataSetting() {
+      return (
+        this.curTableSettingId !== null &&
+        this.curTableSettingId === this.element.id
+      )
+    },
     style() {
       return this.element.style || {}
     },
     tableCols() {
       return this.bodyDataTableElement.tableCols || []
+    },
+    tableRowHeight() {
+      return this.bodyDataTableElement.tableRowHeight || 40
+    },
+    bodyTableWidth() {
+      return this.tableCols
+        .map((item) => {
+          return Number(item.width)
+        })
+        .reduce((a, b) => {
+          return a + b
+        })
     }
   },
   data() {
     return {
+      initCompleted: false,
       prefixTextElement: {},
       suffixTextElement: {},
       bodyDataTableElement: {},
@@ -240,6 +262,7 @@ export default {
       this.bodyDataTableElement =
         bodyDataTableElement || this.deepCopy(defaultDataTableProp)
       setTimeout(() => {
+        this.initCompleted = true
         // this.observeElementWidth()
       })
     },
@@ -257,6 +280,10 @@ export default {
       })
       this.$emit('update:propValue', propValue)
       this.$emit('componentUpdated')
+    },
+    handleTableSettingSave(data) {
+      this.bodyDataTableElement = data
+      this.componentUpdated()
     },
     observeElementWidth() {
       this.$nextTick(() => {
@@ -281,11 +308,19 @@ export default {
   mounted() {
     this.initMounted()
   },
-  watch: {}
+  watch: {
+    style: {
+      handler() {
+        Object.assign(this.headSimpleTableElement.style, this.style)
+        Object.assign(this.footSimpleTableElement.style, this.style)
+      },
+      deep: true
+    }
+  }
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .roy-complex-table {
   padding: 0;
 }
