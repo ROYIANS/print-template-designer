@@ -352,4 +352,22 @@ export const StyledComplexTable = styled('div', complexTableProps)`
     padding: 0;
     margin: 0;
   }
+
+  .roy-complex-table__auto_fill {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #ccc;
+    background-color: rgb(246, 246, 246);
+    background-image: linear-gradient(
+        90deg,
+        rgba(0, 0, 0, 0.1) 3%,
+        transparent 1px
+      ),
+      linear-gradient(1turn, rgba(0, 0, 0, 0.1) 3%, transparent 1px);
+    background-size: 10px 10px;
+    background-position: 50%;
+    background-repeat: repeat;
+  }
 `

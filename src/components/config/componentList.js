@@ -88,6 +88,10 @@ export const componentList = [
     name: '复杂表格',
     component: 'RoyComplexTable',
     propValue: {},
+    showPrefix: true,
+    showHead: true,
+    showFoot: true,
+    showSuffix: true,
     style: {
       width: 'auto',
       height: 'auto',

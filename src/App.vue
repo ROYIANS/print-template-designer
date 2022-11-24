@@ -115,6 +115,12 @@ export default {
           field: 'curDateTime',
           typeName: '字符',
           type: String
+        },
+        {
+          title: '表格数据',
+          field: 'tableData',
+          typeName: '数组',
+          type: Array
         }
       ],
       preDataSet: {

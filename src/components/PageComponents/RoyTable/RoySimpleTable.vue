@@ -266,18 +266,7 @@ export default {
   },
   created() {},
   mounted() {
-    let preSettled = false
-    if (this.propValue.tableConfig) {
-      preSettled = true
-      this.tableConfig = this.deepCopy(this.propValue.tableConfig)
-    }
-    if (this.propValue.tableData) {
-      preSettled = true
-      this.tableData = this.deepCopy(this.propValue.tableData)
-    }
-    if (!preSettled) {
-      this.reRenderTableLayout()
-    }
+    this.initMounted()
   },
   computed: {
     ...mapState({
@@ -319,6 +308,20 @@ export default {
     }
   },
   methods: {
+    initMounted() {
+      let preSettled = false
+      if (this.propValue.tableConfig) {
+        preSettled = true
+        this.tableConfig = this.deepCopy(this.propValue.tableConfig)
+      }
+      if (this.propValue.tableData) {
+        preSettled = true
+        this.tableData = this.deepCopy(this.propValue.tableData)
+      }
+      if (!preSettled) {
+        this.reRenderTableLayout()
+      }
+    },
     clearSelection() {
       this.selectedCells = []
     },
