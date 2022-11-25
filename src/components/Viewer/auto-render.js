@@ -440,13 +440,13 @@ export class AutoRender {
         curHtml = curTd.outerHTML
       } else {
         curHtml += curTd.outerHTML
-        if (i === rows.length - 1) {
-          // 最后一个元素
-          tables.push({
-            html: `${headHtml}<tbody>${curHtml}</tbody>`,
-            height: curHeight
-          })
-        }
+      }
+      if (i === rows.length - 1) {
+        // 最后一个元素
+        tables.push({
+          html: `${headHtml}<tbody>${curHtml}</tbody>`,
+          height: curHeight
+        })
       }
     }
     return { tables, overflowPages, maxTableWidth }
