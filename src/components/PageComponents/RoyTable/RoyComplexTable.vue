@@ -36,7 +36,17 @@
         </tr>
         <tr>
           <td>
-            <div class="roy-complex-table__body">
+            <div
+              class="roy-complex-table__body"
+              :style="{
+                marginTop: element.showHead
+                  ? `-${style.borderWidth - 0.5}px`
+                  : '',
+                marginBottom: element.showFoot
+                  ? `-${style.borderWidth - 0.5}px`
+                  : ''
+              }"
+            >
               <table :style="`width: ${bodyTableWidth}px`">
                 <thead>
                   <tr :style="`height: ${tableRowHeight}px`">
@@ -267,6 +277,7 @@ export default {
       })
     },
     componentUpdated() {
+      this.bodyDataTableElement.bodyTableWidth = this.bodyTableWidth
       const propValue = Object.assign({}, this.propValue, {
         prefixTextElement: this.prefixTextElement,
         suffixTextElement: this.suffixTextElement,

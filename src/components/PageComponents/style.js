@@ -310,8 +310,6 @@ export const StyledSimpleTable = styled('div', simpleTableProps)`
 `
 
 export const StyledComplexTable = styled('div', complexTableProps)`
-  width: 100%;
-  height: 100%;
   position: absolute;
   border: none;
   padding: 0;
@@ -323,27 +321,37 @@ export const StyledComplexTable = styled('div', complexTableProps)`
     width: 100%;
   }
 
-  .roy-complex-table__body {
-    margin: ${(props) => `-${props.borderWidth - 0.5}px`} 0;
+  th {
+    text-align: center;
+    font-weight: bold;
   }
 
-  .roy-complex-table__body table {
+  .rendered-roy-complex-table__footer {
+    margin-top: ${(props) => `-${props.borderWidth - 0.5}px`};
+  }
+
+  .roy-complex-table__body table,
+  .rendered-roy-complex-table__body {
     //table-layout: fixed;
     border-collapse: separate;
     border-spacing: ${(props) => `${props.borderWidth}px`};
     background-color: ${(props) => `${props.borderColor}`};
   }
   .roy-complex-table__body td,
-  .roy-complex-table__body th {
+  .roy-complex-table__body th,
+  .rendered-roy-complex-table__body td,
+  .rendered-roy-complex-table__body th {
     position: relative;
     background-color: ${(props) => `${props.background || '#FFF'}`};
   }
   .roy-complex-table__prefix,
-  .roy-complex-table__suffix {
+  .roy-complex-table__suffix,
+  .rendered-roy-text {
     overflow: hidden;
   }
 
-  .roy-complex-table__container {
+  .roy-complex-table__container,
+  .rendered-roy-complex-table {
     border-spacing: 0;
     border-collapse: separate;
   }
