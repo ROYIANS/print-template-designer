@@ -10,7 +10,7 @@
 import { CONFIG } from '@/components/Viewer/viewer-constant'
 import { StyledSimpleText, StyledText } from '@/components/PageComponents/style'
 import Vue from 'vue'
-import { renderUtil } from '@/components/Viewer/viewer'
+import { RenderUtil } from '@/components/Viewer/render-util'
 
 export class AutoTable {
   constructor({
@@ -49,6 +49,8 @@ export class AutoTable {
     switch (this.type) {
       case 'RoySimpleTable':
         return this.generateSimpleTable()
+      case 'RoyComplexTable':
+        return this.generateComplexTable()
     }
   }
 
@@ -56,7 +58,7 @@ export class AutoTable {
     const { tableConfig, tableData } = this.propValue
     const { rows, cols } = tableConfig
     const hiddenTdMap = this.getHiddenTd()
-    const tableHeadStart = '<table style="width: auto">'
+    const tableHeadStart = '<table>'
     const tableHeadEnd = '</table>'
     const tableBodyStart = '<tbody>'
     const tableBodyEnd = '</tbody>'
@@ -85,7 +87,7 @@ export class AutoTable {
                   ${notShowThisTd ? 'display: none;' : ''}
                   ${
                     curTableData.component !== 'RoyTextIn'
-                      ? `height: ${curTableData.height}px`
+                      ? `height: ${curTableData.height}px;`
                       : ''
                   }
                   width: ${curTableData.width}px;
@@ -101,6 +103,36 @@ export class AutoTable {
       })
       .join('')
     return `${tableHeadStart}${tableBodyStart} ${trHtml} ${tableBodyEnd}${tableHeadEnd}`
+  }
+
+  generateComplexTable() {
+    const { tableRowHeight, tableDataSource, tableCols, bodyTableWidth } =
+      this.propValue
+    const tableData = this.dataSet[tableDataSource] || []
+    const tableHead = tableCols
+      .map((item) => {
+        return `<th style='width: ${item.width}px; height: ${tableRowHeight}px'>${item.title}</th>`
+      })
+      .join('')
+    const tableBody = tableData
+      .map((row) => {
+        let tdEle = tableCols
+          .map((col) => {
+            const { field, type } = col
+            console.log(type)
+            return `<td height="${tableRowHeight}px">${row[field]}</td>`
+          })
+          .join('')
+        return `<tr class="roy-complex-table-row">${tdEle}</tr>`
+      })
+      .join('')
+    return {
+      tableStart: `<table class="rendered-roy-complex-table__body" style="width: ${bodyTableWidth}px">`,
+      tableHead: `<thead class="roy-complex-table-thead">${tableHead}</thead>`,
+      tableBody: `<tbody>${tableBody}</tbody>`,
+      tableEnd: '</table>',
+      tableWidth: bodyTableWidth
+    }
   }
 
   generateSimpleText(element) {
@@ -133,7 +165,7 @@ export class AutoTable {
   generateRichText(element) {
     let StyledTextConstructor = Vue.extend(StyledText)
     const { propValue, style } = element
-    const afterPropValue = renderUtil.replaceTextWithDataSource(
+    const afterPropValue = RenderUtil.replaceTextWithDataSource(
       propValue,
       this.dataSet,
       this.dataSource

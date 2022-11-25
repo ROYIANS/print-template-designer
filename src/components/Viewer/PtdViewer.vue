@@ -126,11 +126,10 @@ export default {
           this.dataSet,
           this.$refs.tempHolder
         )
+        console.log('renderPage', renderPage)
         if (renderPage.length) {
           const viewerElement = this.$refs.viewer
-          renderPage.forEach((el) => {
-            viewerElement.appendChild(el)
-          })
+          viewerElement.innerHTML = renderPage.join('')
           toast('建议导出PDF后再打印，更精准', 'warning', 10000)
         } else {
           this.isBlankPage = true
