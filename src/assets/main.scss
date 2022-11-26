@@ -30,3 +30,44 @@
     cursor: initial;
   }
 }
+
+.roy-btn-radio-group {
+  .roy-btn-radio-group__btn {
+    background: var(--roy-bg-color-page);
+    height: 24px;
+    width: 24px;
+    font-size: 14px;
+    line-height: 24px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    &:hover {
+      color: #ffffff !important;
+      background: var(--roy-color-primary-light-3);
+    }
+    & + .roy-btn-radio-group__btn {
+      margin-left: 5px;
+    }
+    &.roy-btn-radio-group__btn--active {
+      background: var(--roy-color-primary);
+      color: #fff;
+    }
+  }
+}
+
+.roy-color-picker {
+  width: 100%;
+
+  .el-color-picker__color {
+    border-radius: 0;
+  }
+  .el-color-picker__trigger {
+    padding: 0;
+    margin: 0;
+    width: 100% !important;
+    border: none;
+    border-radius: unset;
+  }
+}

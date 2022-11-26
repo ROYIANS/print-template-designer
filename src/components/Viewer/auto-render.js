@@ -98,7 +98,8 @@ export class AutoRender {
   }
 
   async renderPages() {
-    const { background, color, fontSize, fontFamily } = this.pagerConfig
+    const { background, color, fontSize, fontFamily, lineHeight } =
+      this.pagerConfig
     return this.pages.map((page) => {
       return `
         <div
@@ -113,8 +114,9 @@ export class AutoRender {
             color: ${color};
             font-size: ${fontSize}pt;
             font-family: ${fontFamily};
+            line-height: ${lineHeight};
             position: relative;
-            overflow: hidden
+            overflow: hidden;
           "
         >
           ${page}

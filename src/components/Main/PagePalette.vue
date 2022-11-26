@@ -56,7 +56,6 @@
 <script>
 import { mapState } from 'vuex'
 import commonMixin from '@/mixin/commonMixin'
-import { renderers } from '@/components/config/renderers'
 import {
   paletteConfigList,
   settingConfigList
@@ -105,16 +104,8 @@ export default {
       settingFormItemConfigs: settingConfigList
     }
   },
-  methods: {
-    async registerTableRender(renderers) {
-      // 注册渲染器
-      for (let i in renderers) {
-        this.$VXETable.renderer.add(i, renderers[i])
-      }
-    }
-  },
+  methods: {},
   async mounted() {
-    await this.registerTableRender(renderers)
     this.$nextTick(() => {
       this.initCompleted = true
     })
@@ -186,47 +177,6 @@ export default {
     background: transparent;
     color: var(--roy-text-color-primary);
     border-color: var(--roy-border-color);
-  }
-}
-
-.roy-btn-radio-group {
-  .roy-btn-radio-group__btn {
-    background: var(--roy-bg-color-page);
-    height: 24px;
-    width: 24px;
-    font-size: 14px;
-    line-height: 24px;
-    padding: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    &:hover {
-      color: #ffffff !important;
-      background: var(--roy-color-primary-light-3);
-    }
-    & + .roy-btn-radio-group__btn {
-      margin-left: 5px;
-    }
-    &.roy-btn-radio-group__btn--active {
-      background: var(--roy-color-primary);
-      color: #fff;
-    }
-  }
-}
-
-.roy-color-picker {
-  width: 100%;
-
-  .el-color-picker__color {
-    border-radius: 0;
-  }
-  .el-color-picker__trigger {
-    padding: 0;
-    margin: 0;
-    width: 100% !important;
-    border: none;
-    border-radius: unset;
   }
 }
 </style>

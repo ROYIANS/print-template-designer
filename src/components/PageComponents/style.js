@@ -136,9 +136,7 @@ export const StyledText = styled('div', textProps)`
   margin: ${(props) => props.margin};
   font-size: ${(props) => `${props.fontSize}pt`};
   font-family: ${(props) =>
-    props.fontFamily === 'default'
-      ? 'LXGW New Clear Gothic Book, Helvetica Neue, Helvetica, Arial, PingFang SC, Microsoft YaHei, WenQuanYi Micro Hei, sans-serif'
-      : `${props.fontFamily}`};
+    props.fontFamily === 'default' ? 'inherit' : `${props.fontFamily}`};
   z-index: ${(props) => props.zIndex};
   line-height: ${(props) => props.lineHeight};
   letter-spacing: ${(props) => `${props.letterSpacing}px`};
@@ -181,9 +179,7 @@ export const StyledSimpleText = styled('div', textProps)`
   margin: ${(props) => props.margin};
   font-size: ${(props) => `${props.fontSize}pt`};
   font-family: ${(props) =>
-    props.fontFamily === 'default'
-      ? 'LXGW New Clear Gothic Book, Helvetica Neue, Helvetica, Arial, PingFang SC, Microsoft YaHei, WenQuanYi Micro Hei, sans-serif'
-      : `${props.fontFamily}`};
+    props.fontFamily === 'default' ? 'inherit' : `${props.fontFamily}`};
   z-index: ${(props) => props.zIndex};
   line-height: ${(props) => props.lineHeight};
   letter-spacing: ${(props) => `${props.letterSpacing}px`};

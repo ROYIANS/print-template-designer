@@ -44,11 +44,11 @@
 import commonMixin from '@/mixin/commonMixin'
 import RoyModal from '@/components/RoyModal/RoyModal'
 import RoyLoading from '@/components/RoyLoading'
-import { generateViewerElement } from '@/components/Viewer/viewer'
 import html2canvas from 'html2canvas'
 import { jsPDF } from 'jspdf'
 import print from 'vue-print-nb'
 import toast from '@/utils/toast'
+import { AutoRender } from '@/components/Viewer/auto-render'
 
 /**
  * 打印模板预览组件
@@ -119,14 +119,14 @@ export default {
     initMounted() {
       this.$nextTick(async () => {
         this.initCompleted = false
-        const renderPage = await generateViewerElement(
-          this.componentData,
-          this.pageConfig,
-          this.dataSource,
-          this.dataSet,
-          this.$refs.tempHolder
-        )
-        console.log('renderPage', renderPage)
+        const renderer = new AutoRender({
+          renderElements: this.componentData,
+          pagerConfig: this.pageConfig,
+          dataSet: this.dataSet,
+          dataSource: this.dataSource,
+          tempHolder: this.$refs.tempHolder
+        })
+        const renderPage = await renderer.run()
         if (renderPage.length) {
           const viewerElement = this.$refs.viewer
           viewerElement.innerHTML = renderPage.join('')

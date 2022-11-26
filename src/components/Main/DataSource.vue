@@ -31,21 +31,16 @@
         <div class="roy-datasource-node--content">{{ item.field }}</div>
       </div>
     </div>
-    <RoyModal
+    <DataSourceMaintain
       v-if="showDataSourceMaintainer"
-      :show.sync="showDataSourceMaintainer"
-      title="数据源维护"
-      height="70%"
-      width="60%"
-    >
-      123456
-    </RoyModal>
+      :visible.sync="showDataSourceMaintainer"
+    />
   </el-main>
 </template>
 
 <script>
 import commonMixin from '@/mixin/commonMixin'
-import RoyModal from '@/components/RoyModal/RoyModal'
+import DataSourceMaintain from '@/components/Main/DataSourceMaintain'
 import { mapState } from 'vuex'
 
 /**
@@ -55,7 +50,7 @@ export default {
   name: 'DataSource',
   mixins: [commonMixin],
   components: {
-    RoyModal
+    DataSourceMaintain
   },
   props: {},
   data() {
@@ -81,7 +76,11 @@ export default {
   mounted() {
     this.initMounted()
   },
-  watch: {}
+  watch: {
+    dataSource(newVal) {
+      this.dataSourceIn = this.deepCopy(newVal)
+    }
+  }
 }
 </script>
 
