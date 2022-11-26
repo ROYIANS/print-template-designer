@@ -9,6 +9,7 @@
         <div class="head-slot">
           <i
             v-for="(tool, index) in headIconConfig"
+            :title="tool.title"
             :key="index"
             :class="tool.icon"
             class="roy-header-icon"
@@ -81,6 +82,7 @@ export default {
         {
           name: 'Github',
           icon: 'ri-github-fill',
+          title: '跳转到Github',
           event: () => {
             toast('跳转到Github', 'info')
             window.open(
@@ -91,7 +93,8 @@ export default {
         },
         {
           name: 'ShowViewer',
-          icon: 'ri-focus-2-line',
+          icon: 'ri-eye-line',
+          title: '预览设计模板',
           event: () => {
             this.showViewer()
           }

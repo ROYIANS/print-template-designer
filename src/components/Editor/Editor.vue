@@ -63,6 +63,15 @@
           />
           <!-- 标线 -->
           <EditorLine />
+          <!-- 上下边距线 -->
+          <div
+            class="roy-margin-top-line"
+            :style="`top: ${pageConfig.pageMarginTop * realScale}px`"
+          ></div>
+          <div
+            class="roy-margin-bottom-line"
+            :style="`bottom: ${pageConfig.pageMarginBottom * realScale}px`"
+          ></div>
         </div>
       </div>
     </div>
@@ -183,7 +192,8 @@ export default {
       showRuler: (state) => state.printTemplateModule.rulerThings.showRuler,
       componentData: (state) => state.printTemplateModule.componentData,
       curComponent: (state) => state.printTemplateModule.curComponent,
-      editor: (state) => state.printTemplateModule.editor
+      editor: (state) => state.printTemplateModule.editor,
+      pageConfig: (state) => state.printTemplateModule.pageConfig
     }),
     contextTheme() {
       return this.isNightMode ? 'dark' : 'default'
@@ -329,7 +339,12 @@ export default {
       return {
         width: `${this.rectWidth * 5}px`,
         height: `${this.rectHeight * 5}px`,
-        transform: `scale(${this.scale})`
+        transform: `scale(${this.scale})`,
+        background: this.pageConfig.background,
+        color: this.pageConfig.color,
+        fontFamily: this.pageConfig.fontFamily,
+        fontSize: this.pageConfig.fontSize,
+        lineHeight: this.pageConfig.lineHeight
       }
     },
     isNightMode() {
@@ -648,6 +663,13 @@ export default {
         cursor: not-allowed;
       }
     }
+  }
+  .roy-margin-top-line,
+  .roy-margin-bottom-line {
+    position: absolute;
+    height: 0;
+    width: 100%;
+    border-top: 1px dashed #ccc;
   }
 }
 

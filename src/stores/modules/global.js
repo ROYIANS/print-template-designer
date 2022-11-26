@@ -36,7 +36,9 @@ export const state = {
     // 默认字号
     fontSize: 12,
     // 默认字体
-    fontFamily: 'Microsoft YaHei'
+    fontFamily: 'Microsoft YaHei',
+    // 默认行高
+    lineHeight: 1
   },
   // 是否在编辑器中，用于判断复制、粘贴组件时是否生效，如果在编辑器外，则无视这些操作
   isInEditor: false,

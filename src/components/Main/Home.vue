@@ -65,6 +65,7 @@ import DesignerMain from './DesignerMain.vue'
 import shepherd from '@/components/RoyUserTour/userTour'
 import toast from '@/utils/toast'
 import commonMixin from '@/mixin/commonMixin'
+import { renderers } from '@/components/config/renderers'
 
 const VERSION = config.version
 
@@ -120,14 +121,14 @@ export default {
         },
         {
           code: 'exportTemplate',
-          name: '导出配置信息',
-          icon: 'ri-braces-line',
+          name: '保存模板为文件',
+          icon: 'ri-file-download-line',
           event: this.exportJSON
         },
         {
           code: 'importTemplate',
-          name: '导入模板数据',
-          icon: 'ri-contacts-book-upload-line',
+          name: '从模板文件导入',
+          icon: 'ri-file-upload-line',
           event: this.importFile
         }
       ]
@@ -153,7 +154,7 @@ export default {
       initNightMode: 'printTemplateModule/nightMode/initNightMode',
       toggleNightMode: 'printTemplateModule/nightMode/toggleNightMode'
     }),
-    initMounted() {
+    async initMounted() {
       console.log(
         `\n %c PrintTemplateDesigner® v${VERSION} %c ${new Date(
           window.printTemplateVersionTime || new Date().getTime()
@@ -162,6 +163,13 @@ export default {
         'color:#000;background:linear-gradient(90deg,#009688,#ffffff);padding:5px 10px 5px 0px;'
       )
       this.initConfig()
+      await this.registerTableRender(renderers)
+    },
+    registerTableRender(renderers) {
+      // 注册渲染器
+      for (let i in renderers) {
+        this.$VXETable.renderer.add(i, renderers[i])
+      }
     },
     initConfig() {
       this.initNightMode()

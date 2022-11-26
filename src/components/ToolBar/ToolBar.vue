@@ -84,20 +84,20 @@ export default {
     },
     toolbarLeftConfig() {
       return [
-        {
-          name: '撤销',
-          icon: 'ri-arrow-go-back-fill',
-          event: () => {
-            this.$store.commit('printTemplateModule/undo')
-          }
-        },
-        {
-          name: '恢复',
-          icon: 'ri-arrow-go-forward-fill',
-          event: () => {
-            this.$store.commit('printTemplateModule/redo')
-          }
-        },
+        // {
+        //   name: '撤销',
+        //   icon: 'ri-arrow-go-back-fill',
+        //   event: () => {
+        //     this.$store.commit('printTemplateModule/undo')
+        //   }
+        // },
+        // {
+        //   name: '恢复',
+        //   icon: 'ri-arrow-go-forward-fill',
+        //   event: () => {
+        //     this.$store.commit('printTemplateModule/redo')
+        //   }
+        // },
         {
           name: '显示/隐藏标尺',
           icon: 'ri-ruler-2-line',
@@ -105,21 +105,21 @@ export default {
             this.toggleRuler()
           }
         },
-        {
-          name: this.curComponent && this.curComponent.isLock ? '解锁' : '锁定',
-          icon:
-            this.curComponent && this.curComponent.isLock
-              ? 'ri-lock-unlock-line'
-              : 'ri-lock-2-line',
-          disabled: !this.curComponent,
-          event: () => {
-            if (this.curComponent.isLock) {
-              this.$store.commit('printTemplateModule/unlock')
-            } else {
-              this.$store.commit('printTemplateModule/lock')
-            }
-          }
-        },
+        // {
+        //   name: this.curComponent && this.curComponent.isLock ? '解锁' : '锁定',
+        //   icon:
+        //     this.curComponent && this.curComponent.isLock
+        //       ? 'ri-lock-unlock-line'
+        //       : 'ri-lock-2-line',
+        //   disabled: !this.curComponent,
+        //   event: () => {
+        //     if (this.curComponent.isLock) {
+        //       this.$store.commit('printTemplateModule/unlock')
+        //     } else {
+        //       this.$store.commit('printTemplateModule/lock')
+        //     }
+        //   }
+        // },
         // {
         //   name: this.areaData.components.length ? '组合' : '拆分',
         //   icon: this.areaData.components.length
