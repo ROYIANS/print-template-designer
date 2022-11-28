@@ -36,6 +36,9 @@ export const RenderUtil = {
     return RenderUtil.getDataWithTypeConvertedByDataSource(value, typeName)
   },
   getDataWithTypeConvertedByDataSource(value, typeName) {
+    if (value === null || value === undefined) {
+      return ''
+    }
     switch (typeName) {
       case 'String':
         return value

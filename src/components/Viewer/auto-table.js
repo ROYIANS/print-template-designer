@@ -118,8 +118,8 @@ export class AutoTable {
       .map((row) => {
         let tdEle = tableCols
           .map((col) => {
-            const { field, formatter } = col
-            return `<td height="${tableRowHeight}px">${RenderUtil.getDataWithTypeConvertedByDataSource(
+            const { field, formatter, align } = col
+            return `<td height="${tableRowHeight}px" style="text-align: ${align}">${RenderUtil.getDataWithTypeConvertedByDataSource(
               row[field],
               formatter
             )}</td>`
