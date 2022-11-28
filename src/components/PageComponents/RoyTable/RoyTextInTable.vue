@@ -48,10 +48,12 @@ import {
   editorConfig,
   mode
 } from '@/components/config/editorConfig'
+import commonMixin from '@/mixin/commonMixin'
 import { mapState } from 'vuex'
 
 export default {
   name: 'RoyTextInTable',
+  mixins: [commonMixin],
   props: {
     element: {
       type: Object,
@@ -80,7 +82,7 @@ export default {
     return {
       wangEditor: null,
       showEditor: false,
-      html: this.propValue,
+      html: this.deepCopy(this.propValue),
       toolbarConfig: toolBarConfig,
       editorConfig: editorConfig,
       mode: mode
@@ -100,11 +102,8 @@ export default {
     },
     handleMouseDown(e) {
       e.stopPropagation()
-    }
-  },
-  created() {},
-  watch: {
-    html() {
+    },
+    handleTextClosed() {
       this.$store.commit('printTemplateModule/updateDataValue', {
         data: this.element,
         value: this.html,
@@ -114,6 +113,8 @@ export default {
       this.$emit('componentUpdated', this.html)
     }
   },
+  created() {},
+  watch: {},
   beforeDestroy() {
     const editor = this.wangEditor
     if (editor == null) return
