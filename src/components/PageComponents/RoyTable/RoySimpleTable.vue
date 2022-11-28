@@ -598,14 +598,19 @@ export default {
     },
     setTablePropValue() {
       const propValue = {
-        tableData: this.tableData,
-        tableConfig: this.tableConfig
+        tableData: this.deepCopy(this.tableData),
+        tableConfig: this.deepCopy(this.tableConfig)
       }
       this.$store.commit('printTemplateModule/setPropValue', {
         id: this.element.id,
         propValue
       })
-      this.$emit('update:propValue', propValue)
+      // this.$emit('update:propValue', propValue)
+      this.$store.commit('printTemplateModule/updateDataValue', {
+        data: this.element,
+        value: propValue,
+        key: 'propValue'
+      })
       this.$emit('componentUpdated', propValue)
     },
     componentUpdated(row, col, value) {

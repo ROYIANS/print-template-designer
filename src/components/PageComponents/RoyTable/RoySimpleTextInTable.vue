@@ -150,7 +150,12 @@ export default {
         let bindingDataSource = this.dataSource[index]
         if (bindingDataSource) {
           this.$emit('update:bindValue', bindingDataSource)
-          this.$emit('update:propValue', `[绑定:${bindingDataSource.title}]`)
+          // this.$emit('update:propValue', `[绑定:${bindingDataSource.title}]`)
+          this.$store.commit('printTemplateModule/updateDataValue', {
+            data: this.element,
+            value: `[绑定:${bindingDataSource.title}]`,
+            key: 'propValue'
+          })
           this.$emit('componentUpdated', `[绑定:${bindingDataSource.title}]`)
           this.canEdit = false
         }
@@ -177,7 +182,12 @@ export default {
     },
     canEdit(newVal) {
       if (!newVal) {
-        this.$emit('update:propValue', this.$refs.editArea.$el.innerHTML)
+        // this.$emit('update:propValue', this.$refs.editArea.$el.innerHTML)
+        this.$store.commit('printTemplateModule/updateDataValue', {
+          data: this.element,
+          value: this.$refs.editArea.$el.innerHTML,
+          key: 'propValue'
+        })
         this.$emit('componentUpdated', this.$refs.editArea.$el.innerHTML)
       }
     }

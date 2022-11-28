@@ -15,7 +15,7 @@
                 key="prefix"
                 style="min-height: 40px; min-width: 200px"
                 :element="prefixTextElement"
-                :prop-value.sync="prefixTextElement.propValue"
+                :prop-value="prefixTextElement.propValue"
                 @componentUpdated="componentUpdated"
               />
             </div>
@@ -28,7 +28,7 @@
                 key="head"
                 :scale="scale"
                 :element="headSimpleTableElement"
-                :prop-value.sync="headSimpleTableElement.propValue"
+                :prop-value="headSimpleTableElement.propValue"
                 @componentUpdated="componentUpdated"
               />
             </div>
@@ -82,7 +82,7 @@
                 key="foot"
                 :scale="scale"
                 :element="footSimpleTableElement"
-                :prop-value.sync="footSimpleTableElement.propValue"
+                :prop-value="footSimpleTableElement.propValue"
                 @componentUpdated="componentUpdated"
               />
             </div>
@@ -95,7 +95,7 @@
                 key="suffix"
                 style="min-height: 40px; min-width: 200px"
                 :element="suffixTextElement"
-                :prop-value.sync="suffixTextElement.propValue"
+                :prop-value="suffixTextElement.propValue"
                 @componentUpdated="componentUpdated"
               />
             </div>
@@ -289,7 +289,6 @@ export default {
         id: this.element.id,
         propValue
       })
-      this.$emit('update:propValue', propValue)
       this.$emit('componentUpdated')
     },
     handleTableSettingSave(data) {

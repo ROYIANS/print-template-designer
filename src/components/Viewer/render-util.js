@@ -33,7 +33,7 @@ export const RenderUtil = {
       return item.field === field
     })
     const { typeName } = curDataConfig
-    RenderUtil.getDataWithTypeConvertedByDataSource(value, typeName)
+    return RenderUtil.getDataWithTypeConvertedByDataSource(value, typeName)
   },
   getDataWithTypeConvertedByDataSource(value, typeName) {
     switch (typeName) {
@@ -56,7 +56,7 @@ export const RenderUtil = {
   parseBigCurDate() {
     const curDate = new Date()
     const bigNumber = [
-      '零',
+      '〇',
       '一',
       '二',
       '三',
