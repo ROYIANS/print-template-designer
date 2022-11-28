@@ -84,7 +84,7 @@ export default {
     }),
     dataSourceOption() {
       return this.dataSource.filter((item) => {
-        return item.type === Array
+        return item.typeName === 'Array'
       })
     }
   },
@@ -204,16 +204,20 @@ export default {
               name: '$select',
               options: [
                 {
-                  value: 'text',
+                  value: 'String',
                   label: '文本'
                 },
                 {
-                  value: 'number',
-                  label: '数字'
+                  value: 'Money',
+                  label: '金额'
                 },
                 {
-                  value: 'money',
-                  label: '金额'
+                  value: 'BigNumber',
+                  label: '中文大写数字'
+                },
+                {
+                  value: 'BigMoney',
+                  label: '中文大写金额'
                 }
               ],
               props: {

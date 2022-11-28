@@ -164,22 +164,22 @@ const defaultDataTableProp = {
       field: 'field1',
       title: '表头R1',
       width: 100,
-      align: 'center',
-      formatter: 'text'
+      align: 'left',
+      formatter: 'String'
     },
     {
       field: 'field2',
       title: '表头R2',
       width: 100,
       align: 'center',
-      formatter: 'text'
+      formatter: 'String'
     },
     {
       field: 'field3',
       title: '表头R3',
       width: 100,
-      align: 'center',
-      formatter: 'text'
+      align: 'right',
+      formatter: 'String'
     }
   ]
 }

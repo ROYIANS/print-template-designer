@@ -118,9 +118,11 @@ export class AutoTable {
       .map((row) => {
         let tdEle = tableCols
           .map((col) => {
-            const { field, type } = col
-            console.log(type)
-            return `<td height="${tableRowHeight}px">${row[field]}</td>`
+            const { field, formatter } = col
+            return `<td height="${tableRowHeight}px">${RenderUtil.getDataWithTypeConvertedByDataSource(
+              row[field],
+              formatter
+            )}</td>`
           })
           .join('')
         return `<tr class="roy-complex-table-row">${tdEle}</tr>`

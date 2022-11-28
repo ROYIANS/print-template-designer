@@ -23,7 +23,7 @@ export class DataSourceMenu {
     }
     ul.innerHTML = dataSource
       .filter((item) => {
-        return item.type !== Array
+        return item.typeName !== 'Array'
       })
       .map((item) => {
         return `<li data-value='[::${item.field}::]'>${item.title}</li>`

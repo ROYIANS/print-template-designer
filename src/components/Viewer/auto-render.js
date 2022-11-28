@@ -154,7 +154,6 @@ export class AutoRender {
     } else {
       rootElement = newElement
     }
-    debugger
     if (this.curPageUsedHeight !== 0) {
       rootElement.style.top = `${this.curPageUsedHeight}px`
     }
@@ -180,6 +179,7 @@ export class AutoRender {
           this.addElementToCurPage(elementHTML, lastHeight)
           newElement.innerHTML = ''
           await appendImg(i)
+          break
         } else {
           const img = document.createElement('img')
           img.src = imgData.src
@@ -206,11 +206,11 @@ export class AutoRender {
     let afterPropValue = propValue
     if (bindValue) {
       const { field } = bindValue
-      if (this.dataSet[field] && this.dataSet[field] instanceof Function) {
-        afterPropValue = this.dataSet[field]()
-      } else {
-        afterPropValue = this.dataSet[field]
-      }
+      afterPropValue = RenderUtil.getDataConvertedByDataSource(
+        this.dataSet[field],
+        field,
+        this.dataSource
+      )
     }
     let newElement = this.createNewElementWithStyledComponent(element)
     newElement.innerHTML = afterPropValue
@@ -327,7 +327,6 @@ export class AutoRender {
     let tableItem = autoTable.getOriginTableItem()
     let newElement = this.createNewElementWithStyledComponent(element)
     let realTop = element.style.top
-    debugger
     if (this.curPageUsedHeight !== 0) {
       newElement.style.top = `${this.curPageUsedHeight}px`
       realTop = this.curPageUsedHeight
@@ -345,16 +344,13 @@ export class AutoRender {
     const thElement = newElement.getElementsByClassName(
       'roy-complex-table-thead'
     )[0]
-    debugger
     const { tables, overflowPages } = this.getTablesSplit(
       element.style,
       trElements,
       thElement
     )
-    debugger
     tables.forEach((table, index) => {
       if (index > 0) {
-        debugger
         newElement.style.top = `${this.realPageMarginTop}px`
         realTop = this.realPageMarginTop
       }
