@@ -15,6 +15,7 @@
       title="长文本编辑"
       height="70%"
       width="60%"
+      @close="handleTextClosed"
     >
       <div class="roy-wang-editor" @mousedown="handleMouseDown">
         <Toolbar
@@ -44,10 +45,12 @@ import {
   editorConfig,
   mode
 } from '@/components/config/editorConfig'
+import commonMixin from '@/mixin/commonMixin'
 import { mapState } from 'vuex'
 
 export default {
   name: 'RoyText',
+  mixins: [commonMixin],
   props: {
     element: {
       type: Object,
@@ -76,7 +79,7 @@ export default {
     return {
       wangEditor: null,
       showEditor: false,
-      html: this.propValue,
+      html: this.deepCopy(this.propValue),
       toolbarConfig: toolBarConfig,
       editorConfig: editorConfig,
       mode: mode
@@ -97,14 +100,13 @@ export default {
     },
     handleMouseDown(e) {
       e.stopPropagation()
-    }
-  },
-  created() {},
-  watch: {
-    html() {
+    },
+    handleTextClosed() {
       this.onBlur()
     }
   },
+  created() {},
+  watch: {},
   beforeDestroy() {
     const editor = this.wangEditor
     if (editor == null) return
