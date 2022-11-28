@@ -105,7 +105,12 @@ export default {
   created() {},
   watch: {
     html() {
-      this.$emit('update:propValue', this.html)
+      this.$store.commit('printTemplateModule/updateDataValue', {
+        data: this.element,
+        value: this.html,
+        key: 'propValue'
+      })
+      // this.$emit('update:propValue', this.html)
       this.$emit('componentUpdated', this.html)
     }
   },

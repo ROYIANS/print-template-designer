@@ -22,7 +22,6 @@
       :title-colon="formGlobalConfigIn.titleColon"
       :prevent-submit="formGlobalConfigIn.preventSubmit"
       :loading="formGlobalConfigIn.loading"
-      @change="handleItemChange"
     />
     <el-row class="roy-designer-global__pages">
       <el-col :span="24" class="roy-designer-global__title">纸张大小:</el-col>
@@ -330,10 +329,6 @@ export default {
     }),
     initMounted() {
       this.globalSettingConfig = this.deepCopy(this.pageConfig)
-    },
-    handleItemChange(data) {
-      console.log(data)
-      debugger
     }
   },
   created() {},

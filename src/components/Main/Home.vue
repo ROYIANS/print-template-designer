@@ -138,7 +138,8 @@ export default {
     ...mapState({
       isNightMode: (state) => state.printTemplateModule.nightMode.isNightMode,
       pageConfig: (state) => state.printTemplateModule.pageConfig,
-      componentData: (state) => state.printTemplateModule.componentData
+      componentData: (state) => state.printTemplateModule.componentData,
+      dataSource: (state) => state.printTemplateModule.dataSource
     }),
     headIconConfig() {
       return this.headIcons.filter((item) => {
@@ -399,7 +400,8 @@ export default {
       return {
         type: 'rptd',
         pageConfig: this.pageConfig,
-        componentData: this.componentData
+        componentData: this.componentData,
+        dataSource: this.dataSource
       }
     }
   },

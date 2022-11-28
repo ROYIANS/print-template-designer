@@ -103,6 +103,10 @@ export const mutations = {
     state.pageConfig = pageConfig
   },
 
+  updateDataValue(state, { data, key, value }) {
+    data[key] = value
+  },
+
   setPropValue({ componentData }, { propValue, id }) {
     if (componentData.length) {
       let newComponentValue = null

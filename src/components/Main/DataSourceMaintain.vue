@@ -175,8 +175,7 @@ export default {
           showUpdateStatus: true,
           showInsertStatus: true,
           showAsterisk: true
-        },
-        editClosed: this.handleEditClosed
+        }
       }
     }
   },
@@ -211,10 +210,6 @@ export default {
         this.$store.commit('printTemplateModule/setDataSource', tableData)
         this.handleModalClose()
       })
-    },
-    handleEditClosed(data) {
-      console.log(data)
-      debugger
     }
   },
   created() {},
