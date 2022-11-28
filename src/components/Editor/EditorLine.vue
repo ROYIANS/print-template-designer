@@ -4,8 +4,8 @@
       v-for="line in lines"
       v-show="lineStatus[line] || false"
       :key="line"
-      :ref="line"
       class="roy-mark-line__line"
+      :id="`rot-editor-line-${line}`"
       :class="
         line.includes('x') ? 'roy-mark-line--xline' : 'roy-mark-line--yline'
       "
@@ -43,7 +43,7 @@ export default {
   mounted() {
     // 监听元素移动和不移动的事件
     eventBus.$on('move', (isDownward, isRightward) => {
-      this.showLine(isDownward, isRightward)
+      this.showLineMove(isDownward, isRightward)
     })
 
     eventBus.$on('unmove', () => {
@@ -57,8 +57,7 @@ export default {
       })
     },
 
-    showLine(isDownward, isRightward) {
-      const lines = this.$refs
+    showLineMove(isDownward, isRightward) {
       const components = this.componentData || []
       const curComponentStyle = getComponentRotatedStyle(
         this.curComponent?.style || {}
@@ -78,14 +77,14 @@ export default {
           top: [
             {
               isNearly: this.isNearly(curComponentStyle.top, top),
-              lineNode: lines.xt[0], // xt
+              lineNode: this.$el.querySelector('#rot-editor-line-xt'), // xt
               line: 'xt',
               dragShift: top,
               lineShift: top
             },
             {
               isNearly: this.isNearly(curComponentStyle.bottom, top),
-              lineNode: lines.xt[0], // xt
+              lineNode: this.$el.querySelector('#rot-editor-line-xt'), // xt
               line: 'xt',
               dragShift: top - curComponentStyle.height,
               lineShift: top
@@ -96,21 +95,21 @@ export default {
                 curComponentStyle.top + curComponentHalfHeight,
                 top + componentHalfHeight
               ),
-              lineNode: lines.xc[0], // xc
+              lineNode: this.$el.querySelector('#rot-editor-line-xc'), // xc
               line: 'xc',
               dragShift: top + componentHalfHeight - curComponentHalfHeight,
               lineShift: top + componentHalfHeight
             },
             {
               isNearly: this.isNearly(curComponentStyle.top, bottom),
-              lineNode: lines.xb[0], // xb
+              lineNode: this.$el.querySelector('#rot-editor-line-xb'), // xb
               line: 'xb',
               dragShift: bottom,
               lineShift: bottom
             },
             {
               isNearly: this.isNearly(curComponentStyle.bottom, bottom),
-              lineNode: lines.xb[0], // xb
+              lineNode: this.$el.querySelector('#rot-editor-line-xb'), // xb
               line: 'xb',
               dragShift: bottom - curComponentStyle.height,
               lineShift: bottom
@@ -119,14 +118,14 @@ export default {
           left: [
             {
               isNearly: this.isNearly(curComponentStyle.left, left),
-              lineNode: lines.yl[0], // yl
+              lineNode: this.$el.querySelector('#rot-editor-line-yl'), // yl
               line: 'yl',
               dragShift: left,
               lineShift: left
             },
             {
               isNearly: this.isNearly(curComponentStyle.right, left),
-              lineNode: lines.yl[0], // yl
+              lineNode: this.$el.querySelector('#rot-editor-line-yl'), // yl
               line: 'yl',
               dragShift: left - curComponentStyle.width,
               lineShift: left
@@ -137,21 +136,21 @@ export default {
                 curComponentStyle.left + curComponentHalfWidth,
                 left + componentHalfWidth
               ),
-              lineNode: lines.yc[0], // yc
+              lineNode: this.$el.querySelector('#rot-editor-line-yc'), // yc
               line: 'yc',
               dragShift: left + componentHalfWidth - curComponentHalfWidth,
               lineShift: left + componentHalfWidth
             },
             {
               isNearly: this.isNearly(curComponentStyle.left, right),
-              lineNode: lines.yr[0], // yr
+              lineNode: this.$el.querySelector('#rot-editor-line-yr'), // yr
               line: 'yr',
               dragShift: right,
               lineShift: right
             },
             {
               isNearly: this.isNearly(curComponentStyle.right, right),
-              lineNode: lines.yr[0], // yr
+              lineNode: this.$el.querySelector('#rot-editor-line-yr'), // yr
               line: 'yr',
               dragShift: right - curComponentStyle.width,
               lineShift: right

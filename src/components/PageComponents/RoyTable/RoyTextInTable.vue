@@ -19,6 +19,7 @@
       title="长文本编辑"
       height="70%"
       width="60%"
+      @close="handleTextClosed"
     >
       <div class="roy-wang-editor" @mousedown="handleMouseDown">
         <Toolbar
