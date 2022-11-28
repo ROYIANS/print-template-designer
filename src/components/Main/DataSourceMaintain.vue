@@ -127,10 +127,6 @@ export default {
                   label: '文本'
                 },
                 {
-                  value: 'Number',
-                  label: '数字'
-                },
-                {
                   value: 'Array',
                   label: '数组（表格数据）'
                 },
@@ -139,8 +135,20 @@ export default {
                   label: '金额'
                 },
                 {
-                  value: 'Time',
-                  label: '日期/时间'
+                  value: 'BigNumber',
+                  label: '中文大写数字'
+                },
+                {
+                  value: 'BigMoney',
+                  label: '中文大写金额'
+                },
+                {
+                  value: 'CurDateTime',
+                  label: '当前日期(2022.11.28)'
+                },
+                {
+                  value: 'BigCurDate',
+                  label: '当前中文日期(二零二二年十一月二十八日)'
                 }
               ],
               props: {
@@ -161,9 +169,14 @@ export default {
         },
         editConfig: {
           trigger: 'click',
+          enabled: true,
           mode: 'row',
-          showStatus: true
-        }
+          showStatus: true,
+          showUpdateStatus: true,
+          showInsertStatus: true,
+          showAsterisk: true
+        },
+        editClosed: this.handleEditClosed
       }
     }
   },
@@ -198,6 +211,10 @@ export default {
         this.$store.commit('printTemplateModule/setDataSource', tableData)
         this.handleModalClose()
       })
+    },
+    handleEditClosed(data) {
+      console.log(data)
+      debugger
     }
   },
   created() {},

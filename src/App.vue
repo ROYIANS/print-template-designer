@@ -104,32 +104,28 @@ export default {
         {
           title: '当前日期（中文）',
           field: 'curDateChn',
-          typeName: '字符',
-          type: String
+          typeName: 'BigCurDate'
         },
         {
           title: '当前日期（数字）',
           field: 'curDateNum',
-          typeName: '字符',
-          type: String
+          typeName: 'CurDateTime'
         },
         {
           title: '当前日期时间（数字）',
           field: 'curDateTime',
-          typeName: '字符',
-          type: String
+          typeName: 'CurDateTime'
         },
         {
           title: '表格数据',
           field: 'tableData',
-          typeName: '数组',
-          type: Array
+          typeName: 'Array'
         }
       ],
       preDataSet: {
-        curDateTime: () => {
-          return new Date()
-        },
+        curDateTime: 'YYYY.MM.DD hh:mm',
+        curDateChn: '',
+        curDateNum: 'YYYY年MM月DD日',
         tableData: [
           {
             name: '张三',
