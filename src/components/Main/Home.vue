@@ -361,10 +361,13 @@ export default {
                     'printTemplateModule/setComponentData',
                     resultParsed.componentData
                   )
-                  console.log(resultParsed.componentData)
                   this.$store.commit(
                     'printTemplateModule/setPageConfig',
                     resultParsed.pageConfig
+                  )
+                  this.$store.commit(
+                    'printTemplateModule/setDataSource',
+                    resultParsed.dataSource
                   )
                 } catch (e) {
                   toast('文件损坏，转换内容失败', 'warning')
@@ -384,7 +387,8 @@ export default {
 
       const saveData = {
         pageConfig: this.pageConfig,
-        componentData: this.componentData
+        componentData: this.componentData,
+        dataSource: this.dataSource
       }
 
       const blob = new Blob([JSON.stringify(saveData)])
