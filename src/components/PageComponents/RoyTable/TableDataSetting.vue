@@ -140,8 +140,8 @@ export default {
             sortable: true,
             titlePrefix: { message: '用于展示于表头名称' },
             editRender: {
-              name: 'input',
-              attrs: { placeholder: '请输入列标题' }
+              name: '$input',
+              props: { placeholder: '请输入列标题' }
             }
           },
           {
@@ -150,8 +150,8 @@ export default {
             sortable: true,
             titlePrefix: { message: '用于匹配对应列数据' },
             editRender: {
-              name: 'input',
-              attrs: { placeholder: '请输入英文字段' }
+              name: '$input',
+              props: { placeholder: '请输入英文字段' }
             }
           },
           {
@@ -186,8 +186,8 @@ export default {
             sortable: true,
             titlePrefix: { message: '该列宽度' },
             editRender: {
-              name: 'input',
-              attrs: {
+              name: '$input',
+              props: {
                 placeholder: '请输入列宽度',
                 type: 'number',
                 min: 10,
@@ -271,7 +271,7 @@ export default {
       const defaultData = {
         width: 100,
         align: 'left',
-        formatter: 'text'
+        formatter: 'String'
       }
       this.$refs.xGrid.insertAt(defaultData, -1)
     },

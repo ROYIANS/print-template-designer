@@ -135,6 +135,9 @@ export class AutoRender {
     )
     let rootElement = null
     let newElement = this.createNewElementWithStyledComponent(element)
+    newElement.style.transform = 'none'
+    const border = newElement.style.border
+    newElement.style.border = 'none'
     newElement.innerHTML = afterPropValue
     // 富文本高度自动给，然后走分页逻辑
     newElement.style.height = 'auto'
@@ -164,6 +167,8 @@ export class AutoRender {
     const richTextImgList = await autoSplitText.run()
     newElement.style.display = 'inline-grid'
     newElement.innerHTML = ''
+    newElement.style.transform = `rotate(${style.rotate}deg)`
+    newElement.style.border = border
     const appendImg = async (imgIndex) => {
       let curHeight = this.curPageUsedHeight !== 0 ? 0 : outerStyle.top
       if (imgIndex !== 0) {

@@ -143,11 +143,11 @@ export class AutoTable {
     let afterPropValue = propValue
     if (bindValue) {
       const { field } = bindValue
-      if (this.dataSet[field] && this.dataSet[field] instanceof Function) {
-        afterPropValue = this.dataSet[field]()
-      } else {
-        afterPropValue = this.dataSet[field]
-      }
+      afterPropValue = RenderUtil.getDataConvertedByDataSource(
+        this.dataSet[field],
+        field,
+        this.dataSource
+      )
     }
     const instance = new StyledSimpleTextConstructor({
       propsData: style

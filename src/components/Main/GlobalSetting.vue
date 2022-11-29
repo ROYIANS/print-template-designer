@@ -189,7 +189,7 @@ export default {
           field: 'title',
           span: 24,
           itemRender: {
-            name: 'input'
+            name: '$input'
           }
         },
         {

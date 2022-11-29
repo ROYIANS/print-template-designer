@@ -100,8 +100,8 @@ export default {
             sortable: true,
             titlePrefix: { message: '数据源的标识名称' },
             editRender: {
-              name: 'input',
-              attrs: { placeholder: '请输入数据名称' }
+              name: '$input',
+              props: { placeholder: '请输入数据名称' }
             }
           },
           {
@@ -110,8 +110,8 @@ export default {
             sortable: true,
             titlePrefix: { message: '用于匹配对应数据集' },
             editRender: {
-              name: 'input',
-              attrs: { placeholder: '请输入英文字段' }
+              name: '$input',
+              props: { placeholder: '请输入英文字段' }
             }
           },
           {

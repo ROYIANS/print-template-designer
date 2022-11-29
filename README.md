@@ -11,7 +11,10 @@ A vue2 component for design a page for print / 一个使用Vue2的组件，用�
 
 ## 截图
 
-![image.png](https://s2.loli.net/2022/10/21/nBx2zugcJZDYMIt.png)
+![image.png](https://s2.loli.net/2022/11/29/mBilHMz8xuZeL3Y.png)
+![image.png](https://s2.loli.net/2022/11/29/7Qpzd1N4XZDu9xE.png)
+![image.png](https://s2.loli.net/2022/11/29/iPSO9GJQv41YZlj.png)
+![image.png](https://s2.loli.net/2022/11/29/kQZwCrS41m6THAh.png)
 
 ## 安装
 
@@ -43,8 +46,36 @@ Vue.prototype.$XModal = VXETable.modal
 app.vue
 ```vue
 <template>
-  <ptd-designer />
+  <div>
+    <ptd-designer
+      ref="designer"
+      :pre-component-data="preComponentData"
+      :pre-page-config="prePageConfig"
+      :pre-data-source="preDataSource"
+      :config="printTemplateConfig"
+    />
+    <PtdViewer
+      v-if="viewerVisible"
+      :visible.sync="viewerVisible"
+      :component-data="componentData"
+      :page-config="pageConfig"
+      :data-set="preDataSet"
+      :data-source="dataSource"
+    />
+  </div>
 </template>
+
+<script>
+import { PtdViewer } from 'print-template-designer'
+
+export default {
+  name: 'APP',
+  components: {
+    PtdViewer
+  },
+  // ......
+}
+</script>
 ```
 
 ## 插槽
@@ -82,3 +113,9 @@ app.vue
 - [slatejs 编辑器表格---合并单元格](https://juejin.cn/post/7080046216259567646)
 - [slatejs 编辑器表格---拆分单元格](https://juejin.cn/post/7080710896082747399)
 - [slatejs 编辑器表格---插入行](https://juejin.cn/post/7118925563858780174)
+
+## TODO
+
+以下是待办列表，写一些接下来该项目要干的事：
+
+[√] 基本功能
