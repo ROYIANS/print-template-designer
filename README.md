@@ -91,9 +91,8 @@ export default {
 - vuex
 - element-ui
 - remixicon
-- @wangeditor/editor
-- @wangeditor/editor-for-vue
 - vxe-table
+- shepherd.js
 
 ## 参考项目
 

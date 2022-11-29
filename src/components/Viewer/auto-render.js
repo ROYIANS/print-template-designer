@@ -80,6 +80,22 @@ export class AutoRender {
     this.curPageIndex = 0
     this.curPageUsedHeight = 0
     this.maxPageUseHeight = this.pageHeight - this.realPageMarginBottom
+    const { background, color, fontSize, fontFamily, lineHeight } =
+      this.pagerConfig
+    this.pageDefaultStyle = `
+      width: ${this.pageWidth}px;
+      height: ${this.pageHeight}px;
+      padding-top: ${this.realPageMarginTop}px;
+      padding-bottom: ${this.realPageMarginBottom}px;
+      background: ${background};
+      color: ${color};
+      font-size: ${fontSize}pt;
+      font-family: ${fontFamily};
+      line-height: ${lineHeight};
+      position: relative;
+      overflow: hidden;
+    `
+    this.tempHolder.style = this.pageDefaultStyle
     this.pages = []
   }
 
@@ -98,26 +114,12 @@ export class AutoRender {
   }
 
   async renderPages() {
-    const { background, color, fontSize, fontFamily, lineHeight } =
-      this.pagerConfig
     return this.pages.map((page) => {
       return `
         <div
           id="${generateID()}"
           class="roy-preview-page"
-          style="
-            width: ${this.pageWidth}px;
-            height: ${this.pageHeight}px;
-            padding-top: ${this.realPageMarginTop}px;
-            padding-bottom: ${this.realPageMarginBottom}px;
-            background: ${background};
-            color: ${color};
-            font-size: ${fontSize}pt;
-            font-family: ${fontFamily};
-            line-height: ${lineHeight};
-            position: relative;
-            overflow: hidden;
-          "
+          style="${this.pageDefaultStyle}"
         >
           ${page}
         </div>
@@ -291,7 +293,7 @@ export class AutoRender {
         }px`
         newElement.style.overflow = 'hidden'
       }
-      this.addElementToCurPage(rootElement.outerHTML, table.height)
+      this.addElementToCurPage(rootElement.outerHTML, newElement.clientHeight)
     })
     // fix: 复杂表格各个元素位置不对问题
     this.curPageUsedHeight = rootElement.clientHeight + realTop
@@ -366,7 +368,14 @@ export class AutoRender {
         }px`
         newElement.style.overflow = 'hidden'
       }
-      this.addElementToCurPage(newElement.outerHTML, table.height)
+      if (this.curPageUsedHeight !== 0) {
+        this.addElementToCurPage(newElement.outerHTML, newElement.clientHeight)
+      } else {
+        this.addElementToCurPage(
+          newElement.outerHTML,
+          realTop + newElement.clientHeight
+        )
+      }
     })
     this.curPageUsedHeight = newElement.clientHeight + realTop
     this.tempHolder.removeChild(newElement)

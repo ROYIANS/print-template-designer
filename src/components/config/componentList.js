@@ -55,7 +55,7 @@ export const componentList = [
     name: '长文本',
     component: 'RoyText',
     propValue:
-      '<p><span style="font-size: 16pt; font-family: 仿宋;">双击</span><span style="color: rgb(255, 255, 255); background-color: rgb(0, 0, 0); font-size: 16pt; font-family: 仿宋;">编辑</span><span style="font-size: 16pt; font-family: 仿宋;">文本</span></p>',
+      '<p><span style="font-size: 16pt;">双击</span><span style="color: rgb(255, 255, 255); background-color: #009688; font-size: 16pt; font-family: 仿宋;">编辑</span><span style="font-size: 16pt;">文本</span></p>',
     style: {
       width: 500,
       height: 200,

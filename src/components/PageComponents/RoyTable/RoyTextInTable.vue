@@ -22,12 +22,12 @@
       @close="handleTextClosed"
     >
       <div class="roy-wang-editor" @mousedown="handleMouseDown">
-        <Toolbar
+        <WangToolbar
           style="border-bottom: 1px solid #ccc"
           :editor="wangEditor"
           :defaultConfig="toolbarConfig"
         />
-        <Editor
+        <WangEditor
           v-model="html"
           style="height: 300px"
           :defaultConfig="editorConfig"
@@ -43,7 +43,10 @@
 <script>
 import { StyledText } from '@/components/PageComponents/style'
 import RoyModal from '@/components/RoyModal/RoyModal'
-import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
+import {
+  Editor as WangEditor,
+  Toolbar as WangToolbar
+} from '@wangeditor/editor-for-vue'
 import {
   toolBarConfig,
   editorConfig,
@@ -66,8 +69,8 @@ export default {
     }
   },
   components: {
-    Editor,
-    Toolbar,
+    WangEditor,
+    WangToolbar,
     StyledText,
     RoyModal
   },

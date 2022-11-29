@@ -110,7 +110,7 @@ const circleProps = Object.assign({}, commonProps, {})
 
 const rectProps = Object.assign({}, commonProps, {
   borderWidth: {
-    type: Number,
+    type: [Number, String],
     default: 1
   }
 })

@@ -1,6 +1,6 @@
 {
   "name": "print-template-designer",
-  "version": "0.1.4",
+  "version": "0.1.7",
   "private": false,
   "author": {
     "email": "admin@royians.cn",
@@ -13,7 +13,7 @@
   },
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
+    "build": "vue-cli-service build --mode development",
     "lint": "vue-cli-service lint",
     "lib": "vue-cli-service build --target lib --name print-template-designer --dest lib src/components/index.js"
   },
@@ -29,13 +29,11 @@
     "element-ui": "^2.15.9",
     "html2canvas": "^1.4.1",
     "jspdf": "^2.5.1",
-    "lodash": "^4.17.21",
-    "mathjs": "^11.3.0",
     "nanoid": "^4.0.0",
     "normalize.css": "^8.0.1",
     "remixicon": "^2.5.0",
     "shepherd.js": "^10.0.1",
-    "vue": "^2.6.14",
+    "vue": "2.6.11",
     "vue-print-nb": "^1.7.5",
     "vue-router": "^3.5.4",
     "vue-styled-components": "^1.6.0",
@@ -59,7 +57,9 @@
     "prettier": "^2.4.1",
     "sass": "^1.32.7",
     "sass-loader": "^12.0.0",
-    "vue-template-compiler": "^2.6.14"
+    "vue-template-compiler": "2.6.11",
+    "webpack-bundle-analyzer": "^4.7.0",
+    "webpack-node-externals": "^3.0.0"
   },
   "gitHooks": {
     "pre-commit": "lint-staged"

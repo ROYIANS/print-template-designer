@@ -256,6 +256,10 @@ export default {
             name: '$select',
             options: [
               {
+                label: '霞鹜新晰黑',
+                value: 'LXGW New Clear Gothic Book'
+              },
+              {
                 label: '宋体',
                 value: 'simsun'
               },
