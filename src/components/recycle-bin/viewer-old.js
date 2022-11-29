@@ -382,7 +382,6 @@ export const renderMain = {
     })
     let tableHtml = autoTable.getOriginTableItem()
     console.log(StyledComplexTableConstructor, maxHeight, tableHtml)
-    debugger
   },
   async renderRoyCircle({ element, pagerConfig, pageSet }) {
     let StyledCircleConstructor = Vue.extend(StyledCircle)

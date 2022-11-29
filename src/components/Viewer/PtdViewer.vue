@@ -130,7 +130,8 @@ export default {
         if (renderPage.length) {
           const viewerElement = this.$refs.viewer
           viewerElement.innerHTML = renderPage.join('')
-          toast('建议导出PDF后再打印，更精准', 'warning', 10000)
+          toast('建议导出PDF后再打印，更精准', 'info', 5000)
+          this.$el.querySelector('.roy-temp-holder').style.display = 'none'
         } else {
           this.isBlankPage = true
         }

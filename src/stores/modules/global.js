@@ -36,7 +36,7 @@ export const state = {
     // 默认字号
     fontSize: 12,
     // 默认字体
-    fontFamily: 'Microsoft YaHei',
+    fontFamily: 'LXGW New Clear Gothic Book',
     // 默认行高
     lineHeight: 1
   },
@@ -101,6 +101,17 @@ export const mutations = {
 
   setPageConfig(state, pageConfig) {
     state.pageConfig = pageConfig
+    store.commit('printTemplateModule/rulerThings/setRect', {
+      w:
+        pageConfig.pageDirection === 'p'
+          ? pageConfig.pageWidth
+          : pageConfig.pageHeight,
+      h:
+        pageConfig.pageDirection === 'p'
+          ? pageConfig.pageHeight
+          : pageConfig.pageWidth
+    })
+    store.commit('printTemplateModule/rulerThings/setReDrawRuler')
   },
 
   updateDataValue(state, { data, key, value }) {
