@@ -54,7 +54,7 @@ app.vue
       :pre-data-source="preDataSource"
       :config="printTemplateConfig"
     />
-    <PtdViewer
+    <ptd-viewer
       v-if="viewerVisible"
       :visible.sync="viewerVisible"
       :component-data="componentData"
@@ -66,13 +66,8 @@ app.vue
 </template>
 
 <script>
-import { PtdViewer } from 'print-template-designer'
-
 export default {
   name: 'APP',
-  components: {
-    PtdViewer
-  },
   // ......
 }
 </script>
