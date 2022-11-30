@@ -25,7 +25,7 @@ export const componentList = [
     component: 'RoySimpleText',
     propValue: '双击编辑文本',
     style: {
-      color: '#212121',
+      color: '#000000',
       borderRadius: 'inherit',
       padding: '0 0 0 0',
       margin: '0 0 0 0',
@@ -96,6 +96,8 @@ export const componentList = [
       width: 'auto',
       height: 'auto',
       fontSize: 12,
+      fontFamily: 'default',
+      color: '#000000',
       background: '#FFFFFF',
       borderWidth: 2,
       borderColor: '#212121',

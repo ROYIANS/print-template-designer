@@ -284,6 +284,7 @@ export const StyledSimpleTable = styled('div', simpleTableProps)`
 
   td {
     position: relative;
+    padding: 2px;
     background-color: ${(props) => `${props.background || '#FFF'}`};
   }
 
@@ -312,6 +313,9 @@ export const StyledComplexTable = styled('div', complexTableProps)`
   margin: 0;
   color: ${(props) => props.color};
   background: ${(props) => props.background};
+  font-size: ${(props) => `${props.fontSize}pt`};
+  font-family: ${(props) =>
+    props.fontFamily === 'default' ? 'inherit' : `${props.fontFamily}`};
 
   table {
     width: 100%;
@@ -320,6 +324,11 @@ export const StyledComplexTable = styled('div', complexTableProps)`
   th {
     text-align: center;
     font-weight: bold;
+    padding: 2px;
+  }
+
+  td {
+    padding: 3px;
   }
 
   .rendered-roy-complex-table__footer {

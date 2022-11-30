@@ -84,7 +84,7 @@ export default {
           icon: 'ri-github-fill',
           title: '跳转到Github',
           event: () => {
-            toast('跳转到Github', 'info')
+            toast('跳转到Github', 'info', 1000)
             window.open(
               'https://github.com/ROYIANS/print-template-designer',
               '_blank'
@@ -102,21 +102,25 @@ export default {
       ],
       preDataSource: [
         {
+          id: '0001',
           title: '当前日期（中文）',
           field: 'curDateChn',
           typeName: 'BigCurDate'
         },
         {
+          id: '0002',
           title: '当前日期（数字）',
           field: 'curDateNum',
           typeName: 'CurDateTime'
         },
         {
+          id: '0003',
           title: '当前日期时间（数字）',
           field: 'curDateTime',
           typeName: 'CurDateTime'
         },
         {
+          id: '0004',
           title: '表格数据',
           field: 'tableData',
           typeName: 'Array'
@@ -144,230 +148,14 @@ export default {
               '小梦小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号岛街道002号'
           },
           {
-            name: '李四',
-            age: 23,
-            money: 20000,
-            gender: '2',
-            address: '小梦岛街道002号'
-          },
-          {
-            name: '李四',
-            age: 23,
-            money: 20000,
-            gender: '2',
-            address: '小梦岛街道002号'
-          },
-          {
-            name: '李四',
-            age: 23,
-            money: 20000,
-            gender: '2',
-            address: '小梦岛街道002号'
-          },
-          {
-            name: '李四',
-            age: 23,
-            money: 20000,
-            gender: '2',
-            address: '小梦岛街道002号'
-          },
-          {
-            name: '李四',
-            age: 23,
-            money: 20000,
-            gender: '2',
-            address: '小梦岛街道002号'
-          },
-          {
-            name: '李四',
-            age: 23,
-            money: 20000,
-            gender: '2',
-            address: '小梦岛街道002号'
-          },
-          {
-            name: '李四',
-            age: 23,
-            money: 20000,
-            gender: '2',
-            address: '小梦岛街道002号'
-          },
-          {
-            name: '李四',
-            age: 23,
-            money: 20000,
-            gender: '2',
-            address: '小梦岛街道002号'
-          },
-          {
-            name: '李四',
-            age: 23,
-            money: 20000,
-            gender: '2',
-            address: '小梦岛街道002号'
-          },
-          {
-            name: '李四',
-            age: 23,
-            money: 20000,
-            gender: '2',
-            address: '小梦岛街道002号'
-          },
-          {
-            name: '李四',
-            age: 23,
-            money: 20000,
-            gender: '2',
-            address: '小梦岛街道002号'
-          },
-          {
-            name: '李四',
-            age: 23,
-            money: 20000,
-            gender: '2',
-            address: '小梦岛街道002号'
-          },
-          {
-            name: '李四',
-            age: 23,
-            money: 20000,
-            gender: '2',
-            address: '小梦岛街道002号'
-          },
-          {
-            name: '李四',
-            age: 23,
-            money: 20000,
-            gender: '2',
-            address: '小梦岛街道002号'
-          },
-          {
-            name: '李四',
-            age: 23,
-            money: 20000,
-            gender: '2',
-            address: '小梦岛街道002号'
-          },
-          {
-            name: '李四',
-            age: 23,
-            money: 20000,
-            gender: '2',
-            address: '小梦岛街道002号'
-          },
-          {
-            name: '李四',
-            age: 23,
-            money: 20000,
-            gender: '2',
-            address: '小梦岛街道002号'
-          },
-          {
-            name: '李四',
-            age: 23,
-            money: 20000,
-            gender: '2',
-            address: '小梦岛街道002号'
-          },
-          {
-            name: '李四',
-            age: 23,
-            money: 20000,
-            gender: '2',
-            address: '小梦岛街道002号'
-          },
-          {
-            name: '李四',
-            age: 23,
-            money: 20000,
-            gender: '2',
-            address: '小梦岛街道002号'
-          },
-          {
-            name: '李四',
-            age: 23,
-            money: 20000,
-            gender: '2',
-            address: '小梦岛街道002号'
-          },
-          {
-            name: '李四',
-            age: 23,
-            money: 20000,
-            gender: '2',
-            address: '小梦岛街道002号'
-          },
-          {
-            name: '李四',
-            age: 23,
-            money: 20000,
-            gender: '2',
-            address: '小梦岛街道002号'
-          },
-          {
-            name: '李四',
-            age: 23,
-            money: 20000,
-            gender: '2',
-            address: '小梦岛街道002号'
-          },
-          {
-            name: '李四',
-            age: 23,
-            money: 20000,
-            gender: '2',
-            address: '小梦岛街道002号'
-          },
-          {
-            name: '李四',
-            age: 23,
-            money: 20000,
-            gender: '2',
-            address: '小梦岛街道002号'
-          },
-          {
-            name: '李四',
-            age: 23,
-            money: 20000,
-            gender: '2',
-            address: '小梦岛街道002号'
-          },
-          {
-            name: '李四',
-            age: 23,
-            money: 20000,
-            gender: '2',
-            address: '小梦岛街道002号'
-          },
-          {
-            name: '李四',
-            age: 23,
-            money: 20000,
-            gender: '2',
-            address: '小梦岛街道002号'
-          },
-          {
-            name: '李四',
-            age: 23,
-            money: 20000,
-            gender: '2',
-            address: '小梦岛街道002号'
-          },
-          {
-            name: '李四',
-            age: 23,
-            money: 20000,
-            gender: '2',
-            address: '小梦岛街道002号'
-          },
-          {
-            name: '李四',
-            age: 23,
-            money: 20000,
-            gender: '2',
-            address: '小梦岛街道002号'
+            name: '王五',
+            age: 24,
+            money: 123456789.12,
+            gender: '1',
+            address: '小梦岛街道003号'
           }
-        ]
+        ],
+        author: 'ROYIANS'
       },
       viewerVisible: false
     }

@@ -85,8 +85,6 @@ export class AutoRender {
     this.pageDefaultStyle = `
       width: ${this.pageWidth}px;
       height: ${this.pageHeight}px;
-      padding-top: ${this.realPageMarginTop}px;
-      padding-bottom: ${this.realPageMarginBottom}px;
       background: ${background};
       color: ${color};
       font-size: ${fontSize}pt;
@@ -377,7 +375,7 @@ export class AutoRender {
         )
       }
     })
-    this.curPageUsedHeight = newElement.clientHeight + realTop
+    // this.curPageUsedHeight = newElement.clientHeight + realTop
     this.tempHolder.removeChild(newElement)
     newElement = null
     if (showFoot) {
