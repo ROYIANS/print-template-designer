@@ -29,6 +29,7 @@
 import commonMixin from '@/mixin/commonMixin'
 import RoyModal from '@/components/RoyModal/RoyModal'
 import { mapState } from 'vuex'
+import generateID from '@/utils/generateID'
 
 /**
  * 数据源设置
@@ -199,6 +200,7 @@ export default {
     },
     doAddRow() {
       const defaultData = {
+        id: generateID(16),
         typeName: 'String',
         type: String
       }

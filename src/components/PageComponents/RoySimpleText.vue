@@ -121,7 +121,7 @@ export default {
           })
           this.$store.commit('printTemplateModule/setPropValue', {
             id: this.element.id,
-            propValue: `[绑定:${bindingDataSource.title}]`
+            propValue: `<span class="roy-binding-value">[绑定:${bindingDataSource.title}]</span>`
           })
           this.canEdit = false
         }

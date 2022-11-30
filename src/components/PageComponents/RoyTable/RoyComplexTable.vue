@@ -125,7 +125,7 @@ const defaultTextProp = {
   icon: 'ri-text',
   code: 'text',
   name: '文本',
-  component: 'RoySimpleTextIn',
+  component: 'RoyTextIn',
   propValue: '',
   style: {
     width: '100%',

@@ -153,10 +153,13 @@ export default {
           // this.$emit('update:propValue', `[绑定:${bindingDataSource.title}]`)
           this.$store.commit('printTemplateModule/updateDataValue', {
             data: this.element,
-            value: `[绑定:${bindingDataSource.title}]`,
+            value: `<span class="roy-binding-value">[绑定:${bindingDataSource.title}]</span>`,
             key: 'propValue'
           })
-          this.$emit('componentUpdated', `[绑定:${bindingDataSource.title}]`)
+          this.$emit(
+            'componentUpdated',
+            `<span class="roy-binding-value">[绑定:${bindingDataSource.title}]</span>`
+          )
           this.canEdit = false
         }
       } else {

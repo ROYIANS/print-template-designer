@@ -29,6 +29,13 @@
     box-shadow: rgba(99, 99, 99, 0.2) 0 2px 8px 0;
     cursor: initial;
   }
+
+  .roy-binding-value {
+    background: var(--roy-color-info-light-8);
+    padding: 3px;
+    border-radius: 3px;
+    border: 1px solid var(--roy-color-info);
+  }
 }
 
 .roy-btn-radio-group {

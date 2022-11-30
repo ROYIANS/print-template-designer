@@ -764,6 +764,63 @@ export const paletteConfigList = {
           max: 4
         }
       }
+    },
+    {
+      title: '字体',
+      field: 'fontFamily',
+      span: 24,
+      itemRender: {
+        name: '$select',
+        options: [
+          {
+            label: '默认',
+            value: 'default'
+          },
+          {
+            label: '宋体',
+            value: 'simsun'
+          },
+          {
+            label: '黑体',
+            value: 'simhei'
+          },
+          {
+            label: '楷体',
+            value: 'kaiti'
+          },
+          {
+            label: '仿宋',
+            value: 'fangsong'
+          },
+          {
+            label: '微软雅黑',
+            value: 'microsoft yahei'
+          }
+        ]
+      }
+    },
+    {
+      title: '字体颜色',
+      field: 'color',
+      span: 24,
+      itemRender: {
+        name: '$colorPicker',
+        props: {}
+      }
+    },
+    {
+      title: '字体大小（pt）',
+      field: 'fontSize',
+      span: 24,
+      itemRender: {
+        name: '$input',
+        props: {
+          type: 'number',
+          size: 'mini',
+          min: 10,
+          max: 120
+        }
+      }
     }
   ],
   RoyTextIn: [
