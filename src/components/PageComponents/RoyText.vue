@@ -39,10 +39,8 @@
 <script>
 import { StyledText } from '@/components/PageComponents/style'
 import RoyModal from '@/components/RoyModal/RoyModal'
-import {
-  Editor as WangEditor,
-  Toolbar as WangToolbar
-} from '@wangeditor/editor-for-vue'
+import WangToolbar from '@/components/PageComponents/WangEditorVue/WangToolbar'
+import WangEditor from '@/components/PageComponents/WangEditorVue/WangEditor'
 import {
   toolBarConfig,
   editorConfig,

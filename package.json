@@ -1,6 +1,6 @@
 {
   "name": "print-template-designer",
-  "version": "0.1.7",
+  "version": "0.1.9",
   "private": false,
   "author": {
     "email": "admin@royians.cn",
@@ -23,7 +23,6 @@
   ],
   "dependencies": {
     "@wangeditor/editor": "^5.1.22",
-    "@wangeditor/editor-for-vue": "^1.0.2",
     "big.js": "^6.2.1",
     "core-js": "^3.8.3",
     "element-ui": "^2.15.9",
