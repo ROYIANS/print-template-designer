@@ -78,6 +78,7 @@ export const toolBarConfig = {
     'justifyCenter',
     'justifyJustify',
     'lineHeight',
+    'insertImage',
     'headerSelect',
     'header1',
     'header2',
