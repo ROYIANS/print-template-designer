@@ -7,22 +7,26 @@ const webpack = require('webpack')
 
 module.exports = defineConfig({
   transpileDependencies: true,
-  publicPath: '/print-template-designer',
+  publicPath: '/',
   configureWebpack: {
+    optimization: {
+      concatenateModules: false
+    },
     output: {
       libraryExport: 'default'
     },
     externals:
       process.env.NODE_ENV === 'production'
-        ? {
-            vue: 'Vue',
-            'element-ui': 'Element',
-            'vxe-table': 'VXETable',
-            vuex: 'Vuex',
-            'shepherd.js': 'Shepherd',
-            remixicon: 'remixicon'
-          }
-        : {},
+        ? [
+            'vue',
+            'vuex',
+            'element-ui',
+            'vxe-table',
+            'xe-utils',
+            'shepherd.js',
+            'remixicon'
+          ]
+        : [],
     plugins: [
       // 打包大小分析：只在用到的时候解开注释
       // new BundleAnalyzerPlugin(),

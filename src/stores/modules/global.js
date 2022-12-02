@@ -36,7 +36,7 @@ export const state = {
     // 默认字号
     fontSize: 12,
     // 默认字体
-    fontFamily: 'LXGW New Clear Gothic Book',
+    fontFamily: 'simhei',
     // 默认行高
     lineHeight: 1
   },

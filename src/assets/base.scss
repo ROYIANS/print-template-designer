@@ -1,8 +1,7 @@
 @import "./variable.scss";
-@import "./font/LXGW.css";
 
 .roy-designer-container {
-  font-family: LXGW New Clear Gothic Book, Helvetica Neue, Helvetica, Arial, PingFang SC, Microsoft YaHei, WenQuanYi Micro Hei, sans-serif;
+  font-family: Helvetica Neue, Helvetica, Arial, PingFang SC, Microsoft YaHei, WenQuanYi Micro Hei, sans-serif;
   font-weight: 400;
   font-size: var(--roy-font-size-base);
   color: var(--roy-text-color-primary);

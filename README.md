@@ -91,8 +91,9 @@ export default {
 - vuex
 - element-ui
 - remixicon
-- vxe-table
+- vxe-table@legacy
 - shepherd.js
+- xe-utils
 
 ## 参考项目
 
