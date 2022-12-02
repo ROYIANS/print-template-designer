@@ -266,7 +266,7 @@ export const StyledStar = styled('div', starProps)`
 
 export const StyledSimpleTable = styled('div', simpleTableProps)`
   width: 100%;
-  height: 100%;
+  height: auto;
   position: ${(props) => (props.isRelative ? 'relative' : 'absolute')};
   border: none;
   padding: 0;
