@@ -183,6 +183,36 @@ export const paletteConfigList = {
       }
     },
     {
+      title: '行高',
+      field: 'lineHeight',
+      span: 24,
+      itemRender: {
+        name: '$select',
+        options: [
+          {
+            value: '1',
+            label: '1'
+          },
+          {
+            value: '1.5',
+            label: '1.5'
+          },
+          {
+            value: '2',
+            label: '2'
+          },
+          {
+            value: '2.5',
+            label: '2.5'
+          },
+          {
+            value: '3',
+            label: '3'
+          }
+        ]
+      }
+    },
+    {
       title: '排列',
       span: 24,
       itemRender: {
@@ -890,6 +920,36 @@ export const paletteConfigList = {
           min: 10,
           max: 120
         }
+      }
+    },
+    {
+      title: '行高',
+      field: 'lineHeight',
+      span: 24,
+      itemRender: {
+        name: '$select',
+        options: [
+          {
+            value: '1',
+            label: '1'
+          },
+          {
+            value: '1.5',
+            label: '1.5'
+          },
+          {
+            value: '2',
+            label: '2'
+          },
+          {
+            value: '2.5',
+            label: '2.5'
+          },
+          {
+            value: '3',
+            label: '3'
+          }
+        ]
       }
     },
     {

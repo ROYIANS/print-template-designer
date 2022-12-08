@@ -102,6 +102,7 @@ import RoyText from '@/components/PageComponents/RoyText'
 import RoySimpleText from '@/components/PageComponents/RoySimpleText'
 import RoyRect from '@/components/PageComponents/RoyRect'
 import RoyLine from '@/components/PageComponents/RoyLine'
+import RoyImage from '@/components/PageComponents/RoyImage'
 import RoyStar from '@/components/PageComponents/RoyStar'
 import RoyCircle from '@/components/PageComponents/RoyCircle'
 import RoySimpleTable from '@/components/PageComponents/RoyTable/RoySimpleTable.vue'
@@ -135,6 +136,7 @@ export default {
     RoyLine,
     RoyCircle,
     RoyStar,
+    RoyImage,
     RoySimpleTable,
     RoyComplexTable,
     Area

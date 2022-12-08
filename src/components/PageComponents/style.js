@@ -102,6 +102,8 @@ const commonProps = {
 
 const textProps = Object.assign({}, commonProps, {})
 
+const imageProps = Object.assign({}, commonProps, {})
+
 const lineProps = Object.assign({}, commonProps, {})
 
 const starProps = Object.assign({}, commonProps, {})
@@ -219,6 +221,30 @@ export const StyledRect = styled('div', rectProps)`
       return `${borderWidth}px ${borderType} ${borderColor}`
     }
   }};
+`
+
+export const StyledImage = styled('div', imageProps)`
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: ${(props) => props.background};
+  border-radius: ${(props) => props.borderRadius};
+  z-index: ${(props) => props.zIndex};
+  border: ${(props) => {
+    const { borderWidth, borderType, borderColor } = props
+    if (borderType === 'none') {
+      return borderType
+    } else {
+      return `${borderWidth}px ${borderType} ${borderColor}`
+    }
+  }};
+  img {
+    height: 100%;
+  }
 `
 
 export const StyledCircle = styled('div', circleProps)`
