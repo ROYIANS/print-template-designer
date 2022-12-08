@@ -7,6 +7,8 @@
  * ╠╦╝║ ║╚╦╝║╠═╣║║║╚═╗
  * ╩╚═╚═╝ ╩ ╩╩ ╩╝╚╝╚═╝
  */
+import { defaultImageSrc } from '@/components/config/bigData'
+
 export const commonStyle = {
   rotate: 0,
   opacity: 1
@@ -165,6 +167,27 @@ export const componentList = [
       height: 200,
       background: '#FF0000',
       icon: 'icon-shiwujiaoxing',
+      rotate: 0
+    },
+    groupStyle: {}
+  },
+  {
+    icon: 'ri-image-fill',
+    code: 'image',
+    name: '图片',
+    component: 'RoyImage',
+    propValue: {
+      src: defaultImageSrc,
+      title: '默认图片'
+    },
+    style: {
+      borderRadius: 'inherit',
+      borderWidth: 0,
+      borderColor: '#212121',
+      borderType: 'none',
+      width: 200,
+      height: 200,
+      background: null,
       rotate: 0
     },
     groupStyle: {}

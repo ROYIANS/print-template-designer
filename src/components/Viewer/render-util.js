@@ -16,6 +16,7 @@ export const RenderUtil = {
     })
   },
   replaceTextWithDataSource: (value, dataSet, dataSource) => {
+    // FIXME: 这里的正则其实不太正确，虽然在上下文中，不会影响程序的运行，但是不是我最初想要的效果
     return `${value}`.replace(/\[::[^[\]:]*::]/g, (word) => {
       const field = word.substring(3, word.length - 3)
       if (dataSet[field] && dataSet[field] instanceof Function) {

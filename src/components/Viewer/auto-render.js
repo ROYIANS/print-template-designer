@@ -17,7 +17,8 @@ import {
   StyledStar,
   StyledText,
   StyledSimpleTable,
-  StyledComplexTable
+  StyledComplexTable,
+  StyledImage
 } from '@/components/PageComponents/style'
 import { RenderUtil } from '@/components/Viewer/render-util'
 import Vue from 'vue'
@@ -34,7 +35,8 @@ const componentToStyled = {
   RoyRect: StyledRect,
   RoyStar: StyledStar,
   RoySimpleTable: StyledSimpleTable,
-  RoyComplexTable: StyledComplexTable
+  RoyComplexTable: StyledComplexTable,
+  RoyImage: StyledImage
 }
 
 const componentToClassName = {
@@ -47,7 +49,8 @@ const componentToClassName = {
   RoyRect: 'rendered-roy-rect',
   RoyStar: 'rendered-roy-star',
   RoySimpleTable: 'rendered-roy-simple-table',
-  RoyComplexTable: 'rendered-roy-complex-table'
+  RoyComplexTable: 'rendered-roy-complex-table',
+  RoyImage: 'rendered-roy-image'
 }
 
 export class AutoRender {
@@ -394,6 +397,17 @@ export class AutoRender {
   async renderRoyRect(element) {
     const { style } = element
     let newElement = this.createNewElementWithStyledComponent(element)
+    this.addElementToCurPage(newElement.outerHTML, style.height)
+    newElement = null
+  }
+
+  async renderRoyImage(element) {
+    const { style } = element
+    let newElement = this.createNewElementWithStyledComponent(element)
+    let img = document.createElement('img')
+    const { propValue } = element
+    img.src = propValue.src
+    newElement.appendChild(img)
     this.addElementToCurPage(newElement.outerHTML, style.height)
     newElement = null
   }
