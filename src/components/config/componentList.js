@@ -29,7 +29,7 @@ export const componentList = [
     style: {
       color: '#000000',
       borderRadius: 'inherit',
-      padding: '0 0 0 0',
+      padding: '0',
       margin: '0 0 0 0',
       fontFamily: 'default',
       lineHeight: '1',
@@ -63,7 +63,8 @@ export const componentList = [
       height: 200,
       fontSize: 12,
       background: null,
-      rotate: 0
+      rotate: 0,
+      padding: '0'
     },
     groupStyle: {}
   },

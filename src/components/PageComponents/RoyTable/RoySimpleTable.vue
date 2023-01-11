@@ -91,13 +91,14 @@ const defaultTableCell = {
     height: '100%',
     fontSize: 12,
     background: null,
-    rotate: 0
+    rotate: 0,
+    padding: '0'
   },
   simpleTextStyle: {},
   style: {
     color: '#212121',
     borderRadius: 'inherit',
-    padding: '0 0 0 0',
+    padding: '0',
     margin: '0 0 0 0',
     fontFamily: 'default',
     lineHeight: '1',

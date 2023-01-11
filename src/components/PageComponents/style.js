@@ -36,7 +36,7 @@ const commonProps = {
   },
   padding: {
     type: String,
-    default: '0 0 0 0'
+    default: '0'
   },
   margin: {
     type: String,
@@ -134,7 +134,7 @@ export const StyledText = styled('div', textProps)`
   color: ${(props) => props.color};
   background: ${(props) => props.background};
   border-radius: ${(props) => props.borderRadius};
-  padding: ${(props) => props.padding};
+  padding: ${(props) => `${props.padding}px`};
   margin: ${(props) => props.margin};
   font-size: ${(props) => `${props.fontSize}pt`};
   font-family: ${(props) =>
@@ -177,7 +177,7 @@ export const StyledSimpleText = styled('div', textProps)`
   background: ${(props) => props.background};
   border: ${(props) => props.border};
   border-radius: ${(props) => props.borderRadius};
-  padding: ${(props) => props.padding};
+  padding: ${(props) => `${props.padding}px`};
   margin: ${(props) => props.margin};
   font-size: ${(props) => `${props.fontSize}pt`};
   font-family: ${(props) =>
