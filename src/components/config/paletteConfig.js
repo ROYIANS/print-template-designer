@@ -862,6 +862,20 @@ export const paletteConfigList = {
         name: '$colorPicker',
         props: {}
       }
+    },
+    {
+      title: '边距',
+      field: 'padding',
+      span: 24,
+      itemRender: {
+        name: '$input',
+        props: {
+          type: 'number',
+          size: 'mini',
+          min: 0,
+          max: 20
+        }
+      }
     }
   ],
   RoySimpleTextIn: [
@@ -1071,6 +1085,20 @@ export const paletteConfigList = {
       itemRender: {
         name: '$colorPicker',
         props: {}
+      }
+    },
+    {
+      title: '边距',
+      field: 'padding',
+      span: 24,
+      itemRender: {
+        name: '$input',
+        props: {
+          type: 'number',
+          size: 'mini',
+          min: 0,
+          max: 20
+        }
       }
     }
   ]
