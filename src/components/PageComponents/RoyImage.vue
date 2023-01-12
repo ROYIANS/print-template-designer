@@ -6,8 +6,8 @@
 !-->
 <template>
   <div class="RoyImage">
-    <StyledImage>
-      <img :alt="propValue.alt || 'RoyImage'" :src="propValue.src" />
+    <StyledImage v-bind="style">
+      <img :alt="element.title || 'RoyImage'" :src="element.src" />
     </StyledImage>
   </div>
 </template>
