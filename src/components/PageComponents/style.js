@@ -360,11 +360,26 @@ export const StyledComplexTable = styled('div', complexTableProps)`
   th {
     text-align: center;
     font-weight: bold;
-    padding: 2px;
+    padding: 0;
+    word-break: break-all;
   }
 
   td {
-    padding: 3px;
+    padding: 0;
+    word-break: break-all;
+    position: relative;
+  }
+
+  .roy-complex-table-cell-in {
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    align-items: center;
+    display: flex;
   }
 
   .rendered-roy-complex-table__footer {

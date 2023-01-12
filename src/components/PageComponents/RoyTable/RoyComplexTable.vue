@@ -49,15 +49,18 @@
             >
               <table :style="`width: ${bodyTableWidth}px`">
                 <thead>
-                  <tr :style="`height: ${tableRowHeight}px`">
+                  <tr>
                     <th
                       v-for="(item, index) in tableCols"
                       :key="index"
                       :style="{
-                        width: `${item.width}px`
+                        width: `${item.width}px`,
+                        height: `${tableRowHeight}px`
                       }"
                     >
-                      {{ item.title }}
+                      <div style="display: inline; width: 100%">
+                        {{ item.title }}
+                      </div>
                     </th>
                   </tr>
                 </thead>
