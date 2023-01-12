@@ -99,7 +99,7 @@ const defaultTableCell = {
     color: '#212121',
     borderRadius: 'inherit',
     padding: '0',
-    margin: '0 0 0 0',
+    margin: '0',
     fontFamily: 'default',
     lineHeight: '1',
     letterSpacing: '1',
