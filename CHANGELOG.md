@@ -1,3 +1,18 @@
+## [0.1.12](https://github.com/royians/print-template-designer/compare/0.1.11...0.1.12) (2023-01-12)
+
+
+### Bug Fixes
+
+* 文本+富文本添加边距设置 ([05a9c97](https://github.com/royians/print-template-designer/commit/05a9c97c1b71a910981165b1ed91674630f87686))
+
+
+### Features
+
+* 0.1.12发布。具体见详细信息 ([82f9a1e](https://github.com/royians/print-template-designer/commit/82f9a1e0a84efa85351ab0f00a36ab8fc1734b71))
+* RoyImage ([689b62f](https://github.com/royians/print-template-designer/commit/689b62fd49906f864c90f35c60986e41a5704289))
+
+
+
 ## 0.1.11 (2023-01-05)
 
 
