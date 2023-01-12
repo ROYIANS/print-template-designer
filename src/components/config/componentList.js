@@ -25,7 +25,7 @@ export const componentList = [
     code: 'text',
     name: '文本',
     component: 'RoySimpleText',
-    propValue: '双击编辑文本',
+    propValue: '单击编辑文本',
     style: {
       color: '#000000',
       borderRadius: 'inherit',
@@ -177,10 +177,8 @@ export const componentList = [
     code: 'image',
     name: '图片',
     component: 'RoyImage',
-    propValue: {
-      src: defaultImageSrc,
-      title: '默认图片'
-    },
+    src: defaultImageSrc,
+    title: '默认图片',
     style: {
       borderRadius: 'inherit',
       borderWidth: 0,

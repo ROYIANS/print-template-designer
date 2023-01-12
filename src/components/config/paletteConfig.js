@@ -1101,6 +1101,85 @@ export const paletteConfigList = {
         }
       }
     }
+  ],
+  RoyImage: [
+    {
+      title: '圆角',
+      field: 'borderRadius',
+      span: 24,
+      itemRender: {
+        name: '$input',
+        props: {
+          type: 'number',
+          size: 'mini',
+          min: 0,
+          max: 10000
+        }
+      }
+    },
+    {
+      title: '边框类型',
+      field: 'borderType',
+      span: 24,
+      itemRender: {
+        name: '$select',
+        options: [
+          {
+            label: '无',
+            value: 'none'
+          },
+          {
+            label: '实线',
+            value: 'solid'
+          },
+          {
+            label: '线虚线',
+            value: 'dashed'
+          },
+          {
+            label: '点虚线',
+            value: 'dotted'
+          }
+        ]
+      }
+    },
+    {
+      title: '边框颜色',
+      field: 'borderColor',
+      span: 24,
+      itemRender: {
+        name: '$colorPicker',
+        props: {}
+      }
+    },
+    {
+      title: '边框宽度',
+      field: 'borderWidth',
+      span: 24,
+      itemRender: {
+        name: '$input',
+        props: {
+          type: 'number',
+          size: 'mini',
+          min: 0,
+          max: 4
+        }
+      }
+    },
+    {
+      title: '旋转角度（°）',
+      field: 'rotate',
+      span: 24,
+      itemRender: {
+        name: '$input',
+        props: {
+          type: 'number',
+          size: 'mini',
+          min: 0,
+          max: 360
+        }
+      }
+    }
   ]
 }
 
@@ -1326,6 +1405,32 @@ export const settingConfigList = {
             ]
           }
         ]
+      }
+    }
+  ],
+  RoyImage: [
+    {
+      title: '标题',
+      field: 'title',
+      span: 24,
+      itemRender: {
+        name: '$input',
+        props: {
+          type: 'text',
+          size: 'mini'
+        }
+      }
+    },
+    {
+      title: '图片链接地址',
+      field: 'src',
+      span: 24,
+      itemRender: {
+        name: '$textarea',
+        props: {
+          type: 'text',
+          size: 'mini'
+        }
       }
     }
   ]

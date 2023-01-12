@@ -170,7 +170,8 @@ export const StyledSimpleText = styled('div', textProps)`
   overflow: hidden;
   position: absolute;
   display: flex;
-  text-align: center;
+  text-align: left;
+  word-break: break-all;
   justify-content: ${(props) => props.justifyContent};
   align-items: ${(props) => props.alignItems};
   color: ${(props) => props.color};
@@ -232,18 +233,22 @@ export const StyledImage = styled('div', imageProps)`
   align-items: center;
   justify-content: center;
   background: ${(props) => props.background};
-  border-radius: ${(props) => props.borderRadius};
-  z-index: ${(props) => props.zIndex};
-  border: ${(props) => {
-    const { borderWidth, borderType, borderColor } = props
-    if (borderType === 'none') {
-      return borderType
-    } else {
-      return `${borderWidth}px ${borderType} ${borderColor}`
-    }
-  }};
+  padding: ${(props) => `${props.borderWidth}px`};
   img {
     height: 100%;
+    border-radius: ${(props) =>
+      isNaN(props.borderRadius)
+        ? props.borderRadius
+        : `${props.borderRadius}px`};
+    z-index: ${(props) => props.zIndex};
+    border: ${(props) => {
+      const { borderWidth, borderType, borderColor } = props
+      if (borderType === 'none') {
+        return borderType
+      } else {
+        return `${borderWidth}px ${borderType} ${borderColor}`
+      }
+    }};
   }
 `
 

@@ -405,8 +405,8 @@ export class AutoRender {
     const { style } = element
     let newElement = this.createNewElementWithStyledComponent(element)
     let img = document.createElement('img')
-    const { propValue } = element
-    img.src = propValue.src
+    img.src = element.src
+    img.alt = element.title
     newElement.appendChild(img)
     this.addElementToCurPage(newElement.outerHTML, style.height)
     newElement = null

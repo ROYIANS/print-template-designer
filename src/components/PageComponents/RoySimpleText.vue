@@ -139,18 +139,12 @@ export default {
     },
     handleKeyDown(e) {
       if (this.canEdit && [13].includes(e.keyCode)) {
-        // 先禁止default事件。然后以后再考虑如何换行
         e.preventDefault()
+        document.execCommand('insertLineBreak')
+        return false
       }
     },
     clearStyle(e) {
-      e.preventDefault()
-      const clp = e.clipboardData
-      const text = clp.getData('text/plain') || ''
-      if (text !== '') {
-        document.execCommand('insertText', false, text)
-      }
-
       this.$emit('input', this.element, e.target.innerHTML)
     },
     handleDragEnter() {
