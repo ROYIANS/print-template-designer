@@ -162,6 +162,11 @@ export const StyledText = styled('div', textProps)`
     position: relative;
     background-color: #fff;
   }
+
+  p {
+    margin-block-start: 0;
+    margin-block-end: 0;
+  }
 `
 
 export const StyledSimpleText = styled('div', textProps)`
