@@ -40,7 +40,7 @@ const commonProps = {
   },
   margin: {
     type: String,
-    default: '0 0 0 0'
+    default: '0'
   },
   fontSize: {
     type: [Number, String],
