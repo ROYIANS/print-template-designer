@@ -106,23 +106,33 @@ export class AutoTable {
   }
 
   generateComplexTable() {
-    const { tableRowHeight, tableDataSource, tableCols, bodyTableWidth } =
-      this.propValue
+    const { tableDataSource, tableCols, bodyTableWidth } = this.propValue
     const tableData = this.dataSet[tableDataSource] || []
     const tableHead = tableCols
       .map((item) => {
-        return `<th style='width: ${item.width}px; height: ${tableRowHeight}px'>${item.title}</th>`
+        return `<th style='width: ${item.width}px;'>
+                  <div class="roy-complex-table-cell-in" style='justify-content: center;'>
+                    <div style='padding: 3px'>${item.title}</div>
+                  </div>
+                </th>`
       })
       .join('')
+    let widthList = tableCols.map((item) => {
+      return item.width
+    })
     const tableBody = tableData
       .map((row) => {
         let tdEle = tableCols
-          .map((col) => {
+          .map((col, index) => {
             const { field, formatter, align } = col
-            return `<td height="${tableRowHeight}px" style="text-align: ${align}">${RenderUtil.getDataWithTypeConvertedByDataSource(
-              row[field],
-              formatter
-            )}</td>`
+            return `<td style="width: ${widthList[index]}px;">
+                      <div class="roy-complex-table-cell-in" style='justify-content: ${align}'>
+                        <div style='padding: 3px'>${RenderUtil.getDataWithTypeConvertedByDataSource(
+                          row[field],
+                          formatter
+                        )}</div>
+                      </div>
+                    </td>`
           })
           .join('')
         return `<tr class="roy-complex-table-row">${tdEle}</tr>`

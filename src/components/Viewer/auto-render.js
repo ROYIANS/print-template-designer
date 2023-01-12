@@ -355,7 +355,8 @@ export class AutoRender {
     const { tables, overflowPages } = this.getTablesSplit(
       element.style,
       trElements,
-      thElement
+      thElement,
+      true
     )
     tables.forEach((table, index) => {
       if (index > 0) {
@@ -435,8 +436,18 @@ export class AutoRender {
     newElement = null
   }
 
-  getTablesSplit(style, rows, head = null) {
-    let headHeight = head == null ? 0 : head.clientHeight
+  getTablesSplit(style, rows, head = null, isDataTable = false) {
+    let headHeight = 0
+    if (isDataTable && head !== null) {
+      let innerCell = head.getElementsByClassName('roy-complex-table-cell-in')
+      for (let cell of innerCell) {
+        headHeight =
+          headHeight < cell.children[0].clientHeight
+            ? cell.children[0].clientHeight
+            : headHeight
+      }
+      head.children[0].style.height = `${headHeight}px`
+    }
     let headHtml = head == null ? '' : head.outerHTML
     let realTop = this.curPageUsedHeight || style.top
     let maxHeight = this.maxPageUseHeight - realTop
@@ -448,6 +459,19 @@ export class AutoRender {
     let maxTableWidth = 0
     for (let i = 0; i < rows.length; i++) {
       let curTd = rows[i]
+      if (isDataTable) {
+        let maxHeight = 0
+        let innerCell = curTd.getElementsByClassName(
+          'roy-complex-table-cell-in'
+        )
+        for (let cell of innerCell) {
+          maxHeight =
+            maxHeight < cell.children[0].clientHeight
+              ? cell.children[0].clientHeight
+              : maxHeight
+        }
+        curTd.style.height = `${maxHeight}px`
+      }
       let lastHeight = curHeight
       curHeight += curTd.clientHeight
       maxTableWidth =
