@@ -28,7 +28,8 @@
               :style="{
                 width: `${tableData[`${row}-${col}`].width}px`,
                 height: `${tableData[`${row}-${col}`].height}px`,
-                padding: '0'
+                padding: '0',
+                overflow: 'hidden'
               }"
               @mousedown.stop="(e) => handleCellMousedown(e, row, col)"
               @mouseenter.stop.prevent="handleCellMouseenter(row, col)"
@@ -102,7 +103,7 @@ const defaultTableCell = {
     margin: '0',
     fontFamily: 'default',
     lineHeight: '1',
-    letterSpacing: '1',
+    letterSpacing: '0',
     borderWidth: 0,
     borderColor: '#212121',
     borderType: 'none',

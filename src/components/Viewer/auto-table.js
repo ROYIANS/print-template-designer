@@ -106,15 +106,15 @@ export class AutoTable {
   }
 
   generateComplexTable() {
-    const { tableDataSource, tableCols, bodyTableWidth } = this.propValue
+    const { tableRowHeight, tableDataSource, tableCols, bodyTableWidth } =
+      this.propValue
+    let tableRowHeightPx = `${tableRowHeight}px`
     const tableData = this.dataSet[tableDataSource] || []
     const tableHead = tableCols
       .map((item) => {
-        return `<th style='width: ${item.width}px;'>
-                  <div class="roy-complex-table-cell-in" style='justify-content: center;'>
-                    <div style='padding: 3px'>${item.title}</div>
-                  </div>
-                </th>`
+        return `<th style='width: ${item.width}px;'><div class="roy-complex-table-cell-in" style='justify-content: center;'>
+                    <div style='min-height: ${tableRowHeightPx};line-height: ${tableRowHeightPx};padding: 3px'>${item.title}</div>
+                </div></th>`
       })
       .join('')
     let widthList = tableCols.map((item) => {
@@ -125,14 +125,14 @@ export class AutoTable {
         let tdEle = tableCols
           .map((col, index) => {
             const { field, formatter, align } = col
-            return `<td style="width: ${widthList[index]}px;">
-                      <div class="roy-complex-table-cell-in" style='justify-content: ${align}'>
-                        <div style='padding: 3px'>${RenderUtil.getDataWithTypeConvertedByDataSource(
-                          row[field],
-                          formatter
-                        )}</div>
-                      </div>
-                    </td>`
+            return `<td style="width: ${
+              widthList[index]
+            }px;"><div class="roy-complex-table-cell-in" style='justify-content: ${align}'>
+                        <div style='min-height: ${tableRowHeightPx};padding: 3px;display: flex;align-items: center'>${RenderUtil.getDataWithTypeConvertedByDataSource(
+              row[field],
+              formatter
+            )}</div>
+            </div></td>`
           })
           .join('')
         return `<tr class="roy-complex-table-row">${tdEle}</tr>`
@@ -167,7 +167,7 @@ export class AutoTable {
     newElement.style.width = '100%'
     newElement.style.height = `${element.height}px`
     newElement.style.position = 'static'
-    newElement.innerHTML = afterPropValue
+    newElement.innerHTML = `<div class="roy-simple-text-inner">${afterPropValue}</div>`
     newElement.style.height = `${element.height}px`
     const res = newElement.outerHTML
     instance.$destroy()
@@ -189,7 +189,7 @@ export class AutoTable {
     const newElement = instance.$el
     newElement.style.width = '100%'
     newElement.style.position = 'static'
-    newElement.innerHTML = afterPropValue
+    newElement.innerHTML = `<div class="roy-text-inner">${afterPropValue}</div>`
     const res = newElement.outerHTML
     instance.$destroy()
     return res
