@@ -116,6 +116,9 @@ export default {
 以下是待办列表，写一些接下来该项目要干的事：
 
 [√] 基本功能
+
 [·] BUG修复
+
 [·] 剔除ElementUI
+
 [·] 调整RoyText渲染逻辑

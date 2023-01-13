@@ -109,7 +109,7 @@ export class AutoRender {
     for (let i = 0; i < this.renderElements.length; i++) {
       const curElement = this.renderElements[i]
       const { component } = curElement
-      await this[`render${component}`](curElement)
+      await this[`render${component}`](curElement, i)
       this.initWhileRenderNewElement()
     }
   }
@@ -128,7 +128,12 @@ export class AutoRender {
     })
   }
 
-  async renderRoyText(element, parentElement = null, ristrictWidth = null) {
+  async renderRoyText(
+    element,
+    zIndex = 0,
+    parentElement = null,
+    restrictWidth = null
+  ) {
     const { propValue, style } = element
     let outerStyle = style
     const afterPropValue = RenderUtil.replaceTextWithDataSource(
@@ -137,7 +142,7 @@ export class AutoRender {
       this.dataSource
     )
     let rootElement = null
-    let newElement = this.createNewElementWithStyledComponent(element)
+    let newElement = this.createNewElementWithStyledComponent(element, zIndex)
     newElement.style.transform = 'none'
     const border = newElement.style.border
     newElement.style.border = 'none'
@@ -152,7 +157,7 @@ export class AutoRender {
       newElement.style.left = 0
       newElement.style.top = 0
       outerStyle = parentElement.style
-      pEle = this.createNewElementWithStyledComponent(parentElement)
+      pEle = this.createNewElementWithStyledComponent(parentElement, zIndex)
       pEle.appendChild(newElement)
       // 富文本高度自动给，然后走分页逻辑
       pEle.style.height = 'auto'
@@ -163,8 +168,8 @@ export class AutoRender {
     if (this.curPageUsedHeight !== 0) {
       rootElement.style.top = `${this.curPageUsedHeight}px`
     }
-    if (ristrictWidth !== null) {
-      rootElement.style.width = `${ristrictWidth}px`
+    if (restrictWidth !== null) {
+      rootElement.style.width = `${restrictWidth}px`
     }
     const autoSplitText = new AutoSplitText(this.tempHolder, rootElement)
     const richTextImgList = await autoSplitText.run()
@@ -209,7 +214,7 @@ export class AutoRender {
     rootElement = null
   }
 
-  async renderRoySimpleText(element) {
+  async renderRoySimpleText(element, zIndex = 0) {
     const { propValue, bindValue } = element
     let afterPropValue = propValue
     if (bindValue) {
@@ -220,7 +225,7 @@ export class AutoRender {
         this.dataSource
       )
     }
-    let newElement = this.createNewElementWithStyledComponent(element)
+    let newElement = this.createNewElementWithStyledComponent(element, zIndex)
     newElement.innerHTML = `<div class="roy-simple-text-inner">${afterPropValue}</div>`
     this.addElementToCurPage(newElement.outerHTML, 0)
     newElement = null
@@ -228,6 +233,7 @@ export class AutoRender {
 
   async renderRoySimpleTable(
     element,
+    zIndex = 0,
     parentElement = null,
     ristrictWidth = null,
     margenTop = null
@@ -244,7 +250,7 @@ export class AutoRender {
     let outerStyle = style
     let tableHtml = autoTable.getOriginTableItem()
     let rootElement, pEle
-    let newElement = this.createNewElementWithStyledComponent(element)
+    let newElement = this.createNewElementWithStyledComponent(element, zIndex)
     newElement.innerHTML = tableHtml
     newElement.style.width = 'auto'
     if (parentElement) {
@@ -254,7 +260,7 @@ export class AutoRender {
       newElement.style.left = 0
       newElement.style.top = 0
       outerStyle = parentElement.style
-      pEle = this.createNewElementWithStyledComponent(parentElement)
+      pEle = this.createNewElementWithStyledComponent(parentElement, zIndex)
       pEle.style.width = 'auto'
       pEle.appendChild(newElement)
       rootElement = pEle
@@ -304,7 +310,7 @@ export class AutoRender {
     rootElement = null
   }
 
-  async renderRoyComplexTable(element) {
+  async renderRoyComplexTable(element, zIndex = 0) {
     const { showPrefix, showHead, showFoot, showSuffix } = element
     const {
       prefixTextElement,
@@ -315,11 +321,17 @@ export class AutoRender {
     } = element.propValue
     const { bodyTableWidth } = bodyDataTableElement
     if (showPrefix) {
-      await this.renderRoyText(prefixTextElement, element, bodyTableWidth)
+      await this.renderRoyText(
+        prefixTextElement,
+        zIndex,
+        element,
+        bodyTableWidth
+      )
     }
     if (showHead) {
       await this.renderRoySimpleTable(
         headSimpleTableElement,
+        zIndex,
         element,
         bodyTableWidth
       )
@@ -333,7 +345,7 @@ export class AutoRender {
       dataSet: this.dataSet
     })
     let tableItem = autoTable.getOriginTableItem()
-    let newElement = this.createNewElementWithStyledComponent(element)
+    let newElement = this.createNewElementWithStyledComponent(element, zIndex)
     let realTop = element.style.top
     if (this.curPageUsedHeight !== 0) {
       newElement.style.top = `${this.curPageUsedHeight}px`
@@ -385,26 +397,32 @@ export class AutoRender {
     if (showFoot) {
       await this.renderRoySimpleTable(
         footSimpleTableElement,
+        zIndex,
         element,
         bodyTableWidth,
         `-${element.style.borderWidth - 0.5}px`
       )
     }
     if (showSuffix) {
-      await this.renderRoyText(suffixTextElement, element, bodyTableWidth)
+      await this.renderRoyText(
+        suffixTextElement,
+        zIndex,
+        element,
+        bodyTableWidth
+      )
     }
   }
 
-  async renderRoyRect(element) {
+  async renderRoyRect(element, zIndex = 0) {
     const { style } = element
-    let newElement = this.createNewElementWithStyledComponent(element)
+    let newElement = this.createNewElementWithStyledComponent(element, zIndex)
     this.addElementToCurPage(newElement.outerHTML, style.height)
     newElement = null
   }
 
-  async renderRoyImage(element) {
+  async renderRoyImage(element, zIndex = 0) {
     const { style } = element
-    let newElement = this.createNewElementWithStyledComponent(element)
+    let newElement = this.createNewElementWithStyledComponent(element, zIndex)
     let img = document.createElement('img')
     img.src = element.src
     img.alt = element.title
@@ -413,16 +431,16 @@ export class AutoRender {
     newElement = null
   }
 
-  async renderRoyLine(element) {
+  async renderRoyLine(element, zIndex = 0) {
     const { style } = element
-    let newElement = this.createNewElementWithStyledComponent(element)
+    let newElement = this.createNewElementWithStyledComponent(element, zIndex)
     this.addElementToCurPage(newElement.outerHTML, style.height)
     newElement = null
   }
 
-  async renderRoyStar(element) {
+  async renderRoyStar(element, zIndex = 0) {
     const { style } = element
-    let newElement = this.createNewElementWithStyledComponent(element)
+    let newElement = this.createNewElementWithStyledComponent(element, zIndex)
     const star = document.createElement('span')
     star.classList.add(...['iconfont', 'roy-star-icon', style.icon])
     newElement.appendChild(star)
@@ -430,8 +448,8 @@ export class AutoRender {
     newElement = null
   }
 
-  async renderRoyCircle(element) {
-    let newElement = this.createNewElementWithStyledComponent(element)
+  async renderRoyCircle(element, zIndex = 0) {
+    let newElement = this.createNewElementWithStyledComponent(element, zIndex)
     this.addElementToCurPage(newElement.outerHTML, 0)
     newElement = null
   }
@@ -459,21 +477,21 @@ export class AutoRender {
     let maxTableWidth = 0
     for (let i = 0; i < rows.length; i++) {
       let curTd = rows[i]
+      let cellMaxHeight = 0
       if (isDataTable) {
-        let maxHeight = 0
         let innerCell = curTd.getElementsByClassName(
           'roy-complex-table-cell-in'
         )
         for (let cell of innerCell) {
-          maxHeight =
-            maxHeight < cell.children[0].clientHeight
+          cellMaxHeight =
+            cellMaxHeight < cell.children[0].clientHeight
               ? cell.children[0].clientHeight
-              : maxHeight
+              : cellMaxHeight
         }
-        curTd.style.height = `${maxHeight}px`
+        curTd.style.height = `${cellMaxHeight}px`
       }
       let lastHeight = curHeight
-      curHeight += curTd.clientHeight
+      curHeight += Math.max(curTd.clientHeight, cellMaxHeight)
       maxTableWidth =
         maxTableWidth > curTd.clientWidth ? maxTableWidth : curTd.clientWidth
       if (curHeight > maxHeight) {
@@ -484,8 +502,12 @@ export class AutoRender {
         if (lastHeight > maxHeight) {
           overflowPages.push(tables.length - 1)
         }
-        curHeight = this.realPageMarginTop + curTd.clientHeight + headHeight
+        curHeight =
+          this.realPageMarginTop +
+          Math.max(curTd.clientHeight, cellMaxHeight) +
+          headHeight
         curHtml = curTd.outerHTML
+        maxHeight = this.maxPageUseHeight
       } else {
         curHtml += curTd.outerHTML
       }
@@ -495,6 +517,7 @@ export class AutoRender {
           html: `${headHtml}<tbody>${curHtml}</tbody>`,
           height: curHeight
         })
+        maxHeight = this.maxPageUseHeight
       }
     }
     return { tables, overflowPages, maxTableWidth }
@@ -522,7 +545,7 @@ export class AutoRender {
       : elementHTML
   }
 
-  createNewElementWithStyledComponent(element) {
+  createNewElementWithStyledComponent(element, zIndex = 0) {
     const { component, style } = element
     let constructor = Vue.extend(componentToStyled[component])
     let instance = new constructor({
@@ -536,6 +559,7 @@ export class AutoRender {
     newElement.style.left = `${style.left}px`
     newElement.style.top = `${style.top}px`
     newElement.style.transform = `rotate(${style.rotate}deg)`
+    newElement.style.zIndex = zIndex
     newElement.classList.add(componentToClassName[component])
     instance.$destroy()
     return newElement

@@ -41,12 +41,25 @@
       :data-set="dataSet"
       :data-source="dataSource"
     />
+    <TemplateViews
+      v-if="templateVisible"
+      :visible.sync="templateVisible"
+      @load="loadTemp"
+    />
+    <div class="fork-me">
+      <a
+        href="https://github.com/ROYIANS/print-template-designer"
+        target="_blank"
+        >Give me a Star!
+      </a>
+    </div>
   </div>
 </template>
 
 <script>
 import toast from '@/utils/toast'
 import PtdViewer from '@/components/Viewer/PtdViewer'
+import TemplateViews from '@/views/templates/TemplateViews'
 import { mapState } from 'vuex'
 
 export default {
@@ -56,7 +69,8 @@ export default {
     console.log('contributed by ROYIANS@Little-Dreamland﹢')
   },
   components: {
-    PtdViewer
+    PtdViewer,
+    TemplateViews
   },
   computed: {
     ...mapState({
@@ -74,21 +88,17 @@ export default {
           name: '从报表配置拉取表格',
           icon: 'ri-table-line',
           event: () => {
-            toast('从报表配置拉取表格(开发者自定义事件)')
+            toast('(开发者自定义按钮)')
           }
         }
       ],
       headIconConfig: [
         {
           name: 'Github',
-          icon: 'ri-github-fill',
-          title: '跳转到Github',
+          icon: 'ri-file-word-2-line',
+          title: '预设模板',
           event: () => {
-            toast('跳转到Github', 'info', 1000)
-            window.open(
-              'https://github.com/ROYIANS/print-template-designer',
-              '_blank'
-            )
+            this.templateVisible = true
           }
         },
         {
@@ -130,39 +140,20 @@ export default {
         curDateTime: 'YYYY.MM.DD hh:mm',
         curDateChn: '',
         curDateNum: 'YYYY年MM月DD日',
-        tableData: [
-          {
-            name: '张三',
-            age: 13,
-            money: 10000,
-            gender: '1',
-            address:
-              '小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号'
-          },
-          {
-            name: '李四',
-            age: 23,
-            money: 20000,
-            gender: '2',
-            address:
-              '小梦小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号小梦岛街道001号岛街道002号'
-          },
-          {
-            name: '王五',
-            age: 24,
-            money: 123456789.12,
-            gender: '1',
-            address: '小梦岛街道003号'
-          }
-        ],
-        author: 'ROYIANS'
+        currentTime: 'YYYY年MM月DD日',
+        tableData: [{}, {}, {}, {}]
       },
-      viewerVisible: false
+      viewerVisible: false,
+      templateVisible: false
     }
   },
   methods: {
     showViewer() {
       this.viewerVisible = true
+    },
+    loadTemp(data) {
+      this.$refs.designer.loadTemplateData(data)
+      this.templateVisible = false
     }
   }
 }
@@ -242,5 +233,23 @@ body,
     margin: 0;
     font-size: 14px;
   }
+}
+
+.fork-me {
+  a {
+    text-decoration: none;
+    color: #fff;
+  }
+  width: 250px;
+  height: 32px;
+  line-height: 32px;
+  background: black;
+  text-align: center;
+  font-family: fantasy;
+  transform: rotate(-45deg);
+  position: fixed;
+  right: -69px;
+  bottom: 39px;
+  cursor: pointer;
 }
 </style>
