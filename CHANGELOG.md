@@ -1,3 +1,15 @@
+## [0.1.13](https://github.com/royians/print-template-designer/compare/0.1.12...0.1.13) (2023-01-13)
+
+
+### Bug Fixes
+
+* 表格样式、富文本样式、文本样式修复和调整 ([91ac08e](https://github.com/royians/print-template-designer/commit/91ac08ecfc47ec195283202a59e3bd99013e17a6))
+* 去除Text组件p标签默认上下margin ([e67badb](https://github.com/royians/print-template-designer/commit/e67badb79a5ba446bad3a4ce870a253d078c7a4c))
+* 数据表格宽度问题修复。（表格行高因此暂时失效，以后修复） ([ed80dff](https://github.com/royians/print-template-designer/commit/ed80dff7bfe807f867954bed0346102bcee1d26d))
+* margin写错 ([cdc0361](https://github.com/royians/print-template-designer/commit/cdc03612ae05b535c0788ccbce1a8c5ae62c3302))
+
+
+
 ## [0.1.12](https://github.com/royians/print-template-designer/compare/0.1.11...0.1.12) (2023-01-12)
 
 

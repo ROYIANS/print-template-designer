@@ -157,9 +157,7 @@ export default {
     }),
     async initMounted() {
       console.log(
-        `\n %c PrintTemplateDesigner® v${VERSION} %c ${new Date(
-          window.printTemplateVersionTime || new Date().getTime()
-        ).toLocaleString()}`,
+        `\n %c PrintTemplateDesigner® v${VERSION} %c`,
         'color:#fff;background:linear-gradient(90deg,#4579e1,#009688);padding:5px 0;',
         'color:#000;background:linear-gradient(90deg,#009688,#ffffff);padding:5px 10px 5px 0px;'
       )
