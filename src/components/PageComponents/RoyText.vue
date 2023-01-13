@@ -32,7 +32,9 @@
         />
       </div>
     </RoyModal>
-    <StyledText v-bind="style" v-html="propValue"></StyledText>
+    <StyledText v-bind="style">
+      <div class="roy-text-inner" v-html="propValue"></div>
+    </StyledText>
   </div>
 </template>
 

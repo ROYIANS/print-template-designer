@@ -33,7 +33,7 @@ export const componentList = [
       margin: '0',
       fontFamily: 'default',
       lineHeight: '1',
-      letterSpacing: '1',
+      letterSpacing: '0',
       borderWidth: 0,
       borderColor: '#212121',
       borderType: 'none',

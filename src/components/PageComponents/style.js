@@ -134,14 +134,8 @@ export const StyledText = styled('div', textProps)`
   color: ${(props) => props.color};
   background: ${(props) => props.background};
   border-radius: ${(props) => props.borderRadius};
-  padding: ${(props) => `${props.padding}px`};
   margin: ${(props) => props.margin};
-  font-size: ${(props) => `${props.fontSize}pt`};
-  font-family: ${(props) =>
-    props.fontFamily === 'default' ? 'inherit' : `${props.fontFamily}`};
   z-index: ${(props) => props.zIndex};
-  line-height: ${(props) => props.lineHeight};
-  letter-spacing: ${(props) => `${props.letterSpacing}px`};
   border: ${(props) => {
     const { borderWidth, borderType, borderColor } = props
     if (borderType === 'none') {
@@ -150,6 +144,16 @@ export const StyledText = styled('div', textProps)`
       return `${borderWidth}px ${borderType} ${borderColor}`
     }
   }};
+
+  .roy-text-inner {
+    height: 100%;
+    padding: ${(props) => `${props.padding}px`};
+    line-height: ${(props) => props.lineHeight};
+    letter-spacing: ${(props) => `${props.letterSpacing}px`};
+    font-size: ${(props) => `${props.fontSize}pt`};
+    font-family: ${(props) =>
+      props.fontFamily === 'default' ? 'inherit' : `${props.fontFamily}`};
+  }
   table {
     table-layout: fixed;
     border-collapse: separate;
@@ -161,6 +165,7 @@ export const StyledText = styled('div', textProps)`
   td {
     position: relative;
     background-color: #fff;
+    overflow: hidden;
   }
 
   p {
@@ -174,41 +179,44 @@ export const StyledSimpleText = styled('div', textProps)`
   height: 100%;
   overflow: hidden;
   position: absolute;
-  display: flex;
-  text-align: left;
-  word-break: break-all;
-  justify-content: ${(props) => props.justifyContent};
-  align-items: ${(props) => props.alignItems};
   color: ${(props) => props.color};
   background: ${(props) => props.background};
   border: ${(props) => props.border};
   border-radius: ${(props) => props.borderRadius};
-  padding: ${(props) => `${props.padding}px`};
   margin: ${(props) => props.margin};
   font-size: ${(props) => `${props.fontSize}pt`};
   font-family: ${(props) =>
     props.fontFamily === 'default' ? 'inherit' : `${props.fontFamily}`};
-  z-index: ${(props) => props.zIndex};
-  line-height: ${(props) => props.lineHeight};
-  letter-spacing: ${(props) => `${props.letterSpacing}px`};
   border: ${(props) =>
     `${props.borderWidth}px ${props.borderType} ${props.borderColor}`};
-  font-weight: ${(props) => `${props.fontWeight}`};
-  font-style: ${(props) => `${props.fontStyle}`};
-  text-decoration: ${(props) => {
-    const { isUnderLine, isDelLine } = props
-    const propsValue = {
-      underline: isUnderLine,
-      'line-through': isDelLine
-    }
-    if (isUnderLine || isDelLine) {
-      return Object.keys(propsValue)
-        .filter((item) => propsValue[item])
-        .join(' ')
-    } else {
-      return 'none'
-    }
-  }};
+  z-index: ${(props) => props.zIndex};
+  .roy-simple-text-inner {
+    height: 100%;
+    display: flex;
+    text-align: left;
+    word-break: break-all;
+    justify-content: ${(props) => props.justifyContent};
+    align-items: ${(props) => props.alignItems};
+    padding: ${(props) => `${props.padding}px`};
+    line-height: ${(props) => props.lineHeight};
+    letter-spacing: ${(props) => `${props.letterSpacing}px`};
+    font-weight: ${(props) => `${props.fontWeight}`};
+    font-style: ${(props) => `${props.fontStyle}`};
+    text-decoration: ${(props) => {
+      const { isUnderLine, isDelLine } = props
+      const propsValue = {
+        underline: isUnderLine,
+        'line-through': isDelLine
+      }
+      if (isUnderLine || isDelLine) {
+        return Object.keys(propsValue)
+          .filter((item) => propsValue[item])
+          .join(' ')
+      } else {
+        return 'none'
+      }
+    }};
+  }
 `
 
 export const StyledRect = styled('div', rectProps)`

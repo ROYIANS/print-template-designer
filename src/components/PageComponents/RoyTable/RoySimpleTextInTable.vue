@@ -29,8 +29,9 @@
       @mousedown="handleMouseDown"
       @keydown="handleKeyDown"
       @blur="handleBlur"
-      v-html="propValue"
-    ></StyledSimpleText>
+    >
+      <div class="roy-simple-text-inner" v-html="propValue"></div>
+    </StyledSimpleText>
   </div>
 </template>
 

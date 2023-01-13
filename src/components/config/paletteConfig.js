@@ -11,7 +11,8 @@ export const paletteConfigList = {
         name: '$input',
         props: {
           type: 'number',
-          size: 'mini'
+          size: 'mini',
+          min: 0
         }
       }
     },
@@ -23,7 +24,8 @@ export const paletteConfigList = {
         name: '$input',
         props: {
           type: 'number',
-          size: 'mini'
+          size: 'mini',
+          min: 0
         }
       }
     },
@@ -109,7 +111,8 @@ export const paletteConfigList = {
         name: '$input',
         props: {
           type: 'number',
-          size: 'mini'
+          size: 'mini',
+          min: 0
         }
       }
     },
@@ -121,7 +124,8 @@ export const paletteConfigList = {
         name: '$input',
         props: {
           type: 'number',
-          size: 'mini'
+          size: 'mini',
+          min: 0
         }
       }
     },
@@ -406,7 +410,8 @@ export const paletteConfigList = {
         name: '$input',
         props: {
           type: 'number',
-          size: 'mini'
+          size: 'mini',
+          min: 0
         }
       }
     },
@@ -418,7 +423,8 @@ export const paletteConfigList = {
         name: '$input',
         props: {
           type: 'number',
-          size: 'mini'
+          size: 'mini',
+          min: 0
         }
       }
     },
@@ -504,7 +510,8 @@ export const paletteConfigList = {
         name: '$input',
         props: {
           type: 'number',
-          size: 'mini'
+          size: 'mini',
+          min: 0
         }
       }
     },
@@ -516,7 +523,8 @@ export const paletteConfigList = {
         name: '$input',
         props: {
           type: 'number',
-          size: 'mini'
+          size: 'mini',
+          min: 0
         }
       }
     },
@@ -602,7 +610,8 @@ export const paletteConfigList = {
         name: '$input',
         props: {
           type: 'number',
-          size: 'mini'
+          size: 'mini',
+          min: 0
         }
       }
     },
@@ -1186,6 +1195,32 @@ export const paletteConfigList = {
 export const settingConfigList = {
   RoySimpleTextIn: [
     {
+      title: '宽度',
+      field: 'width',
+      span: 24,
+      itemRender: {
+        name: '$input',
+        props: {
+          type: 'number',
+          size: 'mini',
+          min: 0
+        }
+      }
+    },
+    {
+      title: '高度',
+      field: 'height',
+      span: 24,
+      itemRender: {
+        name: '$input',
+        props: {
+          type: 'number',
+          size: 'mini',
+          min: 0
+        }
+      }
+    },
+    {
       title: '文本类型',
       span: 24,
       itemRender: {
@@ -1230,6 +1265,32 @@ export const settingConfigList = {
     }
   ],
   RoyTextIn: [
+    {
+      title: '宽度',
+      field: 'width',
+      span: 24,
+      itemRender: {
+        name: '$input',
+        props: {
+          type: 'number',
+          size: 'mini',
+          min: 0
+        }
+      }
+    },
+    {
+      title: '高度',
+      field: 'height',
+      span: 24,
+      itemRender: {
+        name: '$input',
+        props: {
+          type: 'number',
+          size: 'mini',
+          min: 0
+        }
+      }
+    },
     {
       title: '文本类型',
       span: 24,

@@ -141,7 +141,7 @@ export class AutoRender {
     newElement.style.transform = 'none'
     const border = newElement.style.border
     newElement.style.border = 'none'
-    newElement.innerHTML = afterPropValue
+    newElement.innerHTML = `<div class="roy-text-inner">${afterPropValue}</div>`
     // 富文本高度自动给，然后走分页逻辑
     newElement.style.height = 'auto'
     let pEle
@@ -221,7 +221,7 @@ export class AutoRender {
       )
     }
     let newElement = this.createNewElementWithStyledComponent(element)
-    newElement.innerHTML = afterPropValue
+    newElement.innerHTML = `<div class="roy-simple-text-inner">${afterPropValue}</div>`
     this.addElementToCurPage(newElement.outerHTML, 0)
     newElement = null
   }
