@@ -1,4 +1,6 @@
 import { deepCopy } from '@/utils/html-util'
+import { VXETable } from 'vxe-table'
+import toast from '@/utils/toast'
 import store from '@/stores/index'
 
 export const paletteConfigList = {
@@ -1492,6 +1494,41 @@ export const settingConfigList = {
           type: 'text',
           size: 'mini'
         }
+      }
+    },
+    {
+      title: '上传图片',
+      span: 24,
+      itemRender: {
+        name: '$btnRadioGroup',
+        options: [
+          {
+            field: 'src',
+            isRadio: false,
+            customCallBack: async ({ data }) => {
+              const { file } = await VXETable.readFile({
+                types: ['jpg', 'jpeg', 'gif', 'png']
+              })
+              if (file.size / 1000 > 1000) {
+                toast('请上传小于 1MB 的图片', 'warning')
+                return
+              }
+              let reader = new FileReader()
+              reader.readAsDataURL(file)
+              reader.onload = function () {
+                data.src = reader.result
+              }
+            },
+            options: [
+              {
+                type: 'icon',
+                content: 'ri-upload-line',
+                value: 'uploaded-image',
+                label: '点击上传图片'
+              }
+            ]
+          }
+        ]
       }
     }
   ]

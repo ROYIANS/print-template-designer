@@ -355,18 +355,7 @@ export default {
                     toast('文件格式错误，转换内容失败', 'warning')
                     return
                   }
-                  this.$store.commit(
-                    'printTemplateModule/setComponentData',
-                    resultParsed.componentData
-                  )
-                  this.$store.commit(
-                    'printTemplateModule/setPageConfig',
-                    resultParsed.pageConfig
-                  )
-                  this.$store.commit(
-                    'printTemplateModule/setDataSource',
-                    resultParsed.dataSource
-                  )
+                  this.loadTemplateData(resultParsed)
                 } catch (e) {
                   toast('文件损坏，转换内容失败', 'warning')
                 }
@@ -397,6 +386,20 @@ export default {
       eleA.click()
       document.body.removeChild(eleA)
       toast('导出成功！', 'success')
+    },
+    loadTemplateData(resultParsed) {
+      this.$store.commit(
+        'printTemplateModule/setComponentData',
+        resultParsed.componentData
+      )
+      this.$store.commit(
+        'printTemplateModule/setPageConfig',
+        resultParsed.pageConfig
+      )
+      this.$store.commit(
+        'printTemplateModule/setDataSource',
+        resultParsed.dataSource
+      )
     },
     getTemplateData() {
       return {
