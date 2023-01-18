@@ -44,7 +44,7 @@ const install = function (Vue, opts = {}) {
   })
 }
 const Api = {
-  version: 'ROY-PRINT-DESIGNER@0.1.14',
+  version: 'ROY-PRINT-DESIGNER@0.1.15',
   PtdDesigner,
   PtdViewer,
   NightModeStore,
