@@ -8,7 +8,7 @@
   <RoyModal
     v-if="visibleIn"
     :show.sync="visibleIn"
-    title="打印预览"
+    :title="directExport ? '打印导出' : '打印预览'"
     height="90%"
     width="90%"
     class="rptd-viewer"
@@ -91,6 +91,18 @@ export default {
       default: () => {
         return {}
       }
+    },
+    fileName: {
+      type: String,
+      default: ''
+    },
+    directExport: {
+      type: Boolean,
+      default: false
+    },
+    needToast: {
+      type: [Boolean, String],
+      default: '建议导出PDF后再打印，更精准'
     }
   },
   computed: {
@@ -130,13 +142,19 @@ export default {
         if (renderPage.length) {
           const viewerElement = this.$refs.viewer
           viewerElement.innerHTML = renderPage.join('')
-          toast('建议导出PDF后再打印，更精准', 'info', 5000)
+          if (this.needToast) {
+            toast(this.needToast, 'info', 5000)
+          }
           this.$el.querySelector('.roy-temp-holder').style.display = 'none'
         } else {
           this.isBlankPage = true
         }
         this.$nextTick(() => {
-          this.initCompleted = true
+          if (this.directExport) {
+            this.exportPdf()
+          } else {
+            this.initCompleted = true
+          }
         })
       })
     },
@@ -175,9 +193,12 @@ export default {
             : this.pageConfig.pageWidth
         })
       }
-      doc.save(`${this.pageConfig.title || '预览'}.pdf`)
+      doc.save(`${this.fileName || this.pageConfig.title || '预览'}.pdf`)
       this.initCompleted = true
       this.isExportPDF = false
+      if (this.directExport) {
+        this.$emit('update:visible', false)
+      }
     }
   },
   created() {
