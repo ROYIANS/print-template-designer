@@ -91,7 +91,7 @@ export default {
 }
 .roy-loading-loading {
   background: #333333;
-  z-index: 2;
+  z-index: 99999;
   position: absolute;
   left: 0;
   top: 0;
