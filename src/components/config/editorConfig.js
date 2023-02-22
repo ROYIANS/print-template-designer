@@ -13,11 +13,7 @@ export class DataSourceMenu {
   getPanelContentElem(editor) {
     let dataSource = store.state.printTemplateModule.dataSource
     const ul = document.createElement('ul')
-    ul.style.display = 'grid'
-    ul.style.justifyContent = 'center'
-    ul.style.maxHeight = '200px'
-    ul.style.overflowY = 'auto'
-    ul.style.width = '100%'
+    ul.classList.add('roy-dropdown-menu')
     if (!dataSource) {
       return ul
     }
@@ -26,16 +22,10 @@ export class DataSourceMenu {
         return item.typeName !== 'Array'
       })
       .map((item) => {
-        return `<li data-value='[::${item.field}::]'>${item.title}</li>`
+        return `<li data-value='[::${item.field}::]' title='${item.field}'>${item.title}</li>`
       })
       .join('')
     for (const liEle of ul.getElementsByTagName('li')) {
-      liEle.style.listStyleType = 'none'
-      liEle.style.cursor = 'pointer'
-      liEle.style.margin = '3px 5px'
-      liEle.style.textAlign = 'left'
-      liEle.style.background = '#eee'
-      liEle.style.width = '100%'
       liEle.onclick = () => {
         editor.insertText(liEle.dataset.value)
       }
