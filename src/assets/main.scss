@@ -28,6 +28,9 @@
     border: 1px solid var(--roy-border);
     box-shadow: rgba(99, 99, 99, 0.2) 0 2px 8px 0;
     cursor: initial;
+    .w-e-drop-panel {
+      min-width: 400px;
+    }
   }
 
   .roy-binding-value {
@@ -76,5 +79,25 @@
     width: 100% !important;
     border: none;
     border-radius: unset;
+  }
+}
+
+.roy-dropdown-menu {
+  display: grid;
+  justify-content: center;
+  max-height: 200px;
+  overflow-y: auto;
+  width: 100%;
+  li {
+    list-style-type: none;
+    cursor: pointer;
+    margin: 0;
+    text-align: left;
+    width: 100%;
+    padding: 8px 5px;
+    &:hover {
+      background: #3e6dcb;
+      color: #fff;
+    }
   }
 }

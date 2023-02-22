@@ -22,11 +22,14 @@
         v-for="(item, index) in dataSourceIn"
         :data-index="index"
         :key="index"
+        :title="item.title"
         draggable="true"
       >
         <div class="roy-datasource-node--title">
           <span class="roy-datasource-node--tag">{{ item.typeName }}</span>
-          <span>{{ item.title }}</span>
+          <span>
+            <span class="roy-datasource-node--text">{{ item.title }}</span>
+          </span>
         </div>
         <div class="roy-datasource-node--content">{{ item.field }}</div>
       </div>
@@ -114,6 +117,13 @@ export default {
       background-color: var(--roy-color-primary);
       color: var(--roy-bg-color-page);
       border-radius: 4px 4px 0 0;
+    }
+    .roy-datasource-node--text {
+      margin: auto;
+      display: block;
+      width: 35%;
+      text-overflow: ellipsis;
+      overflow: hidden;
     }
     .roy-datasource-node--content {
       box-sizing: border-box;
