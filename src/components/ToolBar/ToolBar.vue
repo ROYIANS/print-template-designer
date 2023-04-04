@@ -5,27 +5,20 @@
 * @date 2022/9/16 10:40
 !-->
 <template>
-  <el-header :height="'45px'" class="roy-designer-main__toolbar">
+  <roy-header :height="'45px'" class="roy-designer-main__toolbar">
     <section class="roy-designer-main__toolbar_left">
-      <el-tooltip
+      <div
         v-for="(tool, index) in toolbarLeftConfig"
         :key="index"
-        :content="tool.name"
-        :open-delay="600"
-        :visible-arrow="false"
-        effect="dark"
-        placement="bottom"
+        class="roy-designer-main__toolbar__item"
+        :class="
+          tool.disabled ? `roy-designer-main__toolbar__item--disabled` : ``
+        "
+        :title="tool.name"
+        @click="tool.event"
       >
-        <div
-          class="roy-designer-main__toolbar__item"
-          :class="
-            tool.disabled ? `roy-designer-main__toolbar__item--disabled` : ``
-          "
-          @click="tool.event"
-        >
-          <i :class="tool.icon"></i>
-        </div>
-      </el-tooltip>
+        <i :class="tool.icon"></i>
+      </div>
     </section>
     <section>
       <slot name="roy-designer-toolbar-slot"></slot>
@@ -50,7 +43,7 @@
         </div>
       </div>
     </section>
-  </el-header>
+  </roy-header>
 </template>
 
 <script>

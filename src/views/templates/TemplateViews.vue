@@ -12,7 +12,7 @@
     height="80%"
     width="70%"
   >
-    <el-main class="TemplateViews">
+    <roy-main class="TemplateViews">
       <div class="cards">
         <div class="card" v-for="(item, index) in templateData" :key="index">
           <div class="card__image-holder">
@@ -29,7 +29,7 @@
           </div>
         </div>
       </div>
-    </el-main>
+    </roy-main>
   </RoyModal>
 </template>
 

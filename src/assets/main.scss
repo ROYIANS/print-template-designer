@@ -1,4 +1,3 @@
-@import "./theme/index.scss";
 @import "./base.scss";
 
 .roy-designer-container {
@@ -64,21 +63,6 @@
       background: var(--roy-color-primary);
       color: #fff;
     }
-  }
-}
-
-.roy-color-picker {
-  width: 100%;
-
-  .el-color-picker__color {
-    border-radius: 0;
-  }
-  .el-color-picker__trigger {
-    padding: 0;
-    margin: 0;
-    width: 100% !important;
-    border: none;
-    border-radius: unset;
   }
 }
 

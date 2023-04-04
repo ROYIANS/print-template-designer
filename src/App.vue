@@ -18,19 +18,15 @@
         </div>
       </template>
       <template v-slot:roy-designer-toolbar-slot>
-        <el-tooltip
+        <div
           v-for="(tool, index) in toolbarSlotConfig"
           :key="index"
-          :content="tool.name"
-          :open-delay="600"
-          :visible-arrow="false"
-          effect="dark"
-          placement="bottom"
+          class="toolbar-slot-item"
+          :title="tool.name"
+          @click="tool.event"
         >
-          <div class="toolbar-slot-item" @click="tool.event">
-            <i :class="tool.icon"></i>
-          </div>
-        </el-tooltip>
+          <i :class="tool.icon"></i>
+        </div>
       </template>
     </PtdDesigner>
     <PtdViewer
@@ -170,31 +166,6 @@ body,
   display: flex;
   height: 40px;
   align-items: center;
-
-  .roy-upload-file {
-    .el-upload {
-      align-items: center;
-      display: flex;
-    }
-  }
-
-  .el-button,
-  .el-button--mini {
-    background: transparent !important;
-    color: #fff !important;
-    border: none !important;
-    display: inline-flex !important;
-    align-items: center !important;
-
-    i {
-      padding-right: 5px;
-      font-size: 14px !important;
-    }
-
-    &:hover {
-      background: var(--roy-color-primary-light-3) !important;
-    }
-  }
 
   .roy-header-icon {
     padding: 0 8px;

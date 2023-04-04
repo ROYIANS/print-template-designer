@@ -5,7 +5,7 @@
 * @date 2022/10/21 9:16
 !-->
 <template>
-  <el-main class="DataSource">
+  <roy-main class="DataSource">
     <vxe-button
       status="primary"
       size="mini"
@@ -38,7 +38,7 @@
       v-if="showDataSourceMaintainer"
       :visible.sync="showDataSourceMaintainer"
     />
-  </el-main>
+  </roy-main>
 </template>
 
 <script>
