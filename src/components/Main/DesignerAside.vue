@@ -4,6 +4,7 @@
       :collapsed="true"
       :menu="menuList"
       :theme="isNightMode ? '' : 'white-theme'"
+      width="150px"
       @item-click="onMenuSelect"
     />
     <keep-alive>
