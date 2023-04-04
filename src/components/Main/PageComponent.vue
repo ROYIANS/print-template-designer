@@ -33,12 +33,14 @@ export default {
 
 <style lang="scss" scoped>
 .roy-page-component {
+  align-items: center;
+  grid-auto-rows: 105px;
+  grid-template-columns: auto auto auto;
   overflow: auto;
   height: calc(100% - 16px);
   padding: 8px;
-  display: flex;
-  flex-flow: row wrap;
-  place-content: flex-start;
+  display: grid;
+  justify-content: center;
 }
 
 .roy-page-component__item {
@@ -54,7 +56,7 @@ export default {
   min-width: 67px;
   max-width: 69px;
   height: 95px;
-  margin: 0 4px 10px 0;
+  margin: 0 4px;
   color: var(--roy-text-color-regular);
 
   &:hover {
@@ -64,6 +66,7 @@ export default {
     animation-duration: 1s;
     animation-delay: 1.5s;
     animation-iteration-count: infinite;
+    border: 2px solid var(--roy-color-primary);
   }
 
   i {

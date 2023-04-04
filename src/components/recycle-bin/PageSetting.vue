@@ -1,19 +1,14 @@
 <template>
   <div class="roy-page-setting">
     <header>
-      <el-tooltip
+      <i
         v-for="(btn, index) in buttons"
         :key="index"
-        :content="btn.content"
-        :open-delay="400"
-        :visible-arrow="false"
-        effect="dark"
-        placement="bottom"
-      >
-        <i :class="btn.icon"></i>
-      </el-tooltip>
+        :title="btn.content"
+        :class="btn.icon"
+      ></i>
     </header>
-    <el-row
+    <roy-row
       v-for="(page, index) in pages"
       :key="index"
       :class="page.active ? 'active' : ''"
@@ -21,11 +16,11 @@
       :gutter="10"
       @click.native="doActivePage(index)"
     >
-      <el-col :span="4">{{ index + 1 }}</el-col>
-      <el-col :span="20">
+      <roy-col :span="4">{{ index + 1 }}</roy-col>
+      <roy-col :span="20">
         <PageThumbnail v-if="page.canvas" :element="page.canvas" />
-      </el-col>
-    </el-row>
+      </roy-col>
+    </roy-row>
   </div>
 </template>
 
@@ -127,16 +122,16 @@ export default {
     }
   }
 
-  .el-row {
+  .roy-row {
     height: 100px;
     width: 100%;
     user-select: none;
 
-    & + .el-row {
+    & + .roy-row {
       margin-top: 10px;
     }
 
-    .el-col {
+    .roy-col {
       height: 100%;
 
       &:first-child {
@@ -156,7 +151,7 @@ export default {
     }
 
     &.active {
-      .el-col {
+      .roy-col {
         color: var(--roy-color-warning-dark-2);
 
         &:last-child {

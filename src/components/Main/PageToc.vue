@@ -5,7 +5,7 @@
 * @date 2022/9/26 15:10
 !-->
 <template>
-  <el-main class="roy-page-toc">
+  <roy-main class="roy-page-toc">
     <div v-if="componentData.length">
       <div
         v-for="(item, index) in componentData"
@@ -42,7 +42,7 @@
       />
       <div>当前没有组件，您可以通过拖拽添加组件</div>
     </div>
-  </el-main>
+  </roy-main>
 </template>
 
 <script>

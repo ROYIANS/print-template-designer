@@ -20,9 +20,15 @@ import '@wangeditor/editor/dist/css/style.css'
 
 import NightModeStore from '../stores/modules/index.js'
 
+// RoyUI
+import '@/components/RoyUI/styles/index.scss'
+import { UI } from '@/components/RoyUI'
+// RoyUI End
+
 const componentsLib = {
   PtdDesigner,
-  PtdViewer
+  PtdViewer,
+  ...UI
 }
 const install = function (Vue, opts = {}) {
   if (install.installed) {

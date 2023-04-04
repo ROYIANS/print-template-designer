@@ -5,7 +5,7 @@
 * @date 2022/9/26 15:11
 !-->
 <template>
-  <el-main class="roy-designer-global">
+  <roy-main class="roy-designer-global">
     <vxe-form
       ref="global-setting-form"
       sync-resize
@@ -23,9 +23,9 @@
       :prevent-submit="formGlobalConfigIn.preventSubmit"
       :loading="formGlobalConfigIn.loading"
     />
-    <el-row class="roy-designer-global__pages">
-      <el-col :span="24" class="roy-designer-global__title">纸张大小:</el-col>
-      <el-col :span="24">
+    <roy-row class="roy-designer-global__pages">
+      <roy-col :span="24" class="roy-designer-global__title">纸张大小:</roy-col>
+      <roy-col :span="24">
         <div class="roy-designer-global__pages__container">
           <div
             v-for="page in Object.values(pages)"
@@ -41,9 +41,9 @@
             {{ page.name }}
           </div>
         </div>
-      </el-col>
-    </el-row>
-  </el-main>
+      </roy-col>
+    </roy-row>
+  </roy-main>
 </template>
 
 <script>

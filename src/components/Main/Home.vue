@@ -5,12 +5,12 @@
 * @date 2022/9/29 9:23
 !-->
 <template>
-  <el-container
+  <roy-container
     id="roy-print-template-designer"
     class="roy-designer-container"
     theme="day"
   >
-    <el-header class="roy-designer-header" height="40px">
+    <roy-header class="roy-designer-header" height="40px">
       <div id="tttt" class="roy-designer-header__text">
         <i class="ri-pen-nib-line"></i>
         <span>打印模板设计器 | {{ pageConfig.title }}</span>
@@ -41,20 +41,20 @@
           ></i>
         </div>
       </div>
-    </el-header>
-    <el-container style="height: calc(100% - 40px)">
-      <el-aside class="roy-designer-aside" width="auto">
+    </roy-header>
+    <roy-container style="height: calc(100% - 40px)">
+      <roy-aside class="roy-designer-aside" width="auto">
         <DesignerAside :show-right.sync="defaultExpendAside" />
-      </el-aside>
-      <el-main class="roy-designer-main">
+      </roy-aside>
+      <roy-main class="roy-designer-main">
         <DesignerMain :show-right="defaultExpendAside">
           <template v-slot:roy-designer-toolbar-slot>
             <slot name="roy-designer-toolbar-slot"></slot>
           </template>
         </DesignerMain>
-      </el-main>
-    </el-container>
-  </el-container>
+      </roy-main>
+    </roy-container>
+  </roy-container>
 </template>
 
 <script>

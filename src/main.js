@@ -2,16 +2,13 @@ import Vue from 'vue'
 import store from './stores/index.js'
 
 import App from './App.vue'
-import Element from 'element-ui'
 import router from './router'
 import PrintDesigner from './components/index.js'
 
 import 'remixicon/fonts/remixicon.css'
-import 'element-ui/lib/theme-chalk/index.css'
 import VXETable from 'vxe-table'
 import '@/assets/vxevarible.scss'
 
-Vue.use(Element, { size: 'mini' })
 Vue.use(VXETable)
 Vue.use(PrintDesigner, {
   store

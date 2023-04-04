@@ -1,0 +1,216 @@
+.v-sidebar-menu {
+  * {
+    box-sizing: border-box;
+  }
+
+  position: relative;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  z-index: 999;
+  box-sizing: border-box;
+  width: 100%;
+  text-align: left;
+  transition: 0.3s max-width ease;
+
+  .vsm--scroll-wrapper {
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .vsm--dropdown > .vsm--list {
+    padding: 5px;
+  }
+
+  .vsm--item {
+    position: relative;
+    display: block;
+    width: 100%;
+    white-space: nowrap;
+  }
+
+  .vsm--link {
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    align-items: center;
+    font-size: $item-font-size;
+    font-weight: 400;
+    padding: $item-padding;
+    line-height: $item-line-height;
+    text-decoration: none;
+    user-select: none;
+    z-index: 20;
+    transition: 0.3s all ease;
+
+    &_exact-active,
+    &_active {
+      font-weight: normal;
+    }
+
+    &_disabled {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    &_level-1 {
+      .vsm--icon {
+        height: $icon-height;
+        line-height: $icon-height;
+        width: $icon-width;
+        flex-shrink: 0;
+        text-align: center;
+        border-radius: 3px;
+      }
+    }
+  }
+
+  .vsm--icon {
+    display: inline-block;
+    margin-right: 10px;
+  }
+
+  .vsm--title {
+    flex-grow: 1;
+  }
+
+  .vsm--arrow {
+    width: 30px;
+    text-align: center;
+    font-style: normal;
+    font-weight: 900;
+    transition: 0.3s transform ease;
+
+    &:after {
+      content: '\f105';
+      font-family: 'Font Awesome 5 Free';
+    }
+
+    &_open {
+      transform: rotate(90deg);
+    }
+
+    &_slot:after {
+      display: none;
+    }
+  }
+
+  .vsm--header {
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px;
+    white-space: nowrap;
+    text-transform: uppercase;
+  }
+
+  .vsm--badge {
+    &_default {
+      padding: 0px 6px;
+      font-size: 12px;
+      border-radius: 3px;
+      height: 20px;
+      line-height: 20px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+  }
+
+  .vsm--toggle-btn {
+    display: block;
+    text-align: center;
+    font-style: normal;
+    font-weight: normal;
+    height: 50px;
+    cursor: pointer;
+    border: none;
+    width: 100%;
+
+    &:after {
+      content: '\EA42';
+      font-family: 'remixicon' !important;
+    }
+
+    &_slot:after {
+      display: none;
+    }
+  }
+
+  &.vsm_collapsed {
+    & .vsm--link_level-1 {
+      &.vsm--link_hover,
+      &:hover {
+        background-color: transparent !important;
+      }
+    }
+  }
+
+  &.vsm_rtl {
+    right: 0;
+    left: inherit;
+    text-align: right;
+    direction: rtl;
+
+    & .vsm--icon {
+      margin-left: 10px;
+      margin-right: 0px;
+    }
+  }
+
+  &.vsm_relative {
+    position: relative;
+    height: 100%;
+  }
+
+  .expand-enter-active,
+  .expand-leave-active {
+    transition: height 0.3s ease;
+    overflow: hidden;
+  }
+
+  .expand-enter,
+  .expand-leave-to {
+    height: 0 !important;
+  }
+
+  .slide-animation-enter-active {
+    transition: width 0.3s ease;
+  }
+
+  .slide-animation-leave-active {
+    transition: width 0.3s ease;
+  }
+
+  .slide-animation-enter,
+  .slide-animation-leave-to {
+    width: 0 !important;
+  }
+
+  .fade-animation-enter-active {
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+
+  .fade-animation-leave-active {
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+
+  .fade-animation-enter,
+  .fade-animation-leave-to {
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+
+  .vsm--mobile-item > .vsm--item {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .vsm--mobile-item > .vsm--item > .vsm--link {
+    margin: 0 !important;
+    background-color: transparent !important;
+    line-height: $icon-height !important;
+  }
+}

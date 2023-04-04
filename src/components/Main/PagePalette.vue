@@ -1,9 +1,9 @@
 <template>
   <div v-if="initCompleted" class="roy-page-tools">
     <div v-if="curActiveComponent && curActiveComponent.id">
-      <el-divider v-if="settingFormItemConfig.length" content-position="left">
+      <roy-divider v-if="settingFormItemConfig.length" content-position="left">
         属性设置
-      </el-divider>
+      </roy-divider>
       <vxe-form
         ref="setting-form"
         sync-resize
@@ -21,7 +21,7 @@
         :prevent-submit="formGlobalConfigIn.preventSubmit"
         :loading="formGlobalConfigIn.loading"
       />
-      <el-divider content-position="left">样式设置</el-divider>
+      <roy-divider content-position="left">样式设置</roy-divider>
       <vxe-form
         ref="paletteForm"
         sync-resize

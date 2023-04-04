@@ -26,7 +26,6 @@
     "axios": "^1.2.2",
     "big.js": "^6.2.1",
     "core-js": "^3.8.3",
-    "element-ui": "^2.15.9",
     "html2canvas": "^1.4.1",
     "jspdf": "^2.5.1",
     "nanoid": "^4.0.0",
