@@ -22,11 +22,7 @@ export const RenderUtil = {
       if (dataSet[field] && dataSet[field] instanceof Function) {
         return dataSet[field]()
       }
-      return RenderUtil.getDataConvertedByDataSource(
-        dataSet[field],
-        field,
-        dataSource
-      )
+      return RenderUtil.getDataConvertedByDataSource(dataSet[field], field, dataSource)
     })
   },
   getDataConvertedByDataSource(value, field, dataSource) {
@@ -59,19 +55,7 @@ export const RenderUtil = {
   },
   parseBigCurDate() {
     const curDate = new Date()
-    const bigNumber = [
-      '〇',
-      '一',
-      '二',
-      '三',
-      '四',
-      '五',
-      '六',
-      '七',
-      '八',
-      '九',
-      '十'
-    ]
+    const bigNumber = ['〇', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十']
     const year = `${curDate.getFullYear()}`.replace(/\d/g, (number) => {
       return bigNumber[Number(number)]
     })
@@ -152,9 +136,7 @@ export const RenderUtil = {
           RegExp.$1,
           RegExp.$1.length === 1
             ? o[k]
-            : ('00' + o[k]).substr(
-                ('' + o[k]).length >= 2 ? 2 : ('' + o[k]).length
-              )
+            : ('00' + o[k]).substr(('' + o[k]).length >= 2 ? 2 : ('' + o[k]).length)
         )
       }
     }
@@ -210,14 +192,11 @@ export const RenderUtil = {
         ? ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十']
         : ['零', '壹', '贰', '叁', '肆', '伍', '陆', '柒', '捌', '玖']
     // 基本单位
-    let cnIntRadice =
-      type === 'number' ? ['', '十', '百', '千'] : ['', '拾', '佰', '仟']
+    let cnIntRadice = type === 'number' ? ['', '十', '百', '千'] : ['', '拾', '佰', '仟']
     // 对应整数部分扩展单位
-    let cnIntUnits =
-      type === 'number' ? ['', '万', '亿', '万'] : ['', '万', '亿', '万']
+    let cnIntUnits = type === 'number' ? ['', '万', '亿', '万'] : ['', '万', '亿', '万']
     // 对应小数部分单位
-    let cnDecUnits =
-      type === 'number' ? ['', '', '', ''] : ['角', '分', '毫', '厘']
+    let cnDecUnits = type === 'number' ? ['', '', '', ''] : ['角', '分', '毫', '厘']
     // 整数金额时后面跟的字符
     let cnInteger = type === 'number' ? '' : '整'
     // 整型完以后的单位
@@ -308,9 +287,7 @@ export const RenderUtil = {
     if (n > 0) {
       //  return numberArr[0] + (numberArr[1] ? ('.' + numberArr[1].slice(0, n)) : '')
       return (
-        (numberArr[0] ? numberArr[0] : 0) +
-        '.' +
-        (numberArr[1] ? numberArr[1] : '0').padEnd(n, 0)
+        (numberArr[0] ? numberArr[0] : 0) + '.' + (numberArr[1] ? numberArr[1] : '0').padEnd(n, 0)
       )
     } else {
       return numberArr[0] || ''

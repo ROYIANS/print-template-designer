@@ -8,18 +8,18 @@
   <RoyModal
     v-if="visible"
     :show="visible"
-    title="数据表格设置"
-    height="80%"
-    width="60%"
     class="TableDataSetting"
-    @mousedown.stop.prevent="handleMouseDown"
+    height="80%"
+    title="数据表格设置"
+    width="60%"
     @close="handleModalClose"
+    @mousedown.stop.prevent="handleMouseDown"
   >
     <vxe-grid
       ref="xGrid"
-      v-bind="gridOptions"
-      height="100%"
       :data="tableDataIn"
+      height="100%"
+      v-bind="gridOptions"
       @toolbar-button-click="handleToolbarButtonClick"
     >
       <template v-slot:form>
@@ -30,8 +30,8 @@
               <vxe-option
                 v-for="opt in dataSourceOption"
                 :key="opt.field"
-                :value="opt.field"
                 :label="opt.title"
+                :value="opt.field"
               ></vxe-option>
             </vxe-select>
           </div>
@@ -39,10 +39,10 @@
             <span>表格行高：</span>
             <vxe-input
               v-model="tableRowHeight"
+              max="100"
+              min="20"
               placeholder="20-100"
               type="number"
-              min="20"
-              max="100"
             ></vxe-input>
           </div>
         </div>
@@ -307,10 +307,12 @@ export default {
 .TableDataSetting {
   height: 100%;
   padding: 6px;
+
   .roy-table-data-form {
     display: flex;
     align-items: center;
     justify-content: flex-end;
+
     & > div {
       margin-left: 10px;
     }

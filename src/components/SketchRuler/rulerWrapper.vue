@@ -1,39 +1,39 @@
 <template>
   <div :class="rwClassName" :style="rwStyle">
     <CanvasRuler
-      :vertical="vertical"
-      :scale="scale"
-      :width="width"
-      :height="height"
-      :start="start"
-      :selectStart="selectStart"
-      :selectLength="selectLength"
       :canvasConfigs="canvasConfigs"
+      :height="height"
+      :scale="scale"
+      :selectLength="selectLength"
+      :selectStart="selectStart"
+      :start="start"
+      :vertical="vertical"
+      :width="width"
       @onAddLine="handleNewLine"
-      @onIndicatorShow="handleIndicatorShow"
-      @onIndicatorMove="handleIndicatorMove"
       @onIndicatorHide="handleIndicatorHide"
+      @onIndicatorMove="handleIndicatorMove"
+      @onIndicatorShow="handleIndicatorShow"
     >
     </CanvasRuler>
-    <div class="lines" v-show="isShowReferLine">
+    <div v-show="isShowReferLine" class="lines">
       <LineRuler
         v-for="(v, i) in lines"
         :key="v + i"
         :index="i"
-        :value="v >> 0"
+        :isShowReferLine="isShowReferLine"
+        :palette="palette"
         :scale="scale"
         :start="start"
         :thick="thick"
-        :palette="palette"
+        :value="v >> 0"
         :vertical="vertical"
-        :isShowReferLine="isShowReferLine"
-        @onRemove="handleLineRemove"
         @onMouseDown="handleLineDown"
         @onRelease="handleLineRelease"
+        @onRemove="handleLineRemove"
       >
       </LineRuler>
     </div>
-    <div class="indicator" :style="indicatorStyle" v-show="showIndicator">
+    <div v-show="showIndicator" :style="indicatorStyle" class="indicator">
       <div class="value">{{ value }}</div>
     </div>
   </div>
@@ -158,32 +158,41 @@ export default {
 .line {
   position: absolute;
 }
+
 .h-container,
 .v-container {
   position: absolute;
+
   .lines {
     pointer-events: none;
   }
+
   &:hover .lines {
     pointer-events: auto;
   }
 }
+
 .h-container {
   top: 0;
+
   .line {
     height: 100vh;
     top: 0;
     padding-left: 5px;
+
     .action {
       transform: translateX(-24px);
+
       .value {
         margin-left: 4px;
       }
     }
   }
+
   .indicator {
     top: 0;
     height: 100vw;
+
     .value {
       padding: 0 2px;
       width: auto;
@@ -195,20 +204,25 @@ export default {
 
 .v-container {
   left: 0;
+
   .line {
     width: 100vw;
     left: 0;
     padding-top: 5px;
+
     .action {
       transform: translateY(-24px);
       flex-direction: column;
+
       .value {
         margin-top: 4px;
       }
     }
   }
+
   .indicator {
     width: 100vw;
+
     .value {
       padding: 0 2px;
       width: auto;

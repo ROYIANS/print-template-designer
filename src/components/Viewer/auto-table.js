@@ -13,24 +13,10 @@ import Vue from 'vue'
 import { RenderUtil } from '@/components/Viewer/render-util'
 
 export class AutoTable {
-  constructor({
-    type,
-    propValue,
-    pagerConfig,
-    tempHolder,
-    dataSet,
-    dataSource
-  }) {
+  constructor({ type, propValue, pagerConfig, tempHolder, dataSet, dataSource }) {
     const { COMMON_SCALE } = CONFIG
-    const {
-      pageHeight,
-      pageWidth,
-      pageDirection,
-      pageMarginBottom,
-      pageMarginTop
-    } = pagerConfig
-    this.realPageHeight =
-      (pageDirection === 'p' ? pageHeight : pageWidth) * COMMON_SCALE
+    const { pageHeight, pageWidth, pageDirection, pageMarginBottom, pageMarginTop } = pagerConfig
+    this.realPageHeight = (pageDirection === 'p' ? pageHeight : pageWidth) * COMMON_SCALE
     this.realPageMarginBottom = pageMarginBottom * COMMON_SCALE
     this.realPageMarginTop = pageMarginTop * COMMON_SCALE
     this.type = type
@@ -106,8 +92,7 @@ export class AutoTable {
   }
 
   generateComplexTable() {
-    const { tableRowHeight, tableDataSource, tableCols, bodyTableWidth } =
-      this.propValue
+    const { tableRowHeight, tableDataSource, tableCols, bodyTableWidth } = this.propValue
     let tableRowHeightPx = `${tableRowHeight}px`
     const tableData = this.dataSet[tableDataSource] || []
     const tableHead = tableCols
@@ -208,11 +193,7 @@ export class AutoTable {
           ) {
             for (let row = i; row < i + (colInfo.rowSpan || 1); row++) {
               // col = (row === i ? j + 1 : j) 是为了避开自己
-              for (
-                let col = row === i ? j + 1 : j;
-                col < j + (colInfo.colSpan || 1);
-                col++
-              ) {
+              for (let col = row === i ? j + 1 : j; col < j + (colInfo.colSpan || 1); col++) {
                 hiddenTdMaps[`${row}_${col}`] = true
               }
             }
@@ -222,6 +203,7 @@ export class AutoTable {
     }
     return hiddenTdMaps
   }
+
   getItColSpan(row, col) {
     let { tableConfig } = this.propValue
     return (
@@ -229,6 +211,7 @@ export class AutoTable {
       tableConfig.layoutDetail[(row - 1) * tableConfig.cols + col - 1].colSpan
     )
   }
+
   getItRowSpan(row, col) {
     let { tableConfig } = this.propValue
     return (

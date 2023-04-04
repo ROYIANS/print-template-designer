@@ -130,9 +130,7 @@ export function mod360(deg) {
 }
 
 export function changeStyleWithScale(value) {
-  const divideBy100 = new Big(parseInt(store.state.canvasStyleData.scale)).div(
-    new Big(100)
-  )
+  const divideBy100 = new Big(parseInt(store.state.canvasStyleData.scale)).div(new Big(100))
   return new Big(value).times(divideBy100).toNumber()
 }
 

@@ -8,20 +8,20 @@
   <roy-main class="roy-designer-global">
     <vxe-form
       ref="global-setting-form"
-      sync-resize
-      :title-overflow="formGlobalConfigIn.titleOverflow"
+      :align="formGlobalConfigIn.align"
       :data="globalSettingConfig"
       :items="globalSettingItem"
-      :rules="{}"
-      :span="formGlobalConfigIn.span"
-      :align="formGlobalConfigIn.align"
-      :valid-config="formGlobalConfigIn.validConfig"
-      :size="formGlobalConfigIn.size"
-      :title-align="formGlobalConfigIn.titleAlign"
-      :title-width="formGlobalConfigIn.titleWidth"
-      :title-colon="formGlobalConfigIn.titleColon"
-      :prevent-submit="formGlobalConfigIn.preventSubmit"
       :loading="formGlobalConfigIn.loading"
+      :prevent-submit="formGlobalConfigIn.preventSubmit"
+      :rules="{}"
+      :size="formGlobalConfigIn.size"
+      :span="formGlobalConfigIn.span"
+      :title-align="formGlobalConfigIn.titleAlign"
+      :title-colon="formGlobalConfigIn.titleColon"
+      :title-overflow="formGlobalConfigIn.titleOverflow"
+      :title-width="formGlobalConfigIn.titleWidth"
+      :valid-config="formGlobalConfigIn.validConfig"
+      sync-resize
     />
     <roy-row class="roy-designer-global__pages">
       <roy-col :span="24" class="roy-designer-global__title">纸张大小:</roy-col>
@@ -30,11 +30,7 @@
           <div
             v-for="page in Object.values(pages)"
             :key="page.name"
-            :class="
-              currentPage === page.name
-                ? 'roy-designer-global__pages__item--active'
-                : ''
-            "
+            :class="currentPage === page.name ? 'roy-designer-global__pages__item--active' : ''"
             class="roy-designer-global__pages__item"
             @click="currentPage = page.name"
           >
@@ -379,10 +375,12 @@ export default {
   .vxe-form.size--medium .vxe-form--item-inner {
     display: grid;
   }
+
   .vxe-form--item-title {
     font-size: 10px;
     text-align: left !important;
     margin-bottom: 5px;
+
     .vxe-form--item-title-label:before {
       content: '';
       width: 1px;
@@ -391,9 +389,11 @@ export default {
       border-left: var(--roy-color-primary) 3px solid;
     }
   }
+
   .vxe-form--item {
     float: inherit !important;
   }
+
   .vxe-input--inner {
     border-radius: unset;
     background: transparent;

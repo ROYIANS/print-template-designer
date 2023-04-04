@@ -1,19 +1,19 @@
 @import '~shepherd.js/dist/css/shepherd.css';
 
 .shepherd-has-title.shepherd-element {
-  &[data-popper-placement="bottom"] {
+  &[data-popper-placement='bottom'] {
     margin-top: 24px !important;
   }
 
-  &[data-popper-placement="left"] {
+  &[data-popper-placement='left'] {
     margin-right: 24px !important;
   }
 
-  &[data-popper-placement="right"] {
+  &[data-popper-placement='right'] {
     margin-left: 24px !important;
   }
 
-  &[data-popper-placement="top"] {
+  &[data-popper-placement='top'] {
     margin-bottom: 24px !important;
   }
 

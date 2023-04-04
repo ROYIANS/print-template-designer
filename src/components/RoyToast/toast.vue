@@ -7,9 +7,7 @@
 <template>
   <div
     v-if="visible"
-    :class="`roy-toast__status--${status} ${
-      isPaused ? 'roy-toast--hover-tab' : ''
-    }`"
+    :class="`roy-toast__status--${status} ${isPaused ? 'roy-toast--hover-tab' : ''}`"
     :style="positionStyle"
     class="roy-toast roy-toast--center"
     style="width: auto; opacity: 1"
@@ -19,11 +17,7 @@
     <div></div>
     <div class="roy-toast__main">
       <i :class="icon"></i>
-      <span
-        v-if="dangerouslyUseHTMLString"
-        class="roy-toast__message"
-        v-html="message"
-      ></span>
+      <span v-if="dangerouslyUseHTMLString" class="roy-toast__message" v-html="message"></span>
       <span v-else class="roy-toast__message">{{ message }}</span>
     </div>
     <i class="roy-toast__close ri-close-fill" @click="close"></i>

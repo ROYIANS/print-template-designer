@@ -12,11 +12,11 @@
         v-for="item in propValue"
         :id="'roy-component-' + item.id"
         :key="item.id"
-        class="roy-group-component"
-        :style="item.groupStyle"
-        :prop-value="item.propValue"
         :element="item"
+        :prop-value="item.propValue"
         :request="item.request"
+        :style="item.groupStyle"
+        class="roy-group-component"
       />
     </div>
   </div>
