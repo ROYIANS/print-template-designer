@@ -10,11 +10,9 @@
       <div
         v-for="(tool, index) in toolbarLeftConfig"
         :key="index"
-        class="roy-designer-main__toolbar__item"
-        :class="
-          tool.disabled ? `roy-designer-main__toolbar__item--disabled` : ``
-        "
+        :class="tool.disabled ? `roy-designer-main__toolbar__item--disabled` : ``"
         :title="tool.name"
+        class="roy-designer-main__toolbar__item"
         @click="tool.event"
       >
         <i :class="tool.icon"></i>
@@ -28,17 +26,11 @@
         <span>{{ rectWidth }}/{{ rectHeight }}</span>
       </div>
       <div class="roy-designer-main__toolbar__zoom">
-        <div
-          class="roy-designer-main__toolbar__item"
-          @click.stop.prevent="smallerScale"
-        >
+        <div class="roy-designer-main__toolbar__item" @click.stop.prevent="smallerScale">
           <i class="ri-zoom-out-line"></i>
         </div>
         <span>{{ scale100 }}%</span>
-        <div
-          class="roy-designer-main__toolbar__item"
-          @click.stop.prevent="biggerScale"
-        >
+        <div class="roy-designer-main__toolbar__item" @click.stop.prevent="biggerScale">
           <i class="ri-zoom-in-line"></i>
         </div>
       </div>

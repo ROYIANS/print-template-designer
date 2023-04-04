@@ -14,10 +14,7 @@ export default {
   },
   actions: {
     toggleNightMode({ commit }, isNightMode) {
-      window.localStorage.setItem(
-        `${STORAGE_PREFIX}NIGHT_MODE`,
-        JSON.stringify(isNightMode)
-      )
+      window.localStorage.setItem(`${STORAGE_PREFIX}NIGHT_MODE`, JSON.stringify(isNightMode))
       document
         .getElementById('roy-print-template-designer')
         .setAttribute('theme', isNightMode ? 'dark' : 'day')
@@ -26,9 +23,7 @@ export default {
       })
     },
     async initNightMode({ dispatch }) {
-      const nightMode = window.localStorage.getItem(
-        `${STORAGE_PREFIX}NIGHT_MODE`
-      )
+      const nightMode = window.localStorage.getItem(`${STORAGE_PREFIX}NIGHT_MODE`)
       if (nightMode !== null) {
         await dispatch('toggleNightMode', JSON.parse(nightMode))
       }

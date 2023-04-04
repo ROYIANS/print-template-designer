@@ -9,7 +9,9 @@
  */
 import { RenderUtil } from '@/components/Viewer/render-util'
 import html2canvas from 'html2canvas'
+
 const SCALE = devicePixelRatio * 2
+
 export class AutoSplitText {
   constructor(tempHolder, toSplitElement) {
     this.tempHolder = tempHolder
@@ -32,10 +34,7 @@ export class AutoSplitText {
       [this.toSplitElement],
       this.toSplitElement.getBoundingClientRect()
     )
-    const someThing = this.getSomeThing(
-      this.toSplitElement.getBoundingClientRect(),
-      arrSelection
-    )
+    const someThing = this.getSomeThing(this.toSplitElement.getBoundingClientRect(), arrSelection)
     return this.getCanvasList(someThing, canvasThing, SCALE)
   }
 
@@ -149,9 +148,7 @@ export class AutoSplitText {
         } else if (node.nodeType === 1) {
           if (node.childNodes.length) {
             getRangesForElement(node.childNodes)
-          } else if (
-            !['TD', 'BR', 'TH', 'P', 'DIV'].includes(node.tagName.toUpperCase())
-          ) {
+          } else if (!['TD', 'BR', 'TH', 'P', 'DIV'].includes(node.tagName.toUpperCase())) {
             drawRange(node)
           }
         }

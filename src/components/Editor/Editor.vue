@@ -19,12 +19,7 @@
       @onCornerClick="handleCornerClick"
     >
     </SketchRuler>
-    <div
-      id="screens"
-      ref="screensRef"
-      @scroll="handleScroll"
-      @wheel="handleWheel"
-    >
+    <div id="screens" ref="screensRef" @scroll="handleScroll" @wheel="handleWheel">
       <div ref="containerRef" class="screen-container">
         <div
           id="designer-page"
@@ -46,31 +41,26 @@
           >
             <component
               :is="item.component"
-              :active="item.id === (curComponent || {}).id"
               :id="'roy-component-' + item.id"
-              :element="item"
-              :scale="scale"
-              :prop-value="item.propValue"
+              :active="item.id === (curComponent || {}).id"
               :bind-value="item.bindValue"
+              :element="item"
+              :prop-value="item.propValue"
+              :scale="scale"
             />
           </ComponentAdjuster>
           <!-- 选中区域 -->
-          <Area
-            v-show="isShowArea"
-            :height="height"
-            :start="start"
-            :width="width"
-          />
+          <Area v-show="isShowArea" :height="height" :start="start" :width="width" />
           <!-- 标线 -->
           <EditorLine />
           <!-- 上下边距线 -->
           <div
-            class="roy-margin-top-line"
             :style="`top: ${pageConfig.pageMarginTop * realScale}px`"
+            class="roy-margin-top-line"
           ></div>
           <div
-            class="roy-margin-bottom-line"
             :style="`bottom: ${pageConfig.pageMarginBottom * realScale}px`"
+            class="roy-margin-bottom-line"
           ></div>
         </div>
       </div>
@@ -189,8 +179,7 @@ export default {
       realScale: (state) => state.printTemplateModule.rulerThings.scale,
       rectWidth: (state) => state.printTemplateModule.rulerThings.rectWidth,
       rectHeight: (state) => state.printTemplateModule.rulerThings.rectHeight,
-      needReDrawRuler: (state) =>
-        state.printTemplateModule.rulerThings.needReDrawRuler,
+      needReDrawRuler: (state) => state.printTemplateModule.rulerThings.needReDrawRuler,
       showRuler: (state) => state.printTemplateModule.rulerThings.showRuler,
       componentData: (state) => state.printTemplateModule.componentData,
       curComponent: (state) => state.printTemplateModule.curComponent,
@@ -353,9 +342,7 @@ export default {
       return this.$store.state.printTemplateModule.nightMode.isNightMode
     },
     panelWidth() {
-      return this.showRight
-        ? 'width: calc(100% - 330px);'
-        : 'width: calc(100% - 95px);'
+      return this.showRight ? 'width: calc(100% - 330px);' : 'width: calc(100% - 95px);'
     }
   },
   methods: {
@@ -452,9 +439,7 @@ export default {
         let style = {}
         if (component.component === 'Group') {
           component.propValue.forEach((item) => {
-            const rectInfo = $(
-              `#roy-component-${item.id}`
-            ).getBoundingClientRect()
+            const rectInfo = $(`#roy-component-${item.id}`).getBoundingClientRect()
             style.left = rectInfo.left - this.editorX
             style.top = rectInfo.top - this.editorY
             style.right = rectInfo.right - this.editorX
@@ -517,9 +502,7 @@ export default {
           return
         }
 
-        const { left, top, width, height } = getComponentRotatedStyle(
-          component.style
-        )
+        const { left, top, width, height } = getComponentRotatedStyle(component.style)
         if (
           x <= left &&
           y <= top &&
@@ -538,17 +521,11 @@ export default {
     },
     handleCornerClick() {},
     handleScroll() {
-      const screensRect = document
-        .querySelector('#screens')
-        .getBoundingClientRect()
-      const canvasRect = document
-        .querySelector('#designer-page')
-        .getBoundingClientRect()
+      const screensRect = document.querySelector('#screens').getBoundingClientRect()
+      const canvasRect = document.querySelector('#designer-page').getBoundingClientRect()
       // 标尺开始的刻度
-      const startX =
-        (screensRect.left + this.thick - canvasRect.left) / this.realScale
-      const startY =
-        (screensRect.top + this.thick - canvasRect.top) / this.realScale
+      const startX = (screensRect.left + this.thick - canvasRect.left) / this.realScale
+      const startY = (screensRect.top + this.thick - canvasRect.top) / this.realScale
 
       this.startX = startX
       this.startY = startY
@@ -557,9 +534,7 @@ export default {
     handleWheel(e) {
       if (e.ctrlKey || e.metaKey) {
         e.preventDefault()
-        const nextScale = parseFloat(
-          Math.max(0.2, this.scale - e.deltaY / 500).toFixed(2)
-        )
+        const nextScale = parseFloat(Math.max(0.2, this.scale - e.deltaY / 500).toFixed(2))
         if (nextScale <= MAX_SCALE && nextScale >= MIN_SCALE) {
           this.setScale(nextScale)
         }
@@ -599,8 +574,7 @@ export default {
           this.rulerWidth = this.$el.offsetWidth
           this.rulerHeight = this.$el.offsetHeight
           this.$refs.screensRef.scrollLeft =
-            this.$refs.containerRef.getBoundingClientRect().width / 2 -
-            this.rectWidth
+            this.$refs.containerRef.getBoundingClientRect().width / 2 - this.rectWidth
           this.reDrawRuler()
         })
       }
@@ -638,11 +612,7 @@ export default {
   padding: 0 !important;
   margin: 0;
   background-color: rgb(255, 255, 255);
-  background-image: linear-gradient(
-      45deg,
-      rgb(247, 247, 247) 25%,
-      transparent 25%
-    ),
+  background-image: linear-gradient(45deg, rgb(247, 247, 247) 25%, transparent 25%),
     linear-gradient(-45deg, rgb(247, 247, 247) 25%, transparent 25%),
     linear-gradient(45deg, transparent 75%, rgb(247, 247, 247) 75%),
     linear-gradient(-45deg, transparent 75%, rgb(247, 247, 247) 75%);
@@ -666,6 +636,7 @@ export default {
       }
     }
   }
+
   .roy-margin-top-line,
   .roy-margin-bottom-line {
     position: absolute;
@@ -683,6 +654,7 @@ export default {
       linear-gradient(45deg, transparent 75%, #232323 75%),
       linear-gradient(-45deg, transparent 75%, #232323 75%);
   }
+
   #designer-page {
     filter: brightness(0.6);
   }

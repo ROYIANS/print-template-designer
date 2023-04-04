@@ -1,4 +1,4 @@
-@import "./base.scss";
+@import './base.scss';
 
 .roy-designer-container {
   .roy-fade-enter-active {
@@ -27,6 +27,7 @@
     border: 1px solid var(--roy-border);
     box-shadow: rgba(99, 99, 99, 0.2) 0 2px 8px 0;
     cursor: initial;
+
     .w-e-drop-panel {
       min-width: 400px;
     }
@@ -52,13 +53,16 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
+
     &:hover {
       color: #ffffff !important;
       background: var(--roy-color-primary-light-3);
     }
+
     & + .roy-btn-radio-group__btn {
       margin-left: 5px;
     }
+
     &.roy-btn-radio-group__btn--active {
       background: var(--roy-color-primary);
       color: #fff;
@@ -72,6 +76,7 @@
   max-height: 200px;
   overflow-y: auto;
   width: 100%;
+
   li {
     list-style-type: none;
     cursor: pointer;
@@ -79,6 +84,7 @@
     text-align: left;
     width: 100%;
     padding: 8px 5px;
+
     &:hover {
       background: #3e6dcb;
       color: #fff;

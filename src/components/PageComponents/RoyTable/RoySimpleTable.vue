@@ -17,12 +17,12 @@
           <tr v-for="(row, index) in tableConfig.rows" :key="index">
             <td
               v-for="(col, index) in tableConfig.cols"
-              v-contextmenu="'simple-table-contextmenu'"
               v-show="isNeedShow(row - 1, col - 1)"
+              :key="index"
+              v-contextmenu="'simple-table-contextmenu'"
               :class="{
                 'roy-simple-table-cell--selected': getIsActiveCell(row, col)
               }"
-              :key="index"
               :colspan="getItColSpan(row, col)"
               :rowspan="getItRowSpan(row, col)"
               :style="{
@@ -31,22 +31,19 @@
                 padding: '0',
                 overflow: 'hidden'
               }"
+              @contextmenu="handleContendMenu"
+              @mouseup="handleMouseUp"
               @mousedown.stop="(e) => handleCellMousedown(e, row, col)"
               @mouseenter.stop.prevent="handleCellMouseenter(row, col)"
-              @mouseup="handleMouseUp"
-              @contextmenu="handleContendMenu"
             >
               <component
+                :is="tableData[`${row}-${col}`] && tableData[`${row}-${col}`].component"
                 v-if="tableData[`${row}-${col}`]"
-                :is="
-                  tableData[`${row}-${col}`] &&
-                  tableData[`${row}-${col}`].component
-                "
                 :id="`roy-component-${tableData[`${row}-${col}`].id}`"
+                :bind-value.sync="tableData[`${row}-${col}`].bindValue"
                 :cur-id="curClickedId"
                 :element="tableData[`${row}-${col}`]"
                 :prop-value.sync="tableData[`${row}-${col}`].propValue"
-                :bind-value.sync="tableData[`${row}-${col}`].bindValue"
                 :style="{
                   width: `${tableData[`${row}-${col}`].width}px`,
                   height: `${tableData[`${row}-${col}`].height}px`
@@ -294,11 +291,7 @@ export default {
             ) {
               for (let row = i; row < i + (colInfo.rowSpan || 1); row++) {
                 // col = (row === i ? j + 1 : j) 是为了避开自己
-                for (
-                  let col = row === i ? j + 1 : j;
-                  col < j + (colInfo.colSpan || 1);
-                  col++
-                ) {
+                for (let col = row === i ? j + 1 : j; col < j + (colInfo.colSpan || 1); col++) {
                   hiddenTdMaps[`${row}_${col}`] = true
                 }
               }
@@ -331,28 +324,18 @@ export default {
       return !this.hiddenTdMaps[`${row}_${col}`]
     },
     getIsActiveCell(row, col) {
-      return this.selectedCells.includes(
-        (row - 1) * this.tableConfig.cols + col - 1
-      )
+      return this.selectedCells.includes((row - 1) * this.tableConfig.cols + col - 1)
     },
     getItColSpan(row, col) {
       return (
-        this.tableConfig.layoutDetail[
-          (row - 1) * this.tableConfig.cols + col - 1
-        ] &&
-        this.tableConfig.layoutDetail[
-          (row - 1) * this.tableConfig.cols + col - 1
-        ]['colSpan']
+        this.tableConfig.layoutDetail[(row - 1) * this.tableConfig.cols + col - 1] &&
+        this.tableConfig.layoutDetail[(row - 1) * this.tableConfig.cols + col - 1]['colSpan']
       )
     },
     getItRowSpan(row, col) {
       return (
-        this.tableConfig.layoutDetail[
-          (row - 1) * this.tableConfig.cols + col - 1
-        ] &&
-        this.tableConfig.layoutDetail[
-          (row - 1) * this.tableConfig.cols + col - 1
-        ]['rowSpan']
+        this.tableConfig.layoutDetail[(row - 1) * this.tableConfig.cols + col - 1] &&
+        this.tableConfig.layoutDetail[(row - 1) * this.tableConfig.cols + col - 1]['rowSpan']
       )
     },
     handleCellMousedown(e, x, y) {
@@ -490,12 +473,7 @@ export default {
               .getElementById(`roy-component-${endCellData.id}`)
               .getBoundingClientRect()
             const { x: startAriaX, y: startAriaY } = startComponent
-            const {
-              x: endAriaX,
-              y: endAriaY,
-              width: endWidth,
-              height: endHeight
-            } = endComponent
+            const { x: endAriaX, y: endAriaY, width: endWidth, height: endHeight } = endComponent
             curTableData.width = Math.abs(endAriaX - startAriaX) + endWidth
             curTableData.height = Math.abs(endAriaY - startAriaY) + endHeight
             this.tableConfig.layoutDetail[curIndex].rowSpan = endX - startX + 1
@@ -586,8 +564,7 @@ export default {
           const icIndex = (row - 1) * this.tableConfig.cols + ic - 1
           const icCellConfig = this.tableConfig.layoutDetail[icIndex]
           if (icCellConfig.rowSpan === curTableConfig.rowSpan) {
-            this.tableData[`${row}-${ic}`].height =
-              (height + deltaY) / this.scale
+            this.tableData[`${row}-${ic}`].height = (height + deltaY) / this.scale
           }
         }
       }

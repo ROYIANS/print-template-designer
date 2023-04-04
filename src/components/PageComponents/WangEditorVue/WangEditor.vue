@@ -1,10 +1,12 @@
 <script>
 import { createEditor } from '@wangeditor/editor'
+
 function genErrorInfo(fnName) {
   let info = `请使用 '@${fnName}' 事件，不要放在 props 中`
   info += `\nPlease use '@${fnName}' event instead of props`
   return info
 }
+
 export default {
   //【注意】单独写 <template>...</template> 时，rollup 打包完浏览器运行时报错，所以先在这里写 template
   render(h) {
@@ -25,7 +27,9 @@ export default {
     // 监听 'value' 属性变化 - value 用于自定义 v-model
     value(newVal) {
       const isEqual = newVal === this.curValue
-      if (isEqual) return // 和当前内容一样，则忽略
+      if (isEqual) {
+        return
+      } // 和当前内容一样，则忽略
       // 重置 HTML
       this.setHtml(newVal)
     }
@@ -34,12 +38,16 @@ export default {
     // 重置 HTML
     setHtml(newHtml) {
       const editor = this.editor
-      if (editor == null) return
+      if (editor == null) {
+        return
+      }
       editor.setHtml(newHtml)
     },
     // 创建 editor
     create() {
-      if (this.$refs.box == null) return
+      if (this.$refs.box == null) {
+        return
+      }
       const defaultConfig = this.defaultConfig || {}
       const defaultContent = JSON.stringify(
         Array.isArray(this.defaultContent) ? this.defaultContent : []

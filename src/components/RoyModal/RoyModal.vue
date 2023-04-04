@@ -7,14 +7,14 @@
 <template>
   <vxe-modal
     v-model="visibleIn"
-    :width="width"
-    :title="title"
     :height="height"
     :show-footer="showFooter"
-    show-zoom
-    resize
-    remember
+    :title="title"
     :transfer="appendToBody"
+    :width="width"
+    remember
+    resize
+    show-zoom
     @close="close"
   >
     <slot></slot>

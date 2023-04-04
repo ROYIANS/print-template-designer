@@ -25,8 +25,7 @@ export default {
       if (state.snapshotIndex >= 1) {
         state.snapshotIndex--
         const componentData =
-          deepCopy(state.snapshotData[state.snapshotIndex]) ||
-          getDefaultComponentData()
+          deepCopy(state.snapshotData[state.snapshotIndex]) || getDefaultComponentData()
         if (state.curComponent) {
           // 如果当前组件不在 componentData 中，则置空
           const needClean = !componentData.find(
@@ -64,10 +63,7 @@ export default {
       state.snapshotData[++state.snapshotIndex] = deepCopy(state.componentData)
       // 在 undo 过程中，添加新的快照时，要将它后面的快照清理掉
       if (state.snapshotIndex < state.snapshotData.length - 1) {
-        state.snapshotData = state.snapshotData.slice(
-          0,
-          state.snapshotIndex + 1
-        )
+        state.snapshotData = state.snapshotData.slice(0, state.snapshotIndex + 1)
       }
       if (state.snapshotData.length > MAX_SNAP_SHOT_LENGTH) {
         // 只保留最近50次操作

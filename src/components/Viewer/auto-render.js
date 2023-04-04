@@ -54,37 +54,22 @@ const componentToClassName = {
 }
 
 export class AutoRender {
-  constructor({
-    renderElements,
-    pagerConfig,
-    dataSet,
-    dataSource,
-    tempHolder
-  }) {
+  constructor({ renderElements, pagerConfig, dataSet, dataSource, tempHolder }) {
     const { COMMON_SCALE } = CONFIG
     this.renderElements = renderElements
     this.pagerConfig = pagerConfig
     this.dataSet = dataSet
     this.dataSource = dataSource
     this.tempHolder = tempHolder
-    const {
-      pageWidth,
-      pageHeight,
-      pageMarginBottom,
-      pageMarginTop,
-      pageDirection
-    } = pagerConfig
-    this.pageWidth =
-      (pageDirection === 'p' ? pageWidth : pageHeight) * COMMON_SCALE
-    this.pageHeight =
-      (pageDirection === 'p' ? pageHeight : pageWidth) * COMMON_SCALE
+    const { pageWidth, pageHeight, pageMarginBottom, pageMarginTop, pageDirection } = pagerConfig
+    this.pageWidth = (pageDirection === 'p' ? pageWidth : pageHeight) * COMMON_SCALE
+    this.pageHeight = (pageDirection === 'p' ? pageHeight : pageWidth) * COMMON_SCALE
     this.realPageMarginBottom = pageMarginBottom * COMMON_SCALE
     this.realPageMarginTop = pageMarginTop * COMMON_SCALE
     this.curPageIndex = 0
     this.curPageUsedHeight = 0
     this.maxPageUseHeight = this.pageHeight - this.realPageMarginBottom
-    const { background, color, fontSize, fontFamily, lineHeight } =
-      this.pagerConfig
+    const { background, color, fontSize, fontFamily, lineHeight } = this.pagerConfig
     this.pageDefaultStyle = `
       width: ${this.pageWidth}px;
       height: ${this.pageHeight}px;
@@ -128,12 +113,7 @@ export class AutoRender {
     })
   }
 
-  async renderRoyText(
-    element,
-    zIndex = 0,
-    parentElement = null,
-    restrictWidth = null
-  ) {
+  async renderRoyText(element, zIndex = 0, parentElement = null, restrictWidth = null) {
     const { propValue, style } = element
     let outerStyle = style
     const afterPropValue = RenderUtil.replaceTextWithDataSource(
@@ -282,10 +262,7 @@ export class AutoRender {
     this.tempHolder.appendChild(rootElement)
     await RenderUtil.wait()
     const tdElements = newElement.getElementsByClassName('roy-simple-table-row')
-    const { tables, overflowPages, maxTableWidth } = this.getTablesSplit(
-      outerStyle,
-      tdElements
-    )
+    const { tables, overflowPages, maxTableWidth } = this.getTablesSplit(outerStyle, tdElements)
     tables.forEach((table, index) => {
       if (index > 0) {
         rootElement.style.top = `${this.realPageMarginTop}px`
@@ -321,20 +298,10 @@ export class AutoRender {
     } = element.propValue
     const { bodyTableWidth } = bodyDataTableElement
     if (showPrefix) {
-      await this.renderRoyText(
-        prefixTextElement,
-        zIndex,
-        element,
-        bodyTableWidth
-      )
+      await this.renderRoyText(prefixTextElement, zIndex, element, bodyTableWidth)
     }
     if (showHead) {
-      await this.renderRoySimpleTable(
-        headSimpleTableElement,
-        zIndex,
-        element,
-        bodyTableWidth
-      )
+      await this.renderRoySimpleTable(headSimpleTableElement, zIndex, element, bodyTableWidth)
     }
     let autoTable = new AutoTable({
       type: element.component,
@@ -358,12 +325,8 @@ export class AutoRender {
     newElement.innerHTML = `${tableStart}${tableHead}${tableBody}${tableEnd}`
     this.tempHolder.appendChild(newElement)
     await RenderUtil.wait()
-    const trElements = newElement.getElementsByClassName(
-      'roy-complex-table-row'
-    )
-    const thElement = newElement.getElementsByClassName(
-      'roy-complex-table-thead'
-    )[0]
+    const trElements = newElement.getElementsByClassName('roy-complex-table-row')
+    const thElement = newElement.getElementsByClassName('roy-complex-table-thead')[0]
     const { tables, overflowPages } = this.getTablesSplit(
       element.style,
       trElements,
@@ -385,10 +348,7 @@ export class AutoRender {
       if (this.curPageUsedHeight !== 0) {
         this.addElementToCurPage(newElement.outerHTML, newElement.clientHeight)
       } else {
-        this.addElementToCurPage(
-          newElement.outerHTML,
-          realTop + newElement.clientHeight
-        )
+        this.addElementToCurPage(newElement.outerHTML, realTop + newElement.clientHeight)
       }
     })
     // this.curPageUsedHeight = newElement.clientHeight + realTop
@@ -404,12 +364,7 @@ export class AutoRender {
       )
     }
     if (showSuffix) {
-      await this.renderRoyText(
-        suffixTextElement,
-        zIndex,
-        element,
-        bodyTableWidth
-      )
+      await this.renderRoyText(suffixTextElement, zIndex, element, bodyTableWidth)
     }
   }
 
@@ -460,17 +415,14 @@ export class AutoRender {
       let innerCell = head.getElementsByClassName('roy-complex-table-cell-in')
       for (let cell of innerCell) {
         headHeight =
-          headHeight < cell.children[0].clientHeight
-            ? cell.children[0].clientHeight
-            : headHeight
+          headHeight < cell.children[0].clientHeight ? cell.children[0].clientHeight : headHeight
       }
       head.children[0].style.height = `${headHeight}px`
     }
     let headHtml = head == null ? '' : head.outerHTML
     let realTop = this.curPageUsedHeight || style.top
     let maxHeight = this.maxPageUseHeight - realTop
-    let curHeight =
-      this.curPageUsedHeight !== 0 ? headHeight : style.top + headHeight
+    let curHeight = this.curPageUsedHeight !== 0 ? headHeight : style.top + headHeight
     let curHtml = ''
     let tables = []
     let overflowPages = []
@@ -479,9 +431,7 @@ export class AutoRender {
       let curTd = rows[i]
       let cellMaxHeight = 0
       if (isDataTable) {
-        let innerCell = curTd.getElementsByClassName(
-          'roy-complex-table-cell-in'
-        )
+        let innerCell = curTd.getElementsByClassName('roy-complex-table-cell-in')
         for (let cell of innerCell) {
           cellMaxHeight =
             cellMaxHeight < cell.children[0].clientHeight
@@ -492,8 +442,7 @@ export class AutoRender {
       }
       let lastHeight = curHeight
       curHeight += Math.max(curTd.clientHeight, cellMaxHeight)
-      maxTableWidth =
-        maxTableWidth > curTd.clientWidth ? maxTableWidth : curTd.clientWidth
+      maxTableWidth = maxTableWidth > curTd.clientWidth ? maxTableWidth : curTd.clientWidth
       if (curHeight > maxHeight) {
         tables.push({
           html: `${headHtml}<tbody>${curHtml}</tbody>`,
@@ -503,9 +452,7 @@ export class AutoRender {
           overflowPages.push(tables.length - 1)
         }
         curHeight =
-          this.realPageMarginTop +
-          Math.max(curTd.clientHeight, cellMaxHeight) +
-          headHeight
+          this.realPageMarginTop + Math.max(curTd.clientHeight, cellMaxHeight) + headHeight
         curHtml = curTd.outerHTML
         maxHeight = this.maxPageUseHeight
       } else {
@@ -540,9 +487,7 @@ export class AutoRender {
       this.curPageUsedHeight = elementHeight
     }
     let curPage = this.pages[this.curPageIndex]
-    this.pages[this.curPageIndex] = curPage
-      ? `${curPage}${elementHTML}`
-      : elementHTML
+    this.pages[this.curPageIndex] = curPage ? `${curPage}${elementHTML}` : elementHTML
   }
 
   createNewElementWithStyledComponent(element, zIndex = 0) {

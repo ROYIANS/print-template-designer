@@ -7,13 +7,7 @@ export const renderers = {
         return [
           <div class="roy-btn-radio-group">
             {options.map((group) => {
-              const {
-                field,
-                defaultValue,
-                isRadio = true,
-                customCallBack,
-                options: inOpt
-              } = group
+              const { field, defaultValue, isRadio = true, customCallBack, options: inOpt } = group
               if (inOpt && inOpt.length) {
                 return inOpt.map((option) => {
                   const value = option.value
