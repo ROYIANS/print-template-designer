@@ -7,7 +7,7 @@
 <template>
   <div class="RoyStar">
     <StyledStar v-bind="style">
-      <span class="iconfont roy-star-icon" :class="style.icon"></span>
+      <span :class="style.icon" class="iconfont roy-star-icon"></span>
     </StyledStar>
   </div>
 </template>

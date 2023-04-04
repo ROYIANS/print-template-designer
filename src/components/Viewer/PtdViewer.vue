@@ -9,9 +9,9 @@
     v-if="visibleIn"
     :show.sync="visibleIn"
     :title="directExport ? '打印导出' : '打印预览'"
+    class="rptd-viewer"
     height="90%"
     width="90%"
-    class="rptd-viewer"
   >
     <RoyLoading :loading="!initCompleted" :loading-text="loadingText">
       <div v-if="isBlankPage" class="roy-page-blank">
@@ -20,10 +20,10 @@
       </div>
       <div
         v-else
-        ref="viewer"
-        class="roy-viewer"
         id="roy-viewer"
+        ref="viewer"
         :class="isExportPDF ? '' : 'is-show-border'"
+        class="roy-viewer"
       ></div>
       <div ref="tempHolder" class="roy-temp-holder"></div>
       <div class="roy-viewer-right-conor">
@@ -31,7 +31,7 @@
           <i class="ri-file-ppt-line"></i>
           <span>导出PDF</span>
         </div>
-        <div class="roy-viewer-btn" v-print="printConfig">
+        <div v-print="printConfig" class="roy-viewer-btn">
           <i class="ri-printer-line"></i>
           <span>打印</span>
         </div>
@@ -185,12 +185,8 @@ export default {
           format: 'JPEG',
           x: 0,
           y: 0,
-          width: isNormalPage
-            ? this.pageConfig.pageWidth
-            : this.pageConfig.pageHeight,
-          height: isNormalPage
-            ? this.pageConfig.pageHeight
-            : this.pageConfig.pageWidth
+          width: isNormalPage ? this.pageConfig.pageWidth : this.pageConfig.pageHeight,
+          height: isNormalPage ? this.pageConfig.pageHeight : this.pageConfig.pageWidth
         })
       }
       doc.save(`${this.fileName || this.pageConfig.title || '预览'}.pdf`)
@@ -220,27 +216,33 @@ export default {
   height: 100%;
   padding: 0;
   margin: 0;
+
   .vxe-modal--body {
     background: #efefef;
   }
+
   .roy-viewer {
     height: 100%;
     width: 100%;
     background: #efefef;
     display: block;
     overflow: auto;
+
     .roy-preview-page {
       margin: 20px auto;
     }
   }
+
   .is-show-border {
     .roy-preview-page {
       border: solid 1px #000;
     }
   }
+
   .roy-temp-holder {
     z-index: -1;
   }
+
   .roy-page-blank {
     width: 100%;
     height: 100%;
@@ -249,10 +251,12 @@ export default {
     justify-content: center;
     background: #fff;
   }
+
   .roy-viewer-right-conor {
     right: 25px;
     bottom: 25px;
     position: absolute;
+
     .roy-viewer-btn {
       width: 100px;
       height: 24px;
@@ -267,19 +271,23 @@ export default {
       cursor: pointer;
       color: #fff;
       box-shadow: rgba(69, 121, 225, 0.1) 0 4px 12px;
+
       & + .roy-viewer-btn {
         margin-top: 10px;
       }
+
       &:hover {
         box-shadow: none;
       }
     }
   }
 }
+
 @page {
   .roy-viewer {
     width: 0;
     height: 0;
+
     .roy-preview-page {
       margin: 0;
       padding: 0;
@@ -287,6 +295,7 @@ export default {
     }
   }
 }
+
 ::-webkit-scrollbar {
   width: 12px;
   height: 12px;

@@ -8,18 +8,18 @@
   <RoyModal
     v-if="visible"
     :show="visible"
-    title="数据源设置"
-    height="80%"
-    width="60%"
     class="DataSourceMaintain"
-    @mousedown.stop.prevent="handleMouseDown"
+    height="80%"
+    title="数据源设置"
+    width="60%"
     @close="handleModalClose"
+    @mousedown.stop.prevent="handleMouseDown"
   >
     <vxe-grid
       ref="xGrid"
-      v-bind="gridOptions"
-      height="100%"
       :data="tableDataIn"
+      height="100%"
+      v-bind="gridOptions"
       @toolbar-button-click="handleToolbarButtonClick"
     />
   </RoyModal>

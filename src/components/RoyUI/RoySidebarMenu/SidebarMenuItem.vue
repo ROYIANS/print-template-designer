@@ -1,27 +1,23 @@
 <template>
-  <component
-    :is="item.component"
-    v-if="item.component && !isItemHidden"
-    v-bind="item.props"
-  />
+  <component :is="item.component" v-if="item.component && !isItemHidden" v-bind="item.props" />
   <div
     v-else-if="item.header && !isItemHidden"
-    class="vsm--header"
     :class="item.class"
+    class="vsm--header"
     v-bind="item.attributes"
   >
     {{ item.title }}
   </div>
   <div
     v-else-if="!isItemHidden"
-    class="vsm--item"
     :class="[{ 'vsm--item_open': show }]"
-    @mouseover="mouseOverEvent"
+    class="vsm--item"
     @mouseout="mouseOutEvent"
+    @mouseover="mouseOverEvent"
   >
     <sidebar-menu-link
-      :item="item"
       :class="itemLinkClass"
+      :item="item"
       v-bind="itemLinkAttributes"
       @click.native="clickEvent"
     >
@@ -29,55 +25,46 @@
         v-if="item.icon && !isMobileItem"
         :icon="active ? item.activeIcon || item.icon : item.icon"
       />
-      <transition name="fade-animation" :appear="isMobileItem">
-        <template
-          v-if="(isCollapsed && !isFirstLevel) || !isCollapsed || isMobileItem"
-        >
+      <transition :appear="isMobileItem" name="fade-animation">
+        <template v-if="(isCollapsed && !isFirstLevel) || !isCollapsed || isMobileItem">
           <span class="vsm--title">{{ item.title }}</span>
         </template>
       </transition>
-      <template
-        v-if="(isCollapsed && !isFirstLevel) || !isCollapsed || isMobileItem"
-      >
+      <template v-if="(isCollapsed && !isFirstLevel) || !isCollapsed || isMobileItem">
         <sidebar-menu-badge v-if="item.badge" :badge="item.badge" />
         <div
           v-if="itemHasChild"
+          :class="[{ 'vsm--arrow_open': show }, { 'vsm--arrow_slot': $slots['dropdown-icon'] }]"
           class="vsm--arrow"
-          :class="[
-            { 'vsm--arrow_open': show },
-            { 'vsm--arrow_slot': $slots['dropdown-icon'] }
-          ]"
         >
           <slot name="dropdown-icon" />
         </div>
       </template>
     </sidebar-menu-link>
     <template v-if="itemHasChild">
-      <template
-        v-if="(isCollapsed && !isFirstLevel) || !isCollapsed || isMobileItem"
-      >
+      <template v-if="(isCollapsed && !isFirstLevel) || !isCollapsed || isMobileItem">
         <transition
           :appear="isMobileItem"
           name="expand"
-          @enter="expandEnter"
           @afterEnter="expandAfterEnter"
           @beforeLeave="expandBeforeLeave"
+          @enter="expandEnter"
         >
           <div
             v-if="show"
-            class="vsm--dropdown"
             :class="isMobileItem && 'vsm--dropdown_mobile-item'"
             :style="isMobileItem && mobileItemStyle.dropdown"
+            class="vsm--dropdown"
           >
             <div class="vsm--list">
               <sidebar-menu-item
                 v-for="(subItem, index) in item.child"
                 :key="index"
+                :is-collapsed="isCollapsed"
                 :item="subItem"
                 :level="level + 1"
-                :show-child="showChild"
                 :rtl="rtl"
-                :is-collapsed="isCollapsed"
+                :show-child="showChild"
               >
                 <slot slot="dropdown-icon" name="dropdown-icon" />
               </sidebar-menu-item>
@@ -278,9 +265,7 @@ export default {
       if (item.alias) {
         const current = this.$router
           ? this.$route.fullPath
-          : window.location.pathname +
-            window.location.search +
-            window.location.hash
+          : window.location.pathname + window.location.search + window.location.hash
         if (Array.isArray(item.alias)) {
           return item.alias.some((alias) => {
             return pathToRegexp(alias).test(current)
@@ -297,13 +282,9 @@ export default {
       }
       if (this.$router) {
         const { route } = this.$router.resolve(href)
-        return exactPath
-          ? route.path === this.$route.path
-          : this.matchExactRoute(href)
+        return exactPath ? route.path === this.$route.path : this.matchExactRoute(href)
       } else {
-        return exactPath
-          ? encodeURI(href) === window.location.pathname
-          : this.matchExactRoute(href)
+        return exactPath ? encodeURI(href) === window.location.pathname : this.matchExactRoute(href)
       }
     },
     matchExactRoute(href) {
@@ -316,9 +297,7 @@ export default {
       } else {
         return (
           encodeURI(href) ===
-          window.location.pathname +
-            window.location.search +
-            window.location.hash
+          window.location.pathname + window.location.search + window.location.hash
         )
       }
     },
@@ -370,10 +349,7 @@ export default {
       if (!this.itemHasChild || this.showChild) {
         return
       }
-      if (
-        (this.showOneChild && this.active && !this.show) ||
-        (this.active && !this.show)
-      ) {
+      if ((this.showOneChild && this.active && !this.show) || (this.active && !this.show)) {
         this.show = true
       } else if (this.showOneChild && !this.active && this.show) {
         this.show = false

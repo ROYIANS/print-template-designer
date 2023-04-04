@@ -84,14 +84,12 @@ export function getStyle(style, filter = []) {
 export function getComponentRotatedStyle(style) {
   style = { ...style }
   if (style.rotate !== 0) {
-    const newWidth =
-      style.width * cos(style.rotate) + style.height * sin(style.rotate)
+    const newWidth = style.width * cos(style.rotate) + style.height * sin(style.rotate)
     const diffX = (style.width - newWidth) / 2 // 旋转后范围变小是正值，变大是负值
     style.left += diffX
     style.right = style.left + newWidth
 
-    const newHeight =
-      style.height * cos(style.rotate) + style.width * sin(style.rotate)
+    const newHeight = style.height * cos(style.rotate) + style.width * sin(style.rotate)
     const diffY = (newHeight - style.height) / 2 // 始终是正
     style.top -= diffY
     style.bottom = style.top + newHeight
@@ -135,12 +133,8 @@ export function createGroupStyle(groupComponent) {
         component.groupStyle = getStyle(style)
       }
 
-      component.groupStyle.left = toPercent(
-        (style.left - parentStyle.left) / parentStyle.width
-      )
-      component.groupStyle.top = toPercent(
-        (style.top - parentStyle.top) / parentStyle.height
-      )
+      component.groupStyle.left = toPercent((style.left - parentStyle.left) / parentStyle.width)
+      component.groupStyle.top = toPercent((style.top - parentStyle.top) / parentStyle.height)
       component.groupStyle.width = toPercent(style.width / parentStyle.width)
       component.groupStyle.height = toPercent(style.height / parentStyle.height)
     }

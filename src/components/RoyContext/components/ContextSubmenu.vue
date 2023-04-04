@@ -1,9 +1,5 @@
 <template>
-  <li
-    :class="classname"
-    @mouseenter="handleMouseenter"
-    @mouseleave="handleMouseleave"
-  >
+  <li :class="classname" @mouseenter="handleMouseenter" @mouseleave="handleMouseleave">
     <span class="v-contextmenu-submenu__title">
       <slot name="title">{{ title }}</slot>
 

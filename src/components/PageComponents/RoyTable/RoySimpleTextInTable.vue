@@ -6,29 +6,29 @@
 !-->
 <template>
   <div
-    style="width: 100%; height: 100%"
     class="RoySimpleText"
-    @dblclick="setEdit"
+    style="width: 100%; height: 100%"
     @click="activeCell"
     @contextmenu="setEdit"
-    @drop="handleDrop"
+    @dblclick="setEdit"
     @dragenter="handleDragEnter"
     @dragleave="handleDragLeave"
+    @drop="handleDrop"
   >
     <StyledSimpleText
       ref="editArea"
-      class="edit-area"
-      v-bind="style"
-      :contenteditable="canEdit"
       :class="{
         'can-edit': canEdit,
         'is-drag-over': dragOver
       }"
+      :contenteditable="canEdit"
+      class="edit-area"
       tabindex="0"
-      @paste="clearStyle"
-      @mousedown="handleMouseDown"
-      @keydown="handleKeyDown"
+      v-bind="style"
       @blur="handleBlur"
+      @keydown="handleKeyDown"
+      @mousedown="handleMouseDown"
+      @paste="clearStyle"
     >
       <div class="roy-simple-text-inner" v-html="propValue"></div>
     </StyledSimpleText>
@@ -201,10 +201,12 @@ export default {
     outline: none;
     word-break: break-all;
   }
+
   .is-drag-over {
     border: 2px solid var(--roy-color-warning);
     background: #cccccc;
   }
+
   .can-edit {
     height: 100%;
     cursor: text;

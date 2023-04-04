@@ -17,29 +17,14 @@
         <i :class="getComponent(index).icon" style="padding-right: 5px"></i>
         <span class="roy-page-toc__label">{{ getComponent(index).label }}</span>
         <div class="roy-page-toc__buttons">
-          <span
-            class="ri-arrow-up-line"
-            @click="upComponent(transformIndex(index))"
-          ></span>
-          <span
-            class="ri-arrow-down-line"
-            @click="downComponent(transformIndex(index))"
-          ></span>
-          <span
-            class="ri-delete-bin-4-line"
-            @click="deleteComponent(transformIndex(index))"
-          ></span>
+          <span class="ri-arrow-up-line" @click="upComponent(transformIndex(index))"></span>
+          <span class="ri-arrow-down-line" @click="downComponent(transformIndex(index))"></span>
+          <span class="ri-delete-bin-4-line" @click="deleteComponent(transformIndex(index))"></span>
         </div>
       </div>
     </div>
-    <div
-      v-else
-      class="roy-page-toc__empty animate__animated animate__headShake"
-    >
-      <i
-        class="ri-door-lock-box-line animate__backInUp"
-        style="color: var(--roy-color-warning)"
-      />
+    <div v-else class="roy-page-toc__empty animate__animated animate__headShake">
+      <i class="ri-door-lock-box-line animate__backInUp" style="color: var(--roy-color-warning)" />
       <div>当前没有组件，您可以通过拖拽添加组件</div>
     </div>
   </roy-main>
@@ -126,6 +111,7 @@ export default {
     width: 100%;
     display: flex;
     flex-flow: row wrap;
+
     i {
       font-size: 28px;
       width: 100%;

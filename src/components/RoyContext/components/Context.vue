@@ -80,10 +80,7 @@ export default {
     delete window.$$VContextmenu[this.$contextmenuId]
 
     this.references.forEach((ref) => {
-      ref.el.removeEventListener(
-        this.eventType,
-        this.handleReferenceContextmenu
-      )
+      ref.el.removeEventListener(this.eventType, this.handleReferenceContextmenu)
     })
 
     document.body.removeEventListener('click', this.handleBodyClick)
@@ -103,9 +100,7 @@ export default {
         return
       }
 
-      const reference = this.references.find((ref) =>
-        ref.el.contains(event.target)
-      )
+      const reference = this.references.find((ref) => ref.el.contains(event.target))
 
       this.$emit('contextmenu', reference ? reference.vnode : null)
 
@@ -142,8 +137,7 @@ export default {
     handleBodyClick(event) {
       const notOutside =
         this.$el.contains(event.target) ||
-        (this.isClick &&
-          this.references.some((ref) => ref.el.contains(event.target)))
+        (this.isClick && this.references.some((ref) => ref.el.contains(event.target)))
 
       if (!notOutside) {
         this.visible = false
@@ -297,6 +291,7 @@ export default {
 .roy-context--danger {
   color: #f54536 !important;
 }
+
 .roy-context--danger:hover {
   background: #f54536;
   color: #fff !important;

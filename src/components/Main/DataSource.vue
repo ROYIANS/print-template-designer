@@ -7,22 +7,22 @@
 <template>
   <roy-main class="DataSource">
     <vxe-button
-      status="primary"
-      size="mini"
-      type="text"
       icon="ri-database-line"
+      size="mini"
+      status="primary"
       style="float: right; padding: 5px 10px"
+      type="text"
       @click="showDataSourceMaintainer = true"
     >
       编辑数据源
     </vxe-button>
     <div class="roy-datasource-node-list" @dragstart="handleDragStart">
       <div
-        class="roy-datasource-node"
         v-for="(item, index) in dataSourceIn"
-        :data-index="index"
         :key="index"
+        :data-index="index"
         :title="item.title"
+        class="roy-datasource-node"
         draggable="true"
       >
         <div class="roy-datasource-node--title">
@@ -34,10 +34,7 @@
         <div class="roy-datasource-node--content">{{ item.field }}</div>
       </div>
     </div>
-    <DataSourceMaintain
-      v-if="showDataSourceMaintainer"
-      :visible.sync="showDataSourceMaintainer"
-    />
+    <DataSourceMaintain v-if="showDataSourceMaintainer" :visible.sync="showDataSourceMaintainer" />
   </roy-main>
 </template>
 
@@ -91,9 +88,11 @@ export default {
 .DataSource {
   height: 100%;
   padding: 2px !important;
+
   .roy-datasource-node-list {
     width: 100%;
   }
+
   .roy-datasource-node {
     box-sizing: border-box;
     display: inline-block;
@@ -105,6 +104,7 @@ export default {
     user-select: none;
     cursor: move;
     width: 100%;
+
     .roy-datasource-node--title {
       text-align: center;
       font-size: 12px;
@@ -118,6 +118,7 @@ export default {
       color: var(--roy-bg-color-page);
       border-radius: 4px 4px 0 0;
     }
+
     .roy-datasource-node--text {
       margin: auto;
       display: block;
@@ -125,6 +126,7 @@ export default {
       text-overflow: ellipsis;
       overflow: hidden;
     }
+
     .roy-datasource-node--content {
       box-sizing: border-box;
       width: 100%;
@@ -140,6 +142,7 @@ export default {
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+
     .roy-datasource-node--tag {
       font-size: 10px;
       position: absolute;

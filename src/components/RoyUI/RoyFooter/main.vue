@@ -1,5 +1,5 @@
 <template>
-  <footer class="roy-footer" :style="{ height }">
+  <footer :style="{ height }" class="roy-footer">
     <slot></slot>
   </footer>
 </template>

@@ -8,30 +8,26 @@
 <!-- * ╩╚═╚═╝ ╩ ╩╩ ╩╝╚╝╚═╝-->
 <!-- */-->
 <template>
-  <div
-    style="width: 100%; height: 100%"
-    @click="activeCell"
-    @dblclick="onDblClick"
-  >
+  <div style="width: 100%; height: 100%" @click="activeCell" @dblclick="onDblClick">
     <RoyModal
       v-if="showEditor"
       :show.sync="showEditor"
-      title="长文本编辑"
       height="70%"
+      title="长文本编辑"
       width="60%"
       @close="handleTextClosed"
     >
       <div class="roy-wang-editor" @mousedown="handleMouseDown">
         <WangToolbar
-          style="border-bottom: 1px solid #ccc"
-          :editor="wangEditor"
           :defaultConfig="toolbarConfig"
+          :editor="wangEditor"
+          style="border-bottom: 1px solid #ccc"
         />
         <WangEditor
           v-model="html"
-          style="height: 300px"
           :defaultConfig="editorConfig"
           :mode="mode"
+          style="height: 300px"
           @onCreated="onCreated"
         />
       </div>
@@ -47,11 +43,7 @@ import { StyledText } from '@/components/PageComponents/style'
 import RoyModal from '@/components/RoyModal/RoyModal'
 import WangToolbar from '@/components/PageComponents/WangEditorVue/WangToolbar'
 import WangEditor from '@/components/PageComponents/WangEditorVue/WangEditor'
-import {
-  toolBarConfig,
-  editorConfig,
-  mode
-} from '@/components/config/editorConfig'
+import { toolBarConfig, editorConfig, mode } from '@/components/config/editorConfig'
 import commonMixin from '@/mixin/commonMixin'
 import { mapState } from 'vuex'
 
@@ -121,7 +113,9 @@ export default {
   watch: {},
   beforeDestroy() {
     const editor = this.wangEditor
-    if (editor == null) return
+    if (editor == null) {
+      return
+    }
     editor.destroy() // 组件销毁时，及时销毁编辑器
   }
 }

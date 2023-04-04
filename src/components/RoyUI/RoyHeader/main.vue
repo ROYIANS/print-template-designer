@@ -1,5 +1,5 @@
 <template>
-  <header class="roy-header" :style="{ height }">
+  <header :style="{ height }" class="roy-header">
     <slot></slot>
   </header>
 </template>

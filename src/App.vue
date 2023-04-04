@@ -1,17 +1,13 @@
 <template>
   <div style="height: 100%">
-    <PtdDesigner
-      ref="designer"
-      :pre-data-source="preDataSource"
-      :pre-data-set="preDataSet"
-    >
+    <PtdDesigner ref="designer" :pre-data-set="preDataSet" :pre-data-source="preDataSource">
       <template v-slot:roy-designer-header-slot>
         <div class="head-slot">
           <i
             v-for="(tool, index) in headIconConfig"
-            :title="tool.title"
             :key="index"
             :class="tool.icon"
+            :title="tool.title"
             class="roy-header-icon"
             @click="tool.event"
           ></i>
@@ -21,8 +17,8 @@
         <div
           v-for="(tool, index) in toolbarSlotConfig"
           :key="index"
-          class="toolbar-slot-item"
           :title="tool.name"
+          class="toolbar-slot-item"
           @click="tool.event"
         >
           <i :class="tool.icon"></i>
@@ -31,21 +27,15 @@
     </PtdDesigner>
     <PtdViewer
       v-if="viewerVisible"
-      :visible.sync="viewerVisible"
       :component-data="componentData"
-      :page-config="pageConfig"
       :data-set="dataSet"
       :data-source="dataSource"
+      :page-config="pageConfig"
+      :visible.sync="viewerVisible"
     />
-    <TemplateViews
-      v-if="templateVisible"
-      :visible.sync="templateVisible"
-      @load="loadTemp"
-    />
+    <TemplateViews v-if="templateVisible" :visible.sync="templateVisible" @load="loadTemp" />
     <div class="fork-me">
-      <a
-        href="https://github.com/ROYIANS/print-template-designer"
-        target="_blank"
+      <a href="https://github.com/ROYIANS/print-template-designer" target="_blank"
         >Give me a Star!
       </a>
     </div>
@@ -211,6 +201,7 @@ body,
     text-decoration: none;
     color: #fff;
   }
+
   width: 250px;
   height: 32px;
   line-height: 32px;

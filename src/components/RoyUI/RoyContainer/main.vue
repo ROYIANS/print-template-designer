@@ -5,7 +5,7 @@
 * @date 2023/4/3 10:22
 !-->
 <template>
-  <section class="roy-container" :class="{ 'is-vertical': isVertical }">
+  <section :class="{ 'is-vertical': isVertical }" class="roy-container">
     <slot></slot>
   </section>
 </template>

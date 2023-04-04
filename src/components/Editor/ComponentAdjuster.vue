@@ -6,8 +6,8 @@
 !-->
 <template>
   <div
-    :style="adjusterStyle"
     ref="adjuster"
+    :style="adjusterStyle"
     class="roy-component-adjuster"
     @click="selectCurComponent"
     @mousedown="handleMouseDownOnShape"
@@ -17,18 +17,15 @@
       class="ri-checkbox-blank-circle-line roy-component-adjuster__rotate"
       @mousedown="handleRotate"
     ></span>
-    <span
-      v-show="element.isLock"
-      class="ri-lock-fill roy-component-adjuster__lock"
-    ></span>
+    <span v-show="element.isLock" class="ri-lock-fill roy-component-adjuster__lock"></span>
     <span
       v-show="element.bindValue"
       class="ri-link-unlink-m roy-component-adjuster__bind"
       @click="unlinkElement"
     ></span>
     <span
-      class="roy-component-adjuster__move"
       :class="element.icon"
+      class="roy-component-adjuster__move"
       @mousedown="handleMouseMoveItem"
     ></span>
     <div
@@ -118,9 +115,7 @@ export default {
       curComponent: (state) => state.printTemplateModule.curComponent
     }),
     pointList() {
-      const isTable = ['RoySimpleTable', 'RoyComplexTable'].includes(
-        this.element.component
-      )
+      const isTable = ['RoySimpleTable', 'RoyComplexTable'].includes(this.element.component)
       if (isTable) {
         return []
       }
@@ -133,15 +128,11 @@ export default {
       return this.active && !this.element.isLock
     },
     showRotate() {
-      return !['RoySimpleTable', 'RoyComplexTable'].includes(
-        this.element?.component || ''
-      )
+      return !['RoySimpleTable', 'RoyComplexTable'].includes(this.element?.component || '')
     },
     adjusterStyle() {
       return {
-        border: this.isActive
-          ? '0.5px dashed var(--roy-text-color-secondary)'
-          : undefined
+        border: this.isActive ? '0.5px dashed var(--roy-text-color-secondary)' : undefined
       }
     }
   },
@@ -228,8 +219,7 @@ export default {
       const centerY = rect.top + rect.height / 2
 
       // 旋转前的角度
-      const rotateDegreeBefore =
-        Math.atan2(startY - centerY, startX - centerX) / (Math.PI / 180)
+      const rotateDegreeBefore = Math.atan2(startY - centerY, startX - centerX) / (Math.PI / 180)
 
       // 如果元素没有移动，则不保存快照
       let hasMove = false
@@ -238,8 +228,7 @@ export default {
         const curX = moveEvent.clientX
         const curY = moveEvent.clientY
         // 旋转后的角度
-        const rotateDegreeAfter =
-          Math.atan2(curY - centerY, curX - centerX) / (Math.PI / 180)
+        const rotateDegreeAfter = Math.atan2(curY - centerY, curX - centerX) / (Math.PI / 180)
         // 获取旋转的角度值
         pos.rotate = startRotate + rotateDegreeAfter - rotateDegreeBefore
         // 修改当前组件样式
@@ -427,13 +416,7 @@ export default {
           // 后面两个参数代表鼠标移动方向
           // curY - startY > 0 true 表示向下移动 false 表示向上移动
           // curX - startX > 0 true 表示向右移动 false 表示向左移动
-          eventBus.$emit(
-            'move',
-            curY - startY > 0,
-            curX - startX > 0,
-            curX,
-            curY
-          )
+          eventBus.$emit('move', curY - startY > 0, curX - startX > 0, curX, curY)
         })
       }
 
@@ -511,9 +494,11 @@ export default {
     cursor: move;
     background: var(--roy-color-primary-light-7);
     color: #aaaaaa;
+
     &:hover {
       color: #212121;
     }
+
     &:active {
       color: #212121;
       background: var(--roy-color-primary-light-3);

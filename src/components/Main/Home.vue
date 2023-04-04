@@ -5,11 +5,7 @@
 * @date 2022/9/29 9:23
 !-->
 <template>
-  <roy-container
-    id="roy-print-template-designer"
-    class="roy-designer-container"
-    theme="day"
-  >
+  <roy-container id="roy-print-template-designer" class="roy-designer-container" theme="day">
     <roy-header class="roy-designer-header" height="40px">
       <div id="tttt" class="roy-designer-header__text">
         <i class="ri-pen-nib-line"></i>
@@ -29,14 +25,14 @@
           ></i>
           <i
             v-if="configIn.toolbarConfig.showNightMode && isNightMode"
-            title="切换到日间模式"
             class="ri-haze-fill"
+            title="切换到日间模式"
             @click="dayNightChange"
           ></i>
           <i
             v-if="configIn.toolbarConfig.showNightMode && !isNightMode"
-            title="切换到夜间模式"
             class="ri-moon-foggy-fill"
+            title="切换到夜间模式"
             @click="dayNightChange"
           ></i>
         </div>
@@ -174,22 +170,13 @@ export default {
       this.initNightMode()
       this.configIn = Object.assign({}, this.configIn, this.config)
       if (this.preComponentData) {
-        this.$store.commit(
-          'printTemplateModule/setComponentData',
-          this.preComponentData
-        )
+        this.$store.commit('printTemplateModule/setComponentData', this.preComponentData)
       }
       if (this.prePageConfig) {
-        this.$store.commit(
-          'printTemplateModule/setPageConfig',
-          this.prePageConfig
-        )
+        this.$store.commit('printTemplateModule/setPageConfig', this.prePageConfig)
       }
       if (this.preDataSource) {
-        this.$store.commit(
-          'printTemplateModule/setDataSource',
-          this.preDataSource
-        )
+        this.$store.commit('printTemplateModule/setDataSource', this.preDataSource)
       }
       if (this.preDataSet) {
         this.$store.commit('printTemplateModule/setDataSet', this.preDataSet)
@@ -343,24 +330,22 @@ export default {
         let reader = new FileReader()
         reader.readAsText(file, 'UTF-8')
         reader.onload = (e) => {
-          this.$XModal
-            .confirm('确定要读取该文件？将覆盖当前编辑内容！')
-            .then((type) => {
-              if (type === 'confirm') {
-                const result = e.target.result
-                try {
-                  const resultParsed = JSON.parse(`${result}`)
-                  console.log(resultParsed.componentData)
-                  if (!resultParsed.pageConfig || !resultParsed.componentData) {
-                    toast('文件格式错误，转换内容失败', 'warning')
-                    return
-                  }
-                  this.loadTemplateData(resultParsed)
-                } catch (e) {
-                  toast('文件损坏，转换内容失败', 'warning')
+          this.$XModal.confirm('确定要读取该文件？将覆盖当前编辑内容！').then((type) => {
+            if (type === 'confirm') {
+              const result = e.target.result
+              try {
+                const resultParsed = JSON.parse(`${result}`)
+                console.log(resultParsed.componentData)
+                if (!resultParsed.pageConfig || !resultParsed.componentData) {
+                  toast('文件格式错误，转换内容失败', 'warning')
+                  return
                 }
+                this.loadTemplateData(resultParsed)
+              } catch (e) {
+                toast('文件损坏，转换内容失败', 'warning')
               }
-            })
+            }
+          })
         }
       } catch (e) {
         toast(`读取文件错误：${e.message}`, 'warning')
@@ -388,18 +373,9 @@ export default {
       toast('导出成功！', 'success')
     },
     loadTemplateData(resultParsed) {
-      this.$store.commit(
-        'printTemplateModule/setComponentData',
-        resultParsed.componentData
-      )
-      this.$store.commit(
-        'printTemplateModule/setPageConfig',
-        resultParsed.pageConfig
-      )
-      this.$store.commit(
-        'printTemplateModule/setDataSource',
-        resultParsed.dataSource
-      )
+      this.$store.commit('printTemplateModule/setComponentData', resultParsed.componentData)
+      this.$store.commit('printTemplateModule/setPageConfig', resultParsed.pageConfig)
+      this.$store.commit('printTemplateModule/setDataSource', resultParsed.dataSource)
     },
     getTemplateData() {
       return {

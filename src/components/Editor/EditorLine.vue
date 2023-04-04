@@ -3,12 +3,10 @@
     <div
       v-for="line in lines"
       v-show="lineStatus[line] || false"
-      :key="line"
-      class="roy-mark-line__line"
       :id="`rot-editor-line-${line}`"
-      :class="
-        line.includes('x') ? 'roy-mark-line--xline' : 'roy-mark-line--yline'
-      "
+      :key="line"
+      :class="line.includes('x') ? 'roy-mark-line--xline' : 'roy-mark-line--yline'"
+      class="roy-mark-line__line"
     ></div>
   </div>
 </template>
@@ -59,15 +57,15 @@ export default {
 
     showLineMove(isDownward, isRightward) {
       const components = this.componentData || []
-      const curComponentStyle = getComponentRotatedStyle(
-        this.curComponent?.style || {}
-      )
+      const curComponentStyle = getComponentRotatedStyle(this.curComponent?.style || {})
       const curComponentHalfWidth = curComponentStyle.width / 2
       const curComponentHalfHeight = curComponentStyle.height / 2
 
       this.hideLine()
       components.forEach((component) => {
-        if (component === this.curComponent) return
+        if (component === this.curComponent) {
+          return
+        }
         const componentStyle = getComponentRotatedStyle(component.style)
         const { top, left, bottom, right } = componentStyle
         const componentHalfWidth = componentStyle.width / 2
@@ -163,17 +161,15 @@ export default {
         Object.keys(conditions).forEach((key) => {
           // 遍历符合的条件并处理
           conditions[key].forEach((condition) => {
-            if (!condition.isNearly) return
+            if (!condition.isNearly) {
+              return
+            }
             // 修改当前组件位移
             this.$store.commit('printTemplateModule/setShapeSingleStyle', {
               key,
               value:
                 rotate !== 0
-                  ? this.translatecurComponentShift(
-                      key,
-                      condition,
-                      curComponentStyle
-                    )
+                  ? this.translatecurComponentShift(key, condition, curComponentStyle)
                   : condition.dragShift
             })
 
@@ -193,14 +189,10 @@ export default {
     translatecurComponentShift(key, condition, curComponentStyle) {
       const { width, height } = this.curComponent.style
       if (key === 'top') {
-        return Math.round(
-          condition.dragShift - (height - curComponentStyle.height) / 2
-        )
+        return Math.round(condition.dragShift - (height - curComponentStyle.height) / 2)
       }
 
-      return Math.round(
-        condition.dragShift - (width - curComponentStyle.width) / 2
-      )
+      return Math.round(condition.dragShift - (width - curComponentStyle.width) / 2)
     },
 
     chooseTheTureLine(needToShow, isDownward, isRightward) {

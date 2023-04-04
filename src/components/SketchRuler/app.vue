@@ -1,27 +1,22 @@
 <template>
   <div class="wrapper">
     <SketchRule
-      :lang="lang"
-      :thick="thick"
-      :scale="scale"
-      :width="582"
+      :cornerActive="true"
       :height="482"
+      :horLineArr="lines.h"
+      :lang="lang"
+      :scale="scale"
+      :shadow="shadow"
       :startX="startX"
       :startY="startY"
-      :shadow="shadow"
-      :horLineArr="lines.h"
+      :thick="thick"
       :verLineArr="lines.v"
-      :cornerActive="true"
+      :width="582"
       @handleLine="handleLine"
       @onCornerClick="handleCornerClick"
     >
     </SketchRule>
-    <div
-      ref="screensRef"
-      id="screens"
-      @wheel="handleWheel"
-      @scroll="handleScroll"
-    >
+    <div id="screens" ref="screensRef" @scroll="handleScroll" @wheel="handleWheel">
       <div ref="containerRef" class="screen-container">
         <div id="canvas" :style="canvasStyle" />
       </div>
@@ -31,6 +26,7 @@
 <script>
 import Vue from 'vue'
 import SketchRule from './sketchRuler.vue'
+
 const rectWidth = 160
 const rectHeight = 200
 export default Vue.extend({
@@ -77,18 +73,12 @@ export default Vue.extend({
       return
     },
     handleScroll() {
-      const screensRect = document
-        .querySelector('#screens')
-        .getBoundingClientRect()
-      const canvasRect = document
-        .querySelector('#canvas')
-        .getBoundingClientRect()
+      const screensRect = document.querySelector('#screens').getBoundingClientRect()
+      const canvasRect = document.querySelector('#canvas').getBoundingClientRect()
 
       // 标尺开始的刻度
-      const startX =
-        (screensRect.left + this.thick - canvasRect.left) / this.scale
-      const startY =
-        (screensRect.top + this.thick - canvasRect.top) / this.scale
+      const startX = (screensRect.left + this.thick - canvasRect.left) / this.scale
+      const startY = (screensRect.top + this.thick - canvasRect.top) / this.scale
 
       this.startX = startX
       this.startY = startY
@@ -97,9 +87,7 @@ export default Vue.extend({
     handleWheel(e) {
       if (e.ctrlKey || e.metaKey) {
         e.preventDefault()
-        const nextScale = parseFloat(
-          Math.max(0.2, this.scale - e.deltaY / 500).toFixed(2)
-        )
+        const nextScale = parseFloat(Math.max(0.2, this.scale - e.deltaY / 500).toFixed(2))
         this.scale = nextScale
       }
       this.$nextTick(() => {
@@ -167,6 +155,7 @@ body * {
   left: 200px;
   bottom: 100%;
 }
+
 .button-en {
   position: absolute;
   left: 230px;

@@ -98,20 +98,14 @@ export default {
     },
     clickPaletteMenu() {
       this.$refs.menuItem.forEach((item) => {
-        if (
-          item.$vnode.key === 'palette' &&
-          this.curActiveComponentCode !== 'palette'
-        ) {
+        if (item.$vnode.key === 'palette' && this.curActiveComponentCode !== 'palette') {
           item.$el.click()
         }
       })
     },
     clickGlobalMenu() {
       this.$refs.menuItem.forEach((item) => {
-        if (
-          item.$vnode.key === 'setting' &&
-          this.curActiveComponentCode !== 'setting'
-        ) {
+        if (item.$vnode.key === 'setting' && this.curActiveComponentCode !== 'setting') {
           item.$el.click()
         }
       })

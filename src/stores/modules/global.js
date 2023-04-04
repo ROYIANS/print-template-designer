@@ -102,14 +102,8 @@ export const mutations = {
   setPageConfig(state, pageConfig) {
     state.pageConfig = pageConfig
     store.commit('printTemplateModule/rulerThings/setRect', {
-      w:
-        pageConfig.pageDirection === 'p'
-          ? pageConfig.pageWidth
-          : pageConfig.pageHeight,
-      h:
-        pageConfig.pageDirection === 'p'
-          ? pageConfig.pageHeight
-          : pageConfig.pageWidth
+      w: pageConfig.pageDirection === 'p' ? pageConfig.pageWidth : pageConfig.pageHeight,
+      h: pageConfig.pageDirection === 'p' ? pageConfig.pageHeight : pageConfig.pageWidth
     })
     store.commit('printTemplateModule/rulerThings/setReDrawRuler')
   },

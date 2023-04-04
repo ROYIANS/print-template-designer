@@ -1,10 +1,20 @@
 // 标尺中每小格代表的宽度(根据scale的不同实时变化)
 const getGridSize = (scale) => {
-  if (scale <= 0.25) return 40
-  if (scale <= 0.5) return 20
-  if (scale <= 1) return 10
-  if (scale <= 2) return 5
-  if (scale <= 4) return 2
+  if (scale <= 0.25) {
+    return 40
+  }
+  if (scale <= 0.5) {
+    return 20
+  }
+  if (scale <= 1) {
+    return 10
+  }
+  if (scale <= 2) {
+    return 5
+  }
+  if (scale <= 4) {
+    return 2
+  }
   return 1
 }
 
@@ -12,8 +22,7 @@ const FONT_SCALE = 0.83 // 10 / 12
 
 export const drawHorizontalRuler = (ctx, start, shadow, options) => {
   const { scale, width, height, canvasConfigs } = options
-  const { bgColor, fontColor, shadowColor, ratio, longfgColor, shortfgColor } =
-    canvasConfigs
+  const { bgColor, fontColor, shadowColor, ratio, longfgColor, shortfgColor } = canvasConfigs
 
   // 缩放ctx, 以简化计算
   ctx.scale(ratio, ratio)
@@ -51,11 +60,7 @@ export const drawHorizontalRuler = (ctx, start, shadow, options) => {
 
   // 长间隔和短间隔需要两次绘制，才可以完成不同颜色的设置；分开放到两个for循环是为了节省性能，因为如果放到一个for循环的话，每次循环都会重新绘制操作dom
   // 绘制长间隔和文字
-  for (
-    let value = startValue_10, count = 0;
-    value < endValue;
-    value += gridSize_10, count++
-  ) {
+  for (let value = startValue_10, count = 0; value < endValue; value += gridSize_10, count++) {
     const x = offsetX_10 + count * gridPixel_10 + 0.5 // prevent canvas 1px line blurry
     ctx.moveTo(x, 0)
     ctx.save()
@@ -71,11 +76,7 @@ export const drawHorizontalRuler = (ctx, start, shadow, options) => {
   // 绘制短间隔
   ctx.beginPath()
   ctx.strokeStyle = shortfgColor
-  for (
-    let value = startValue, count = 0;
-    value < endValue;
-    value += gridSize, count++
-  ) {
+  for (let value = startValue, count = 0; value < endValue; value += gridSize, count++) {
     const x = offsetX + count * gridPixel + 0.5 // prevent canvas 1px line blurry
     ctx.moveTo(x, 0)
     if (value % gridSize_10 !== 0) {
@@ -91,8 +92,7 @@ export const drawHorizontalRuler = (ctx, start, shadow, options) => {
 
 export const drawVerticalRuler = (ctx, start, shadow, options) => {
   const { scale, width, height, canvasConfigs } = options
-  const { bgColor, fontColor, shadowColor, ratio, longfgColor, shortfgColor } =
-    canvasConfigs
+  const { bgColor, fontColor, shadowColor, ratio, longfgColor, shortfgColor } = canvasConfigs
 
   // 缩放ctx, 以简化计算
   ctx.scale(ratio, ratio)
@@ -130,11 +130,7 @@ export const drawVerticalRuler = (ctx, start, shadow, options) => {
   ctx.fillStyle = fontColor
   ctx.strokeStyle = longfgColor // 设置长间隔的颜色
 
-  for (
-    let value = startValue_10, count = 0;
-    value < endValue;
-    value += gridSize_10, count++
-  ) {
+  for (let value = startValue_10, count = 0; value < endValue; value += gridSize_10, count++) {
     const y = offsetY_10 + count * gridPixel_10 + 0.5
     ctx.moveTo(0, y)
     ctx.save() // 这里先保存一下状态
@@ -152,11 +148,7 @@ export const drawVerticalRuler = (ctx, start, shadow, options) => {
   ctx.beginPath() // 开始绘制短间隔
   ctx.strokeStyle = shortfgColor
 
-  for (
-    let value = startValue, count = 0;
-    value < endValue;
-    value += gridSize, count++
-  ) {
+  for (let value = startValue, count = 0; value < endValue; value += gridSize, count++) {
     const y = offsetY + count * gridPixel + 0.5
     ctx.moveTo(0, y)
     if (value % gridSize_10 !== 0) {

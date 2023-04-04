@@ -1,8 +1,8 @@
 <template>
   <component
     :is="badge.element ? badge.element : 'span'"
-    class="vsm--badge"
     :class="badge.class"
+    class="vsm--badge"
     v-bind="badge.attributes"
   >
     {{ badge.text }}

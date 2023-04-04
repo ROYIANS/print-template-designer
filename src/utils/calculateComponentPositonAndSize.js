@@ -23,20 +23,10 @@ const funcs = {
   l: calculateLeft
 }
 
-function calculateLeftTop(
-  style,
-  curPosition,
-  proportion,
-  needLockProportion,
-  pointInfo
-) {
+function calculateLeftTop(style, curPosition, proportion, needLockProportion, pointInfo) {
   const { symmetricPoint } = pointInfo
   let newCenterPoint = getCenterPoint(curPosition, symmetricPoint)
-  let newTopLeftPoint = calculateRotatedPointCoordinate(
-    curPosition,
-    newCenterPoint,
-    -style.rotate
-  )
+  let newTopLeftPoint = calculateRotatedPointCoordinate(curPosition, newCenterPoint, -style.rotate)
   let newBottomRightPoint = calculateRotatedPointCoordinate(
     symmetricPoint,
     newCenterPoint,
@@ -87,20 +77,10 @@ function calculateLeftTop(
   }
 }
 
-function calculateRightTop(
-  style,
-  curPosition,
-  proportion,
-  needLockProportion,
-  pointInfo
-) {
+function calculateRightTop(style, curPosition, proportion, needLockProportion, pointInfo) {
   const { symmetricPoint } = pointInfo
   let newCenterPoint = getCenterPoint(curPosition, symmetricPoint)
-  let newTopRightPoint = calculateRotatedPointCoordinate(
-    curPosition,
-    newCenterPoint,
-    -style.rotate
-  )
+  let newTopRightPoint = calculateRotatedPointCoordinate(curPosition, newCenterPoint, -style.rotate)
   let newBottomLeftPoint = calculateRotatedPointCoordinate(
     symmetricPoint,
     newCenterPoint,
@@ -148,13 +128,7 @@ function calculateRightTop(
   }
 }
 
-function calculateRightBottom(
-  style,
-  curPosition,
-  proportion,
-  needLockProportion,
-  pointInfo
-) {
+function calculateRightBottom(style, curPosition, proportion, needLockProportion, pointInfo) {
   const { symmetricPoint } = pointInfo
   let newCenterPoint = getCenterPoint(curPosition, symmetricPoint)
   let newTopLeftPoint = calculateRotatedPointCoordinate(
@@ -186,11 +160,7 @@ function calculateRightBottom(
       style.rotate
     )
     newCenterPoint = getCenterPoint(rotatedBottomRightPoint, symmetricPoint)
-    newTopLeftPoint = calculateRotatedPointCoordinate(
-      symmetricPoint,
-      newCenterPoint,
-      -style.rotate
-    )
+    newTopLeftPoint = calculateRotatedPointCoordinate(symmetricPoint, newCenterPoint, -style.rotate)
     newBottomRightPoint = calculateRotatedPointCoordinate(
       rotatedBottomRightPoint,
       newCenterPoint,
@@ -209,13 +179,7 @@ function calculateRightBottom(
   }
 }
 
-function calculateLeftBottom(
-  style,
-  curPosition,
-  proportion,
-  needLockProportion,
-  pointInfo
-) {
+function calculateLeftBottom(style, curPosition, proportion, needLockProportion, pointInfo) {
   const { symmetricPoint } = pointInfo
   let newCenterPoint = getCenterPoint(curPosition, symmetricPoint)
   let newTopRightPoint = calculateRotatedPointCoordinate(
@@ -270,21 +234,11 @@ function calculateLeftBottom(
   }
 }
 
-function calculateTop(
-  style,
-  curPosition,
-  proportion,
-  needLockProportion,
-  pointInfo
-) {
+function calculateTop(style, curPosition, proportion, needLockProportion, pointInfo) {
   const { symmetricPoint, curPoint } = pointInfo
   // 由于用户拉伸时是以任意角度拉伸的，所以在求得旋转前的坐标时，只取 y 坐标（这里的 x 坐标可能是任意值），x 坐标用 curPoint 的。
   // 这个中心点（第二个参数）用 curPoint, center, symmetricPoint 都可以，只要他们在一条直线上就行
-  const rotatedcurPosition = calculateRotatedPointCoordinate(
-    curPosition,
-    curPoint,
-    -style.rotate
-  )
+  const rotatedcurPosition = calculateRotatedPointCoordinate(curPosition, curPoint, -style.rotate)
 
   // 算出旋转前 y 坐标，再用 curPoint 的 x 坐标，重新计算它们旋转后对应的坐标
   const rotatedTopMiddlePoint = calculateRotatedPointCoordinate(
@@ -303,11 +257,8 @@ function calculateTop(
   )
 
   const newCenter = {
-    x:
-      rotatedTopMiddlePoint.x -
-      (rotatedTopMiddlePoint.x - symmetricPoint.x) / 2,
-    y:
-      rotatedTopMiddlePoint.y + (symmetricPoint.y - rotatedTopMiddlePoint.y) / 2
+    x: rotatedTopMiddlePoint.x - (rotatedTopMiddlePoint.x - symmetricPoint.x) / 2,
+    y: rotatedTopMiddlePoint.y + (symmetricPoint.y - rotatedTopMiddlePoint.y) / 2
   }
 
   let width = style.width
@@ -322,19 +273,9 @@ function calculateTop(
   style.left = Math.round(newCenter.x - style.width / 2)
 }
 
-function calculateRight(
-  style,
-  curPosition,
-  proportion,
-  needLockProportion,
-  pointInfo
-) {
+function calculateRight(style, curPosition, proportion, needLockProportion, pointInfo) {
   const { symmetricPoint, curPoint } = pointInfo
-  const rotatedcurPosition = calculateRotatedPointCoordinate(
-    curPosition,
-    curPoint,
-    -style.rotate
-  )
+  const rotatedcurPosition = calculateRotatedPointCoordinate(curPosition, curPoint, -style.rotate)
   const rotatedRightMiddlePoint = calculateRotatedPointCoordinate(
     {
       x: rotatedcurPosition.x,
@@ -350,12 +291,8 @@ function calculateRight(
   )
 
   const newCenter = {
-    x:
-      rotatedRightMiddlePoint.x -
-      (rotatedRightMiddlePoint.x - symmetricPoint.x) / 2,
-    y:
-      rotatedRightMiddlePoint.y +
-      (symmetricPoint.y - rotatedRightMiddlePoint.y) / 2
+    x: rotatedRightMiddlePoint.x - (rotatedRightMiddlePoint.x - symmetricPoint.x) / 2,
+    y: rotatedRightMiddlePoint.y + (symmetricPoint.y - rotatedRightMiddlePoint.y) / 2
   }
 
   let height = style.height
@@ -370,19 +307,9 @@ function calculateRight(
   style.left = Math.round(newCenter.x - newWidth / 2)
 }
 
-function calculateBottom(
-  style,
-  curPosition,
-  proportion,
-  needLockProportion,
-  pointInfo
-) {
+function calculateBottom(style, curPosition, proportion, needLockProportion, pointInfo) {
   const { symmetricPoint, curPoint } = pointInfo
-  const rotatedcurPosition = calculateRotatedPointCoordinate(
-    curPosition,
-    curPoint,
-    -style.rotate
-  )
+  const rotatedcurPosition = calculateRotatedPointCoordinate(curPosition, curPoint, -style.rotate)
   const rotatedBottomMiddlePoint = calculateRotatedPointCoordinate(
     {
       x: curPoint.x,
@@ -398,12 +325,8 @@ function calculateBottom(
   )
 
   const newCenter = {
-    x:
-      rotatedBottomMiddlePoint.x -
-      (rotatedBottomMiddlePoint.x - symmetricPoint.x) / 2,
-    y:
-      rotatedBottomMiddlePoint.y +
-      (symmetricPoint.y - rotatedBottomMiddlePoint.y) / 2
+    x: rotatedBottomMiddlePoint.x - (rotatedBottomMiddlePoint.x - symmetricPoint.x) / 2,
+    y: rotatedBottomMiddlePoint.y + (symmetricPoint.y - rotatedBottomMiddlePoint.y) / 2
   }
 
   let width = style.width
@@ -418,19 +341,9 @@ function calculateBottom(
   style.left = Math.round(newCenter.x - style.width / 2)
 }
 
-function calculateLeft(
-  style,
-  curPosition,
-  proportion,
-  needLockProportion,
-  pointInfo
-) {
+function calculateLeft(style, curPosition, proportion, needLockProportion, pointInfo) {
   const { symmetricPoint, curPoint } = pointInfo
-  const rotatedcurPosition = calculateRotatedPointCoordinate(
-    curPosition,
-    curPoint,
-    -style.rotate
-  )
+  const rotatedcurPosition = calculateRotatedPointCoordinate(curPosition, curPoint, -style.rotate)
   const rotatedLeftMiddlePoint = calculateRotatedPointCoordinate(
     {
       x: rotatedcurPosition.x,
@@ -446,12 +359,8 @@ function calculateLeft(
   )
 
   const newCenter = {
-    x:
-      rotatedLeftMiddlePoint.x -
-      (rotatedLeftMiddlePoint.x - symmetricPoint.x) / 2,
-    y:
-      rotatedLeftMiddlePoint.y +
-      (symmetricPoint.y - rotatedLeftMiddlePoint.y) / 2
+    x: rotatedLeftMiddlePoint.x - (rotatedLeftMiddlePoint.x - symmetricPoint.x) / 2,
+    y: rotatedLeftMiddlePoint.y + (symmetricPoint.y - rotatedLeftMiddlePoint.y) / 2
   }
 
   let height = style.height

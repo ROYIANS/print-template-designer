@@ -90,15 +90,7 @@ export const editorConfig = {
   autoFocus: true,
   MENU_CONF: {
     fontFamily: {
-      fontFamilyList: [
-        '黑体',
-        '楷体',
-        '仿宋',
-        '宋体',
-        'Arial',
-        'Tahoma',
-        'Verdana'
-      ]
+      fontFamilyList: ['黑体', '楷体', '仿宋', '宋体', 'Arial', 'Tahoma', 'Verdana']
     },
     fontSize: {
       fontSizeList: [

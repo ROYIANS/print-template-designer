@@ -13,9 +13,9 @@
             <div class="roy-complex-table__prefix">
               <RoyTextInTable
                 key="prefix"
-                style="min-height: 40px; min-width: 200px"
                 :element="prefixTextElement"
                 :prop-value="prefixTextElement.propValue"
+                style="min-height: 40px; min-width: 200px"
                 @componentUpdated="componentUpdated"
               />
             </div>
@@ -26,9 +26,9 @@
             <div class="roy-complex-table__head">
               <RoySimpleTable
                 key="head"
-                :scale="scale"
                 :element="headSimpleTableElement"
                 :prop-value="headSimpleTableElement.propValue"
+                :scale="scale"
                 @componentUpdated="componentUpdated"
               />
             </div>
@@ -37,15 +37,11 @@
         <tr>
           <td>
             <div
-              class="roy-complex-table__body"
               :style="{
-                marginTop: element.showHead
-                  ? `-${style.borderWidth - 0.5}px`
-                  : '',
-                marginBottom: element.showFoot
-                  ? `-${style.borderWidth - 0.5}px`
-                  : ''
+                marginTop: element.showHead ? `-${style.borderWidth - 0.5}px` : '',
+                marginBottom: element.showFoot ? `-${style.borderWidth - 0.5}px` : ''
               }"
+              class="roy-complex-table__body"
             >
               <table :style="`width: ${bodyTableWidth}px`">
                 <thead>
@@ -66,10 +62,7 @@
                 </thead>
                 <tbody>
                   <tr :style="`height: ${tableRowHeight}px`">
-                    <td
-                      :colspan="tableCols.length"
-                      :style="`height: ${tableRowHeight}px`"
-                    >
+                    <td :colspan="tableCols.length" :style="`height: ${tableRowHeight}px`">
                       <div class="roy-complex-table__auto_fill">自动填充</div>
                     </td>
                   </tr>
@@ -83,9 +76,9 @@
             <div class="roy-complex-table__foot">
               <RoySimpleTable
                 key="foot"
-                :scale="scale"
                 :element="footSimpleTableElement"
                 :prop-value="footSimpleTableElement.propValue"
+                :scale="scale"
                 @componentUpdated="componentUpdated"
               />
             </div>
@@ -96,9 +89,9 @@
             <div class="roy-complex-table__suffix">
               <RoyTextInTable
                 key="suffix"
-                style="min-height: 40px; min-width: 200px"
                 :element="suffixTextElement"
                 :prop-value="suffixTextElement.propValue"
+                style="min-height: 40px; min-width: 200px"
                 @componentUpdated="componentUpdated"
               />
             </div>
@@ -108,8 +101,8 @@
     </StyledComplexTable>
     <TableDataSetting
       v-if="showTableDataSetting"
-      :visible="showTableDataSetting"
       :table-config="bodyDataTableElement"
+      :visible="showTableDataSetting"
       @onSave="handleTableSettingSave"
     />
   </div>
@@ -221,10 +214,7 @@ export default {
       curTableSettingId: (state) => state.printTemplateModule.curTableSettingId
     }),
     showTableDataSetting() {
-      return (
-        this.curTableSettingId !== null &&
-        this.curTableSettingId === this.element.id
-      )
+      return this.curTableSettingId !== null && this.curTableSettingId === this.element.id
     },
     style() {
       return this.element.style || {}
@@ -264,16 +254,11 @@ export default {
         footSimpleTableElement,
         bodyDataTableElement
       } = this.propValue
-      this.prefixTextElement =
-        prefixTextElement || this.deepCopy(defaultTextProp)
-      this.suffixTextElement =
-        suffixTextElement || this.deepCopy(defaultTextProp)
-      this.headSimpleTableElement =
-        headSimpleTableElement || this.deepCopy(defaultSimpleTableProp)
-      this.footSimpleTableElement =
-        footSimpleTableElement || this.deepCopy(defaultSimpleTableProp)
-      this.bodyDataTableElement =
-        bodyDataTableElement || this.deepCopy(defaultDataTableProp)
+      this.prefixTextElement = prefixTextElement || this.deepCopy(defaultTextProp)
+      this.suffixTextElement = suffixTextElement || this.deepCopy(defaultTextProp)
+      this.headSimpleTableElement = headSimpleTableElement || this.deepCopy(defaultSimpleTableProp)
+      this.footSimpleTableElement = footSimpleTableElement || this.deepCopy(defaultSimpleTableProp)
+      this.bodyDataTableElement = bodyDataTableElement || this.deepCopy(defaultDataTableProp)
       setTimeout(() => {
         this.initCompleted = true
         // this.observeElementWidth()

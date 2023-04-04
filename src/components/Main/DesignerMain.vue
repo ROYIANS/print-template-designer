@@ -61,9 +61,7 @@ export default {
       e.stopPropagation()
 
       const index = e.dataTransfer.getData('index')
-      const rectInfo = document
-        .querySelector('#designer-page')
-        .getBoundingClientRect()
+      const rectInfo = document.querySelector('#designer-page').getBoundingClientRect()
       if (index) {
         const component = this.deepCopy(componentList[index])
         component.style = component.style || {}

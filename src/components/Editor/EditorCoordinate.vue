@@ -5,11 +5,7 @@
 * @date 2022/10/21 16:44
 !-->
 <template>
-  <div
-    v-show="showCoordinate"
-    class="roy-editor-coordinate"
-    :style="coordinateStyle"
-  >
+  <div v-show="showCoordinate" :style="coordinateStyle" class="roy-editor-coordinate">
     {{ left }},{{ top }}
   </div>
 </template>
@@ -52,12 +48,8 @@ export default {
         this.showCoordinate = true
         this.x = curX
         this.y = curY
-        this.left = new Big(this.curComponent.style.left)
-          .div(new Big(5))
-          .toNumber()
-        this.top = new Big(this.curComponent.style.top)
-          .div(new Big(5))
-          .toNumber()
+        this.left = new Big(this.curComponent.style.left).div(new Big(5)).toNumber()
+        this.top = new Big(this.curComponent.style.top).div(new Big(5)).toNumber()
       })
 
       eventBus.$on('unmove', () => {

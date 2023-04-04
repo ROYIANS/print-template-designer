@@ -1,48 +1,44 @@
 <template>
-  <div class="style-ruler mb-ruler" id="mb-ruler">
+  <div id="mb-ruler" class="style-ruler mb-ruler">
     <!-- 水平方向 -->
     <RulerWrapper
-      :vertical="false"
-      :width="width"
+      :canvasConfigs="canvasConfigs"
       :height="thick"
       :isShowReferLine="isShowReferLine"
-      :thick="thick"
-      :start="startX"
       :lines="horLineArr"
-      :selectStart="shadow.x"
-      :selectLength="shadow.width"
-      :scale="scale"
       :palette="palette"
-      :canvasConfigs="canvasConfigs"
+      :scale="scale"
+      :selectLength="shadow.width"
+      :selectStart="shadow.x"
+      :start="startX"
+      :thick="thick"
+      :vertical="false"
+      :width="width"
       @onLineChange="handleLineChange"
     />
     <!-- 竖直方向 -->
     <RulerWrapper
-      :vertical="true"
-      :width="thick"
+      :canvasConfigs="canvasConfigs"
       :height="height"
       :isShowReferLine="isShowReferLine"
-      :thick="thick"
-      :start="startY"
       :lines="verLineArr"
-      :selectStart="shadow.y"
-      :selectLength="shadow.height"
-      :scale="scale"
       :palette="palette"
-      :canvasConfigs="canvasConfigs"
+      :scale="scale"
+      :selectLength="shadow.height"
+      :selectStart="shadow.y"
+      :start="startY"
+      :thick="thick"
+      :vertical="true"
+      :width="thick"
       @onLineChange="handleLineChange"
     />
-    <a
-      class="corner"
-      :class="cornerActiveClass"
-      :style="cornerStyle"
-      @click="onCornerClick"
-    ></a>
+    <a :class="cornerActiveClass" :style="cornerStyle" class="corner" @click="onCornerClick"></a>
   </div>
 </template>
 
 <script>
 import RulerWrapper from './rulerWrapper.vue'
+
 const DEFAULTMENU = {
   bgColor: '#fff',
   dividerColor: '#DBDBDB',
@@ -209,10 +205,12 @@ export default {
   pointer-events: none;
   font-size: 12px;
   overflow: hidden;
+
   span {
     line-height: 1;
   }
 }
+
 .corner {
   position: absolute;
   left: 0;
@@ -229,11 +227,13 @@ export default {
 .indicator {
   position: absolute;
   pointer-events: none;
+
   .value {
     position: absolute;
     background: white;
   }
 }
+
 .corner {
   position: absolute;
   left: 0;
@@ -243,10 +243,12 @@ export default {
   cursor: pointer;
   transition: all 0.2s ease-in-out;
   box-sizing: content-box;
+
   &.active {
     // background-color: ${props => props.cornerActiveColor} !important;
   }
 }
+
 .ruler {
   width: 100%;
   height: 100%;

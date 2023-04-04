@@ -1,69 +1,57 @@
 <template>
   <div
-    class="v-sidebar-menu"
     :class="sidebarClass"
     :style="[{ 'max-width': sidebarWidth }]"
-    @mouseleave="onMouseLeave"
+    class="v-sidebar-menu"
     @mouseenter="onMouseEnter"
+    @mouseleave="onMouseLeave"
   >
     <slot name="header" />
     <div
+      :style="isCollapsed && [rtl ? { 'margin-left': '-17px' } : { 'margin-right': '-17px' }]"
       class="vsm--scroll-wrapper"
-      :style="
-        isCollapsed && [
-          rtl ? { 'margin-left': '-17px' } : { 'margin-right': '-17px' }
-        ]
-      "
     >
-      <div class="vsm--list" :style="isCollapsed && { width: widthCollapsed }">
+      <div :style="isCollapsed && { width: widthCollapsed }" class="vsm--list">
         <sidebar-menu-item
           v-for="(item, index) in menu"
           :key="index"
-          :item="item"
-          :is-collapsed="isCollapsed"
           :active-show="activeShow"
-          :show-one-child="showOneChild"
-          :show-child="showChild"
-          :rtl="rtl"
-          :mobile-item="mobileItem"
           :disable-hover="disableHover"
+          :is-collapsed="isCollapsed"
+          :item="item"
+          :mobile-item="mobileItem"
+          :rtl="rtl"
+          :show-child="showChild"
+          :show-one-child="showOneChild"
           @set-mobile-item="setMobileItem"
           @unset-mobile-item="unsetMobileItem"
         >
           <slot slot="dropdown-icon" name="dropdown-icon" />
         </sidebar-menu-item>
       </div>
-      <div
-        v-if="isCollapsed"
-        class="vsm--mobile-item"
-        :style="mobileItemStyle.item"
-      >
+      <div v-if="isCollapsed" :style="mobileItemStyle.item" class="vsm--mobile-item">
         <sidebar-menu-item
           v-if="mobileItem"
-          :item="mobileItem"
-          :is-mobile-item="true"
-          :mobile-item-style="mobileItemStyle"
-          :is-collapsed="isCollapsed"
-          :show-child="showChild"
-          :rtl="rtl"
           :disable-hover="disableHover"
+          :is-collapsed="isCollapsed"
+          :is-mobile-item="true"
+          :item="mobileItem"
+          :mobile-item-style="mobileItemStyle"
+          :rtl="rtl"
+          :show-child="showChild"
         >
           <slot slot="dropdown-icon" name="dropdown-icon" />
         </sidebar-menu-item>
         <transition name="slide-animation">
-          <div
-            v-if="mobileItem"
-            class="vsm--mobile-bg"
-            :style="mobileItemStyle.background"
-          />
+          <div v-if="mobileItem" :style="mobileItemStyle.background" class="vsm--mobile-bg" />
         </transition>
       </div>
     </div>
     <slot name="footer" />
     <button
       v-if="!hideToggle"
-      class="vsm--toggle-btn"
       :class="{ 'vsm--toggle-btn_slot': $slots['toggle-icon'] }"
+      class="vsm--toggle-btn"
       @click="onToggleClick"
     >
       <slot name="toggle-icon" />
@@ -157,9 +145,7 @@ export default {
           { position: 'absolute' },
           { top: `${this.mobileItemPos}px` },
           this.rtl ? { right: '0px' } : { left: '0px' },
-          this.rtl
-            ? { 'padding-right': this.sidebarWidth }
-            : { 'padding-left': this.sidebarWidth },
+          this.rtl ? { 'padding-right': this.sidebarWidth } : { 'padding-left': this.sidebarWidth },
           this.rtl && { direction: 'rtl' },
           { 'z-index': 0 },
           { width: `${this.parentWidth - this.parentOffsetLeft}px` },
@@ -256,23 +242,18 @@ export default {
         left: sidebarLeft,
         right: sidebarRight
       } = this.$el.getBoundingClientRect()
-      let parent = this.relative
-        ? this.$el.parentElement
-        : document.documentElement
+      let parent = this.relative ? this.$el.parentElement : document.documentElement
       this.parentHeight = parent.clientHeight
       this.parentWidth = parent.clientWidth
       if (this.relative) {
-        let { top: parentTop, left: parentLeft } =
-          parent.getBoundingClientRect()
+        let { top: parentTop, left: parentLeft } = parent.getBoundingClientRect()
         this.parentOffsetTop = sidebarTop - (parentTop + parent.clientTop)
         this.parentOffsetLeft = this.rtl
           ? this.parentWidth - sidebarRight + (parentLeft + parent.clientLeft)
           : sidebarLeft - (parentLeft + parent.clientLeft)
       } else {
         this.parentOffsetTop = sidebarTop
-        this.parentOffsetLeft = this.rtl
-          ? this.parentWidth - sidebarRight
-          : sidebarLeft
+        this.parentOffsetLeft = this.rtl ? this.parentWidth - sidebarRight : sidebarLeft
       }
     },
     onItemUpdate(newItem, item) {

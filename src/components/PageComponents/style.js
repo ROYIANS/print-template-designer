@@ -151,8 +151,7 @@ export const StyledText = styled('div', textProps)`
     line-height: ${(props) => props.lineHeight};
     letter-spacing: ${(props) => `${props.letterSpacing}px`};
     font-size: ${(props) => `${props.fontSize}pt`};
-    font-family: ${(props) =>
-      props.fontFamily === 'default' ? 'inherit' : `${props.fontFamily}`};
+    font-family: ${(props) => (props.fontFamily === 'default' ? 'inherit' : `${props.fontFamily}`)};
   }
   table {
     table-layout: fixed;
@@ -185,10 +184,8 @@ export const StyledSimpleText = styled('div', textProps)`
   border-radius: ${(props) => props.borderRadius};
   margin: ${(props) => props.margin};
   font-size: ${(props) => `${props.fontSize}pt`};
-  font-family: ${(props) =>
-    props.fontFamily === 'default' ? 'inherit' : `${props.fontFamily}`};
-  border: ${(props) =>
-    `${props.borderWidth}px ${props.borderType} ${props.borderColor}`};
+  font-family: ${(props) => (props.fontFamily === 'default' ? 'inherit' : `${props.fontFamily}`)};
+  border: ${(props) => `${props.borderWidth}px ${props.borderType} ${props.borderColor}`};
   z-index: ${(props) => props.zIndex};
   .roy-simple-text-inner {
     height: 100%;
@@ -250,9 +247,7 @@ export const StyledImage = styled('div', imageProps)`
   img {
     height: 100%;
     border-radius: ${(props) =>
-      isNaN(props.borderRadius)
-        ? props.borderRadius
-        : `${props.borderRadius}px`};
+      isNaN(props.borderRadius) ? props.borderRadius : `${props.borderRadius}px`};
     z-index: ${(props) => props.zIndex};
     border: ${(props) => {
       const { borderWidth, borderType, borderColor } = props
@@ -358,8 +353,7 @@ export const StyledComplexTable = styled('div', complexTableProps)`
   color: ${(props) => props.color};
   background: ${(props) => props.background};
   font-size: ${(props) => `${props.fontSize}pt`};
-  font-family: ${(props) =>
-    props.fontFamily === 'default' ? 'inherit' : `${props.fontFamily}`};
+  font-family: ${(props) => (props.fontFamily === 'default' ? 'inherit' : `${props.fontFamily}`)};
 
   table {
     width: 100%;
@@ -432,11 +426,7 @@ export const StyledComplexTable = styled('div', complexTableProps)`
     align-items: center;
     color: #ccc;
     background-color: rgb(246, 246, 246);
-    background-image: linear-gradient(
-        90deg,
-        rgba(0, 0, 0, 0.1) 3%,
-        transparent 1px
-      ),
+    background-image: linear-gradient(90deg, rgba(0, 0, 0, 0.1) 3%, transparent 1px),
       linear-gradient(1turn, rgba(0, 0, 0, 0.1) 3%, transparent 1px);
     background-size: 10px 10px;
     background-position: 50%;

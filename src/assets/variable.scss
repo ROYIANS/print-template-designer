@@ -75,22 +75,25 @@
   --roy-fill-color-dark: #ebedf0;
   --roy-fill-color-darker: #e6e8eb;
   --roy-fill-color-blank: #ffffff;
-  --roy-box-shadow: 0px 12px 32px 4px rgba(0, 0, 0, .04), 0px 8px 20px rgba(0, 0, 0, .08);
-  --roy-box-shadow-light: 0px 0px 12px rgba(0, 0, 0, .12);
-  --roy-box-shadow-lighter: 0px 0px 6px rgba(0, 0, 0, .12);
-  --roy-box-shadow-dark: 0px 16px 48px 16px rgba(0, 0, 0, .08), 0px 12px 32px rgba(0, 0, 0, .12), 0px 8px 16px -8px rgba(0, 0, 0, .16);
+  --roy-box-shadow: 0px 12px 32px 4px rgba(0, 0, 0, 0.04),
+    0px 8px 20px rgba(0, 0, 0, 0.08);
+  --roy-box-shadow-light: 0px 0px 12px rgba(0, 0, 0, 0.12);
+  --roy-box-shadow-lighter: 0px 0px 6px rgba(0, 0, 0, 0.12);
+  --roy-box-shadow-dark: 0px 16px 48px 16px rgba(0, 0, 0, 0.08),
+    0px 12px 32px rgba(0, 0, 0, 0.12), 0px 8px 16px -8px rgba(0, 0, 0, 0.16);
   --roy-disabled-bg-color: var(--roy-fill-color-light);
   --roy-disabled-text-color: var(--roy-text-color-placeholder);
   --roy-disabled-border-color: var(--roy-border-color-light);
-  --roy-overlay-color: rgba(0, 0, 0, .8);
-  --roy-overlay-color-light: rgba(0, 0, 0, .7);
-  --roy-overlay-color-lighter: rgba(0, 0, 0, .5);
-  --roy-mask-color: rgba(255, 255, 255, .9);
-  --roy-mask-color-extra-light: rgba(255, 255, 255, .3);
+  --roy-overlay-color: rgba(0, 0, 0, 0.8);
+  --roy-overlay-color-light: rgba(0, 0, 0, 0.7);
+  --roy-overlay-color-lighter: rgba(0, 0, 0, 0.5);
+  --roy-mask-color: rgba(255, 255, 255, 0.9);
+  --roy-mask-color-extra-light: rgba(255, 255, 255, 0.3);
   --roy-border-width: 1px;
   --roy-border-style: solid;
   --roy-border-color-hover: var(--roy-text-color-disabled);
-  --roy-border: var(--roy-border-width) var(--roy-border-style) var(--roy-border-color);
+  --roy-border: var(--roy-border-width) var(--roy-border-style)
+    var(--roy-border-color);
   --roy-svg-monochrome-grey: var(--roy-border-color);
   --roy-color-primary-rgb: 64, 158, 255;
   --roy-color-success-rgb: 103, 194, 58;
@@ -104,7 +107,9 @@
   --roy-font-size-base: 14px;
   --roy-font-size-small: 13px;
   --roy-font-size-extra-small: 12px;
-  --roy-font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "\5fae\8f6f\96c5\9ed1", Arial, sans-serif;
+  --roy-font-family: 'Helvetica Neue', Helvetica, 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', '\5fae\8f6f\96c5\9ed1', Arial,
+    sans-serif;
   --roy-font-weight-primary: 500;
   --roy-font-line-height-primary: 24px;
   --roy-index-normal: 1;
@@ -114,17 +119,31 @@
   --roy-border-radius-small: 2px;
   --roy-border-radius-round: 20px;
   --roy-border-radius-circle: 100%;
-  --roy-transition-duration: .3s;
-  --roy-transition-duration-fast: .2s;
-  --roy-transition-function-ease-in-out-bezier: cubic-bezier(.645, .045, .355, 1);
-  --roy-transition-function-fast-bezier: cubic-bezier(.23, 1, .32, 1);
-  --roy-transition-all: all var(--roy-transition-duration) var(--roy-transition-function-ease-in-out-bezier);
-  --roy-transition-fade: opacity var(--roy-transition-duration) var(--roy-transition-function-fast-bezier);
-  --roy-transition-md-fade: transform var(--roy-transition-duration) var(--roy-transition-function-fast-bezier), opacity var(--roy-transition-duration) var(--roy-transition-function-fast-bezier);
-  --roy-transition-fade-linear: opacity var(--roy-transition-duration-fast) linear;
-  --roy-transition-border: border-color var(--roy-transition-duration-fast) var(--roy-transition-function-ease-in-out-bezier);
-  --roy-transition-box-shadow: box-shadow var(--roy-transition-duration-fast) var(--roy-transition-function-ease-in-out-bezier);
-  --roy-transition-color: color var(--roy-transition-duration-fast) var(--roy-transition-function-ease-in-out-bezier);
+  --roy-transition-duration: 0.3s;
+  --roy-transition-duration-fast: 0.2s;
+  --roy-transition-function-ease-in-out-bezier: cubic-bezier(
+    0.645,
+    0.045,
+    0.355,
+    1
+  );
+  --roy-transition-function-fast-bezier: cubic-bezier(0.23, 1, 0.32, 1);
+  --roy-transition-all: all var(--roy-transition-duration)
+    var(--roy-transition-function-ease-in-out-bezier);
+  --roy-transition-fade: opacity var(--roy-transition-duration)
+    var(--roy-transition-function-fast-bezier);
+  --roy-transition-md-fade: transform var(--roy-transition-duration)
+      var(--roy-transition-function-fast-bezier),
+    opacity var(--roy-transition-duration)
+      var(--roy-transition-function-fast-bezier);
+  --roy-transition-fade-linear: opacity var(--roy-transition-duration-fast)
+    linear;
+  --roy-transition-border: border-color var(--roy-transition-duration-fast)
+    var(--roy-transition-function-ease-in-out-bezier);
+  --roy-transition-box-shadow: box-shadow var(--roy-transition-duration-fast)
+    var(--roy-transition-function-ease-in-out-bezier);
+  --roy-transition-color: color var(--roy-transition-duration-fast)
+    var(--roy-transition-function-ease-in-out-bezier);
   --roy-component-size-large: 40px;
   --roy-component-size: 32px;
   --roy-component-size-small: 24px;
@@ -153,11 +172,11 @@
   --bg-color-rgb: 0, 0, 0;
   --bg-color-soft: #242424;
   --bg-color-mute: #2c2c2c;
-  --roy-text-color-primary: #E5EAF3;
-  --roy-text-color-regular: #CFD3DC;
-  --roy-text-color-secondary: #A3A6AD;
-  --roy-text-color-placeholder: #8D9095;
-  --roy-text-color-disabled: #6C6E72;
+  --roy-text-color-primary: #e5eaf3;
+  --roy-text-color-regular: #cfd3dc;
+  --roy-text-color-secondary: #a3a6ad;
+  --roy-text-color-placeholder: #8d9095;
+  --roy-text-color-disabled: #6c6e72;
   --roy-color-primary: #4579e1;
   --roy-color-primary-light-3: #30559e;
   --roy-color-primary-light-5: #233d71;
@@ -200,29 +219,31 @@
   --roy-color-info-light-8: #00262a;
   --roy-color-info-light-9: #001315;
   --roy-color-info-dark-2: #1ac3d7;
-  --roy-box-shadow: 0px 12px 32px 4px rgba(0, 0, 0, .36), 0px 8px 20px rgba(0, 0, 0, .72);
-  --roy-box-shadow-light: 0px 0px 12px rgba(0, 0, 0, .72);
-  --roy-box-shadow-lighter: 0px 0px 6px rgba(0, 0, 0, .72);
-  --roy-box-shadow-dark: 0px 16px 48px 16px rgba(0, 0, 0, .72), 0px 12px 32px #000000, 0px 8px 16px -8px #000000;
+  --roy-box-shadow: 0px 12px 32px 4px rgba(0, 0, 0, 0.36),
+    0px 8px 20px rgba(0, 0, 0, 0.72);
+  --roy-box-shadow-light: 0px 0px 12px rgba(0, 0, 0, 0.72);
+  --roy-box-shadow-lighter: 0px 0px 6px rgba(0, 0, 0, 0.72);
+  --roy-box-shadow-dark: 0px 16px 48px 16px rgba(0, 0, 0, 0.72),
+    0px 12px 32px #000000, 0px 8px 16px -8px #000000;
   --roy-bg-color-page: #0a0a0a;
   --roy-bg-color: #141414;
   --roy-bg-color-overlay: #1d1e1f;
   --roy-bg-block-color: #4d4d4f;
   --roy-border-block-color: #878787;
   --roy-border-color-darker: #636466;
-  --roy-border-color-dark: #58585B;
-  --roy-border-color: #4C4D4F;
+  --roy-border-color-dark: #58585b;
+  --roy-border-color: #4c4d4f;
   --roy-border-color-light: #414243;
   --roy-border-color-lighter: #363637;
-  --roy-border-color-extra-light: #2B2B2C;
+  --roy-border-color-extra-light: #2b2b2c;
   --roy-fill-color-darker: #424243;
-  --roy-fill-color-dark: #39393A;
+  --roy-fill-color-dark: #39393a;
   --roy-fill-color: #303030;
   --roy-fill-color-light: #262727;
-  --roy-fill-color-lighter: #1D1D1D;
+  --roy-fill-color-lighter: #1d1d1d;
   --roy-fill-color-extra-light: #191919;
   --roy-fill-color-blank: transparent;
-  --roy-mask-color: rgba(0, 0, 0, .8);
-  --roy-mask-color-extra-light: rgba(0, 0, 0, .3);
+  --roy-mask-color: rgba(0, 0, 0, 0.8);
+  --roy-mask-color-extra-light: rgba(0, 0, 0, 0.3);
   --roy-menu-bar-background: #222222;
 }
