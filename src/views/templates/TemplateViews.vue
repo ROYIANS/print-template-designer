@@ -5,18 +5,12 @@
 * @date 2023/1/13 17:05
 !-->
 <template>
-  <RoyModal
-    v-if="visibleIn"
-    :show.sync="visibleIn"
-    title="预设模板"
-    height="80%"
-    width="70%"
-  >
+  <RoyModal v-if="visibleIn" :show.sync="visibleIn" height="80%" title="预设模板" width="70%">
     <roy-main class="TemplateViews">
       <div class="cards">
-        <div class="card" v-for="(item, index) in templateData" :key="index">
+        <div v-for="(item, index) in templateData" :key="index" class="card">
           <div class="card__image-holder">
-            <img class="card__image" :src="item.img" alt="wave" />
+            <img :src="item.img" alt="wave" class="card__image" />
           </div>
           <div class="card__title">
             <div class="card__btn" @click="load(item.url)">
@@ -38,6 +32,7 @@ import commonMixin from '@/mixin/commonMixin'
 import RoyModal from '@/components/RoyModal/RoyModal'
 import axios from 'axios'
 import toast from '@/utils/toast'
+
 axios.defaults.timeout = 180000
 axios.defaults.baseURL = '/print-template-designer'
 axios.defaults.withCredentials = false
@@ -100,11 +95,13 @@ export default {
 .TemplateViews {
   height: 100%;
   padding: 6px;
+
   .cards {
     margin: 8px;
     display: grid;
     grid-template-columns: repeat(3, auto);
     grid-gap: 5px;
+
     .card {
       box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
       background: #ffffff;
@@ -115,20 +112,24 @@ export default {
       text-align: left;
       transition: all 0.3s 0s ease-in;
       width: 300px;
+
       .card__image {
         max-width: 300px;
       }
+
       .card__image-holder {
         display: flex;
         align-items: center;
         background: rgba(0, 0, 0, 0.1);
       }
+
       .card__title {
         background: #ffffff;
         padding: 6px 15px 10px;
         position: relative;
         z-index: 0;
       }
+
       .card__btn {
         box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
         width: 30px;
@@ -143,6 +144,7 @@ export default {
         position: absolute;
         right: 20px;
         top: 20px;
+
         &:hover {
           box-shadow: none;
           background: rgba(69, 121, 225, 0.84);

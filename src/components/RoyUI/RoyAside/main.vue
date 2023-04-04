@@ -1,5 +1,5 @@
 <template>
-  <aside class="roy-aside" :style="{ width }">
+  <aside :style="{ width }" class="roy-aside">
     <slot></slot>
   </aside>
 </template>

@@ -1,11 +1,6 @@
 <template>
-  <div
-    class="line"
-    v-show="showLine"
-    :style="[offset, borderCursor]"
-    @mousedown="handleDown"
-  >
-    <div class="action" :style="actionStyle">
+  <div v-show="showLine" :style="[offset, borderCursor]" class="line" @mousedown="handleDown">
+    <div :style="actionStyle" class="action">
       <span class="del" @click="this.handleRemove">&times;</span>
       <span class="value">{{ startValue }}</span>
     </div>
@@ -41,9 +36,7 @@ export default {
     },
     borderCursor() {
       const borderValue = `1px solid ${this.palette.lineColor}`
-      const border = this.vertical
-        ? { borderTop: borderValue }
-        : { borderLeft: borderValue }
+      const border = this.vertical ? { borderTop: borderValue } : { borderLeft: borderValue }
 
       const cursorValue = this.isShowReferLine
         ? this.vertical
@@ -56,9 +49,7 @@ export default {
       }
     },
     actionStyle() {
-      return this.vertical
-        ? { left: this.thick + 'px' }
-        : { top: this.thick + 'px' }
+      return this.vertical ? { left: this.thick + 'px' } : { top: this.thick + 'px' }
     }
   },
   methods: {
@@ -68,9 +59,7 @@ export default {
       this.$emit('onMouseDown')
       const onMove = (e) => {
         const currentD = this.vertical ? e.clientY : e.clientX
-        this.startValue = Math.round(
-          initValue + (currentD - startD) / this.scale
-        )
+        this.startValue = Math.round(initValue + (currentD - startD) / this.scale)
       }
       const onEnd = () => {
         this.$emit('onRelease', this.startValue, this.index)
@@ -96,6 +85,7 @@ export default {
 <style lang="scss" scoped>
 .line {
   position: absolute;
+
   .action {
     position: absolute;
     display: flex;
@@ -107,22 +97,27 @@ export default {
     pointer-events: none;
     transform: scale(0.83);
   }
+
   .del {
     cursor: pointer;
     padding: 3px 5px;
     visibility: hidden;
   }
+
   &:hover .del {
     visibility: visible;
   }
 }
+
 .h-container {
   .line {
     height: 100vh;
     top: 0;
     padding-left: 5px;
+
     .action {
       transform: translateX(-24px);
+
       .value {
         margin-left: 4px;
       }
@@ -135,9 +130,11 @@ export default {
     width: 100vw;
     left: 0;
     padding-top: 5px;
+
     .action {
       transform: translateY(-24px);
       flex-direction: column;
+
       .value {
         margin-top: 4px;
       }

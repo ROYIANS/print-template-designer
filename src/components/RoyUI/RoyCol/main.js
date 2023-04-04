@@ -40,11 +40,7 @@ export default {
 
     ;['span', 'offset', 'pull', 'push'].forEach((prop) => {
       if (this[prop] || this[prop] === 0) {
-        classList.push(
-          prop !== 'span'
-            ? `roy-col-${prop}-${this[prop]}`
-            : `roy-col-${this[prop]}`
-        )
+        classList.push(prop !== 'span' ? `roy-col-${prop}-${this[prop]}` : `roy-col-${this[prop]}`)
       }
     })
     ;['xs', 'sm', 'md', 'lg', 'xl'].forEach((size) => {

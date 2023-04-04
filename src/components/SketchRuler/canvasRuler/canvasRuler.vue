@@ -1,17 +1,17 @@
 <template>
   <canvas
-    class="ruler"
     ref="$canvas"
+    class="ruler"
     @click="handleClick"
     @mouseenter="handleEnter"
-    @mousemove="handleMove"
     @mouseleave="handleLeave"
+    @mousemove="handleMove"
   />
 </template>
 <script>
 import { drawHorizontalRuler, drawVerticalRuler } from './utils'
-const getValueByOffset = (offset, start, scale) =>
-  Math.round(start + offset / scale)
+
+const getValueByOffset = (offset, start, scale) => Math.round(start + offset / scale)
 export default {
   name: 'CanvasRuler',
   data() {

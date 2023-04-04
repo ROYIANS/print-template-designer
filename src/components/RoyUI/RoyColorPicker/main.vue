@@ -1,8 +1,8 @@
 <template>
   <div
-    class="roy-color-picker"
     ref="colorPicker"
     v-clickoutside="closePanel"
+    class="roy-color-picker"
     @click="
       (event) => {
         event.stopPropagation()
@@ -11,23 +11,23 @@
   >
     <!-- 颜色显示小方块 -->
     <div
-      class="roy-color-picker__color-btn"
-      :style="`background-color: ${showColor}`"
-      @click="openPanel"
       :class="{ disabled: disabled }"
+      :style="`background-color: ${showColor}`"
+      class="roy-color-picker__color-btn"
+      @click="openPanel"
     ></div>
     <!-- 颜色色盘 -->
-    <div class="roy-color-picker__box" :class="{ open: openStatus }">
+    <div :class="{ open: openStatus }" class="roy-color-picker__box">
       <div class="roy-color-picker__hd">
         <div
-          class="roy-color-picker__color-view"
           :style="{ 'background-color': showPanelColor }"
+          class="roy-color-picker__color-view"
         ></div>
         <div
           class="roy-color-picker__default-color"
           @click="handleDefaultColor"
-          @mouseover="handleOver(defaultColor)"
           @mouseout="handleOver('')"
+          @mouseover="handleOver(defaultColor)"
         >
           默认颜色
         </div>
@@ -39,9 +39,9 @@
             v-for="(color, index) of tColor"
             :key="index"
             :style="{ backgroundColor: color }"
-            @mouseover="handleOver(color)"
-            @mouseout="handleOver('')"
             @click="updateValue(color)"
+            @mouseout="handleOver('')"
+            @mouseover="handleOver(color)"
           ></li>
         </ul>
         <ul class="roy-color-picker__b-color">
@@ -51,9 +51,9 @@
                 v-for="(color, cindex) of item"
                 :key="cindex"
                 :style="{ backgroundColor: color }"
-                @mouseover="handleOver(color)"
-                @mouseout="handleOver('')"
                 @click="updateValue(color)"
+                @mouseout="handleOver('')"
+                @mouseover="handleOver(color)"
               ></li>
             </ul>
           </li>
@@ -64,23 +64,20 @@
             v-for="(color, index) of bColor"
             :key="index"
             :style="{ backgroundColor: color }"
-            @mouseover="handleOver(color)"
-            @mouseout="handleOver('')"
             @click="updateValue(color)"
+            @mouseout="handleOver('')"
+            @mouseover="handleOver(color)"
           ></li>
         </ul>
         <h3>
           <span>更多颜色...</span>
-          <i
-            class="ri-arrow-right-line roy-color-picker__m-color"
-            @click="triggerHtml5Color"
-          ></i>
+          <i class="ri-arrow-right-line roy-color-picker__m-color" @click="triggerHtml5Color"></i>
         </h3>
         <!-- 用以激活HTML5颜色面板 -->
         <input
-          type="color"
           ref="html5ColorEl"
           v-model="html5Color"
+          type="color"
           @change="updateValue(html5Color)"
         />
       </div>
@@ -195,13 +192,7 @@ export default {
     parseColor(hexStr) {
       if (hexStr.length === 4) {
         return (hexStr =
-          '#' +
-          hexStr[1] +
-          hexStr[1] +
-          hexStr[2] +
-          hexStr[2] +
-          hexStr[3] +
-          hexStr[3])
+          '#' + hexStr[1] + hexStr[1] + hexStr[2] + hexStr[2] + hexStr[3] + hexStr[3])
       } else {
         return hexStr
       }
@@ -230,11 +221,7 @@ export default {
       // 计算每一步的hex值
       for (let i = 0; i < step; i++) {
         gradientColorArr.push(
-          this.rgbToHex(
-            rStep * i + sColor[0],
-            gStep * i + sColor[1],
-            bStep * i + sColor[2]
-          )
+          this.rgbToHex(rStep * i + sColor[0], gStep * i + sColor[1], bStep * i + sColor[2])
         )
       }
       return gradientColorArr

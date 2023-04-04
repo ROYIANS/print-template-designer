@@ -3,7 +3,9 @@ import SketchRuler from './sketchRuler.vue'
 
 // Declare install function executed by Vue.use()
 export function install(Vue) {
-  if (install.installed) return
+  if (install.installed) {
+    return
+  }
   install.installed = true
   Vue.component(SketchRuler.name, SketchRuler)
 }

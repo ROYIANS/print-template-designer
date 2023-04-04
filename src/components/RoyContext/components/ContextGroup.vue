@@ -24,10 +24,7 @@ export default {
       }
 
       return {
-        'max-width':
-          typeof this.maxWidth === 'number'
-            ? `${this.maxWidth}px`
-            : this.maxWidth,
+        'max-width': typeof this.maxWidth === 'number' ? `${this.maxWidth}px` : this.maxWidth,
         'overflow-x': 'auto'
       }
     }

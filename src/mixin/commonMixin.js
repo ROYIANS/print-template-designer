@@ -44,8 +44,7 @@ export default {
     findParentComponent(vueIns, name) {
       let parent = vueIns.$parent
       while (parent) {
-        let componentName =
-          parent.$options.componentName || parent.$options.name
+        let componentName = parent.$options.componentName || parent.$options.name
         if (componentName !== name) {
           parent = parent.$parent
         } else {
