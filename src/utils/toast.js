@@ -1,7 +1,7 @@
-import Toast from '@/components/RoyToast'
+import Toast from '@/components/RoyUI/RoyToast'
 
 export default function toast(message = '', type = 'warning', duration = 3000) {
-  Toast({
+  return Toast({
     status: type,
     message: message,
     duration: duration

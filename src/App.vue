@@ -50,8 +50,9 @@ import { mapState } from 'vuex'
 
 export default {
   name: 'App',
-  mounted() {
-    toast('欢迎使用ROYIANS的打印模板设计器，仅个人学习使用', 'info')
+  async mounted() {
+    await toast('欢迎使用ROYIANS的打印模板设计器，仅个人学习使用', 'success', 3000)
+    await toast('当前网页预览的是最新开发分支，请留意', 'warning', 3000)
     console.log('contributed by ROYIANS@Little-Dreamland﹢')
   },
   components: {
