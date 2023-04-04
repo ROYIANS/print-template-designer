@@ -1,28 +1,11 @@
 <template>
   <section :style="asideStyle" class="roy-designer-aside__main">
-    <el-menu
-      :collapse="true"
-      class="roy-designer-aside__menu"
-      default-active="0"
-      @select="onMenuSelect"
-    >
-      <el-menu-item
-        v-for="(menu, index) in menuList"
-        ref="menuItem"
-        style="padding: 0; text-align: center"
-        :key="menu.code"
-        :index="`${index}`"
-      >
-        <div class="roy-designer-aside__menu__icon">
-          <i
-            :class="
-              curActiveComponentCode === menu.code ? menu.activeIcon : menu.icon
-            "
-          ></i>
-          <span>{{ menu.name }}</span>
-        </div>
-      </el-menu-item>
-    </el-menu>
+    <roy-sidebar-menu
+      :collapsed="true"
+      :menu="menuList"
+      :theme="isNightMode ? '' : 'white-theme'"
+      @item-click="onMenuSelect"
+    />
     <keep-alive>
       <component
         :is="curActiveComponent"
@@ -45,39 +28,40 @@ export default {
     return {
       menuList: [
         {
-          name: '组件',
+          title: '组件',
           code: 'component',
           icon: 'ri-drag-drop-line',
           activeIcon: 'ri-drag-drop-fill',
-          component: () => import('./PageComponent.vue')
+          isActive: true,
+          relativeComponent: () => import('./PageComponent.vue')
         },
         {
-          name: '结构',
+          title: '结构',
           code: 'toc',
           icon: 'ri-building-2-line',
           activeIcon: 'ri-building-2-fill',
-          component: () => import('./PageToc.vue')
+          relativeComponent: () => import('./PageToc.vue')
         },
         {
-          name: '属性',
+          title: '属性',
           code: 'palette',
           icon: 'ri-palette-line',
           activeIcon: 'ri-palette-fill',
-          component: () => import('./PagePalette.vue')
+          relativeComponent: () => import('./PagePalette.vue')
         },
         {
-          name: '数据源',
+          title: '数据源',
           code: 'datasource',
           icon: 'ri-database-2-line',
           activeIcon: 'ri-database-2-fill',
-          component: () => import('./DataSource.vue')
+          relativeComponent: () => import('./DataSource.vue')
         },
         {
-          name: '全局',
+          title: '全局',
           code: 'setting',
           icon: 'ri-settings-6-line',
           activeIcon: 'ri-settings-6-fill',
-          component: () => import('./GlobalSetting.vue')
+          relativeComponent: () => import('./GlobalSetting.vue')
         }
       ],
       curActiveComponent: null,
@@ -93,21 +77,24 @@ export default {
   computed: {
     ...mapState({
       paletteCount: (state) => state.printTemplateModule.paletteCount,
-      globalCount: (state) => state.printTemplateModule.globalCount
+      globalCount: (state) => state.printTemplateModule.globalCount,
+      isNightMode: (state) => state.printTemplateModule.nightMode.isNightMode
     }),
     asideStyle() {
       return this.showRight ? 'width: 300px' : 'width: 65px'
     }
   },
   methods: {
-    onMenuSelect(index) {
-      if (this.curActiveComponentCode === this.menuList[index].code) {
-        this.$emit('update:showRight', !this.showRight)
-      } else {
-        this.$emit('update:showRight', true)
-      }
-      this.curActiveComponent = this.menuList[index].component
-      this.curActiveComponentCode = this.menuList[index].code
+    onMenuSelect(e, item) {
+      this.curActiveComponent = item.relativeComponent
+      this.curActiveComponentCode = item.code
+      this.menuList.forEach((mItem) => {
+        let isActive = false
+        if (item.code === mItem.code) {
+          isActive = true
+        }
+        this.$set(mItem, 'isActive', isActive)
+      })
     },
     clickPaletteMenu() {
       this.$refs.menuItem.forEach((item) => {
@@ -131,7 +118,7 @@ export default {
     }
   },
   mounted() {
-    this.curActiveComponent = this.menuList[0].component
+    this.curActiveComponent = this.menuList[0].relativeComponent
     this.curActiveComponentCode = this.menuList[0].code
   },
   watch: {
@@ -150,16 +137,12 @@ export default {
   height: 100%;
   width: 100%;
   display: flex;
+  position: relative;
   background: var(--roy-bg-color-overlay);
 
   .roy-designer-aside__menu {
     height: 100%;
     z-index: 1;
-
-    .el-menu-item {
-      overflow: hidden;
-      padding: 0;
-    }
 
     .roy-designer-aside__menu__icon {
       display: grid;
@@ -187,6 +170,9 @@ export default {
   .roy-designer-aside__right_panel {
     width: calc(100% - 64px);
     background: var(--roy-bg-color-overlay);
+    position: absolute;
+    right: 0;
+    top: 0;
   }
 }
 </style>

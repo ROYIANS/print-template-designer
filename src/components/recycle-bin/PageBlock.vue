@@ -1,11 +1,11 @@
 <template>
   <div class="roy-page-block">
     <section v-for="(block, index) in blocks" :key="index">
-      <el-col
+      <roy-col
         v-for="(span, bIndex) in block"
         :key="bIndex"
         :span="span"
-      ></el-col>
+      ></roy-col>
     </section>
   </div>
 </template>
@@ -50,11 +50,11 @@ export default {
       transform: scale3d(1.05, 1.05, 1.05);
     }
 
-    .el-col {
+    .roy-col {
       height: 100%;
       border: 2px solid var(--roy-border-block-color);
 
-      & + .el-col {
+      & + .roy-col {
         border-left: none;
       }
     }

@@ -60,14 +60,12 @@ export const renderers = {
     renderItem(h, renderOpts, params) {
       let { property, data } = params
       return [
-        <el-color-picker
-          value={data[property]}
-          class="roy-color-picker"
-          size="mini"
+        <roy-color-picker
+          modelValue={data[property]}
           onChange={(val) => {
             data[property] = val
           }}
-        ></el-color-picker>
+        ></roy-color-picker>
       ]
     }
   }
