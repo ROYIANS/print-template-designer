@@ -14,6 +14,7 @@
       <div :style="isCollapsed && { width: widthCollapsed }" class="vsm--list">
         <sidebar-menu-item
           v-for="(item, index) in menu"
+          ref="menuItems"
           :key="index"
           :active-show="activeShow"
           :disable-hover="disableHover"
