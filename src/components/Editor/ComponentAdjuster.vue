@@ -520,11 +520,12 @@ export default {
 
   [class^='roy-component-adjuster__shape-point--'] {
     position: absolute;
-    background: transparent;
-    border: 1px solid var(--roy-text-color-regular);
+    border: 1px solid var(--roy-color-primary);
+    box-shadow: 0 0 2px #bbb;
+    background: #fff;
     width: 6px;
     height: 6px;
-    border-radius: 2px;
+    border-radius: 0;
     z-index: 9;
   }
 
