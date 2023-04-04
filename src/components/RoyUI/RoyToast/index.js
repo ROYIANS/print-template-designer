@@ -6,26 +6,28 @@ let instance
 let instances = []
 let seed = 1
 
-let Toast = function (options = {}) {
-  let userOnClose = options.onClose
-  let id = 'roy_toast_' + seed++
-  options.onClose = function () {
-    Toast.close(id, userOnClose)
-  }
-  instance = new ToastConstructor({
-    data: options
+const Toast = function (options = {}) {
+  return new Promise((resolve) => {
+    let userOnClose = options.onClose
+    let id = 'roy_toast_' + seed++
+    options.onClose = function () {
+      Toast.close(id, userOnClose)
+      resolve()
+    }
+    instance = new ToastConstructor({
+      data: options
+    })
+    instance.id = id
+    instance.$mount()
+    document.body.appendChild(instance.$el)
+    let verticalOffset = options.offset || 0
+    instances.forEach((item) => {
+      verticalOffset += item.$el.offsetHeight
+    })
+    instance.verticalOffset = verticalOffset
+    instance.visible = true
+    instances.push(instance)
   })
-  instance.id = id
-  instance.$mount()
-  document.body.appendChild(instance.$el)
-  let verticalOffset = options.offset || 0
-  instances.forEach((item) => {
-    verticalOffset += item.$el.offsetHeight
-  })
-  instance.verticalOffset = verticalOffset
-  instance.visible = true
-  instances.push(instance)
-  return instance
 }
 
 Toast.close = function (seed, userOnClose) {
@@ -49,12 +51,6 @@ Toast.close = function (seed, userOnClose) {
   for (let i = index; i < len - 1; i++) {
     let dom = instances[i].$el
     dom.style['top'] = parseInt(dom.style['top'], 10) - removedHeight + 'px'
-  }
-}
-
-Toast.closeAll = function () {
-  for (let i = instances.length - 1; i >= 0; i--) {
-    instances[i].close()
   }
 }
 

@@ -109,7 +109,7 @@ export const componentList = [
     groupStyle: {}
   },
   {
-    icon: 'iconfont icon-xianduan',
+    icon: 'ri-subtract-line',
     code: 'line',
     name: '直线',
     component: 'RoyLine',
@@ -123,7 +123,7 @@ export const componentList = [
     groupStyle: {}
   },
   {
-    icon: 'iconfont icon-xingzhuang-juxing',
+    icon: 'ri-checkbox-blank-line',
     code: 'rectangle',
     name: '矩形',
     component: 'RoyRect',
@@ -141,7 +141,7 @@ export const componentList = [
     groupStyle: {}
   },
   {
-    icon: 'iconfont icon-xingzhuang-tuoyuanxing',
+    icon: 'ri-checkbox-blank-circle-line',
     code: 'circle',
     name: '圆形',
     component: 'RoyCircle',
@@ -158,7 +158,7 @@ export const componentList = [
     groupStyle: {}
   },
   {
-    icon: 'iconfont icon-kongwujiaoxing',
+    icon: 'ri-star-line',
     code: 'star',
     name: '五角星',
     component: 'RoyStar',
@@ -173,7 +173,7 @@ export const componentList = [
     groupStyle: {}
   },
   {
-    icon: 'ri-image-fill',
+    icon: 'ri-image-2-line',
     code: 'image',
     name: '图片',
     component: 'RoyImage',

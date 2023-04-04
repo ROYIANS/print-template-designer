@@ -30,7 +30,7 @@
     "jspdf": "^2.5.1",
     "nanoid": "^4.0.0",
     "normalize.css": "^8.0.1",
-    "remixicon": "^2.5.0",
+    "remixicon": "^3.0.0",
     "shepherd.js": "^10.0.1",
     "vue": "2.6.11",
     "vue-print-nb": "^1.7.5",

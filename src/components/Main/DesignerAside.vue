@@ -1,6 +1,7 @@
 <template>
   <section :style="asideStyle" class="roy-designer-aside__main">
     <roy-sidebar-menu
+      ref="sideMenu"
       :collapsed="true"
       :menu="menuList"
       :theme="isNightMode ? '' : 'white-theme'"
@@ -98,16 +99,16 @@ export default {
       })
     },
     clickPaletteMenu() {
-      this.$refs.menuItem.forEach((item) => {
-        if (item.$vnode.key === 'palette' && this.curActiveComponentCode !== 'palette') {
-          item.$el.click()
+      this.$refs.sideMenu.$refs.menuItems.forEach((item) => {
+        if (item.item.code === 'palette' && this.curActiveComponentCode !== 'palette') {
+          this.onMenuSelect(null, item.item)
         }
       })
     },
     clickGlobalMenu() {
-      this.$refs.menuItem.forEach((item) => {
-        if (item.$vnode.key === 'setting' && this.curActiveComponentCode !== 'setting') {
-          item.$el.click()
+      this.$refs.sideMenu.$refs.menuItems.forEach((item) => {
+        if (item.item.code === 'setting' && this.curActiveComponentCode !== 'setting') {
+          this.onMenuSelect(null, item.item)
         }
       })
     }

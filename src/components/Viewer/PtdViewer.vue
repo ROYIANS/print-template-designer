@@ -145,10 +145,10 @@ export default {
           if (this.needToast) {
             toast(this.needToast, 'info', 5000)
           }
-          this.$el.querySelector('.roy-temp-holder').style.display = 'none'
         } else {
           this.isBlankPage = true
         }
+        this.$el.querySelector('.roy-temp-holder').style.display = 'none'
         this.$nextTick(() => {
           if (this.directExport) {
             this.exportPdf()
