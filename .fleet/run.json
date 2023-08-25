@@ -1,0 +1,10 @@
+{
+    "configurations": [
+        {
+            "type": "command",
+            "name": "npm run serve",
+            "program": "D:/App/environment/NodeJS/npm.cmd",
+            "args": ["run", "serve"],
+        },
+    ]
+}

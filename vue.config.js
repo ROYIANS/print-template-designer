@@ -17,15 +17,7 @@ module.exports = defineConfig({
     },
     externals:
       process.env.NODE_ENV === 'production'
-        ? [
-            'vue',
-            'vuex',
-            'element-ui',
-            'vxe-table',
-            'xe-utils',
-            'shepherd.js',
-            'remixicon'
-          ]
+        ? ['vue', 'vuex', 'element-ui', 'vxe-table', 'xe-utils', 'shepherd.js', 'remixicon']
         : [],
     plugins: [
       // 打包大小分析：只在用到的时候解开注释
