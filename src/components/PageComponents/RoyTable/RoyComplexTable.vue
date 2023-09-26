@@ -112,7 +112,7 @@
 import commonMixin from '@/mixin/commonMixin'
 import RoyTextInTable from './RoyTextInTable'
 import RoySimpleTable from './RoySimpleTable'
-import ResizeObserver from '@/components/PageComponents/RoyTable/ResizeObserver'
+import ResizeObserver from '@/utils/ResizeObserver'
 import TableDataSetting from '@/components/PageComponents/RoyTable/TableDataSetting'
 import { StyledComplexTable } from '@/components/PageComponents/style'
 import { mapState } from 'vuex'

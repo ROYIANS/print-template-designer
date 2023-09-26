@@ -47,9 +47,11 @@ export const componentList = [
       fontWeight: 'normal',
       fontStyle: 'normal',
       isUnderLine: false,
-      isDelLine: false
+      isDelLine: false,
+      elementPosition: 'default'
     },
-    groupStyle: {}
+    groupStyle: {},
+    position: {}
   },
   {
     icon: 'ri-t-box-line',
@@ -64,9 +66,13 @@ export const componentList = [
       fontSize: 12,
       background: null,
       rotate: 0,
-      padding: '0'
+      padding: '0',
+      elementPosition: 'default',
+      borderType: 'none',
+      borderWidth: 0
     },
-    groupStyle: {}
+    groupStyle: {},
+    position: {}
   },
   {
     icon: 'ri-table-2',
@@ -81,9 +87,11 @@ export const componentList = [
       background: '#FFFFFF',
       borderWidth: 2,
       borderColor: '#212121',
-      rotate: 0
+      rotate: 0,
+      elementPosition: 'default'
     },
-    groupStyle: {}
+    groupStyle: {},
+    position: {}
   },
   {
     icon: 'ri-table-line',
@@ -104,9 +112,11 @@ export const componentList = [
       background: '#FFFFFF',
       borderWidth: 2,
       borderColor: '#212121',
-      rotate: 0
+      rotate: 0,
+      elementPosition: 'default'
     },
-    groupStyle: {}
+    groupStyle: {},
+    position: {}
   },
   {
     icon: 'ri-subtract-line',
@@ -118,9 +128,11 @@ export const componentList = [
       width: 200,
       height: 1,
       background: '#000',
-      rotate: 0
+      rotate: 0,
+      elementPosition: 'default'
     },
-    groupStyle: {}
+    groupStyle: {},
+    position: {}
   },
   {
     icon: 'ri-checkbox-blank-line',
@@ -136,9 +148,11 @@ export const componentList = [
       width: 200,
       height: 200,
       background: null,
-      rotate: 0
+      rotate: 0,
+      elementPosition: 'default'
     },
-    groupStyle: {}
+    groupStyle: {},
+    position: {}
   },
   {
     icon: 'ri-checkbox-blank-circle-line',
@@ -153,9 +167,11 @@ export const componentList = [
       width: 200,
       height: 200,
       background: '#ffffff',
-      rotate: 0
+      rotate: 0,
+      elementPosition: 'default'
     },
-    groupStyle: {}
+    groupStyle: {},
+    position: {}
   },
   {
     icon: 'ri-star-line',
@@ -168,9 +184,11 @@ export const componentList = [
       height: 200,
       background: '#FF0000',
       icon: 'icon-shiwujiaoxing',
-      rotate: 0
+      rotate: 0,
+      elementPosition: 'default'
     },
-    groupStyle: {}
+    groupStyle: {},
+    position: {}
   },
   {
     icon: 'ri-image-2-line',
@@ -187,8 +205,10 @@ export const componentList = [
       width: 200,
       height: 200,
       background: null,
-      rotate: 0
+      rotate: 0,
+      elementPosition: 'default'
     },
-    groupStyle: {}
+    groupStyle: {},
+    position: {}
   }
 ]

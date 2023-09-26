@@ -17,10 +17,14 @@ export const state = {
     pageSize: 'A4',
     // 页面方向 l 横向长 p 纵向长
     pageDirection: 'p',
+    // 页面位置布局 fixed 固定 relative 相对
+    pageLayout: 'fixed',
     // 页面长度：mm
     pageWidth: 210,
     // 页面高度：mm
     pageHeight: 297,
+    // 页面当前高度: mm （流式布局）
+    pageCurHeight: 297,
     // 页面下边距 mm
     pageMarginBottom: 8,
     // 页面上边距 mm
@@ -161,20 +165,44 @@ export const mutations = {
   },
 
   setShapeStyle({ curComponent }, { top, left, width, height, rotate }) {
-    if (top) {
+    if (!isNaN(top)) {
       curComponent.style.top = Math.round(top)
     }
-    if (left) {
+    if (!isNaN(left)) {
       curComponent.style.left = Math.round(left)
     }
-    if (width) {
+    if (!isNaN(width)) {
       curComponent.style.width = Math.round(width)
     }
-    if (height) {
+    if (!isNaN(height)) {
       curComponent.style.height = Math.round(height)
     }
-    if (rotate) {
+    if (!isNaN(rotate)) {
       curComponent.style.rotate = Math.round(rotate)
+    }
+    if (top || left) {
+      // FIXME: 只在坐标变化后触发，如果是宽高变化，则在外部的监听器中已经做了处理，这里无需重复执行。
+      store.commit('printTemplateModule/setShapePosition', { top, left, width, height })
+    }
+  },
+
+  setShapePosition({ curComponent }, { top, left, width, height }) {
+    if (!curComponent || !curComponent.position) {
+      return
+    }
+    // 调整大小和位置后修改 position 信息
+    curComponent.position = {
+      ...curComponent.position,
+      lx: Math.round(!isNaN(left) ? left : curComponent.position.lx),
+      ty: Math.round(!isNaN(top) ? top : curComponent.position.ty)
+    }
+
+    if (!isNaN(width) && !isNaN(height)) {
+      curComponent.position = {
+        ...curComponent.position,
+        rx: Math.round(curComponent.position.lx + (width ?? curComponent.position.rx)),
+        by: Math.round(curComponent.position.ty + (height ?? curComponent.position.by))
+      }
     }
   },
 
@@ -187,6 +215,26 @@ export const mutations = {
   },
 
   addComponent(state, { component, index }) {
+    // 初始化 position 信息
+    component.position = {
+      lx: component.style.left,
+      ty: component.style.top,
+      rx: isNaN(component.style.width) ? -Infinity : component.style.left + component.style.width,
+      by: isNaN(component.style.height) ? -Infinity : component.style.top + component.style.height
+    }
+
+    if (component.position.rx === -Infinity || component.position.by === -Infinity) {
+      setTimeout(() => {
+        const comEle = document.getElementById(`roy-component-${component.id}`)
+        const rect = comEle.getBoundingClientRect()
+        component.position = {
+          ...component.position,
+          rx: component.position.lx + rect.width,
+          by: component.position.ty + rect.height
+        }
+      }, 100)
+    }
+
     if (index !== undefined) {
       state.componentData.splice(index, 0, component)
     } else {

@@ -151,15 +151,26 @@ export class AutoRender {
     if (restrictWidth !== null) {
       rootElement.style.width = `${restrictWidth}px`
     }
+    this.tempHolder.appendChild(rootElement)
+    await RenderUtil.wait()
+    const { height: richTextRealHeight } = rootElement.getBoundingClientRect()
+    this.tempHolder.removeChild(rootElement)
+    if (outerStyle.top + richTextRealHeight <= this.maxPageUseHeight) {
+      this.addElementToCurPage(rootElement.outerHTML, outerStyle.top + richTextRealHeight)
+      newElement = null
+      pEle = null
+      rootElement = null
+      return
+    }
     const autoSplitText = new AutoSplitText(this.tempHolder, rootElement)
     const richTextImgList = await autoSplitText.run()
     newElement.style.display = 'inline-grid'
     newElement.innerHTML = ''
     newElement.style.transform = `rotate(${style.rotate}deg)`
     newElement.style.border = border
-    const appendImg = async (imgIndex) => {
+    const appendImg = async (imgIndex, secondAppend = false) => {
       let curHeight = this.curPageUsedHeight !== 0 ? 0 : outerStyle.top
-      if (imgIndex !== 0) {
+      if (imgIndex !== 0 || secondAppend) {
         curHeight = this.realPageMarginTop
         rootElement.style.top = `${this.realPageMarginTop}px`
       }
@@ -167,11 +178,11 @@ export class AutoRender {
         const imgData = richTextImgList[i]
         const lastHeight = curHeight
         curHeight += imgData.height
-        if (curHeight > this.maxPageUseHeight) {
+        if (curHeight > this.maxPageUseHeight && imgData.height <= this.maxPageUseHeight) {
           let elementHTML = rootElement.outerHTML
           this.addElementToCurPage(elementHTML, lastHeight)
           newElement.innerHTML = ''
-          await appendImg(i)
+          await appendImg(i, true)
           break
         } else {
           const img = document.createElement('img')

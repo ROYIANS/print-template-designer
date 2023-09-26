@@ -48,7 +48,7 @@ import html2canvas from 'html2canvas'
 import { jsPDF } from 'jspdf'
 import print from 'vue-print-nb'
 import toast from '@/utils/toast'
-import { AutoRender } from '@/components/Viewer/auto-render'
+import { getPageGenerator } from '@/components/Viewer/page-generator'
 
 /**
  * 打印模板预览组件
@@ -131,17 +131,16 @@ export default {
     initMounted() {
       this.$nextTick(async () => {
         this.initCompleted = false
-        const renderer = new AutoRender({
+        const renderer = getPageGenerator({
           renderElements: this.componentData,
           pagerConfig: this.pageConfig,
           dataSet: this.dataSet,
-          dataSource: this.dataSource,
-          tempHolder: this.$refs.tempHolder
+          dataSource: this.dataSource
         })
-        const renderPage = await renderer.run()
-        if (renderPage.length) {
+        const renderPageHTML = await renderer.render()
+        if (renderPageHTML.length) {
           const viewerElement = this.$refs.viewer
-          viewerElement.innerHTML = renderPage.join('')
+          viewerElement.innerHTML = renderPageHTML
           if (this.needToast) {
             toast(this.needToast, 'info', 5000)
           }

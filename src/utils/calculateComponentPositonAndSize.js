@@ -307,7 +307,15 @@ function calculateRight(style, curPosition, proportion, needLockProportion, poin
   style.left = Math.round(newCenter.x - newWidth / 2)
 }
 
-function calculateBottom(style, curPosition, proportion, needLockProportion, pointInfo) {
+function calculateBottom(
+  style,
+  curPosition,
+  proportion,
+  needLockProportion,
+  pointInfo,
+  minHeight,
+  minWidth
+) {
   const { symmetricPoint, curPoint } = pointInfo
   const rotatedcurPosition = calculateRotatedPointCoordinate(curPosition, curPoint, -style.rotate)
   const rotatedBottomMiddlePoint = calculateRotatedPointCoordinate(
@@ -335,7 +343,8 @@ function calculateBottom(style, curPosition, proportion, needLockProportion, poi
     width = newHeight * proportion
   }
 
-  style.width = Math.max(width, MIN_WIDTH)
+  style.width = Math.max(width, MIN_WIDTH, minWidth)
+  console.log(minHeight)
   style.height = Math.max(Math.round(newHeight), MIN_HEIGHT)
   style.top = Math.round(newCenter.y - newHeight / 2)
   style.left = Math.round(newCenter.x - style.width / 2)
@@ -380,7 +389,9 @@ export default function calculateComponentPositionAndSize(
   curPosition,
   proportion,
   needLockProportion,
-  pointInfo
+  pointInfo,
+  minHeight,
+  minWidth
 ) {
-  funcs[name](style, curPosition, proportion, needLockProportion, pointInfo)
+  funcs[name](style, curPosition, proportion, needLockProportion, pointInfo, minHeight, minWidth)
 }
