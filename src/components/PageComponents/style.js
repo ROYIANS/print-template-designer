@@ -127,6 +127,7 @@ const simpleTableProps = Object.assign({}, commonProps, {
 const complexTableProps = Object.assign({}, commonProps, {})
 
 export const StyledText = styled('div', textProps)`
+  box-sizing: border-box;
   width: 100%;
   height: 100%;
   overflow: hidden;
@@ -174,6 +175,7 @@ export const StyledText = styled('div', textProps)`
 `
 
 export const StyledSimpleText = styled('div', textProps)`
+  box-sizing: border-box;
   width: 100%;
   height: 100%;
   overflow: hidden;
@@ -217,6 +219,7 @@ export const StyledSimpleText = styled('div', textProps)`
 `
 
 export const StyledRect = styled('div', rectProps)`
+  box-sizing: border-box;
   width: 100%;
   height: 100%;
   overflow: hidden;
@@ -235,6 +238,7 @@ export const StyledRect = styled('div', rectProps)`
 `
 
 export const StyledImage = styled('div', imageProps)`
+  box-sizing: border-box;
   width: 100%;
   height: 100%;
   overflow: hidden;
@@ -261,6 +265,7 @@ export const StyledImage = styled('div', imageProps)`
 `
 
 export const StyledCircle = styled('div', circleProps)`
+  box-sizing: border-box;
   width: 100%;
   height: 100%;
   overflow: hidden;
@@ -306,7 +311,8 @@ export const StyledStar = styled('div', starProps)`
 export const StyledSimpleTable = styled('div', simpleTableProps)`
   width: 100%;
   height: auto;
-  position: ${(props) => (props.isRelative ? 'relative' : 'absolute')};
+  position: relative;
+  //position: ${(props) => (props.isRelative ? 'relative' : 'absolute')};
   border: none;
   padding: 0;
   margin: 0;
@@ -332,21 +338,25 @@ export const StyledSimpleTable = styled('div', simpleTableProps)`
   }
 
   .roy-simple-table__cell__corner {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
     background: var(--roy-color-primary);
-    box-shadow: rgba(99, 99, 99, 0.2) 0 2px 8px 0;
-    position: absolute;
     right: 0;
     bottom: 0;
-    opacity: 0.5;
+    opacity: 0.9;
     cursor: nw-resize !important;
-    z-index: 1;
+    position: absolute;
+    border: 1px solid var(--roy-color-primary);
+    box-shadow: 0 0 2px #bbb;
+    background: #fff;
+    border-radius: 0;
+    z-index: 9;
   }
 `
 
 export const StyledComplexTable = styled('div', complexTableProps)`
-  position: absolute;
+  //position: absolute;
+  position: relative;
   border: none;
   padding: 0;
   margin: 0;
@@ -375,11 +385,11 @@ export const StyledComplexTable = styled('div', complexTableProps)`
   .roy-complex-table-cell-in {
     height: 100%;
     width: 100%;
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
+    //position: absolute;
+    //left: 0;
+    //right: 0;
+    //top: 0;
+    //bottom: 0;
     align-items: center;
     display: flex;
   }

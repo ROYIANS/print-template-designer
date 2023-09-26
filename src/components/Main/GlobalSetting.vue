@@ -210,6 +210,24 @@ export default {
           }
         },
         {
+          title: '页面位置布局',
+          field: 'pageLayout',
+          span: 24,
+          itemRender: {
+            name: '$select',
+            options: [
+              {
+                label: '固定位置',
+                value: 'fixed'
+              },
+              {
+                label: '相对位置',
+                value: 'relative'
+              }
+            ]
+          }
+        },
+        {
           title: '页面上边距',
           field: 'pageMarginTop',
           span: 24,

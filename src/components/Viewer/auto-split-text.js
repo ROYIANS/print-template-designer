@@ -7,23 +7,17 @@
  * ╠╦╝║ ║╚╦╝║╠═╣║║║╚═╗
  * ╩╚═╚═╝ ╩ ╩╩ ╩╝╚╝╚═╝
  */
-import { RenderUtil } from '@/components/Viewer/render-util'
 import html2canvas from 'html2canvas'
 
 const SCALE = devicePixelRatio * 2
 
 export class AutoSplitText {
-  constructor(tempHolder, toSplitElement) {
-    this.tempHolder = tempHolder
+  constructor(toSplitElement) {
     this.toSplitElement = toSplitElement
   }
 
   async run() {
-    this.tempHolder.appendChild(this.toSplitElement)
-    await RenderUtil.wait()
-    const imgList = await this.splitText()
-    this.tempHolder.removeChild(this.toSplitElement)
-    return imgList
+    return await this.splitText()
   }
 
   async splitText() {
