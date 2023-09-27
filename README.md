@@ -166,5 +166,6 @@ app.vue
 
 ![Alt](https://repobeats.axiom.co/api/embed/dd83a2eca0ff7a4c1772a68c4691980199f7caef.svg "Repobeats analytics image")
 
-[![Star History Chart](https://api.star-history.com/svg?repos=print-template-designer/print-template-designer&type=Date)](https://star-history.com/#print-template-designer/print-template-designer&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=ROYIANS/print-template-designer&type=Date)](https://star-history.com/#ROYIANS/print-template-designer&Date)
+
 
