@@ -181,7 +181,9 @@ class BasePageGenerator {
   }
 
   getPageHTML() {
-    const pageNums = Object.keys(this.pages).sort()
+    const pageNums = Object.keys(this.pages).sort((a, b) => {
+      return +a - +b
+    })
     let pageContent = ''
     for (let pageNum of pageNums) {
       let page = this.pages[pageNum]
@@ -534,6 +536,7 @@ class BasePageGenerator {
   }
 
   async renderRoyImage({ component, curPageUsedHeight, pageNumber = 1 }) {
+    debugger
     let { element, style } = this.generateRoyImage(component)
     if (curPageUsedHeight && curPageUsedHeight + element.style.height > this.maxPageUseHeight) {
       pageNumber++
@@ -923,7 +926,7 @@ class RelativePageGenerator extends FixedPageGenerator {
 
   async renderUniqueElement(uniqueElements) {
     for (let i = 0; i < uniqueElements.length; i++) {
-      const curElement = this.renderElements[i]
+      const curElement = uniqueElements[i]
       const { component } = curElement
       const { nextPageUsedHeight, nextPageNumber } = await this.getNextRenderInfo(curElement)
       const { page, pageUsedHeight, pageNumber } = await this[`render${component}`]({
