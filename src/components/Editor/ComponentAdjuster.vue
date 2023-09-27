@@ -133,7 +133,9 @@ export default {
     },
     adjusterStyle() {
       return {
-        border: this.isActive ? '0.5px dashed var(--roy-text-color-secondary)' : undefined
+        border: this.isActive
+          ? '0.5px solid var(--roy-text-color-secondary)'
+          : '0.5px dashed var(--roy-text-color-secondary)'
       }
     }
   },
@@ -412,6 +414,8 @@ export default {
         component: this.element,
         index: this.index
       })
+      this.$store.commit('printTemplateModule/setPaletteCount')
+
       if (this.element.isLock) {
         return
       }

@@ -97,6 +97,7 @@ export default {
           component: null,
           index: null
         })
+        this.$store.commit('printTemplateModule/setComponentsCount')
       }
     }
   },
