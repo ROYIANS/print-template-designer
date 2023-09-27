@@ -62,6 +62,12 @@ export default {
           img: 'https://s2.loli.net/2023/01/13/4iJbdwgy5rpI8em.png',
           title: '公司采购安排单',
           desp: '测试用'
+        },
+        {
+          url: '/templates/complex-text.rptd',
+          img: 'https://s2.loli.net/2023/09/27/i4cpTfgHj2bNxSZ.png',
+          title: '富文本分页测试',
+          desp: '测试用'
         }
       ]
     }
