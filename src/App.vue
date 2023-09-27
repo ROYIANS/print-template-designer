@@ -32,6 +32,7 @@
       :data-source="dataSource"
       :page-config="pageConfig"
       :visible.sync="viewerVisible"
+      :need-toast="false"
     />
     <TemplateViews v-if="templateVisible" :visible.sync="templateVisible" @load="loadTemp" />
     <div class="fork-me">
@@ -81,11 +82,19 @@ export default {
       ],
       headIconConfig: [
         {
-          name: 'Github',
+          name: 'template',
           icon: 'ri-file-word-2-line',
           title: '预设模板',
           event: () => {
             this.templateVisible = true
+          }
+        },
+        {
+          name: 'dataset',
+          icon: 'ri-database-line',
+          title: '数据源模拟',
+          event: () => {
+            toast('开发中')
           }
         },
         {

@@ -116,12 +116,12 @@ export default {
             },
             {
               code: 'add',
-              name: '新增行',
+              name: '新增一列',
               icon: 'ri-add-line'
             },
             {
               code: 'remove',
-              name: '删除行',
+              name: '删除选中列',
               icon: 'ri-subtract-line'
             }
           ],
