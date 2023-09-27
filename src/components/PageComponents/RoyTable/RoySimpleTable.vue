@@ -89,6 +89,7 @@ const defaultTableCell = {
     height: '100%',
     fontSize: 12,
     background: null,
+    borderType: 'none',
     rotate: 0,
     padding: '0'
   },

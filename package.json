@@ -1,6 +1,6 @@
 {
   "name": "print-template-designer",
-  "version": "0.1.15",
+  "version": "0.2.0",
   "private": false,
   "author": {
     "email": "admin@royians.cn",
@@ -21,6 +21,11 @@
   "files": [
     "lib"
   ],
+  "peerDependencies": {
+    "vue": "^2.6.0",
+    "vuex": "^3.6.0",
+    "vxe-table": ">=2.10.0"
+  },
   "dependencies": {
     "@wangeditor/editor": "^5.1.22",
     "axios": "^1.2.2",
@@ -42,6 +47,8 @@
     "xe-utils": "^3.5.7"
   },
   "devDependencies": {
+    "@babel/plugin-proposal-object-rest-spread": "^7.20.7",
+    "@babel/plugin-proposal-optional-chaining": "^7.21.0",
     "@babel/core": "^7.12.16",
     "@babel/eslint-parser": "^7.12.16",
     "@vue/cli-plugin-babel": "~5.0.0",

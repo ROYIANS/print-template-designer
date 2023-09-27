@@ -103,6 +103,24 @@ export const paletteConfigList = {
         }
       }
     }
+    // {
+    //   title: '元素位置',
+    //   field: 'elementPosition',
+    //   span: 24,
+    //   itemRender: {
+    //     name: '$radio',
+    //     options: [
+    //       {
+    //         label: '是',
+    //         value: true
+    //       },
+    //       {
+    //         label: '否',
+    //         value: false
+    //       }
+    //     ]
+    //   }
+    // }
   ],
   RoySimpleText: [
     {
@@ -401,6 +419,28 @@ export const paletteConfigList = {
           max: 360
         }
       }
+    },
+    {
+      title: '元素位置',
+      field: 'elementPosition',
+      span: 24,
+      itemRender: {
+        name: '$radio',
+        options: [
+          {
+            label: '跟随全局配置（默认）',
+            value: 'default'
+          },
+          {
+            label: '固定位置',
+            value: 'fixed'
+          },
+          {
+            label: '重复位置',
+            value: 'repeated'
+          }
+        ]
+      }
     }
   ],
   RoyRect: [
@@ -500,6 +540,28 @@ export const paletteConfigList = {
           min: 0,
           max: 360
         }
+      }
+    },
+    {
+      title: '元素位置',
+      field: 'elementPosition',
+      span: 24,
+      itemRender: {
+        name: '$radio',
+        options: [
+          {
+            label: '跟随全局配置（默认）',
+            value: 'default'
+          },
+          {
+            label: '固定位置',
+            value: 'fixed'
+          },
+          {
+            label: '重复位置',
+            value: 'repeated'
+          }
+        ]
       }
     }
   ],
@@ -601,6 +663,28 @@ export const paletteConfigList = {
           max: 360
         }
       }
+    },
+    {
+      title: '元素位置',
+      field: 'elementPosition',
+      span: 24,
+      itemRender: {
+        name: '$radio',
+        options: [
+          {
+            label: '跟随全局配置（默认）',
+            value: 'default'
+          },
+          {
+            label: '固定位置',
+            value: 'fixed'
+          },
+          {
+            label: '重复位置',
+            value: 'repeated'
+          }
+        ]
+      }
     }
   ],
   RoyLine: [
@@ -673,6 +757,28 @@ export const paletteConfigList = {
           max: 360
         }
       }
+    },
+    {
+      title: '元素位置',
+      field: 'elementPosition',
+      span: 24,
+      itemRender: {
+        name: '$radio',
+        options: [
+          {
+            label: '跟随全局配置（默认）',
+            value: 'default'
+          },
+          {
+            label: '固定位置',
+            value: 'fixed'
+          },
+          {
+            label: '重复位置',
+            value: 'repeated'
+          }
+        ]
+      }
     }
   ],
   RoyStar: [
@@ -737,6 +843,28 @@ export const paletteConfigList = {
           max: 360
         }
       }
+    },
+    {
+      title: '元素位置',
+      field: 'elementPosition',
+      span: 24,
+      itemRender: {
+        name: '$radio',
+        options: [
+          {
+            label: '跟随全局配置（默认）',
+            value: 'default'
+          },
+          {
+            label: '固定位置',
+            value: 'fixed'
+          },
+          {
+            label: '重复位置',
+            value: 'repeated'
+          }
+        ]
+      }
     }
   ],
   RoySimpleTable: [
@@ -772,6 +900,24 @@ export const paletteConfigList = {
         }
       }
     }
+    // {
+    //   title: '元素位置',
+    //   field: 'elementPosition',
+    //   span: 24,
+    //   itemRender: {
+    //     name: '$radio',
+    //     options: [
+    //       {
+    //         label: '是',
+    //         value: true
+    //       },
+    //       {
+    //         label: '否',
+    //         value: false
+    //       }
+    //     ]
+    //   }
+    // }
   ],
   RoyComplexTable: [
     {
@@ -863,6 +1009,24 @@ export const paletteConfigList = {
         }
       }
     }
+    // {
+    //   title: '元素位置',
+    //   field: 'elementPosition',
+    //   span: 24,
+    //   itemRender: {
+    //     name: '$radio',
+    //     options: [
+    //       {
+    //         label: '是',
+    //         value: true
+    //       },
+    //       {
+    //         label: '否',
+    //         value: false
+    //       }
+    //     ]
+    //   }
+    // }
   ],
   RoyTextIn: [
     {
@@ -1189,6 +1353,28 @@ export const paletteConfigList = {
           min: 0,
           max: 360
         }
+      }
+    },
+    {
+      title: '元素位置',
+      field: 'elementPosition',
+      span: 24,
+      itemRender: {
+        name: '$radio',
+        options: [
+          {
+            label: '跟随全局配置（默认）',
+            value: 'default'
+          },
+          {
+            label: '固定位置',
+            value: 'fixed'
+          },
+          {
+            label: '重复位置',
+            value: 'repeated'
+          }
+        ]
       }
     }
   ]

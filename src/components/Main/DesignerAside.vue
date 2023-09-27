@@ -80,6 +80,7 @@ export default {
     ...mapState({
       paletteCount: (state) => state.printTemplateModule.paletteCount,
       globalCount: (state) => state.printTemplateModule.globalCount,
+      componentsCount: (state) => state.printTemplateModule.componentsCount,
       isNightMode: (state) => state.printTemplateModule.nightMode.isNightMode
     }),
     asideStyle() {
@@ -105,6 +106,13 @@ export default {
         }
       })
     },
+    clickComponentMenu() {
+      this.$refs.sideMenu.$refs.menuItems.forEach((item) => {
+        if (item.item.code === 'component' && this.curActiveComponentCode !== 'component') {
+          this.onMenuSelect(null, item.item)
+        }
+      })
+    },
     clickGlobalMenu() {
       this.$refs.sideMenu.$refs.menuItems.forEach((item) => {
         if (item.item.code === 'setting' && this.curActiveComponentCode !== 'setting') {
@@ -120,6 +128,9 @@ export default {
   watch: {
     paletteCount() {
       this.clickPaletteMenu()
+    },
+    componentsCount() {
+      this.clickComponentMenu()
     },
     globalCount() {
       this.clickGlobalMenu()

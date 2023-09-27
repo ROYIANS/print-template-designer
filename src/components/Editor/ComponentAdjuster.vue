@@ -46,6 +46,7 @@ import commonMixin from '@/mixin/commonMixin'
 import { mod360 } from '@/utils/translate'
 import calculateComponentPositionAndSize from '@/utils/calculateComponentPositonAndSize'
 import { isPreventDrop } from '@/utils/html-util'
+import ResizeObserver from '@/utils/ResizeObserver'
 import eventBus from '@/utils/eventBus'
 import { mapState } from 'vuex'
 
@@ -117,7 +118,7 @@ export default {
     pointList() {
       const isTable = ['RoySimpleTable', 'RoyComplexTable'].includes(this.element.component)
       if (isTable) {
-        return []
+        return ['b']
       }
       if (['RoyLine'].includes(this.element.component)) {
         return ['r', 'l']
@@ -132,16 +133,43 @@ export default {
     },
     adjusterStyle() {
       return {
-        border: this.isActive ? '0.5px dashed var(--roy-text-color-secondary)' : undefined
+        border: this.isActive
+          ? '0.5px solid var(--roy-text-color-secondary)'
+          : '0.5px dashed var(--roy-text-color-secondary)'
       }
     }
   },
   methods: {
     initMounted() {
       this.cursors = this.getCursor()
+      this.observeElementShape()
+    },
+    observeElementShape() {
+      this.$nextTick(() => {
+        // 这边还是观察外层（虚线框的大小而不是里面组件的大小吧）
+        const element = this.$refs.slot
+        if (!element) {
+          return
+        }
+        const resizeObserver = new ResizeObserver()
+        const callback = () => {
+          this.$nextTick(() => {
+            this.$store.commit('printTemplateModule/setShapePosition', {
+              width: element.clientWidth,
+              height: element.clientHeight
+            })
+          })
+        }
+        resizeObserver.onElResize(element, callback)
+      })
     },
     getPointStyle(point) {
-      const { width, height } = this.defaultStyle
+      let { width, height } = this.defaultStyle
+      const adjuster = this.$refs.adjuster
+      if (adjuster && (!width || isNaN(width) || !height || isNaN(height))) {
+        width = adjuster.clientWidth
+        height = adjuster.clientHeight
+      }
       const hasT = /t/.test(point)
       const hasB = /b/.test(point)
       const hasL = /l/.test(point)
@@ -262,14 +290,21 @@ export default {
       e.preventDefault()
 
       const style = { ...this.defaultStyle }
+      const element = this.$el.querySelector(`#roy-component-${this.element.id}`)
+
+      let newStyle = {
+        ...style,
+        width: isNaN(style.width) ? element.clientWidth : style.width,
+        height: isNaN(style.height) ? element.clientHeight : style.height
+      }
 
       // 组件宽高比
-      const proportion = style.width / style.height
+      const proportion = newStyle.width / newStyle.height
 
       // 组件中心点
       const center = {
-        x: style.left + style.width / 2,
-        y: style.top + style.height / 2
+        x: newStyle.left + newStyle.width / 2,
+        y: newStyle.top + newStyle.height / 2
       }
 
       // 获取画布位移信息
@@ -316,9 +351,11 @@ export default {
           y: (moveEvent.clientY - Math.round(editorRectInfo.top)) / this.scale
         }
 
+        const isTable = ['RoySimpleTable', 'RoyComplexTable'].includes(this.element.component)
+
         calculateComponentPositionAndSize(
           point,
-          style,
+          newStyle,
           curPosition,
           proportion,
           needLockProportion,
@@ -326,10 +363,14 @@ export default {
             center,
             curPoint,
             symmetricPoint
-          }
+          },
+          isTable ? element.clientHeight : 0
         )
 
-        this.$store.commit('printTemplateModule/setShapeStyle', style)
+        this.$store.commit('printTemplateModule/setShapeStyle', {
+          ...newStyle,
+          width: isTable ? 'auto' : newStyle.width
+        })
       }
 
       const up = () => {
@@ -373,6 +414,8 @@ export default {
         component: this.element,
         index: this.index
       })
+      this.$store.commit('printTemplateModule/setPaletteCount')
+
       if (this.element.isLock) {
         return
       }
@@ -383,7 +426,7 @@ export default {
       if (!this.isActive) {
         return
       }
-      let adjuster = this.$refs.slot
+      let adjuster = this.$el.querySelector(`#roy-component-${this.element.id}`)
       const pos = { ...this.defaultStyle }
       const startY = e.clientY
       const startX = e.clientX
@@ -533,6 +576,7 @@ export default {
     cursor: initial;
     width: 100%;
     height: 100%;
+    overflow: hidden;
   }
 }
 </style>

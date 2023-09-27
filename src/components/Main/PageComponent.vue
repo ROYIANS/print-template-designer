@@ -35,7 +35,7 @@ export default {
 .roy-page-component {
   align-items: center;
   grid-auto-rows: 105px;
-  grid-template-columns: auto auto auto;
+  grid-template-columns: repeat(3, 80px);
   overflow: auto;
   height: calc(100% - 16px);
   padding: 8px;

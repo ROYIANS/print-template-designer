@@ -7,22 +7,14 @@
  * ╠╦╝║ ║╚╦╝║╠═╣║║║╚═╗
  * ╩╚═╚═╝ ╩ ╩╩ ╩╝╚╝╚═╝
  */
-import { CONFIG } from '@/components/Viewer/viewer-constant'
 import { StyledSimpleText, StyledText } from '@/components/PageComponents/style'
 import Vue from 'vue'
 import { RenderUtil } from '@/components/Viewer/render-util'
 
 export class AutoTable {
-  constructor({ type, propValue, pagerConfig, tempHolder, dataSet, dataSource }) {
-    const { COMMON_SCALE } = CONFIG
-    const { pageHeight, pageWidth, pageDirection, pageMarginBottom, pageMarginTop } = pagerConfig
-    this.realPageHeight = (pageDirection === 'p' ? pageHeight : pageWidth) * COMMON_SCALE
-    this.realPageMarginBottom = pageMarginBottom * COMMON_SCALE
-    this.realPageMarginTop = pageMarginTop * COMMON_SCALE
+  constructor({ type, propValue, dataSet, dataSource }) {
     this.type = type
     this.propValue = propValue
-    this.pagerConfig = pagerConfig
-    this.tempHolder = tempHolder
     this.dataSet = dataSet
     this.dataSource = dataSource
   }
