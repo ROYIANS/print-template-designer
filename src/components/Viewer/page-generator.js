@@ -230,18 +230,29 @@ class BasePageGenerator {
 
   async renderUniqueElement(uniqueElements) {
     for (let i = 0; i < uniqueElements.length; i++) {
-      const curElement = this.renderElements[i]
+      const curElement = uniqueElements[i]
       const { component } = curElement
       await this[`render${component}`]({ component: curElement })
     }
   }
 
   async renderRepeatElement(repeatElements) {
-    console.log(repeatElements)
+    let pages = Object.keys(this.pages)
+    for (let i = 0; i < repeatElements.length; i++) {
+      const curElement = repeatElements[i]
+      const { component } = curElement
+      pages.map(async (page) => {
+        await this[`render${component}`]({ component: curElement, pageNumber: page })
+      })
+    }
   }
 
-  async renderFixedElement(fixedElements) {
-    console.log(fixedElements)
+  async renderFixedElement(fixedElements, pageNum = 1) {
+    for (let i = 0; i < fixedElements.length; i++) {
+      const curElement = fixedElements[i]
+      const { component } = curElement
+      await this[`render${component}`]({ component: curElement, pageNumber: pageNum })
+    }
   }
 
   generateRoySimpleText(component) {
@@ -417,7 +428,10 @@ class BasePageGenerator {
     instance.$mount()
     let newElement = instance.$el
     newElement.style.width = `${style.width}px`
-    newElement.style.height = `${style.height}px`
+    newElement.style.height = AUTO_PAGE_COMPONENT.includes(element.component)
+      ? 'auto'
+      : `${style.height}px`
+    newElement.style.minHeight = style.minHeight ? `${style.minHeight}px` : ''
     newElement.style.position = 'absolute'
     newElement.style.left = `${style.left}px`
     newElement.style.top = `${style.top}px`
