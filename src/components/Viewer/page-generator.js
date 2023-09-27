@@ -766,7 +766,11 @@ class FixedPageGenerator extends BasePageGenerator {
         let cleanChildNode = parentElement ? innerElement.cloneNode() : element.cloneNode()
         let cleanParentNode = element.cloneNode()
         if (index > 0) {
-          cleanParentNode.style.top = `${this.realPageMarginTop}px`
+          if (parentElement) {
+            cleanParentNode.style.top = `${this.realPageMarginTop}px`
+          } else {
+            cleanChildNode.style.top = `${this.realPageMarginTop}px`
+          }
           pageUsedHeight = this.realPageMarginTop
           pageNumber++
           page = this.getPage(pageNumber)
@@ -782,8 +786,10 @@ class FixedPageGenerator extends BasePageGenerator {
         }
         if (parentElement) {
           cleanParentNode.innerHTML = cleanChildNode.outerHTML
+          page.appendHTML(cleanParentNode.outerHTML)
+        } else {
+          page.appendHTML(cleanChildNode.outerHTML)
         }
-        page.appendHTML(cleanParentNode.outerHTML)
         pageUsedHeight = table.height + this.realPageMarginTop
       })
     } else {

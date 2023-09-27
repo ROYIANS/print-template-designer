@@ -110,7 +110,7 @@ export default {
       if (this.isExportPDF) {
         return `正在导出PDF，正在处理第${this.curPage}页/共${this.totalPage}页`
       } else {
-        return '正在生成页面...'
+        return '正在生成页面...请耐心等待'
       }
     }
   },
