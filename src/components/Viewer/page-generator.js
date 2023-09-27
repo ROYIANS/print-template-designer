@@ -536,7 +536,6 @@ class BasePageGenerator {
   }
 
   async renderRoyImage({ component, curPageUsedHeight, pageNumber = 1 }) {
-    debugger
     let { element, style } = this.generateRoyImage(component)
     if (curPageUsedHeight && curPageUsedHeight + element.style.height > this.maxPageUseHeight) {
       pageNumber++
