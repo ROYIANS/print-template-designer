@@ -967,7 +967,10 @@ class RelativePageGenerator extends FixedPageGenerator {
     let relativeHeight = 0
     const { lx: aLx, rx: aRx, ty: aTy, by: aBy } = positionA
     const { lx: bLx, rx: bRx, ty: bTy } = positionB
-    isIntersect = bLx <= aRx || aLx <= bRx
+    const aMidX = (aRx - aLx) / 2 + aLx
+    const bMidX = (bRx - bLx) / 2 + bLx
+    const abMidX = (aRx - aLx) / 2 + (bRx - bLx) / 2
+    isIntersect = Math.abs(aMidX - bMidX) <= Math.abs(abMidX)
     relativeHeight = bTy - aBy
     isBlow = bTy >= aTy
     return {
