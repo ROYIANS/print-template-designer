@@ -115,5 +115,6 @@ export const CONFIG = {
       w: 81,
       h: 114
     }
-  }
+  },
+  AUTO_PAGE_COMPONENT: ['RoyText', 'RoySimpleTable', 'RoyComplexTable']
 }
