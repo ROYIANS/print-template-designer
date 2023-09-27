@@ -1,6 +1,6 @@
 {
   "name": "print-template-designer",
-  "version": "0.1.15",
+  "version": "0.2.0",
   "private": false,
   "author": {
     "email": "admin@royians.cn",
@@ -21,6 +21,11 @@
   "files": [
     "lib"
   ],
+  "peerDependencies": {
+    "vue": "^2.6.0",
+    "vuex": "^3.6.0",
+    "vxe-table": ">=2.10.0"
+  },
   "dependencies": {
     "@wangeditor/editor": "^5.1.22",
     "axios": "^1.2.2",
