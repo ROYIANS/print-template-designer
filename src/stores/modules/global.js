@@ -57,6 +57,7 @@ export const state = {
   isClickComponent: false,
   globalCount: 0,
   paletteCount: 0,
+  componentsCount: 0,
   curTableSettingId: null
 }
 export const getters = {}
@@ -263,6 +264,10 @@ export const mutations = {
 
   setPaletteCount(state) {
     state.paletteCount++
+  },
+
+  setComponentsCount(state) {
+    state.componentsCount++
   }
 }
 export const actions = {}
