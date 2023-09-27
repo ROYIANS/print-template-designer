@@ -208,7 +208,9 @@ class BasePageGenerator {
       yPixelSortMap[Number(ty)] = [...(yPixelSortMap[ty] || []), curElement]
     }
     Object.keys(yPixelSortMap)
-      .sort()
+      .sort((a, b) => {
+        return +a - +b
+      })
       .forEach((yPixel) => {
         yPixelSortMap[yPixel].forEach((comp) => {
           const {
