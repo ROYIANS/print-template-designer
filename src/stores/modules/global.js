@@ -214,7 +214,6 @@ export const mutations = {
   },
 
   addComponent(state, { component, index }) {
-    debugger
     // 初始化 position 信息
     component.position = {
       lx: component.style.left,
