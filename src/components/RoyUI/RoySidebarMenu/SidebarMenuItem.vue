@@ -77,7 +77,7 @@
 </template>
 
 <script>
-import pathToRegexp from 'path-to-regexp'
+import { pathToRegexp } from 'path-to-regexp'
 import SidebarMenuLink from './SidebarMenuLink.vue'
 import SidebarMenuIcon from './SidebarMenuIcon.vue'
 import SidebarMenuBadge from './SidebarMenuBadge.vue'

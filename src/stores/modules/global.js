@@ -191,19 +191,17 @@ export const mutations = {
     if (!curComponent || !curComponent.position) {
       return
     }
+
+    let originWidth = curComponent.position.rx - curComponent.position.lx
+    let originHeight = curComponent.position.by - curComponent.position.ty
+
     // 调整大小和位置后修改 position 信息
     curComponent.position = {
       ...curComponent.position,
       lx: Math.round(!isNaN(left) ? left : curComponent.position.lx),
-      ty: Math.round(!isNaN(top) ? top : curComponent.position.ty)
-    }
-
-    if (!isNaN(width) && !isNaN(height)) {
-      curComponent.position = {
-        ...curComponent.position,
-        rx: Math.round(curComponent.position.lx + (width ?? curComponent.position.rx)),
-        by: Math.round(curComponent.position.ty + (height ?? curComponent.position.by))
-      }
+      ty: Math.round(!isNaN(top) ? top : curComponent.position.ty),
+      rx: Math.round(curComponent.position.lx + (width ?? originWidth)),
+      by: Math.round(curComponent.position.ty + (height ?? originHeight))
     }
   },
 
@@ -216,6 +214,7 @@ export const mutations = {
   },
 
   addComponent(state, { component, index }) {
+    debugger
     // 初始化 position 信息
     component.position = {
       lx: component.style.left,
