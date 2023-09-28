@@ -60,6 +60,11 @@
                 class="roy-simple-table__cell__corner"
                 @mousedown="handleMouseDownOnResize(row, col, $event)"
               ></div>
+              <span
+                v-show="tableData[`${row}-${col}`].bindValue"
+                class="ri-link-unlink-m roy-simple-table__cell__corner__bind"
+                @click="unlinkCell(row, col, $event)"
+              ></span>
             </td>
           </tr>
         </tbody>
@@ -575,6 +580,12 @@ export default {
       }
       document.addEventListener('mousemove', move)
       document.addEventListener('mouseup', up)
+    },
+    unlinkCell(row, col, e) {
+      e.stopPropagation()
+      e.preventDefault()
+      this.tableData[`${row}-${col}`].bindValue = null
+      this.tableData[`${row}-${col}`].propValue = ''
     },
     setTablePropValue() {
       const propValue = {
