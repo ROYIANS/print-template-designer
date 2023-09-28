@@ -135,6 +135,10 @@ app.vue
 | directExport  | `boolean`           | `false`             | 打开窗口后直接进行渲染下载为PDF                    |
 | needToast     | `string \| boolean` | `'建议导出PDF后再打印，更精准'` | 导出PDF后页面提示信息，为false时不提示。否则提示传入的字符串内容 |
 
+## 联系我
+
+![](./README.assets/QrCode.jpg)
+
 ## 参考项目与文章
 
 - [report-designer](https://github.com/xinglie/report-designer)

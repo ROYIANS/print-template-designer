@@ -344,7 +344,6 @@ function calculateBottom(
   }
 
   style.width = Math.max(width, MIN_WIDTH, minWidth)
-  console.log(minHeight)
   style.height = Math.max(Math.round(newHeight), MIN_HEIGHT)
   style.top = Math.round(newCenter.y - newHeight / 2)
   style.left = Math.round(newCenter.x - style.width / 2)
