@@ -86,6 +86,14 @@ class BasePageGenerator {
     `
     // 所有页（key为页码）
     this.pages = {}
+
+    if (new.target === undefined) {
+      throw new Error('请通过new来新建示例')
+    }
+    if (new.target === BasePageGenerator) {
+      throw new Error('基类不能被实例')
+    }
+    console.log('[BasePageGenerator]当前调用适配器：', this.constructor.name)
   }
 
   createTempPage(pageIndex = 0) {
