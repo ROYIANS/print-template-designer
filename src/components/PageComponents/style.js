@@ -352,6 +352,19 @@ export const StyledSimpleTable = styled('div', simpleTableProps)`
     border-radius: 0;
     z-index: 9;
   }
+
+  .roy-simple-table__cell__corner__bind {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 9;
+    cursor: pointer;
+    border-radius: 2px;
+    padding: 2px;
+    font-size: 10px;
+    background: #ffffff;
+    color: #999;
+  }
 `
 
 export const StyledComplexTable = styled('div', complexTableProps)`
