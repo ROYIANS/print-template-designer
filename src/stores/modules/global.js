@@ -95,8 +95,9 @@ export const mutations = {
 
   setPageSize(state, { pageSize, w, h }) {
     state.pageConfig.pageSize = pageSize
-    state.pageConfig.pageWidth = w
-    state.pageConfig.pageHeight = h
+    const reverseWH = state.pageConfig.pageDirection !== 'p'
+    state.pageConfig.pageWidth = reverseWH ? h : w
+    state.pageConfig.pageHeight = reverseWH ? w : h
   },
 
   togglePageDirection(state) {
