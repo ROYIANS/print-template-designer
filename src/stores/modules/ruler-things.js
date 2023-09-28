@@ -1,5 +1,6 @@
 import CONSTANT from '@/utils/constant.js'
 import Big from 'big.js'
+import store from '@/stores/index.js'
 
 const { MIN_SCALE, MAX_SCALE } = CONSTANT
 
@@ -37,9 +38,11 @@ export default {
     setReDrawRuler(state) {
       state.needReDrawRuler += 1
     },
-    setRect(state, payload) {
-      state.rectWidth = payload.w
-      state.rectHeight = payload.h
+    setRect(state, { w, h }) {
+      const pageDirection = store.state.printTemplateModule.pageConfig.pageDirection
+      const reverseWH = pageDirection !== 'p'
+      state.rectWidth = reverseWH ? h : w
+      state.rectHeight = reverseWH ? w : h
     },
     rotateRect(state) {
       const tmpHeight = state.rectHeight
