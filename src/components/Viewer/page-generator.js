@@ -332,7 +332,7 @@ class BasePageGenerator {
     img.src = component.propValue
     img.alt = component.text
     img.style.width = '100%'
-    img.style.height = '100%'
+    img.style.height = includeText ? 'calc(100% - 14px)' : '100%'
     newElement.appendChild(img)
     if (includeText) {
       let text = document.createElement('div')
