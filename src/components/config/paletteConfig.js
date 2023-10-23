@@ -1500,6 +1500,128 @@ export const paletteConfigList = {
         ]
       }
     }
+  ],
+  RoyBarCode: [
+    {
+      title: '宽度',
+      field: 'width',
+      span: 24,
+      itemRender: {
+        name: '$input',
+        props: {
+          type: 'number',
+          size: 'mini',
+          min: 0
+        }
+      }
+    },
+    {
+      title: '高度',
+      field: 'height',
+      span: 24,
+      itemRender: {
+        name: '$input',
+        props: {
+          type: 'number',
+          size: 'mini',
+          min: 0
+        }
+      }
+    },
+    {
+      title: '背景颜色',
+      field: 'background',
+      span: 24,
+      itemRender: {
+        name: '$colorPicker',
+        props: {}
+      }
+    },
+    // {
+    //   title: '边框类型',
+    //   field: 'borderType',
+    //   span: 24,
+    //   itemRender: {
+    //     name: '$select',
+    //     options: [
+    //       {
+    //         label: '无',
+    //         value: 'none'
+    //       },
+    //       {
+    //         label: '实线',
+    //         value: 'solid'
+    //       },
+    //       {
+    //         label: '线虚线',
+    //         value: 'dashed'
+    //       },
+    //       {
+    //         label: '点虚线',
+    //         value: 'dotted'
+    //       }
+    //     ]
+    //   }
+    // },
+    // {
+    //   title: '边框颜色',
+    //   field: 'borderColor',
+    //   span: 24,
+    //   itemRender: {
+    //     name: '$colorPicker',
+    //     props: {}
+    //   }
+    // },
+    // {
+    //   title: '边框宽度',
+    //   field: 'borderWidth',
+    //   span: 24,
+    //   itemRender: {
+    //     name: '$input',
+    //     props: {
+    //       type: 'number',
+    //       size: 'mini',
+    //       min: 0,
+    //       max: 4
+    //     }
+    //   }
+    // },
+    {
+      title: '旋转角度（°）',
+      field: 'rotate',
+      span: 24,
+      itemRender: {
+        name: '$input',
+        props: {
+          type: 'number',
+          size: 'mini',
+          min: 0,
+          max: 360
+        }
+      }
+    },
+    {
+      title: '元素位置',
+      field: 'elementPosition',
+      span: 24,
+      itemRender: {
+        name: '$radio',
+        options: [
+          {
+            label: '跟随全局配置（默认）',
+            value: 'default'
+          },
+          {
+            label: '固定位置',
+            value: 'fixed'
+          },
+          {
+            label: '重复位置',
+            value: 'repeated'
+          }
+        ]
+      }
+    }
   ]
 }
 
@@ -1834,6 +1956,498 @@ export const settingConfigList = {
           {
             label: 'L级别',
             value: QRCode.CorrectLevel.L
+          }
+        ]
+      }
+    }
+  ],
+  RoyBarCode: [
+    {
+      title: '内容',
+      field: 'text',
+      span: 24,
+      itemRender: {
+        name: '$input',
+        props: {
+          type: 'text',
+          size: 'mini',
+          max: 50
+        }
+      }
+    },
+    {
+      title: '显示文字',
+      field: 'includeText',
+      span: 24,
+      itemRender: {
+        name: '$select',
+        options: [
+          {
+            label: '是',
+            value: true
+          },
+          {
+            label: '否',
+            value: false
+          }
+        ]
+      }
+    },
+    {
+      title: '前景色',
+      field: 'colorDark',
+      span: 24,
+      itemRender: {
+        name: '$colorPicker',
+        props: {}
+      }
+    },
+    {
+      title: '编码格式',
+      field: 'bcid',
+      span: 24,
+      itemRender: {
+        name: '$select',
+        options: [
+          {
+            label: 'AusPost 4 State Customer Code',
+            value: 'auspost'
+          },
+          {
+            label: 'Aztec Code',
+            value: 'azteccode'
+          },
+          {
+            label: 'Compact Aztec Code',
+            value: 'azteccodecompact'
+          },
+          {
+            label: 'Aztec Runes',
+            value: 'aztecrune'
+          },
+          {
+            label: 'BC412',
+            value: 'bc412'
+          },
+          {
+            label: 'Channel Code',
+            value: 'channelcode'
+          },
+          {
+            label: 'Codablock F',
+            value: 'codablockf'
+          },
+          {
+            label: 'Code 11',
+            value: 'code11'
+          },
+          {
+            label: 'Code 128',
+            value: 'code128'
+          },
+          {
+            label: 'Code 16K',
+            value: 'code16k'
+          },
+          {
+            label: 'Code 25',
+            value: 'code2of5'
+          },
+          {
+            label: 'Italian Pharmacode',
+            value: 'code32'
+          },
+          {
+            label: 'Code 39',
+            value: 'code39'
+          },
+          {
+            label: 'Code 39 Extended',
+            value: 'code39ext'
+          },
+          {
+            label: 'Code 49',
+            value: 'code49'
+          },
+          {
+            label: 'Code 93',
+            value: 'code93'
+          },
+          {
+            label: 'Code 93 Extended',
+            value: 'code93ext'
+          },
+          {
+            label: 'Code One',
+            value: 'codeone'
+          },
+          {
+            label: 'COOP 2 of 5',
+            value: 'coop2of5'
+          },
+          {
+            label: 'Custom 4 state symbology',
+            value: 'daft'
+          },
+          {
+            label: 'GS1 DataBar Expanded',
+            value: 'databarexpanded'
+          },
+          {
+            label: 'GS1 DataBar Expanded Composite',
+            value: 'databarexpandedcomposite'
+          },
+          {
+            label: 'GS1 DataBar Expanded Stacked',
+            value: 'databarexpandedstacked'
+          },
+          {
+            label: 'GS1 DataBar Expanded Stacked Composite',
+            value: 'databarexpandedstackedcomposite'
+          },
+          {
+            label: 'GS1 DataBar Limited',
+            value: 'databarlimited'
+          },
+          {
+            label: 'GS1 DataBar Limited Composite',
+            value: 'databarlimitedcomposite'
+          },
+          {
+            label: 'GS1 DataBar Omnidirectional',
+            value: 'databaromni'
+          },
+          {
+            label: 'GS1 DataBar Omnidirectional Composite',
+            value: 'databaromnicomposite'
+          },
+          {
+            label: 'GS1 DataBar Stacked',
+            value: 'databarstacked'
+          },
+          {
+            label: 'GS1 DataBar Stacked Composite',
+            value: 'databarstackedcomposite'
+          },
+          {
+            label: 'GS1 DataBar Stacked Omnidirectional',
+            value: 'databarstackedomni'
+          },
+          {
+            label: 'GS1 DataBar Stacked Omnidirectional Composite',
+            value: 'databarstackedomnicomposite'
+          },
+          {
+            label: 'GS1 DataBar Truncated',
+            value: 'databartruncated'
+          },
+          {
+            label: 'GS1 DataBar Truncated Composite',
+            value: 'databartruncatedcomposite'
+          },
+          {
+            label: 'Datalogic 2 of 5',
+            value: 'datalogic2of5'
+          },
+          {
+            label: 'Data Matrix',
+            value: 'datamatrix'
+          },
+          {
+            label: 'Data Matrix Rectangular',
+            value: 'datamatrixrectangular'
+          },
+          {
+            label: 'Data Matrix Rectangular Extension',
+            value: 'datamatrixrectangularextension'
+          },
+          {
+            label: 'DotCode',
+            value: 'dotcode'
+          },
+          {
+            label: 'EAN-13',
+            value: 'ean13'
+          },
+          {
+            label: 'EAN-13 Composite',
+            value: 'ean13composite'
+          },
+          {
+            label: 'GS1-14',
+            value: 'ean14'
+          },
+          {
+            label: 'EAN-2 (2 digit addon)',
+            value: 'ean2'
+          },
+          {
+            label: 'EAN-5 (5 digit addon)',
+            value: 'ean5'
+          },
+          {
+            label: 'EAN-8',
+            value: 'ean8'
+          },
+          {
+            label: 'EAN-8 Composite',
+            value: 'ean8composite'
+          },
+          {
+            label: 'Flattermarken',
+            value: 'flattermarken'
+          },
+          {
+            label: 'GS1-128',
+            value: 'gs1-128'
+          },
+          {
+            label: 'GS1-128 Composite',
+            value: 'gs1-128composite'
+          },
+          {
+            label: 'GS1 Composite 2D Component',
+            value: 'gs1-cc'
+          },
+          {
+            label: 'GS1 Data Matrix',
+            value: 'gs1datamatrix'
+          },
+          {
+            label: 'GS1 Data Matrix Rectangular',
+            value: 'gs1datamatrixrectangular'
+          },
+          {
+            label: 'GS1 Digital Link Data Matrix',
+            value: 'gs1dldatamatrix'
+          },
+          {
+            label: 'GS1 Digital Link QR Code',
+            value: 'gs1dlqrcode'
+          },
+          {
+            label: 'GS1 DotCode',
+            value: 'gs1dotcode'
+          },
+          {
+            label: 'GS1 North American Coupon',
+            value: 'gs1northamericancoupon'
+          },
+          {
+            label: 'GS1 QR Code',
+            value: 'gs1qrcode'
+          },
+          {
+            label: 'Han Xin Code',
+            value: 'hanxin'
+          },
+          {
+            label: 'HIBC Aztec Code',
+            value: 'hibcazteccode'
+          },
+          {
+            label: 'HIBC Codablock F',
+            value: 'hibccodablockf'
+          },
+          {
+            label: 'HIBC Code 128',
+            value: 'hibccode128'
+          },
+          {
+            label: 'HIBC Code 39',
+            value: 'hibccode39'
+          },
+          {
+            label: 'HIBC Data Matrix',
+            value: 'hibcdatamatrix'
+          },
+          {
+            label: 'HIBC Data Matrix Rectangular',
+            value: 'hibcdatamatrixrectangular'
+          },
+          {
+            label: 'HIBC MicroPDF417',
+            value: 'hibcmicropdf417'
+          },
+          {
+            label: 'HIBC PDF417',
+            value: 'hibcpdf417'
+          },
+          {
+            label: 'HIBC QR Code',
+            value: 'hibcqrcode'
+          },
+          {
+            label: 'IATA 2 of 5',
+            value: 'iata2of5'
+          },
+          {
+            label: 'Deutsche Post Identcode',
+            value: 'identcode'
+          },
+          {
+            label: 'Industrial 2 of 5',
+            value: 'industrial2of5'
+          },
+          {
+            label: 'Interleaved 2 of 5 (ITF)',
+            value: 'interleaved2of5'
+          },
+          {
+            label: 'ISBN',
+            value: 'isbn'
+          },
+          {
+            label: 'ISMN',
+            value: 'ismn'
+          },
+          {
+            label: 'ISSN',
+            value: 'issn'
+          },
+          {
+            label: 'ITF-14',
+            value: 'itf14'
+          },
+          {
+            label: 'Japan Post 4 State Customer Code',
+            value: 'japanpost'
+          },
+          {
+            label: 'Royal Dutch TPG Post KIX',
+            value: 'kix'
+          },
+          {
+            label: 'Deutsche Post Leitcode',
+            value: 'leitcode'
+          },
+          {
+            label: 'Royal Mail Mailmark',
+            value: 'mailmark'
+          },
+          {
+            label: 'Marks & Spencer',
+            value: 'mands'
+          },
+          {
+            label: 'Matrix 2 of 5',
+            value: 'matrix2of5'
+          },
+          {
+            label: 'MaxiCode',
+            value: 'maxicode'
+          },
+          {
+            label: 'MicroPDF417',
+            value: 'micropdf417'
+          },
+          {
+            label: 'Micro QR Code',
+            value: 'microqrcode'
+          },
+          {
+            label: 'MSI Modified Plessey',
+            value: 'msi'
+          },
+          {
+            label: 'USPS Intelligent Mail',
+            value: 'onecode'
+          },
+          {
+            label: 'PDF417',
+            value: 'pdf417'
+          },
+          {
+            label: 'Compact PDF417',
+            value: 'pdf417compact'
+          },
+          {
+            label: 'Pharmaceutical Binary Code',
+            value: 'pharmacode'
+          },
+          {
+            label: 'Two-track Pharmacode',
+            value: 'pharmacode2'
+          },
+          {
+            label: 'USPS PLANET',
+            value: 'planet'
+          },
+          {
+            label: 'Plessey UK',
+            value: 'plessey'
+          },
+          {
+            label: 'PosiCode',
+            value: 'posicode'
+          },
+          {
+            label: 'USPS POSTNET',
+            value: 'postnet'
+          },
+          {
+            label: 'Pharmazentralnummer (PZN)',
+            value: 'pzn'
+          },
+          {
+            label: 'QR Code',
+            value: 'qrcode'
+          },
+          {
+            label: 'Codabar',
+            value: 'rationalizedCodabar'
+          },
+          {
+            label: 'Custom 1D symbology',
+            value: 'raw'
+          },
+          {
+            label: 'Rectangular Micro QR Code',
+            value: 'rectangularmicroqrcode'
+          },
+          {
+            label: 'Royal Mail 4 State Customer Code',
+            value: 'royalmail'
+          },
+          {
+            label: 'SSCC-18',
+            value: 'sscc18'
+          },
+          {
+            label: 'Swiss QR Code',
+            value: 'swissqrcode'
+          },
+          {
+            label: 'Miscellaneous symbols',
+            value: 'symbol'
+          },
+          {
+            label: 'Telepen',
+            value: 'telepen'
+          },
+          {
+            label: 'Telepen Numeric',
+            value: 'telepennumeric'
+          },
+          {
+            label: 'Ultracode',
+            value: 'ultracode'
+          },
+          {
+            label: 'UPC-A',
+            value: 'upca'
+          },
+          {
+            label: 'UPC-A Composite',
+            value: 'upcacomposite'
+          },
+          {
+            label: 'UPC-E',
+            value: 'upce'
+          },
+          {
+            label: 'UPC-E Composite',
+            value: 'upcecomposite'
           }
         ]
       }
