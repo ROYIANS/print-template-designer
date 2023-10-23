@@ -17,6 +17,9 @@ dependencies:
   core-js:
     specifier: ^3.8.3
     version: 3.32.2
+  easyqrcodejs:
+    specifier: ^4.5.0
+    version: 4.5.0
   html2canvas:
     specifier: ^1.4.1
     version: 1.4.1
@@ -3917,6 +3920,10 @@ packages:
     resolution: {integrity: sha512-wK2sCs4feiiJeFXn3zvY0p41mdU5VUgbgs1rNsc/y5ngFUijdWd+iIN8eoyuZHKB8xN6BL4PdWmzqFmxNg6V2w==}
     engines: {node: '>=6.0.0'}
     dev: true
+
+  /easyqrcodejs@4.5.0:
+    resolution: {integrity: sha512-V9z6vst9I5hGYw4fx+ofQARDFQlbwpltka+TJ41W+bCtDnQkhw+b/ChsqRv0xFLvpOIW/dv4Lh01ONr6EmXdzQ==}
+    dev: false
 
   /ee-first@1.1.1:
     resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
