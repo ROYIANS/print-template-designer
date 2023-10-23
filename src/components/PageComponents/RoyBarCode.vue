@@ -7,7 +7,7 @@
 <template>
   <div class="RoyBarCode">
     <StyledBarCode v-bind="style">
-      <div style="width: 100%; height: 100%" ref="barCode" />
+      <div :style="barStyle" ref="barCode" />
       <div v-if="element.includeText" class="RoyBarCode__text" :style="textStyle">
         {{ element.text }}
       </div>
@@ -42,6 +42,18 @@ export default {
   computed: {
     style() {
       return this.element.style || {}
+    },
+    barStyle() {
+      if (this.element.includeText) {
+        return {
+          width: '100%',
+          height: 'calc(100% - 14px)'
+        }
+      }
+      return {
+        width: '100%',
+        height: '100%'
+      }
     },
     textStyle() {
       return {
