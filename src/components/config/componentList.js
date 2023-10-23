@@ -19,6 +19,24 @@ export const commonAttr = {
   isLock: false // 是否锁定组件
 }
 
+export const groupList = [
+  {
+    icon: '',
+    code: 'common',
+    name: '通用'
+  },
+  {
+    icon: '',
+    code: 'data',
+    name: '数据'
+  },
+  {
+    icon: '',
+    code: 'shape',
+    name: '形状'
+  }
+]
+
 export const componentList = [
   {
     icon: 'ri-text',
@@ -26,6 +44,7 @@ export const componentList = [
     name: '文本',
     component: 'RoySimpleText',
     propValue: '单击编辑文本',
+    group: 'common',
     style: {
       color: '#000000',
       borderRadius: 'inherit',
@@ -60,6 +79,7 @@ export const componentList = [
     component: 'RoyText',
     propValue:
       '<p><span style="font-size: 16pt;">双击</span><span style="color: rgb(255, 255, 255); background-color: #009688; font-size: 16pt; font-family: 仿宋;">编辑</span><span style="font-size: 16pt;">文本</span></p>',
+    group: 'common',
     style: {
       width: 500,
       height: 200,
@@ -80,6 +100,7 @@ export const componentList = [
     name: '单元格',
     component: 'RoySimpleTable',
     propValue: {},
+    group: 'data',
     style: {
       width: 'auto',
       height: 'auto',
@@ -103,6 +124,7 @@ export const componentList = [
     showHead: true,
     showFoot: true,
     showSuffix: true,
+    group: 'data',
     style: {
       width: 'auto',
       height: 'auto',
@@ -124,6 +146,7 @@ export const componentList = [
     name: '直线',
     component: 'RoyLine',
     propValue: '',
+    group: 'shape',
     style: {
       width: 200,
       height: 1,
@@ -140,6 +163,7 @@ export const componentList = [
     name: '矩形',
     component: 'RoyRect',
     propValue: '',
+    group: 'shape',
     style: {
       borderRadius: 'inherit',
       borderWidth: 1,
@@ -160,6 +184,7 @@ export const componentList = [
     name: '圆形',
     component: 'RoyCircle',
     propValue: '',
+    group: 'shape',
     style: {
       borderWidth: 1,
       borderColor: '#212121',
@@ -179,6 +204,7 @@ export const componentList = [
     name: '五角星',
     component: 'RoyStar',
     propValue: '',
+    group: 'shape',
     style: {
       width: 200,
       height: 200,
@@ -197,6 +223,7 @@ export const componentList = [
     component: 'RoyImage',
     src: defaultImageSrc,
     title: '默认图片',
+    group: 'common',
     style: {
       borderRadius: 'inherit',
       borderWidth: 0,
