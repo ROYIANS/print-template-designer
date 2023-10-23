@@ -99,6 +99,7 @@ import RoySimpleTable from '@/components/PageComponents/RoyTable/RoySimpleTable.
 import RoyComplexTable from '@/components/PageComponents/RoyTable/RoyComplexTable'
 import RoyGroup from '@/components/PageComponents/RoyGroup'
 import RoyQRCode from '@/components/PageComponents/RoyQRCode.vue'
+import RoyBarCode from '@/components/PageComponents/RoyBarCode.vue'
 import Area from '@/components/Editor/Area'
 import commonMixin from '@/mixin/commonMixin'
 import { $, isPreventDrop } from '@/utils/html-util.js'
@@ -129,6 +130,7 @@ export default {
     RoyStar,
     RoyImage,
     RoyQRCode,
+    RoyBarCode,
     RoySimpleTable,
     RoyComplexTable,
     Area

@@ -305,6 +305,16 @@ export const StyledQRCode = styled('div', qrCodeProps)`
   box-sizing: border-box;
 `
 
+export const StyledBarCode = styled('div', qrCodeProps)`
+  width: ${(props) => props.width}px;
+  height: ${(props) => props.height}px;
+  overflow: hidden;
+  background: ${(props) => props.background};
+  border: ${(props) => `${props.borderWidth}px ${props.borderType} ${props.borderColor}`};
+  z-index: ${(props) => props.zIndex};
+  box-sizing: border-box;
+`
+
 export const StyledStar = styled('div', starProps)`
   width: 100%;
   height: 100%;
