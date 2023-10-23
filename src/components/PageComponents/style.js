@@ -117,6 +117,8 @@ const rectProps = Object.assign({}, commonProps, {
   }
 })
 
+const qrCodeProps = Object.assign({}, commonProps, {})
+
 const simpleTableProps = Object.assign({}, commonProps, {
   isRelative: {
     type: Boolean,
@@ -291,6 +293,16 @@ export const StyledLine = styled('div', lineProps)`
   background: ${(props) => props.background};
   z-index: ${(props) => props.zIndex};
   border: none;
+`
+
+export const StyledQRCode = styled('div', qrCodeProps)`
+  width: ${(props) => props.width}px;
+  height: ${(props) => props.height}px;
+  overflow: hidden;
+  background: ${(props) => props.background};
+  border: ${(props) => `${props.borderWidth}px ${props.borderType} ${props.borderColor}`};
+  z-index: ${(props) => props.zIndex};
+  box-sizing: border-box;
 `
 
 export const StyledStar = styled('div', starProps)`

@@ -3,6 +3,7 @@ import {
   StyledComplexTable,
   StyledImage,
   StyledLine,
+  StyledQRCode,
   StyledRect,
   StyledSimpleTable,
   StyledSimpleText,
@@ -30,7 +31,8 @@ const componentToStyled = {
   RoyStar: StyledStar,
   RoySimpleTable: StyledSimpleTable,
   RoyComplexTable: StyledComplexTable,
-  RoyImage: StyledImage
+  RoyImage: StyledImage,
+  RoyQRCode: StyledQRCode
 }
 
 const componentToClassName = {
@@ -44,7 +46,8 @@ const componentToClassName = {
   RoyStar: 'rendered-roy-star',
   RoySimpleTable: 'rendered-roy-simple-table',
   RoyComplexTable: 'rendered-roy-complex-table',
-  RoyImage: 'rendered-roy-image'
+  RoyImage: 'rendered-roy-image',
+  RoyQRCode: 'rendered-roy-qrcode'
 }
 
 class BasePageGenerator {
@@ -304,6 +307,19 @@ class BasePageGenerator {
     }
   }
 
+  generateRoyQRCode(component) {
+    const { index, style } = component
+    let newElement = this.generateNewElementWithStyledComponent(component, index)
+    let img = document.createElement('img')
+    img.src = component.propValue
+    img.alt = component.text
+    newElement.appendChild(img)
+    return {
+      element: newElement,
+      style
+    }
+  }
+
   generateRoyCircle(component) {
     const { index, style } = component
     let newElement = this.generateNewElementWithStyledComponent(component, index)
@@ -483,7 +499,7 @@ class BasePageGenerator {
     element.style.top = `${curPageUsedHeight}px`
     let page = this.getPage(pageNumber)
     page.appendChild(element)
-    curPageUsedHeight += element.style.height
+    curPageUsedHeight += +style.height
     return {
       page,
       element,
@@ -501,7 +517,7 @@ class BasePageGenerator {
     element.style.top = `${curPageUsedHeight}px`
     let page = this.getPage(pageNumber)
     page.appendChild(element)
-    curPageUsedHeight += element.style.height
+    curPageUsedHeight += +style.height
     return {
       page,
       element,
@@ -519,7 +535,25 @@ class BasePageGenerator {
     element.style.top = `${curPageUsedHeight}px`
     let page = this.getPage(pageNumber)
     page.appendChild(element)
-    curPageUsedHeight += element.style.height
+    curPageUsedHeight += +style.height
+    return {
+      page,
+      element,
+      pageUsedHeight: curPageUsedHeight
+    }
+  }
+
+  async renderRoyQRCode({ component, curPageUsedHeight, pageNumber = 1 }) {
+    let { element, style } = this.generateRoyQRCode(component)
+    if (curPageUsedHeight && curPageUsedHeight + element.style.height > this.maxPageUseHeight) {
+      pageNumber++
+      curPageUsedHeight = this.realPageMarginTop
+    }
+    curPageUsedHeight = curPageUsedHeight || style.top
+    element.style.top = `${curPageUsedHeight}px`
+    let page = this.getPage(pageNumber)
+    page.appendChild(element)
+    curPageUsedHeight += +style.height
     return {
       page,
       element,
@@ -537,7 +571,7 @@ class BasePageGenerator {
     element.style.top = `${curPageUsedHeight}px`
     let page = this.getPage(pageNumber)
     page.appendChild(element)
-    curPageUsedHeight += element.style.height
+    curPageUsedHeight += +style.height
     return {
       page,
       element,
@@ -555,7 +589,7 @@ class BasePageGenerator {
     element.style.top = `${curPageUsedHeight}px`
     let page = this.getPage(pageNumber)
     page.appendChild(element)
-    curPageUsedHeight += element.style.height
+    curPageUsedHeight += +style.height
     return {
       page,
       element,
@@ -967,7 +1001,7 @@ class RelativePageGenerator extends FixedPageGenerator {
     let minRelativeHeight = {}
     let relativePageHeight = {}
     renderedComponents.forEach((rComp) => {
-      const { name: rCompName, position: rCompPos, realPageHeight, pageNumber } = rComp
+      const { name: rCompName, position: rCompPos, realPageHeight, pageNumber = 1 } = rComp
       // 遍历已经渲染过的每个组件，查看是否与当前组件有相交的关系
       let rCompIsAutoPage = AUTO_PAGE_COMPONENT.includes(rCompName)
       let curCompIsAutoPage = AUTO_PAGE_COMPONENT.includes(curElement.component)

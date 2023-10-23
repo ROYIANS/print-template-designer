@@ -36,8 +36,9 @@
     />
     <TemplateViews v-if="templateVisible" :visible.sync="templateVisible" @load="loadTemp" />
     <div class="fork-me">
-      <a href="https://github.com/ROYIANS/print-template-designer" target="_blank"
-        >Give me a Star!
+      <a href="https://github.com/ROYIANS/print-template-designer" target="_blank">
+        <i class="ri-github-line"></i>
+        Give me a Star!
       </a>
     </div>
   </div>

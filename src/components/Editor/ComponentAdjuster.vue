@@ -352,6 +352,7 @@ export default {
         }
 
         const isTable = ['RoySimpleTable', 'RoyComplexTable'].includes(this.element.component)
+        const isSyncWH = this.element.isSyncWH
 
         calculateComponentPositionAndSize(
           point,
@@ -369,7 +370,12 @@ export default {
 
         this.$store.commit('printTemplateModule/setShapeStyle', {
           ...newStyle,
-          width: isTable ? 'auto' : newStyle.width
+          height: isSyncWH ? Math.max(newStyle.width, newStyle.height) : newStyle.height,
+          width: isTable
+            ? 'auto'
+            : isSyncWH
+            ? Math.max(newStyle.width, newStyle.height)
+            : newStyle.width
         })
       }
 

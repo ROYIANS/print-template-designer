@@ -136,6 +136,24 @@ export const mutations = {
     }
   },
 
+  setComponentValue({ componentData }, { key, value, id }) {
+    if (componentData.length) {
+      let newComponentValue = null
+      let newComponentIndex = null
+      for (let i = 0; i < componentData.length; i++) {
+        if (componentData[i].id === id) {
+          newComponentIndex = i
+          newComponentValue = componentData[i]
+          newComponentValue[key] = value
+        }
+      }
+      if (newComponentIndex !== null) {
+        Vue.set(componentData, newComponentIndex, newComponentValue)
+        store.commit('printTemplateModule/recordSnapshot')
+      }
+    }
+  },
+
   setBindValue({ componentData }, { bindValue, id }) {
     if (componentData.length) {
       let newComponentValue = null

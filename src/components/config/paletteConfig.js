@@ -2,6 +2,7 @@ import { deepCopy } from '@/utils/html-util'
 import { VXETable } from 'vxe-table'
 import toast from '@/utils/toast'
 import store from '@/stores/index'
+import QRCode from 'easyqrcodejs'
 
 export const paletteConfigList = {
   RoyText: [
@@ -1377,6 +1378,128 @@ export const paletteConfigList = {
         ]
       }
     }
+  ],
+  RoyQRCode: [
+    {
+      title: '宽度',
+      field: 'width',
+      span: 24,
+      itemRender: {
+        name: '$input',
+        props: {
+          type: 'number',
+          size: 'mini',
+          min: 0
+        }
+      }
+    },
+    {
+      title: '高度',
+      field: 'height',
+      span: 24,
+      itemRender: {
+        name: '$input',
+        props: {
+          type: 'number',
+          size: 'mini',
+          min: 0
+        }
+      }
+    },
+    {
+      title: '背景颜色',
+      field: 'background',
+      span: 24,
+      itemRender: {
+        name: '$colorPicker',
+        props: {}
+      }
+    },
+    {
+      title: '边框类型',
+      field: 'borderType',
+      span: 24,
+      itemRender: {
+        name: '$select',
+        options: [
+          {
+            label: '无',
+            value: 'none'
+          },
+          {
+            label: '实线',
+            value: 'solid'
+          },
+          {
+            label: '线虚线',
+            value: 'dashed'
+          },
+          {
+            label: '点虚线',
+            value: 'dotted'
+          }
+        ]
+      }
+    },
+    {
+      title: '边框颜色',
+      field: 'borderColor',
+      span: 24,
+      itemRender: {
+        name: '$colorPicker',
+        props: {}
+      }
+    },
+    {
+      title: '边框宽度',
+      field: 'borderWidth',
+      span: 24,
+      itemRender: {
+        name: '$input',
+        props: {
+          type: 'number',
+          size: 'mini',
+          min: 0,
+          max: 4
+        }
+      }
+    },
+    {
+      title: '旋转角度（°）',
+      field: 'rotate',
+      span: 24,
+      itemRender: {
+        name: '$input',
+        props: {
+          type: 'number',
+          size: 'mini',
+          min: 0,
+          max: 360
+        }
+      }
+    },
+    {
+      title: '元素位置',
+      field: 'elementPosition',
+      span: 24,
+      itemRender: {
+        name: '$radio',
+        options: [
+          {
+            label: '跟随全局配置（默认）',
+            value: 'default'
+          },
+          {
+            label: '固定位置',
+            value: 'fixed'
+          },
+          {
+            label: '重复位置',
+            value: 'repeated'
+          }
+        ]
+      }
+    }
   ]
 }
 
@@ -1652,6 +1775,65 @@ export const settingConfigList = {
                 label: '设置'
               }
             ]
+          }
+        ]
+      }
+    }
+  ],
+  RoyQRCode: [
+    {
+      title: '内容',
+      field: 'text',
+      span: 24,
+      itemRender: {
+        name: '$textarea',
+        props: {
+          type: 'text',
+          size: 'mini',
+          max: 100
+        }
+      }
+    },
+    {
+      title: '前景色',
+      field: 'colorDark',
+      span: 24,
+      itemRender: {
+        name: '$colorPicker',
+        props: {}
+      }
+    },
+    {
+      title: '背景色',
+      field: 'colorLight',
+      span: 24,
+      itemRender: {
+        name: '$colorPicker',
+        props: {}
+      }
+    },
+    {
+      title: '纠错级别',
+      field: 'correctLevel',
+      span: 24,
+      itemRender: {
+        name: '$select',
+        options: [
+          {
+            label: 'H级别',
+            value: QRCode.CorrectLevel.H
+          },
+          {
+            label: 'Q级别',
+            value: QRCode.CorrectLevel.Q
+          },
+          {
+            label: 'M级别',
+            value: QRCode.CorrectLevel.M
+          },
+          {
+            label: 'L级别',
+            value: QRCode.CorrectLevel.L
           }
         ]
       }
