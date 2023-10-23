@@ -84,7 +84,7 @@ export default {
       isNightMode: (state) => state.printTemplateModule.nightMode.isNightMode
     }),
     asideStyle() {
-      return this.showRight ? 'width: 300px' : 'width: 65px'
+      return this.showRight ? 'width: 305px' : 'width: 65px'
     }
   },
   methods: {
