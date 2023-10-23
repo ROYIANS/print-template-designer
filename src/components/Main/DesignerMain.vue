@@ -60,10 +60,14 @@ export default {
       e.preventDefault()
       e.stopPropagation()
 
-      const index = e.dataTransfer.getData('index')
+      const index = e.dataTransfer.getData('code')
       const rectInfo = document.querySelector('#designer-page').getBoundingClientRect()
       if (index) {
-        const component = this.deepCopy(componentList[index])
+        const component = this.deepCopy(
+          componentList.find((item) => {
+            return item.code === index
+          })
+        )
         component.style = component.style || {}
         component.style.top = e.clientY - rectInfo.y
         component.style.left = e.clientX - rectInfo.x
