@@ -8,6 +8,7 @@
  * ╩╚═╚═╝ ╩ ╩╩ ╩╝╚╝╚═╝
  */
 import { defaultImageSrc } from '@/components/config/bigData'
+import QRCode from 'easyqrcodejs'
 
 export const commonStyle = {
   rotate: 0,
@@ -232,6 +233,31 @@ export const componentList = [
       width: 200,
       height: 200,
       background: null,
+      rotate: 0,
+      elementPosition: 'default'
+    },
+    groupStyle: {},
+    position: {}
+  },
+  {
+    icon: 'ri-qr-code-line',
+    code: 'qrcode',
+    name: '二维码',
+    component: 'RoyQRCode',
+    propValue: '',
+    group: 'common',
+    text: 'Print Template Designer',
+    isSyncWH: true,
+    colorDark: '#000000',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.H,
+    style: {
+      width: 100,
+      height: 100,
+      borderWidth: 0,
+      borderColor: '#212121',
+      borderType: 'solid',
+      background: '#ffffff',
       rotate: 0,
       elementPosition: 'default'
     },
