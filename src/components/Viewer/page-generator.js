@@ -1,4 +1,5 @@
 import {
+  StyledBarCode,
   StyledCircle,
   StyledComplexTable,
   StyledImage,
@@ -32,7 +33,8 @@ const componentToStyled = {
   RoySimpleTable: StyledSimpleTable,
   RoyComplexTable: StyledComplexTable,
   RoyImage: StyledImage,
-  RoyQRCode: StyledQRCode
+  RoyQRCode: StyledQRCode,
+  RoyBarCode: StyledBarCode
 }
 
 const componentToClassName = {
@@ -47,7 +49,8 @@ const componentToClassName = {
   RoySimpleTable: 'rendered-roy-simple-table',
   RoyComplexTable: 'rendered-roy-complex-table',
   RoyImage: 'rendered-roy-image',
-  RoyQRCode: 'rendered-roy-qrcode'
+  RoyQRCode: 'rendered-roy-qrcode',
+  RoyBarCode: 'rendered-roy-barcode'
 }
 
 class BasePageGenerator {
@@ -313,7 +316,38 @@ class BasePageGenerator {
     let img = document.createElement('img')
     img.src = component.propValue
     img.alt = component.text
+    img.style.width = '100%'
+    img.style.height = '100%'
     newElement.appendChild(img)
+    return {
+      element: newElement,
+      style
+    }
+  }
+
+  generateRoyBarCode(component) {
+    const { index, style, includeText, colorDark } = component
+    let newElement = this.generateNewElementWithStyledComponent(component, index)
+    let img = document.createElement('img')
+    img.src = component.propValue
+    img.alt = component.text
+    img.style.width = '100%'
+    img.style.height = '100%'
+    newElement.appendChild(img)
+    if (includeText) {
+      let text = document.createElement('div')
+      text.innerText = component.text
+      text.style.height = '14px'
+      text.style.width = '100%'
+      text.style.fontSize = '12px'
+      text.style.textAlign = 'center'
+      text.style.position = 'absolute'
+      text.style.bottom = '0'
+      text.style.left = '0'
+      text.style.color = colorDark
+      text.style.background = style.background
+      newElement.appendChild(text)
+    }
     return {
       element: newElement,
       style
@@ -545,6 +579,24 @@ class BasePageGenerator {
 
   async renderRoyQRCode({ component, curPageUsedHeight, pageNumber = 1 }) {
     let { element, style } = this.generateRoyQRCode(component)
+    if (curPageUsedHeight && curPageUsedHeight + element.style.height > this.maxPageUseHeight) {
+      pageNumber++
+      curPageUsedHeight = this.realPageMarginTop
+    }
+    curPageUsedHeight = curPageUsedHeight || style.top
+    element.style.top = `${curPageUsedHeight}px`
+    let page = this.getPage(pageNumber)
+    page.appendChild(element)
+    curPageUsedHeight += +style.height
+    return {
+      page,
+      element,
+      pageUsedHeight: curPageUsedHeight
+    }
+  }
+
+  async renderRoyBarCode({ component, curPageUsedHeight, pageNumber = 1 }) {
+    let { element, style } = this.generateRoyBarCode(component)
     if (curPageUsedHeight && curPageUsedHeight + element.style.height > this.maxPageUseHeight) {
       pageNumber++
       curPageUsedHeight = this.realPageMarginTop

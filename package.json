@@ -30,6 +30,7 @@
     "@wangeditor/editor": "^5.1.22",
     "axios": "^1.2.2",
     "big.js": "^6.2.1",
+    "bwip-js": "^4.1.1",
     "core-js": "^3.8.3",
     "easyqrcodejs": "^4.5.0",
     "html2canvas": "^1.4.1",

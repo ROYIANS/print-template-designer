@@ -263,5 +263,29 @@ export const componentList = [
     },
     groupStyle: {},
     position: {}
+  },
+  {
+    icon: 'ri-barcode-line',
+    code: 'barcode',
+    name: '条形码',
+    component: 'RoyBarCode',
+    propValue: '',
+    group: 'common',
+    bcid: 'code128',
+    text: '10101000101001',
+    colorDark: '#000000',
+    includeText: true,
+    style: {
+      width: 210,
+      height: 70,
+      borderWidth: 0,
+      borderColor: '#212121',
+      borderType: 'solid',
+      background: '#ffffff',
+      rotate: 0,
+      elementPosition: 'default'
+    },
+    groupStyle: {},
+    position: {}
   }
 ]

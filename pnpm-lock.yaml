@@ -14,6 +14,9 @@ dependencies:
   big.js:
     specifier: ^6.2.1
     version: 6.2.1
+  bwip-js:
+    specifier: ^4.1.1
+    version: 4.1.1
   core-js:
     specifier: ^3.8.3
     version: 3.32.2
@@ -2969,6 +2972,11 @@ packages:
       base64-js: 1.5.1
       ieee754: 1.2.1
     dev: true
+
+  /bwip-js@4.1.1:
+    resolution: {integrity: sha512-lNuBlfanFb7JqZLznuNM+YalOv/8b8VgxZOV51+6D01rdpe62+DDeqnt8gufQgBeXWjIPSKOCnQeKNfrb3M3UA==}
+    hasBin: true
+    dev: false
 
   /bytes@3.0.0:
     resolution: {integrity: sha512-pMhOfFDPiv9t5jjIXkHosWmkSyQbvsgEVNkz0ERHbuLh2T/7j4Mqqpz523Fe8MVY89KC6Sh/QfS2sM+SjgFDcw==}
