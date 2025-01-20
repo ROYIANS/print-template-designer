@@ -13,8 +13,8 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 export default defineConfig(({ mode }) => {
-  const isLib = mode === 'lib' || mode === 'development'; // 默认打包 lib
-  console.log("[print-template-designer] 欢迎使用 print-template-designer！当前打包模式：", isLib ? 'lib' : 'site');
+  const isLib = mode === 'lib' || mode === 'development' // 默认打包 lib
+  console.log('[print-template-designer] 欢迎使用 print-template-designer！当前模式：', isLib ? 'lib' : 'site')
 
   return {
     plugins: [
@@ -38,29 +38,29 @@ export default defineConfig(({ mode }) => {
     },
     build: isLib
       ? {
-        // 组件库打包配置
-        lib: {
-          entry: path.resolve(__dirname, 'src/components/index.ts'), // 更新入口文件路径
-          name: 'PrintTemplateDesigner',
-          fileName: (format) => `print-template-designer.${format}.js`,
-          formats: ['es', 'cjs', 'umd'],
-        },
-        rollupOptions: {
-          external: ['vue'], // 依赖外部化
-          output: {
-            globals: {
-              vue: 'Vue',
+          // 组件库打包配置
+          lib: {
+            entry: path.resolve(__dirname, 'src/components/index.ts'), // 更新入口文件路径
+            name: 'PrintTemplateDesigner',
+            fileName: format => `print-template-designer.${format}.js`,
+            formats: ['es', 'cjs', 'umd'],
+          },
+          rollupOptions: {
+            external: ['vue', 'vue-router', 'pinia'], // 依赖外部化
+            output: {
+              globals: {
+                vue: 'Vue',
+              },
             },
           },
-        },
-        outDir: 'lib', // 组件库输出目录
-      }
+          outDir: 'lib', // 组件库输出目录
+        }
       : {
-        // 网站 demo 打包配置
-        outDir: 'site',
-        rollupOptions: {
-          input: 'index.html',
+          // 网站 demo 打包配置
+          outDir: 'site',
+          rollupOptions: {
+            input: 'index.html',
+          },
         },
-      },
-  };
-});
+  }
+})

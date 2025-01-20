@@ -11,7 +11,11 @@
     "type": "git",
     "url": "git://github.com/royians/print-template-designer.git"
   },
-  "main": "src/main.ts",
+  "main": "lib/print-template-designer.es.js",
+  "peerDependencies": {
+    "vue": "^3.4.0",
+    "pinia": "^2.3.0"
+  },
   "license": "MIT",
   "packageManager": "pnpm@9.12.0",
   "scripts": {
