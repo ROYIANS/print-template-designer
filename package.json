@@ -11,25 +11,35 @@
     "type": "git",
     "url": "git://github.com/royians/print-template-designer.git"
   },
+  "main": "src/main.ts",
+  "license": "MIT",
+  "packageManager": "pnpm@9.12.0",
   "scripts": {
     "dev": "cross-env DEBUG=0 vite",
-    "build": "run-p ts \"build-only {@}\" --",
-    "build-only": "vite build",
+    "build": "run-p ts \"build-only {@}\"",
+    "build-only": "vite build --mode=lib",
+    "build:site": "run-p ts \"build:site-only {@}\"",
+    "build:site-only": "vite build --mode=site",
     "preview": "vite build && vite preview",
     "start": "pnpm dev & wait-on tcp:3000 -v",
     "test": "vitest",
     "test-e2e": "playwright test --headed",
     "coverage": "vitest run --coverage",
     "lint": "eslint . --fix",
-    "ts": "vue-tsc --build --force"
+    "ts": "vue-tsc --build --force",
+    "prepare": "npx husky",
+    "preinstall": "npx only-allow pnpm"
   },
   "dependencies": {
+    "@kirklin/logger": "^0.0.2",
     "@unhead/vue": "1.11.14",
     "pinia": "2.3.0",
     "vue": "3.5.13",
     "vue-router": "4.5.0"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.6.1",
+    "@commitlint/config-conventional": "^19.6.0",
     "@egoist/tailwindcss-icons": "1.8.1",
     "@iconify/json": "2.2.282",
     "@iconify/types": "2.0.0",
@@ -59,6 +69,7 @@
     "eslint-plugin-playwright": "2.1.0",
     "eslint-plugin-security": "3.0.1",
     "eslint-plugin-vue": "9.32.0",
+    "husky": "^9.1.7",
     "jsdom": "26.0.0",
     "lodash-es": "4.17.21",
     "npm-run-all2": "7.0.1",
@@ -75,5 +86,8 @@
     "vitest": "3.0.2",
     "vue-tsc": "2.2.0",
     "wait-on": "8.0.1"
+  },
+  "lint-staged": {
+    "**/*": "eslint --fix"
   }
 }

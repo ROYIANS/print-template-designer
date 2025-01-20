@@ -3,7 +3,7 @@
 const route = useRoute()
 
 useHead({
-  title: () => route.meta.title || 'Vite + Vue Template',
+  title: () => `${route.meta.title || '' } | 打印模板设计器`,
   meta: [
     {
       property: 'og:title',

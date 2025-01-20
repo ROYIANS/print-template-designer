@@ -10,5 +10,14 @@
     "source.fixAll": "explicit"
   },
   "editor.formatOnSave": true,
-  "editor.defaultFormatter": "esbenp.prettier-vscode"
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "typescript.tsserver.exclude": [
+    "lib"
+  ],
+  "files.exclude": {
+    "lib": true
+  },
+  "search.exclude": {
+    "lib": true
+  }
 }
