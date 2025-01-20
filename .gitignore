@@ -1,10 +1,16 @@
 .DS_Store
 node_modules
-/dist
-/lib
+dist
+dist-ssr
 
+/tests/e2e/videos/
+/tests/e2e/screenshots/
+/instrumented
+/coverage
+.nyc_output
 
 # local env files
+.env
 .env.local
 .env.*.local
 
@@ -16,9 +22,16 @@ pnpm-debug.log*
 
 # Editor directories and files
 .idea
-.vscode
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+*.local
+LOCAL_NOTES.md
+/playwright/.cache
+package-lock.json
+*.tsbuildinfo
+.vscode/starter.code-workspace
+test-results/
