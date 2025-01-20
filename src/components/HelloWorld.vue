@@ -10,6 +10,8 @@ defineProps<{
 function increment() {
   store.increment()
 }
+
+const _strings = '';
 </script>
 
 <template>
