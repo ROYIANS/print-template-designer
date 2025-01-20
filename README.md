@@ -4,15 +4,21 @@
 </div>
 
 <center>
-一个使用Vue2的组件，用于设计打印页面模板。
+一个使用 Vue3 的组件，用于设计打印页面模板。
 </center>
 <center>
-A vue2 component for design a page for print <b>print-template-designer</b><br>
+A vue3 component for design a page for print <b>print-template-designer</b><br>
 </center>
 
 ## 特性
 
-- ⚡ 冲冲冲
+- ⚡ 使用 Vite 6 进行快速开发
+- 🛠️ 使用 TypeScript 提供类型安全
+- 💄 使用 Tailwind CSS 进行高效样式管理
+- 📦 使用 pnpm 管理依赖，提升安装速度和减少磁盘空间占用
+- 🧩 支持 Vue 3 和 Pinia 状态管理
+- 🌐 提供详细的 API 文档和示例代码
+- 🎨 提供丰富的插槽和配置选项，便于自定义
 
 ## Priview | 预览
 
