@@ -13,8 +13,8 @@
   },
   "main": "lib/print-template-designer.es.js",
   "peerDependencies": {
-    "vue": "^3.4.0",
-    "pinia": "^2.3.0"
+    "pinia": "^2.3.0",
+    "vue": "^3.4.0"
   },
   "license": "MIT",
   "packageManager": "pnpm@9.12.0",
@@ -31,7 +31,7 @@
     "coverage": "vitest run --coverage",
     "lint": "eslint . --fix",
     "ts": "vue-tsc --build --force",
-    "prepare": "npx husky",
+    "prepare": "husky",
     "preinstall": "npx only-allow pnpm"
   },
   "dependencies": {
@@ -75,6 +75,7 @@
     "eslint-plugin-vue": "9.32.0",
     "husky": "^9.1.7",
     "jsdom": "26.0.0",
+    "lint-staged": "^15.4.1",
     "lodash-es": "4.17.21",
     "npm-run-all2": "7.0.1",
     "postcss": "8.5.0",

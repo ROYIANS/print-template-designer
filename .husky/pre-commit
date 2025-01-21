@@ -1,0 +1,7 @@
+# .husky/pre-commit
+
+echo "Hello"
+
+pnpm exec lint-staged
+
+node scripts/check-filename.cjs
