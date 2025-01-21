@@ -1,0 +1,63 @@
+@import "theme/index.css";
+
+/* 公共前缀 */
+:root {
+  /* Spacer（已处理动态计算） */
+  --ptd-spacer: 8px;
+  --ptd-spacer-s: calc(var(--ptd-spacer) * 0.5);
+  --ptd-spacer-m: calc(var(--ptd-spacer) * 0.75);
+  --ptd-spacer-l: calc(var(--ptd-spacer) * 1.5);
+  --ptd-spacer-1: var(--ptd-spacer);
+  --ptd-spacer-2: calc(var(--ptd-spacer) * 2);
+  --ptd-spacer-3: calc(var(--ptd-spacer) * 3);
+  --ptd-spacer-4: calc(var(--ptd-spacer) * 4);
+  --ptd-spacer-5: calc(var(--ptd-spacer) * 5);
+  --ptd-spacer-6: calc(var(--ptd-spacer) * 6);
+  --ptd-spacer-7: calc(var(--ptd-spacer) * 7);
+  --ptd-spacer-8: calc(var(--ptd-spacer) * 8);
+  --ptd-spacer-9: calc(var(--ptd-spacer) * 9);
+  --ptd-spacer-10: calc(var(--ptd-spacer) * 10);
+
+  /* 字体 */
+  --ptd-font-size: 10px;
+
+  /* 表单 */
+  --ptd-form-height: 30px;
+  --ptd-form-text-color: var(--ptd-text-color-primary);
+  --ptd-form-bg-color: var(--ptd-bg-color-container);
+  --ptd-form-border-color: var(--ptd-border-level-2-color);
+
+  /* 图标 */
+  --ptd-icon-default: 16px;
+  --ptd-icon-l: 24px;
+
+  /* 响应式断点 */
+  --ptd-screen-xs: 320px;
+  --ptd-screen-sm: 768px;
+  --ptd-screen-md: 992px;
+  --ptd-screen-lg: 1200px;
+  --ptd-screen-xl: 1400px;
+  --ptd-screen-xxl: 1880px;
+
+  /* 动画 */
+  --ptd-anim-time-fn-easing: cubic-bezier(.38, 0, .24, 1);
+  --ptd-anim-time-fn-ease-out: cubic-bezier(0, 0, .15, 1);
+  --ptd-anim-time-fn-ease-in: cubic-bezier(.82, 0, 1, .9);
+  --ptd-anim-duration-base: 0.2s;
+  --ptd-anim-duration-moderate: 0.24s;
+  --ptd-anim-duration-slow: 0.28s;
+
+  /* 层级 */
+  --ptd-z-index-back-top: 300;
+  --ptd-z-index-affix: 500;
+  --ptd-z-index-drawer: 1500;
+  --ptd-z-index-dialog: 2500;
+  --ptd-z-index-image-viewer: 3000;
+  --ptd-z-index-loading: 3500;
+  --ptd-z-index-message: 5000;
+  --ptd-z-index-Popup: 5500;
+  --ptd-z-index-Tooltip: 5600;
+  --ptd-z-index-Notification: 6000;
+  --ptd-z-index-dragging: 6500;
+  --ptd-z-index-guide: 999999;
+}

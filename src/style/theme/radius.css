@@ -1,0 +1,10 @@
+/* border-radius相关 token */
+:root {
+  --ptd-radius-small: 2px;
+  --ptd-radius-default: 3px;
+  --ptd-radius-medium: 6px;
+  --ptd-radius-large: 9px;
+  --ptd-radius-extraLarge: 12px;
+  --ptd-radius-round: 999px;
+  --ptd-radius-circle: 50%;
+}

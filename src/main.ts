@@ -1,4 +1,4 @@
-import '@/assets/base.postcss'
+import '@/style/index.css'
 import router from '@/router'
 import { createHead } from '@unhead/vue'
 import { createPinia } from 'pinia'

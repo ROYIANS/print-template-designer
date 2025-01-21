@@ -1,0 +1,75 @@
+/* 字体相关token */
+:root {
+  /* 字体family token */
+  --ptd-font-family: PingFang SC, Microsoft YaHei, Arial Regular;
+  --ptd-font-family-medium: PingFang SC, Microsoft YaHei, Arial Medium;
+
+  /* 字体大小 token */
+  --ptd-font-size-link-small: 12px;
+  --ptd-font-size-link-medium: 14px;
+  --ptd-font-size-link-large: 16px;
+  --ptd-font-size-mark-small: 12px;
+  --ptd-font-size-mark-medium: 14px;
+  --ptd-font-size-body-small: 12px;
+  --ptd-font-size-body-medium: 14px;
+  --ptd-font-size-body-large: 16px;
+  --ptd-font-size-title-small: 14px;
+  --ptd-font-size-title-medium: 16px;
+  --ptd-font-size-title-large: 20px;
+  --ptd-font-size-headline-small: 24px;
+  --ptd-font-size-headline-medium: 28px;
+  --ptd-font-size-headline-large: 36px;
+  --ptd-font-size-display-medium: 48px;
+  --ptd-font-size-display-large: 64px;
+
+  /* 字体行高 token */
+  --ptd-line-height-link-small: 20px;
+  --ptd-line-height-link-medium: 22px;
+  --ptd-line-height-link-large: 24px;
+  --ptd-line-height-mark-small: 20px;
+  --ptd-line-height-mark-medium: 22px;
+  --ptd-line-height-body-small: 20px;
+  --ptd-line-height-body-medium: 22px;
+  --ptd-line-height-body-large: 24px;
+  --ptd-line-height-title-small: 22px;
+  --ptd-line-height-title-medium: 24px;
+  --ptd-line-height-title-large: 28px;
+  --ptd-line-height-headline-small: 32px;
+  --ptd-line-height-headline-medium: 36px;
+  --ptd-line-height-headline-large: 44px;
+  --ptd-line-height-display-medium: 56px;
+  --ptd-line-height-display-large: 72px;
+  /* font token */
+  --ptd-font-link-small: var(--ptd-font-size-link-small) /
+    var(--ptd-line-height-link-small) var(--ptd-font-family);
+  --ptd-font-link-medium: var(--ptd-font-size-link-medium) /
+    var(--ptd-line-height-link-medium) var(--ptd-font-family);
+  --ptd-font-link-large: var(--ptd-font-size-link-large) /
+    var(--ptd-line-height-link-large) var(--ptd-font-family);
+  --ptd-font-mark-small: 600 var(--ptd-font-size-mark-small) /
+    var(--ptd-line-height-mark-small) var(--ptd-font-family);
+  --ptd-font-mark-medium: 600 var(--ptd-font-size-mark-medium) /
+    var(--ptd-line-height-mark-medium) var(--ptd-font-family);
+  --ptd-font-body-small: var(--ptd-font-size-body-small) /
+    var(--ptd-line-height-body-small) var(--ptd-font-family);
+  --ptd-font-body-medium: var(--ptd-font-size-body-medium) /
+    var(--ptd-line-height-body-medium) var(--ptd-font-family);
+  --ptd-font-body-large: var(--ptd-font-size-body-large) /
+    var(--ptd-line-height-body-large) var(--ptd-font-family);
+  --ptd-font-title-small: 600 var(--ptd-font-size-title-small) /
+    var(--ptd-line-height-title-small) var(--ptd-font-family);
+  --ptd-font-title-medium: 600 var(--ptd-font-size-title-medium) /
+    var(--ptd-line-height-title-medium) var(--ptd-font-family);
+  --ptd-font-title-large: 600 var(--ptd-font-size-title-large) /
+    var(--ptd-line-height-title-large) var(--ptd-font-family);
+  --ptd-font-headline-small: 600 var(--ptd-font-size-headline-small) /
+    var(--ptd-line-height-headline-small) var(--ptd-font-family);
+  --ptd-font-headline-medium: 600 var(--ptd-font-size-headline-medium) /
+    var(--ptd-line-height-headline-medium) var(--ptd-font-family);
+  --ptd-font-headline-large: 600 var(--ptd-font-size-headline-large) /
+    var(--ptd-line-height-headline-large) var(--ptd-font-family);
+  --ptd-font-display-medium: 600 var(--ptd-font-size-display-medium) /
+    var(--ptd-line-height-display-medium) var(--ptd-font-family);
+  --ptd-font-display-large: 600 var(--ptd-font-size-display-large) /
+    var(--ptd-line-height-display-large) var(--ptd-font-family);
+}

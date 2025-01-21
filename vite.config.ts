@@ -13,20 +13,31 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 export default defineConfig(({ mode }) => {
-  const isLib = mode === 'lib' || mode === 'development' // 默认打包 lib
+  const isLib = mode === 'lib';
+  const rootDir = fileURLToPath(new URL('./', import.meta.url));
   console.log('[print-template-designer] 欢迎使用 print-template-designer！当前模式：', isLib ? 'lib' : 'site')
 
   return {
     plugins: [
       vue(),
       AutoImport({
-        imports: ['vue', 'vue-router', 'pinia', { '@/store': ['useStore'] }, unheadVueComposablesImports],
-        dts: 'auto-imports.d.ts',
+        imports: [
+          'vue',
+          'vue-router',
+          'pinia',
+          { '@/store': ['useStore'] },
+          unheadVueComposablesImports
+        ],
+        dts: !isLib && 'types/auto-imports.d.ts',
         vueTemplate: true,
+        dirs: isLib ? [
+          path.resolve(rootDir, 'src/components/**')
+        ] : undefined
       }),
       Components({
-        dts: 'components.d.ts',
-      }),
+        dts: !isLib && 'types/components.d.ts',
+        include: isLib ? [] : [/\.vue$/, /\.vue\?vue/]
+      })
     ],
     resolve: {
       alias: {

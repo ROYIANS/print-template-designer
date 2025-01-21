@@ -1,0 +1,68 @@
+/* size/margin/padding相关 token */
+:root {
+  --ptd-size-1: 2px;
+  --ptd-size-2: 4px;
+  --ptd-size-3: 6px;
+  --ptd-size-4: 8px;
+  --ptd-size-5: 12px;
+  --ptd-size-6: 16px;
+  --ptd-size-7: 20px;
+  --ptd-size-8: 24px;
+  --ptd-size-9: 28px;
+  --ptd-size-10: 32px;
+  --ptd-size-11: 36px;
+  --ptd-size-12: 40px;
+  --ptd-size-13: 48px;
+  --ptd-size-14: 56px;
+  --ptd-size-15: 64px;
+  --ptd-size-16: 72px;
+
+  /*全局 component 组件尺寸高度相关 token */
+  --ptd-comp-size-xxxs: var(--ptd-size-6);
+  --ptd-comp-size-xxs: var(--ptd-size-7);
+  --ptd-comp-size-xs: var(--ptd-size-8);
+  --ptd-comp-size-s: var(--ptd-size-9);
+  --ptd-comp-size-m: var(--ptd-size-10);
+  --ptd-comp-size-l: var(--ptd-size-11);
+  --ptd-comp-size-xl: var(--ptd-size-12);
+  --ptd-comp-size-xxl: var(--ptd-size-13);
+  --ptd-comp-size-xxxl: var(--ptd-size-14);
+  --ptd-comp-size-xxxxl: var(--ptd-size-15);
+  --ptd-comp-size-xxxxxl: var(--ptd-size-16);
+
+  /*全局 popup 弹出层整体边距 token */
+  --ptd-pop-padding-s: var(--ptd-size-2);
+  --ptd-pop-padding-m: var(--ptd-size-3);
+  --ptd-pop-padding-l: var(--ptd-size-4);
+  --ptd-pop-padding-xl: var(--ptd-size-5);
+  --ptd-pop-padding-xxl: var(--ptd-size-6);
+
+  /*全局 component 组件左右边距 token */
+  --ptd-comp-paddingLR-xxs: var(--ptd-size-1);
+  --ptd-comp-paddingLR-xs: var(--ptd-size-2);
+  --ptd-comp-paddingLR-s: var(--ptd-size-4);
+  --ptd-comp-paddingLR-m: var(--ptd-size-5);
+  --ptd-comp-paddingLR-l: var(--ptd-size-6);
+  --ptd-comp-paddingLR-xl: var(--ptd-size-8);
+  --ptd-comp-paddingLR-xxl: var(--ptd-size-10);
+
+  /*全局 component 组件上下边距 token */
+  --ptd-comp-paddingTB-xxs: var(--ptd-size-1);
+  --ptd-comp-paddingTB-xs: var(--ptd-size-2);
+  --ptd-comp-paddingTB-s: var(--ptd-size-4);
+  --ptd-comp-paddingTB-m: var(--ptd-size-5);
+  --ptd-comp-paddingTB-l: var(--ptd-size-6);
+  --ptd-comp-paddingTB-xl: var(--ptd-size-8);
+  --ptd-comp-paddingTB-xxl: var(--ptd-size-10);
+
+  /*全局 component 组件间距 token */
+  --ptd-comp-margin-xxs: var(--ptd-size-1);
+  --ptd-comp-margin-xs: var(--ptd-size-2);
+  --ptd-comp-margin-s: var(--ptd-size-4);
+  --ptd-comp-margin-m: var(--ptd-size-5);
+  --ptd-comp-margin-l: var(--ptd-size-6);
+  --ptd-comp-margin-xl: var(--ptd-size-7);
+  --ptd-comp-margin-xxl: var(--ptd-size-8);
+  --ptd-comp-margin-xxxl: var(--ptd-size-10);
+  --ptd-comp-margin-xxxxl: var(--ptd-size-12);
+}

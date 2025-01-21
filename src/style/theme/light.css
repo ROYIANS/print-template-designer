@@ -1,0 +1,168 @@
+:root,
+:root[theme-mode="light"] {
+  --ptd-brand-color-1: #f2f3ff;
+  --ptd-brand-color-2: #d9e1ff;
+  --ptd-brand-color-3: #b5c7ff;
+  --ptd-brand-color-4: #8eabff;
+  --ptd-brand-color-5: #618dff;
+  --ptd-brand-color-6: #366ef4;
+  --ptd-brand-color-7: #0052d9;
+  --ptd-brand-color-8: #003cab;
+  --ptd-brand-color-9: #002a7c;
+  --ptd-brand-color-10: #001a57;
+  --ptd-warning-color-1: #fff1e9;
+  --ptd-warning-color-2: #ffd9c2;
+  --ptd-warning-color-3: #ffb98c;
+  --ptd-warning-color-4: #fa9550;
+  --ptd-warning-color-5: #e37318;
+  --ptd-warning-color-6: #be5a00;
+  --ptd-warning-color-7: #954500;
+  --ptd-warning-color-8: #713300;
+  --ptd-warning-color-9: #532300;
+  --ptd-warning-color-10: #3b1700;
+  --ptd-error-color-1: #fff0ed;
+  --ptd-error-color-2: #ffd8d2;
+  --ptd-error-color-3: #ffb9b0;
+  --ptd-error-color-4: #ff9285;
+  --ptd-error-color-5: #f6685d;
+  --ptd-error-color-6: #d54941;
+  --ptd-error-color-7: #ad352f;
+  --ptd-error-color-8: #881f1c;
+  --ptd-error-color-9: #68070a;
+  --ptd-error-color-10: #490002;
+  --ptd-success-color-1: #e3f9e9;
+  --ptd-success-color-2: #c6f3d7;
+  --ptd-success-color-3: #92dab2;
+  --ptd-success-color-4: #56c08d;
+  --ptd-success-color-5: #2ba471;
+  --ptd-success-color-6: #008858;
+  --ptd-success-color-7: #006c45;
+  --ptd-success-color-8: #005334;
+  --ptd-success-color-9: #003b23;
+  --ptd-success-color-10: #002515;
+  --ptd-gray-color-1: #f3f3f3;
+  --ptd-gray-color-2: #eee;
+  --ptd-gray-color-3: #e8e8e8;
+  --ptd-gray-color-4: #ddd;
+  --ptd-gray-color-5: #c6c6c6;
+  --ptd-gray-color-6: #a6a6a6;
+  --ptd-gray-color-7: #8b8b8b;
+  --ptd-gray-color-8: #777;
+  --ptd-gray-color-9: #5e5e5e;
+  --ptd-gray-color-10: #4b4b4b;
+  --ptd-gray-color-11: #393939;
+  --ptd-gray-color-12: #2c2c2c;
+  --ptd-gray-color-13: #242424;
+  --ptd-gray-color-14: #181818;
+
+  /* 文字 & 图标 颜色 */
+  --ptd-font-white-1: rgba(255, 255, 255, 100%);
+  --ptd-font-white-2: rgba(255, 255, 255, 55%);
+  --ptd-font-white-3: rgba(255, 255, 255, 35%);
+  --ptd-font-white-4: rgba(255, 255, 255, 22%);
+  --ptd-font-gray-1: rgba(0, 0, 0, 90%);
+  --ptd-font-gray-2: rgba(0, 0, 0, 60%);
+  --ptd-font-gray-3: rgba(0, 0, 0, 40%);
+  --ptd-font-gray-4: rgba(0, 0, 0, 26%);
+
+  /* 基础颜色 */
+  --ptd-brand-color: var(--ptd-brand-color-7);     /* 色彩-品牌-可操作 */
+  --ptd-warning-color: var(--ptd-warning-color-5); /* 色彩-功能-警告 */
+  --ptd-error-color: var(--ptd-error-color-6);     /* 色彩-功能-失败 */
+  --ptd-success-color: var(--ptd-success-color-5); /* 色彩-功能-成功 */
+
+  /* 基础颜色的扩展 用于 hover / 聚焦 / 禁用 / 点击 等状态 */
+  --ptd-brand-color-hover: var(--ptd-brand-color-6);     /* hover态 */
+  --ptd-brand-color-focus: var(--ptd-brand-color-2);     /* focus态，包括鼠标和键盘 */
+  --ptd-brand-color-active: var(--ptd-brand-color-8);    /* 点击态 */
+  --ptd-brand-color-disabled: var(--ptd-brand-color-3);  /* 禁用态 */
+  --ptd-brand-color-light: var(--ptd-brand-color-1);     /* 浅色的选中态 */
+  --ptd-brand-color-light-hover: var(--ptd-brand-color-2);
+
+  /* 警告色扩展 */
+  --ptd-warning-color-hover: var(--ptd-warning-color-4);
+  --ptd-warning-color-focus: var(--ptd-warning-color-2);
+  --ptd-warning-color-active: var(--ptd-warning-color-6);
+  --ptd-warning-color-disabled: var(--ptd-warning-color-3);
+  --ptd-warning-color-light: var(--ptd-warning-color-1);
+  --ptd-warning-color-light-hover: var(--ptd-warning-color-2);
+
+  /* 失败/错误色扩展 */
+  --ptd-error-color-hover: var(--ptd-error-color-5);
+  --ptd-error-color-focus: var(--ptd-error-color-2);
+  --ptd-error-color-active: var(--ptd-error-color-7);
+  --ptd-error-color-disabled: var(--ptd-error-color-3);
+  --ptd-error-color-light: var(--ptd-error-color-1);
+  --ptd-error-color-light-hover: var(--ptd-error-color-2);
+
+  /* 成功色扩展 */
+  --ptd-success-color-hover: var(--ptd-success-color-4);
+  --ptd-success-color-focus: var(--ptd-success-color-2);
+  --ptd-success-color-active: var(--ptd-success-color-6);
+  --ptd-success-color-disabled: var(--ptd-success-color-3);
+  --ptd-success-color-light: var(--ptd-success-color-1);
+  --ptd-success-color-light-hover: var(--ptd-success-color-2);
+
+  /* 遮罩 */
+  --ptd-mask-active: rgba(0, 0, 0, 60%); /* 遮罩-弹出 */
+  --ptd-mask-disabled: rgba(255, 255, 255, 60%); /* 遮罩-禁用 */
+
+  /* 背景色 */
+  --ptd-bg-color-page: var(--ptd-gray-color-2);                        /* 色彩 - page */
+  --ptd-bg-color-container: #fff;                                /* 色彩 - 容器 */
+  --ptd-bg-color-container-hover: var(--ptd-gray-color-1);             /* 色彩 - 容器 - hover */
+  --ptd-bg-color-container-active: var(--ptd-gray-color-3);            /* 色彩 - 容器 - active */
+  --ptd-bg-color-container-select: #fff;                         /* 色彩 - 容器 - select */
+  --ptd-bg-color-secondarycontainer: var(--ptd-gray-color-1);          /* 色彩 - 次级容器 */
+  --ptd-bg-color-secondarycontainer-hover: var(--ptd-gray-color-2);    /* 色彩 - 次级容器 - hover */
+  --ptd-bg-color-secondarycontainer-active: var(--ptd-gray-color-4);   /* 色彩 - 次级容器 - active */
+  --ptd-bg-color-component: var(--ptd-gray-color-3);                   /* 色彩 - 组件 */
+  --ptd-bg-color-component-hover: var(--ptd-gray-color-4);             /* 色彩 - 组件 - hover */
+  --ptd-bg-color-component-active: var(--ptd-gray-color-6);            /* 色彩 - 组件 - active */
+  --ptd-bg-color-secondarycomponent: var(--ptd-gray-color-4);          /* 色彩 - 次级组件 */
+  --ptd-bg-color-secondarycomponent-hover: var(--ptd-gray-color-5);    /* 色彩 - 次级组件 - hover */
+  --ptd-bg-color-secondarycomponent-active: var(--ptd-gray-color-6);   /* 色彩 - 次级组件 - active */
+  --ptd-bg-color-component-disabled: var(--ptd-gray-color-2);          /* 色彩 - 组件 - disabled */
+
+  /* 特殊组件背景色，目前只用于 button、input 组件多主题场景，浅色主题下固定为白色，深色主题下为 transparent 适配背景颜色 */
+  --ptd-bg-color-specialcomponent: #fff;
+
+  /* 文本颜色 */
+  --ptd-text-color-primary: var(--ptd-font-gray-1);      /* 色彩-文字-主要 */
+  --ptd-text-color-secondary: var(--ptd-font-gray-2);    /* 色彩-文字-次要 */
+  --ptd-text-color-placeholder: var(--ptd-font-gray-3);  /* 色彩-文字-占位符/说明 */
+  --ptd-text-color-disabled: var(--ptd-font-gray-4);    /* 色彩-文字-禁用 */
+  --ptd-text-color-anti: #fff;                      /* 色彩-文字-反色 */
+  --ptd-text-color-brand: var(--ptd-brand-color-7);           /* 色彩-文字-品牌 */
+  --ptd-text-color-link: var(--ptd-brand-color-8);            /* 色彩-文字-链接 */
+
+  /* 分割线 */
+  --ptd-border-level-1-color: var(--ptd-gray-color-3);
+  --ptd-component-stroke: var(--ptd-gray-color-3);
+  /* 边框 */
+  --ptd-border-level-2-color: var(--ptd-gray-color-4);
+  --ptd-component-border: var(--ptd-gray-color-4);
+
+  /* 基础/下层 投影 hover 使用的组件包括：表格 / */
+  --ptd-shadow-1: 0 1px 10px rgba(0, 0, 0, 5%), 0 4px 5px rgba(0, 0, 0, 8%), 0 2px 4px -1px rgba(0, 0, 0, 12%);
+  /* 中层投影 下拉 使用的组件包括：下拉菜单 / 气泡确认框 / 选择器 / */
+  --ptd-shadow-2: 0 3px 14px 2px rgba(0, 0, 0, 5%), 0 8px 10px 1px rgba(0, 0, 0, 6%), 0 5px 5px -3px rgba(0, 0, 0, 10%);
+  /* 上层投影（警示/弹窗）使用的组件包括：全局提示 / 消息通知 */
+  --ptd-shadow-3: 0 6px 30px 5px rgba(0, 0, 0, 5%), 0 16px 24px 2px rgba(0, 0, 0, 4%), 0 8px 10px -5px rgba(0, 0, 0, 8%);
+
+  /* 内投影 用于弹窗类组件（气泡确认框 / 全局提示 / 消息通知）的内描边 */
+  --ptd-shadow-inset-top: inset 0 .5px 0 #dcdcdc;
+  --ptd-shadow-inset-right: inset .5px 0 0 #dcdcdc;
+  --ptd-shadow-inset-bottom: inset 0 -.5px 0 #dcdcdc;
+  --ptd-shadow-inset-left: inset -.5px 0 0 #dcdcdc;
+
+  /* table 特定阴影 */
+  --ptd-table-shadow-color: rgba(0, 0, 0, 8%);
+
+  /* 滚动条颜色 */
+  --ptd-scrollbar-color: rgba(0, 0, 0, 10%);
+  /* 滚动条悬浮颜色（ hover ） */
+  --ptd-scrollbar-hover-color: rgba(0, 0, 0, 30%);
+  /* 滚动条轨道颜色，不能是带透明度，否则纵向滚动时，横向滚动条会穿透 */
+  --ptd-scroll-track-color: #fff;
+}
