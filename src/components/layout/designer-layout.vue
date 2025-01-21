@@ -1,7 +1,10 @@
 <script setup lang="ts">
-console.log(123)
+defineOptions({
+  name: 'PtdDesignerLayout',
+})
 </script>
 
 <template>
   <div>比你好</div>
+  <slot />
 </template>
