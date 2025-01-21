@@ -1,6 +1,6 @@
 import type { App } from 'vue';
 import * as components from './components';
-import '../style/index.css'
+import '@/style'
 import pkg from '../../package.json' with {
   type: 'json',
 };

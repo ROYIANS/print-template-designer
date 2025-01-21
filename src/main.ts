@@ -1,4 +1,4 @@
-import '@/style/index.css'
+import '@/style'
 import router from '@/router'
 import { createHead } from '@unhead/vue'
 import { createPinia } from 'pinia'
@@ -16,4 +16,4 @@ app.use(pinia)
 app.use(router)
 app.use(head)
 
-app.mount('#app')
+app.mount('#ptd-app')

@@ -1,3 +1,12 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+html, body {
+  @apply ptd-w-full ptd-h-full ptd-overflow-hidden;
+  @apply ptd-font-sans ptd-text-for-text-primary ptd-text-body-md;
+}
+
+#ptd-app {
+  @apply ptd-w-full ptd-h-full;
+}

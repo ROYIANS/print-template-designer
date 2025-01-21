@@ -1,0 +1,4 @@
+.r-container {
+  @apply ptd-container ptd-h-full;
+  @apply ptd-bg-for-background-container;
+}

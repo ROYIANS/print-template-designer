@@ -108,7 +108,7 @@ module.exports = {
         },
 
         // 文字颜色
-        text: {
+        'for-text': {
           primary: 'var(--ptd-text-color-primary)',
           secondary: 'var(--ptd-text-color-secondary)',
           placeholder: 'var(--ptd-text-color-placeholder)',
@@ -119,7 +119,7 @@ module.exports = {
         },
 
         // 背景色
-        bg: {
+        'for-background': {
           page: 'var(--ptd-bg-color-page)',
           container: 'var(--ptd-bg-color-container)',
           'container-hover': 'var(--ptd-bg-color-container-hover)',
@@ -139,7 +139,7 @@ module.exports = {
         },
 
         // 边框颜色
-        border: {
+        'for-border': {
           1: 'var(--ptd-border-level-1-color)',
           2: 'var(--ptd-border-level-2-color)',
           component: 'var(--ptd-component-border)',

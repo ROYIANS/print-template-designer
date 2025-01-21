@@ -22,7 +22,7 @@ yarn-error.log*
 pnpm-debug.log*
 
 # Editor directories and files
-.idea
+#.idea
 *.suo
 *.ntvs*
 *.njsproj
