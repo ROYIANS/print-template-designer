@@ -1,15 +1,15 @@
 @media (prefers-color-scheme: dark) {
   :root[theme-mode="dark"], .dark {
-    --ptd-brand-color-1: #1b2f51;
-    --ptd-brand-color-2: #173463;
-    --ptd-brand-color-3: #143975;
-    --ptd-brand-color-4: #103d88;
-    --ptd-brand-color-5: #0d429a;
-    --ptd-brand-color-6: #054bbe;
-    --ptd-brand-color-7: #2667d4;
-    --ptd-brand-color-8: #4582e6;
-    --ptd-brand-color-9: #699ef5;
-    --ptd-brand-color-10: #96bbf8;
+    --ptd-brand-color-1: #a17aff20;
+    --ptd-brand-color-2: #320084;
+    --ptd-brand-color-3: #4300a6;
+    --ptd-brand-color-4: #653ac8;
+    --ptd-brand-color-5: #825ae6;
+    --ptd-brand-color-6: #a17aff;
+    --ptd-brand-color-7: #bca0ff;
+    --ptd-brand-color-8: #d4c1ff;
+    --ptd-brand-color-9: #eaddff;
+    --ptd-brand-color-10: #f9f0ff;
     --ptd-warning-color-1: #4f2a1d;
     --ptd-warning-color-2: #582f21;
     --ptd-warning-color-3: #733c23;
@@ -42,15 +42,15 @@
     --ptd-success-color-10: #deede8;
     --ptd-gray-color-1: #f3f3f3;
     --ptd-gray-color-2: #eee;
-    --ptd-gray-color-3: #e8e8e8;
-    --ptd-gray-color-4: #ddd;
-    --ptd-gray-color-5: #c6c6c6;
+    --ptd-gray-color-3: #e7e7e7;
+    --ptd-gray-color-4: #dcdcdc;
+    --ptd-gray-color-5: #c5c5c5;
     --ptd-gray-color-6: #a6a6a6;
     --ptd-gray-color-7: #8b8b8b;
     --ptd-gray-color-8: #777;
     --ptd-gray-color-9: #5e5e5e;
     --ptd-gray-color-10: #4b4b4b;
-    --ptd-gray-color-11: #393939;
+    --ptd-gray-color-11: #383838;
     --ptd-gray-color-12: #2c2c2c;
     --ptd-gray-color-13: #242424;
     --ptd-gray-color-14: #181818;

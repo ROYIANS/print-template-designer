@@ -1,0 +1,7 @@
+.r-footer {
+  @apply ptd-h-3 ptd-w-full ptd-fixed ptd-bottom-0;
+  @apply ptd-bg-for-background-secondarycontainer ptd-px-2;
+  @apply ptd-text-for-text-secondary ptd-font-thin ptd-text-xs;
+  @apply ptd-flex ptd-justify-between ptd-items-center ptd-gap-4;
+  @apply ptd-border-t ptd-border-for-border-component;
+}

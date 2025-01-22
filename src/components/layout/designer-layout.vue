@@ -10,10 +10,14 @@ const toggleDarkClass = () => {
 
 <template>
   <div class="r-container">
+    <button @click="toggleDarkClass">切换</button>
     <header>头部</header>
     <aside>侧边</aside>
     <main>主体</main>
-    <footer>底部</footer>
-    <button @click="toggleDarkClass">切换</button>
+    <footer class="r-footer">
+      <slot name="footer">
+        <div>你好</div>
+      </slot>
+    </footer>
   </div>
 </template>
