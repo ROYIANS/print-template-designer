@@ -1,0 +1,5 @@
+{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file": ".trellis/spec/frontend/directory-structure.md", "reason": "现有目录结构参考，新 monorepo 结构设计时对比用"}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "现有组件模式，迁移时 1:1 对应参考"}
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "现有 Vuex 状态模型，重构为 Preact Signals 的参考"}
+{"file": ".trellis/tasks/05-20-refc-blueprint/prd.md", "reason": "重构蓝图 PRD，所有架构决策的权威来源"}
