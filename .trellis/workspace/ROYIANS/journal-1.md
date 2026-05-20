@@ -36,3 +36,37 @@ Populated all six .trellis/spec/frontend/ files (directory-structure, component-
 ### Next Steps
 
 - None - task complete
+
+
+## Session 2: 重构蓝图讨论与子任务分解
+
+**Date**: 2026-05-21
+**Task**: 重构蓝图讨论与子任务分解
+**Branch**: `feature/refc`
+
+### Summary
+
+完成 v2 重构完整蓝图讨论：确认分层架构（monorepo + @ptd/core + @ptd/components + @ptd/react-designer + @ptd/export + NestJS 后端），技术栈决策（React、Preact Signals、CSS Modules + CSS Variables、Radix UI、NestJS + Prisma + SQLite），MVP 功能边界，以及 11 个实施子任务的拆分与依赖关系梳理。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `af87bac` | (see git log) |
+| `e8b07b5` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
