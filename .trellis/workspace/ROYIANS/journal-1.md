@@ -70,3 +70,36 @@ Populated all six .trellis/spec/frontend/ files (directory-structure, component-
 ### Next Steps
 
 - None - task complete
+
+
+## Session 3: Monorepo 脚手架搭建
+
+**Date**: 2026-05-21
+**Task**: Monorepo 脚手架搭建
+**Branch**: `feature/refc`
+
+### Summary
+
+搭建 pnpm monorepo 骨架：归档 Vue 2 旧代码到 legacy/，创建四个 @ptd/* 包（core/components/react-designer/export）和两个 app（web/server），所有包 typecheck + build 通过。更新 README 为 v2 架构说明，新建 .trellis/spec/monorepo/ 规范文档（5 个 spec 文件），旧 frontend spec 标记为 legacy。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `76c9efc` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
