@@ -1,0 +1,39 @@
+# Stage 1: Build
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# Copy workspace config files
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml* ./
+COPY tsconfig.base.json ./
+
+# Copy package sources
+COPY packages/ ./packages/
+COPY apps/web/ ./apps/web/
+
+# Install dependencies
+RUN pnpm install --frozen-lockfile
+
+# Build packages
+RUN pnpm --filter @ptd/core build
+RUN pnpm --filter @ptd/components build
+RUN pnpm --filter @ptd/react-designer build
+
+# Build web app
+RUN pnpm --filter web build
+
+# Stage 2: Serve
+FROM node:20-alpine AS runner
+
+WORKDIR /app
+
+RUN npm install -g serve
+
+COPY --from=builder /app/apps/web/dist ./dist
+
+EXPOSE 3000
+
+CMD ["serve", "-s", "dist", "-l", "3000"]
