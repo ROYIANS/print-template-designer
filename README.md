@@ -1,3 +1,11 @@
+-----------------
+
+# 重构计划中
+
+现在ai很发达了，准备抽时间做一个重构，做成框架无关的，更加功能丰富的东西。
+
+----------------
+
 <div align='center'>
 <h1>print-template-designer</h1>
 <img src='README.assets/favicon.ico' alt='print-template-designer - A vue2 component for design a page for print' width='150'/>
