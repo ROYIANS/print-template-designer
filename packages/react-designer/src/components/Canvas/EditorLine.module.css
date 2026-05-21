@@ -1,0 +1,21 @@
+.markLine {
+  height: 100%;
+  pointer-events: none;
+}
+
+.line {
+  background: var(--ptd-color-primary, #4579e1);
+  position: absolute;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.xline {
+  width: 100%;
+  height: 0.5px;
+}
+
+.yline {
+  width: 0.5px;
+  height: 100%;
+}

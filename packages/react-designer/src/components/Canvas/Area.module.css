@@ -1,0 +1,7 @@
+.area {
+  border: 1px solid rgba(69, 121, 225, 0.6);
+  background: rgba(69, 121, 225, 0.08);
+  position: absolute;
+  pointer-events: none;
+  z-index: 100;
+}

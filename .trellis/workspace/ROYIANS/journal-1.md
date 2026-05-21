@@ -169,3 +169,23 @@ Populated all six .trellis/spec/frontend/ files (directory-structure, component-
 ### Next Steps
 
 - None - task complete
+
+---
+
+## 2026-05-21 — @ptd/react-designer PR1
+
+### Task
+`05-21-react-designer-package` — PR1: tsup 配置 + 状态层骨架 + Designer 空壳
+
+### Done
+- `package.json`：切换到 tsup，修正 exports 字段顺序（types 前置），添加 Radix UI + @ptd/components 依赖
+- `tsup.config.ts`：新建，external react/react-dom/@preact/signals-react，jsx automatic
+- `src/state/editor.ts`：signals 状态层（templateSignal、curComponentSignal、scaleSignal 等）
+- `src/state/snapshot.ts`：撤销/重做（recordSnapshot/undo/redo），MAX_SNAP_SHOT_LENGTH=20
+- `src/utils/index.ts`：generateId、getShapeStyle、deepCopy
+- `src/components/Designer/Designer.tsx`：受控组件骨架，props: value/onChange/onSave/onLoad
+- `src/types/css-modules.d.ts`：CSS Modules 类型声明
+- 构建：ESM + CJS + CSS + d.ts 全部输出，typecheck 通过
+
+### Status
+[OK] **PR1 完成，进入 PR2（画布核心）**

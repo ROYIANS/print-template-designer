@@ -1,0 +1,2 @@
+export { templateSignal, currentPageIndexSignal, currentPageSignal, componentDataSignal, pageConfigSignal, curComponentSignal, curComponentIndexSignal, isClickComponentSignal, isInEditorSignal, editModeSignal, scaleSignal, showRulerSignal, rectWidthSignal, rectHeightSignal, copyDataSignal, areaDataSignal, isShowAreaSignal, isNightModeSignal, setShapeStyle, addComponent, deleteComponent } from './editor'
+export { snapshotDataSignal, snapshotIndexSignal, recordSnapshot, undo, redo } from './snapshot'

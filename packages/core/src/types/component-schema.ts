@@ -19,6 +19,8 @@ export interface ComponentStyle {
   height: number
   rotate: number
   opacity: number
+  left?: number
+  top?: number
   fontSize?: number
   fontFamily?: string
   color?: string
