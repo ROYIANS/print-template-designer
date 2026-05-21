@@ -51,7 +51,8 @@ Run: `pnpm lint`
 ## Required Patterns
 
 - Every `packages/*` must have a `typecheck` script (`tsc --noEmit`)
-- Every `packages/*` must have a `build` script (`tsc -p tsconfig.build.json`)
+- Every `packages/*` must have a `build` script (`tsup`)
+- Every `packages/*` must have a `test` script (`vitest run`)
 - `src/index.ts` must exist and be the only public API entry point
 - `pnpm install` must succeed from root after any `package.json` change
 - Destroy third-party instances in cleanup / component unmount (e.g., Puppeteer browser `browser.close()`)
@@ -68,6 +69,34 @@ Run: `pnpm lint`
 
 ---
 
-## No Tests Yet
+## Testing
 
-There is no test suite configured in v2. Do not add test infrastructure unless explicitly requested. When tests are added, the recommended stack is Vitest (compatible with Vite and ESM).
+All `packages/*` use **Vitest** for unit tests.
+
+### vitest.config.ts (required in every package)
+
+```ts
+import { defineConfig } from 'vitest/config'
+
+export default defineConfig({
+  test: {
+    environment: 'node',
+  },
+})
+```
+
+### Test file location
+
+Tests live in `src/__tests__/` with the naming pattern `<module>.test.ts`.
+
+### Import paths in tests
+
+Tests are inside `src/__tests__/`, so imports are relative to `src/`:
+
+```ts
+// Correct — tests are inside src/__tests__/
+import { DataBindingEngine } from '../data-binding/engine'
+
+// Wrong — do not include 'src' in the path
+import { DataBindingEngine } from '../src/data-binding/engine'
+```

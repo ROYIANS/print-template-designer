@@ -2,7 +2,25 @@
 
 ---
 
-## package.json Required Fields
+## Build Tool: tsup (ESM + CJS dual output)
+
+All `packages/*` use **tsup** for building, not `tsc` directly. tsup produces ESM + CJS + `.d.ts` in one command.
+
+### tsup.config.ts (required in every package)
+
+```ts
+import { defineConfig } from 'tsup'
+
+export default defineConfig({
+  entry: ['src/index.ts'],
+  format: ['esm', 'cjs'],
+  dts: true,
+  sourcemap: true,
+  clean: true,
+})
+```
+
+### package.json Required Fields
 
 Every package under `packages/` must have:
 
@@ -16,39 +34,43 @@ Every package under `packages/` must have:
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.cjs"
     }
   },
+  "files": ["dist"],
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
-    "typecheck": "tsc --noEmit"
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
   },
   "engines": { "node": ">=20" }
 }
 ```
 
-## tsconfig Split Pattern
+> **Warning**: In `exports`, `"types"` must come **before** `"import"` and `"require"`. Putting it after causes a tsup/esbuild warning: "The condition 'types' here will never be used."
 
-Each package has TWO tsconfig files:
+### tsconfig Split Pattern
 
-| File | Purpose | Key settings |
-|------|---------|--------------|
-| `tsconfig.json` | IDE + typecheck (`tsc --noEmit`) | no `outDir`, includes `src` |
-| `tsconfig.build.json` | Emit (`tsc -p tsconfig.build.json`) | `outDir: dist`, `rootDir: src`, `declaration: true` |
+Each package still has TWO tsconfig files (for IDE + typecheck):
 
-`tsconfig.json` example:
+| File | Purpose |
+|------|---------|
+| `tsconfig.json` | IDE + `tsc --noEmit` typecheck |
+| `tsconfig.build.json` | Kept for reference; tsup uses `tsconfig.json` directly |
+
+`tsconfig.json`:
 ```json
 {
   "extends": "../../tsconfig.base.json",
-  "include": ["src"]
-}
-```
-
-`tsconfig.build.json` example:
-```json
-{
-  "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src",
@@ -56,7 +78,8 @@ Each package has TWO tsconfig files:
     "declarationMap": true,
     "sourceMap": true
   },
-  "exclude": ["dist", "node_modules"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
 }
 ```
 
@@ -76,7 +99,7 @@ Framework packages (react, preact) go in `peerDependencies`, not `dependencies`.
 Root `package.json` scripts run all packages via pnpm filter:
 
 ```bash
-pnpm build          # runs build in all packages/* and apps/
+pnpm build          # runs tsup in all packages/* and apps/
 pnpm typecheck      # tsc --noEmit in all packages
 pnpm lint           # eslint across workspace
 ```
@@ -86,3 +109,4 @@ Individual package:
 pnpm --filter @ptd/core build
 pnpm --filter web dev
 ```
+
