@@ -136,3 +136,36 @@ Populated all six .trellis/spec/frontend/ files (directory-structure, component-
 ### Next Steps
 
 - None - task complete
+
+
+## Session 5: @ptd/components 画布组件包实现
+
+**Date**: 2026-05-21
+**Task**: @ptd/components 画布组件包实现
+**Branch**: `feature/refc`
+
+### Summary
+
+实现 @ptd/components 框架无关画布组件包：纯 DOM class 渲染模型（mount/update/destroy API）、CSS Custom Properties 驱动动态样式（--ptd-* 前缀）、单例 stylesheet 注入器（含 SSR guard）、11 种画布组件（SimpleText/Text-Tiptap/Line/Rect/Circle/Star/Image/QRCode-easyqrcodejs/BarCode-bwip-js/Group/SimpleTable/ComplexTable）、DataBindingEngine 集成。vitest jsdom 测试套件（30 个用例全绿）。更新 monorepo spec：jsdom 环境规则、CSS 变量命名约定、singleton stylesheet 注入模式。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `0a538aa` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
