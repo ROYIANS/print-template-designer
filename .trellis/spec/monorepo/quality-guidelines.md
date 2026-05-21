@@ -2,6 +2,24 @@
 
 ---
 
+## Claude Code File Edit Rules
+
+When using Claude Code (CLI or agent) to edit files, the tool enforces a **read-before-write** contract:
+
+> **You must call the `Read` tool on a file before calling `Edit` or `Write` on it in the same session.**
+
+This is a Claude Code platform constraint, not a permissions issue. If you see a "File has not been read yet" error, the fix is always to read the file first, then retry the edit.
+
+**Pattern to follow:**
+```
+Read(file_path)          ← always first
+Edit(file_path, ...)     ← then edit
+```
+
+This applies to both the main agent and all sub-agents (`trellis-implement`, `trellis-check`, etc.). Sub-agents must read any file they intend to modify, even if the file content was described in the prompt.
+
+---
+
 ## Toolchain
 
 | Tool | Version | Config |
