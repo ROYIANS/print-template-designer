@@ -103,3 +103,36 @@ Populated all six .trellis/spec/frontend/ files (directory-structure, component-
 ### Next Steps
 
 - None - task complete
+
+
+## Session 4: @ptd/core 核心引擎包实现
+
+**Date**: 2026-05-21
+**Task**: @ptd/core 核心引擎包实现
+**Branch**: `feature/refc`
+
+### Summary
+
+实现 @ptd/core 框架无关核心引擎包：Schema 类型系统（PageConfig/ComponentSchema/TemplateSchema）、DataBindingEngine（[::field::] 语法 + 7 种类型转换器）、ComponentRegistry（12 种内置组件）、serialize/deserialize（_version 版本标记）、单位换算工具（mmToPx/pxToMm）、PAGE_SIZES 常量。tsup 双格式构建（ESM+CJS），vitest 测试套件（23 个用例全绿）。同步更新 monorepo spec：tsup 构建规范、vitest 测试约定。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `f10f6d0` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
