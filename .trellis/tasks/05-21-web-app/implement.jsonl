@@ -1,1 +1,5 @@
-{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file": ".trellis/spec/monorepo/directory-structure.md", "reason": "apps/web 目录结构，Vite + React 布局规范"}
+{"file": ".trellis/spec/monorepo/styling-conventions.md", "reason": "CSS Modules 用法，apps/web 全局样式约定（global.css）"}
+{"file": ".trellis/spec/monorepo/typescript-conventions.md", "reason": "strict TS、公共 API 消费方式，@ptd/react-designer 接入类型"}
+{"file": ".trellis/spec/monorepo/quality-guidelines.md", "reason": "ESLint/Prettier/Node >=20 约定"}
+{"file": ".trellis/spec/monorepo/package-conventions.md", "reason": "workspace 依赖引用方式（workspace:*），apps/ 与 packages/ 的关系"}

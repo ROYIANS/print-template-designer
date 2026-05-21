@@ -2,17 +2,17 @@
   "id": "react-designer-package",
   "name": "react-designer-package",
   "title": "@ptd/react-designer 设计器 React 包",
-  "description": "",
+  "description": "将 legacy Vue2 打印模板设计器完整迁移为 React 包 @ptd/react-designer，功能对齐 legacy 版本。包含画布核心（ComponentAdjuster/拖拽/缩放/旋转）、工具栏（对齐/层级/组合/撤销重做）、左侧 sidebar（5 面板）、右侧属性面板、SketchRuler 标尺、右键菜单。使用 @preact/signals-react 状态管理、@radix-ui Primitives UI、tsup 构建。",
   "status": "in_progress",
-  "dev_type": null,
-  "scope": null,
-  "package": null,
+  "dev_type": "feature",
+  "scope": "packages/react-designer",
+  "package": "@ptd/react-designer",
   "priority": "P2",
   "creator": "ROYIANS",
   "assignee": "ROYIANS",
   "createdAt": "2026-05-21",
   "completedAt": null,
-  "branch": null,
+  "branch": "feature/refc",
   "base_branch": "feature/refc",
   "worktree_path": null,
   "commit": null,
@@ -20,7 +20,16 @@
   "subtasks": [],
   "children": [],
   "parent": null,
-  "relatedFiles": [],
-  "notes": "",
-  "meta": {}
+  "relatedFiles": [
+    "packages/react-designer/src/",
+    "packages/react-designer/tsup.config.ts",
+    "packages/react-designer/package.json",
+    "packages/core/src/types/component-schema.ts",
+    "apps/web/src/App.tsx"
+  ],
+  "notes": "PR1+PR2 已完成并提交（commit dec3f3a）。PR3 待实现：工具栏操作 + 属性面板。PR4 待实现：左侧 sidebar + SketchRuler + 右键菜单。PR5 待实现：apps/web 接入验收。",
+  "meta": {
+    "pr1_commit": "dec3f3a",
+    "progress": "PR1+PR2 done, PR3 next"
+  }
 }

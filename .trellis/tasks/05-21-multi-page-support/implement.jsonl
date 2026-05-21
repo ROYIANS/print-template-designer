@@ -1,1 +1,4 @@
-{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file": ".trellis/spec/monorepo/package-conventions.md", "reason": "tsup 构建配置，多页支持作为 @ptd/react-designer 内部功能的包约定"}
+{"file": ".trellis/spec/monorepo/typescript-conventions.md", "reason": "strict TS、公共 API 类型导出，多页状态类型定义"}
+{"file": ".trellis/spec/monorepo/styling-conventions.md", "reason": "CSS Modules 用法，多页 UI 组件样式规范"}
+{"file": ".trellis/spec/monorepo/quality-guidelines.md", "reason": "ESLint/Prettier/Node >=20 约定"}

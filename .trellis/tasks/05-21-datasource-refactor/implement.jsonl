@@ -1,1 +1,5 @@
-{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file": ".trellis/spec/monorepo/package-conventions.md", "reason": "tsup 构建配置、package.json exports 约定、peerDependencies 规范"}
+{"file": ".trellis/spec/monorepo/typescript-conventions.md", "reason": "strict TS、禁止 as any、公共 API 只通过 index.ts 导出"}
+{"file": ".trellis/spec/monorepo/styling-conventions.md", "reason": "CSS Modules 用法、Radix UI data-* 属性样式化、禁止 inline style"}
+{"file": ".trellis/spec/monorepo/directory-structure.md", "reason": "monorepo 目录结构，packages/ 与 apps/ 解剖，数据源相关包位置"}
+{"file": ".trellis/spec/monorepo/quality-guidelines.md", "reason": "ESLint/Prettier/Node >=20 约定"}

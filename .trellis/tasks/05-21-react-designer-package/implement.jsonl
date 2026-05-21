@@ -1,4 +1,5 @@
-{"file": ".trellis/spec/frontend/state-management.md", "reason": "signals 替代 Vuex 的状态设计参考"}
-{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "React 组件结构规范"}
-{"file": ".trellis/spec/monorepo/package-conventions.md", "reason": "包构建/导出约定，tsup 配置参考"}
-{"file": ".trellis/spec/frontend/type-safety.md", "reason": "TypeScript 类型规范"}
+{"file": ".trellis/spec/monorepo/package-conventions.md", "reason": "tsup 构建配置、package.json exports 字段顺序、peerDependencies 约定"}
+{"file": ".trellis/spec/monorepo/typescript-conventions.md", "reason": "strict TS、禁止 as any、公共 API 只通过 index.ts 导出"}
+{"file": ".trellis/spec/monorepo/styling-conventions.md", "reason": "CSS Modules 用法、Radix UI data-* 属性样式化、禁止 inline style"}
+{"file": ".trellis/spec/monorepo/directory-structure.md", "reason": "monorepo 目录结构、packages/ 解剖、apps/ 解剖"}
+{"file": ".trellis/spec/monorepo/quality-guidelines.md", "reason": "ESLint flat config、Prettier、Node >=20 约定"}
