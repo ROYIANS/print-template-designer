@@ -36,6 +36,45 @@ element.style.setProperty('--ptd-color', style.color)
 
 This replaces the `vue-styled-components` dynamic template literals used in `legacy/src/components/PageComponents/style.js`.
 
+### Singleton Stylesheet Injection
+
+Canvas components need a shared CSS stylesheet to define the rules that read from CSS variables. Inject it once using a singleton pattern:
+
+```ts
+// src/base/stylesheet.ts
+let injected = false
+
+export function injectStylesheet(): void {
+  if (injected || typeof document === 'undefined') return
+  injected = true
+  const style = document.createElement('style')
+  style.textContent = `
+    .ptd-component { position: absolute; box-sizing: border-box; }
+    .ptd-text { width: var(--ptd-width); color: var(--ptd-color); }
+    /* ... */
+  `
+  document.head.appendChild(style)
+}
+```
+
+Call `injectStylesheet()` in `BaseComponent` constructor so it fires automatically on first use. The `typeof document === 'undefined'` guard makes it safe in SSR/Node.js environments.
+
+### CSS Variable Naming Convention
+
+All canvas component CSS variables use the `--ptd-` prefix:
+
+| Variable | Maps to | Example value |
+|----------|---------|---------------|
+| `--ptd-width` | `style.width` | `200px` |
+| `--ptd-height` | `style.height` | `50px` |
+| `--ptd-color` | `style.color` | `#212121` |
+| `--ptd-background` | `style.background` | `transparent` |
+| `--ptd-font-size` | `style.fontSize` | `12pt` |
+| `--ptd-font-family` | `style.fontFamily` | `simhei` |
+| `--ptd-border` | computed from borderWidth/Type/Color | `1px solid #000` |
+| `--ptd-rotate` | `style.rotate` | `45deg` |
+| `--ptd-opacity` | `style.opacity` | `0.8` |
+
 ---
 
 ## Designer UI: CSS Modules

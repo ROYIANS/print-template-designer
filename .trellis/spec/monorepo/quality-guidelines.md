@@ -75,6 +75,7 @@ All `packages/*` use **Vitest** for unit tests.
 
 ### vitest.config.ts (required in every package)
 
+Default for pure logic packages (no DOM):
 ```ts
 import { defineConfig } from 'vitest/config'
 
@@ -84,6 +85,19 @@ export default defineConfig({
   },
 })
 ```
+
+For packages that use DOM APIs (`@ptd/components` and any future browser-only packages), use `jsdom`:
+```ts
+import { defineConfig } from 'vitest/config'
+
+export default defineConfig({
+  test: {
+    environment: 'jsdom',
+  },
+})
+```
+
+> **Rule**: Use `environment: 'node'` by default. Switch to `'jsdom'` only when the package directly manipulates DOM (e.g., `document.createElement`, `element.style.setProperty`). Do not add `jsdom` to packages that don't need it — it adds ~5s to test startup.
 
 ### Test file location
 

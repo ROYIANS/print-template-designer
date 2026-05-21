@@ -1,1 +1,7 @@
-{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file": ".trellis/tasks/05-21-components-package/prd.md", "reason": "本任务完整需求、技术决策和验收标准"}
+{"file": ".trellis/tasks/archive/2026-05/05-20-refc-blueprint/prd.md", "reason": "整体架构蓝图，@ptd/components 职责、样式方案、Preact Signals 决策"}
+{"file": ".trellis/tasks/archive/2026-05/05-21-core-package/prd.md", "reason": "@ptd/core 已实现的 ComponentSchema、DataBindingEngine 等 API 参考"}
+{"file": ".trellis/spec/monorepo/package-conventions.md", "reason": "tsup 构建规范、package.json 字段要求"}
+{"file": ".trellis/spec/monorepo/typescript-conventions.md", "reason": "TypeScript strict 规范、公共 API 导出模式"}
+{"file": ".trellis/spec/monorepo/quality-guidelines.md", "reason": "vitest 测试规范、禁止模式"}
+{"file": ".trellis/spec/monorepo/styling-conventions.md", "reason": "CSS Custom Properties vs CSS Modules 使用规范"}
