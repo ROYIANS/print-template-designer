@@ -1,9 +1,9 @@
 .area {
-  border: 1px solid rgba(69, 121, 225, 0.6);
-  background: rgba(69, 121, 225, 0.08);
+  border: 1px solid var(--ptd-selection);
+  background: var(--ptd-selection-subtle);
   position: absolute;
   pointer-events: none;
-  z-index: 100;
+  z-index: var(--ptd-layer-selection);
   left: var(--area-left);
   top: var(--area-top);
   width: var(--area-width);

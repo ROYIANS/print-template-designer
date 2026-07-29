@@ -4,9 +4,9 @@
 }
 
 .line {
-  background: var(--ptd-color-primary, #4579e1);
+  background: var(--ptd-selection);
   position: absolute;
-  z-index: 1000;
+  z-index: var(--ptd-layer-guide);
   pointer-events: none;
   display: none;
 }

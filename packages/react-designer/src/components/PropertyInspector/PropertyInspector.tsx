@@ -1,6 +1,7 @@
 import { useEffect, useState, type ChangeEvent, type FocusEvent, type ReactNode } from 'react'
 import { useSignals } from '@preact/signals-react/runtime'
 import type { ComponentSchema, ComponentStyle } from '@ptd/core'
+import { RiFocus3Line } from '@remixicon/react'
 import { useEditorStore } from '../../state'
 import {
   isEditableTextPropValue,
@@ -52,13 +53,13 @@ export function PropertyInspector() {
 
 function EmptyInspector() {
   return (
-    <aside className={styles.inspector} aria-label="属性面板">
+    <aside className={styles.inspector} aria-label="属性面板" data-ptd-region="inspector">
       <div className={styles.heading}>
         <span className={styles.eyebrow}>INSPECTOR</span>
         <h2>属性</h2>
       </div>
       <div className={styles.empty}>
-        <span className={styles.emptyGlyph}>⌁</span>
+        <RiFocus3Line className={styles.emptyGlyph} aria-hidden="true" />
         <h3>选择画布中的对象</h3>
         <p>单击对象调整尺寸与样式；按住 Shift 可建立多选，进行对齐、分布或组合。</p>
       </div>
@@ -83,7 +84,7 @@ function SingleInspector({ component }: { component: ComponentSchema }) {
   const editableText = isEditableTextPropValue(component)
 
   return (
-    <aside className={styles.inspector} aria-label="属性面板">
+    <aside className={styles.inspector} aria-label="属性面板" data-ptd-region="inspector">
       <div className={styles.heading}>
         <span className={styles.eyebrow}>{component.component}</span>
         <h2>{component.name || '未命名组件'}</h2>
@@ -168,7 +169,7 @@ function SingleInspector({ component }: { component: ComponentSchema }) {
           />
           <ColorInput
             label="文字"
-            value={color(component.style.color, '#292421')}
+                  value={color(component.style.color, '#1d2735')}
             disabled={locked}
             onFocus={start}
             onBlur={finish}
@@ -176,7 +177,7 @@ function SingleInspector({ component }: { component: ComponentSchema }) {
           />
           <ColorInput
             label="背景"
-            value={color(component.style.background, '#fdfaf5')}
+              value={color(component.style.background, '#f8fafc')}
             disabled={locked}
             onFocus={start}
             onBlur={finish}
@@ -184,7 +185,7 @@ function SingleInspector({ component }: { component: ComponentSchema }) {
           />
           <ColorInput
             label="边框色"
-            value={color(component.style.borderColor, '#6b625d')}
+                  value={color(component.style.borderColor, '#7d8999')}
             disabled={locked}
             onFocus={start}
             onBlur={finish}
@@ -265,7 +266,7 @@ function BatchInspector({ components }: { components: ComponentSchema[] }) {
   }
   const sharedColor = shared('color')
   return (
-    <aside className={styles.inspector} aria-label="属性面板">
+    <aside className={styles.inspector} aria-label="属性面板" data-ptd-region="inspector">
       <div className={styles.heading}>
         <span className={styles.eyebrow}>MULTI SELECT</span>
         <h2>{components.length} 个对象</h2>

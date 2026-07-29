@@ -1,18 +1,20 @@
 .status {
-  min-height: 28px;
+  min-height: 26px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 0 12px;
-  color: var(--ptd-ink-400);
-  background: var(--ptd-paper-100);
-  border-top: 1px solid var(--ptd-line);
+  gap: var(--ptd-space-2);
+  padding: 0 var(--ptd-space-3);
+  border-top: 1px solid var(--ptd-border);
+  color: var(--ptd-text-muted);
+  background: var(--ptd-surface-panel);
+  font-family: var(--ptd-font-metric);
   font-size: 10px;
+  font-variant-numeric: tabular-nums;
 }
 .divider {
   width: 1px;
   height: 12px;
-  background: var(--ptd-line);
+  background: var(--ptd-border);
 }
 .grow {
   flex: 1;
@@ -21,5 +23,5 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--ptd-ok);
+  background: var(--ptd-success);
 }

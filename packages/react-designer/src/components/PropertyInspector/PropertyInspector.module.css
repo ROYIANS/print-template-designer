@@ -1,13 +1,13 @@
 .inspector {
   height: 100%;
   overflow-y: auto;
-  color: var(--ptd-ink-800);
-  background: var(--ptd-paper-100);
-  border-left: 1px solid var(--ptd-line);
+  color: var(--ptd-text);
+  background: var(--ptd-surface-panel);
+  border-left: 1px solid var(--ptd-border);
 }
 .heading {
   padding: 16px 16px 12px;
-  border-bottom: 1px solid var(--ptd-line);
+  border-bottom: 1px solid var(--ptd-border);
 }
 .heading h2 {
   margin: 2px 0 0;
@@ -15,18 +15,18 @@
   line-height: 1.4;
 }
 .eyebrow {
-  color: var(--ptd-accent-strong);
+  color: var(--ptd-action);
   font-size: 9px;
   font-weight: 750;
   letter-spacing: 0.12em;
 }
 .section {
   padding: 12px 16px 16px;
-  border-bottom: 1px solid var(--ptd-line-soft);
+  border-bottom: 1px solid var(--ptd-border-subtle);
 }
 .section h3 {
   margin: 0 0 10px;
-  color: var(--ptd-ink-500);
+  color: var(--ptd-text-muted);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -36,21 +36,21 @@
   display: grid;
   gap: 4px;
   padding: 10px;
-  border: 1px solid var(--ptd-line-soft);
-  color: var(--ptd-ink-500);
-  background: var(--ptd-paper-200);
+  border: 1px solid var(--ptd-border-subtle);
+  color: var(--ptd-text-muted);
+  background: var(--ptd-surface-sunken);
   font-size: 10px;
   line-height: 1.5;
 }
 .structuredNotice strong {
-  color: var(--ptd-ink-700);
+  color: var(--ptd-text);
   font-size: 11px;
 }
 .field {
   display: grid;
   gap: 4px;
   min-width: 0;
-  color: var(--ptd-ink-500);
+  color: var(--ptd-text-muted);
   font-size: 10px;
 }
 .fieldGrid {
@@ -63,10 +63,10 @@
 .field select {
   width: 100%;
   box-sizing: border-box;
-  border: 1px solid var(--ptd-line);
+  border: 1px solid var(--ptd-border);
   border-radius: 2px;
-  color: var(--ptd-ink-900);
-  background: var(--ptd-paper-50);
+  color: var(--ptd-text-strong);
+  background: var(--ptd-surface-raised);
   font: inherit;
   font-size: 12px;
 }
@@ -87,7 +87,7 @@
 .field input:hover:not(:disabled),
 .field textarea:hover:not(:disabled),
 .field select:hover:not(:disabled) {
-  border-color: var(--ptd-ink-300);
+  border-color: var(--ptd-border-strong);
 }
 .field input:focus-visible,
 .field textarea:focus-visible,
@@ -99,9 +99,8 @@
 .field input:disabled,
 .field textarea:disabled,
 .field select:disabled {
-  color: var(--ptd-ink-300);
-  background: var(--ptd-paper-200);
-  cursor: not-allowed;
+  color: var(--ptd-text-disabled);
+  background: var(--ptd-surface-sunken);
 }
 .lockRow {
   display: flex;
@@ -118,11 +117,11 @@
   font-size: 12px;
 }
 .lockRow small {
-  color: var(--ptd-ink-400);
+  color: var(--ptd-text-muted);
   font-size: 10px;
 }
 .lockRow input {
-  accent-color: var(--ptd-accent);
+  accent-color: var(--ptd-selection);
 }
 .empty {
   display: grid;
@@ -133,8 +132,9 @@
   text-align: center;
 }
 .emptyGlyph {
-  color: var(--ptd-accent);
-  font-size: 34px;
+  width: 26px;
+  height: 26px;
+  color: var(--ptd-text-muted);
 }
 .empty h3 {
   margin: 12px 0 4px;
@@ -142,7 +142,7 @@
 }
 .empty p,
 .summary {
-  color: var(--ptd-ink-400);
+  color: var(--ptd-text-muted);
   font-size: 11px;
   line-height: 1.65;
 }
@@ -154,20 +154,20 @@
   margin: 16px;
   height: 32px;
   padding: 0 12px;
-  border: 1px solid var(--ptd-accent-line);
+  border: 1px solid var(--ptd-action);
   border-radius: 2px;
-  color: var(--ptd-accent-strong);
-  background: var(--ptd-accent-soft);
+  color: var(--ptd-action);
+  background: var(--ptd-action-subtle);
   font: inherit;
   cursor: pointer;
 }
 .unlockButton:hover:not(:disabled) {
-  background: var(--ptd-accent-soft-hover);
+  background: color-mix(in oklch, var(--ptd-action-subtle) 72%, var(--ptd-action));
 }
 .unlockButton:active:not(:disabled) {
   transform: translateY(1px);
 }
 .unlockButton:disabled {
   opacity: 0.45;
-  cursor: not-allowed;
+  cursor: default;
 }

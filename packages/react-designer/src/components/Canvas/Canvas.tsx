@@ -7,10 +7,10 @@ import {
   type MouseEvent,
 } from 'react'
 import { useSignals } from '@preact/signals-react/runtime'
-import type { ComponentSchema } from '@ptd/core'
-import { defaultRegistry, getPageDimensions, mmToPx } from '@ptd/core'
+import { getPageDimensions, mmToPx } from '@ptd/core'
+import { componentCatalog, createComponentSchema, PTD_COMPONENT_MIME } from '../../catalog'
 import { useEditorStore } from '../../state'
-import { generateId, getComponentRotatedStyle } from '../../utils'
+import { getComponentRotatedStyle } from '../../utils'
 import { Area } from './Area'
 import { ComponentAdjuster } from './ComponentAdjuster'
 import { ComponentRenderer } from './ComponentRenderer'
@@ -47,33 +47,25 @@ export function Canvas() {
   const handleDrop = useCallback(
     (event: DragEvent<HTMLDivElement>) => {
       event.preventDefault()
-      const componentType = event.dataTransfer.getData(
-        'componentType',
-      ) as ComponentSchema['component']
-      const definition = defaultRegistry.get(componentType)
+      const componentType =
+        event.dataTransfer.getData(PTD_COMPONENT_MIME) ||
+        event.dataTransfer.getData('componentType')
+      const item = componentCatalogItem(componentType)
       const editor = editorRef.current
-      if (!definition || !editor) return
+      if (!item || !editor) return
       const rect = editor.getBoundingClientRect()
-      const schema: ComponentSchema = {
-        id: generateId(),
-        component: definition.type,
-        name: definition.name,
-        propValue: cloneValue(definition.defaultProps),
-        style: {
-          width: 100,
-          height: 40,
-          rotate: 0,
-          opacity: 1,
-          ...definition.defaultStyle,
-          left: Math.round((event.clientX - rect.left) / scale),
-          top: Math.round((event.clientY - rect.top) / scale),
-        },
-        groupStyle: {},
-        position: {},
-      }
-      store.addComponent(schema)
+      store.addComponent(
+        createComponentSchema(
+          item.type,
+          {
+            x: (event.clientX - rect.left) / scale,
+            y: (event.clientY - rect.top) / scale,
+          },
+          { width: pageWidthPx, height: pageHeightPx },
+        ),
+      )
     },
-    [scale, store],
+    [pageHeightPx, pageWidthPx, scale, store],
   )
 
   const handleMouseDown = useCallback(
@@ -155,11 +147,22 @@ export function Canvas() {
 
   return (
     <div className={styles.canvasWrapper} style={canvasStyle}>
+      <div className={styles.workbenchFrame} aria-hidden="true" data-ptd-decoration="frame">
+        <span className={`${styles.frameNode} ${styles.frameNodeTopLeft}`} />
+        <span className={`${styles.frameNode} ${styles.frameNodeTopRight}`} />
+        <span className={`${styles.frameNode} ${styles.frameNodeBottomLeft}`} />
+        <span className={`${styles.frameNode} ${styles.frameNodeBottomRight}`} />
+      </div>
       <div className={styles.canvasStage}>
+        <span className={`${styles.paperNode} ${styles.paperNodeTopLeft}`} aria-hidden="true" />
+        <span className={`${styles.paperNode} ${styles.paperNodeTopRight}`} aria-hidden="true" />
+        <span className={`${styles.paperNode} ${styles.paperNodeBottomLeft}`} aria-hidden="true" />
+        <span className={`${styles.paperNode} ${styles.paperNodeBottomRight}`} aria-hidden="true" />
         <div
           ref={editorRef}
           id="ptd-designer-canvas"
           className={styles.canvas}
+          data-ptd-region="paper"
           onDragOver={handleDragOver}
           onDrop={handleDrop}
           onMouseDown={handleMouseDown}
@@ -187,6 +190,6 @@ export function Canvas() {
   )
 }
 
-function cloneValue<T>(value: T): T {
-  return JSON.parse(JSON.stringify(value)) as T
+function componentCatalogItem(type: string) {
+  return componentCatalog.find((item) => item.type === type)
 }

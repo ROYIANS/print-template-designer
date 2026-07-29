@@ -14,7 +14,7 @@ body,
 
 body {
   overflow: hidden;
-  background: #e9e2da;
+  background: oklch(91.5% 0.012 255);
 }
 
 button,

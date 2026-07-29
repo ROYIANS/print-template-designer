@@ -2,19 +2,56 @@ import type { ReactNode } from 'react'
 import { useSignals } from '@preact/signals-react/runtime'
 import * as Separator from '@radix-ui/react-separator'
 import * as Tooltip from '@radix-ui/react-tooltip'
+import {
+  RiAlignItemBottomLine,
+  RiAlignItemHorizontalCenterLine,
+  RiAlignItemLeftLine,
+  RiAlignItemRightLine,
+  RiAlignItemTopLine,
+  RiAlignItemVerticalCenterLine,
+  RiArrowGoBackLine,
+  RiArrowGoForwardLine,
+  RiBringForward,
+  RiBringToFront,
+  RiClipboardLine,
+  RiContractLeftRightLine,
+  RiContractUpDownLine,
+  RiDeleteBinLine,
+  RiFileCopyLine,
+  RiGroupLine,
+  RiLandscapeLine,
+  RiLockLine,
+  RiLockUnlockLine,
+  RiRuler2Line,
+  RiScissorsLine,
+  RiSendBackward,
+  RiSendToBack,
+  RiSplitCellsHorizontal,
+  RiZoomInLine,
+  RiZoomOutLine,
+} from '@remixicon/react'
 import type { Alignment, Distribution, LayerAction } from '../../state'
 import { useEditorStore } from '../../state'
+import { ptdThemeClass } from '../Theme'
 import styles from './Toolbar.module.css'
 
 interface ToolButtonProps {
   label: string
+  shortcut?: string
   children: ReactNode
   onClick: () => void
   disabled?: boolean
   pressed?: boolean
 }
 
-function ToolButton({ label, children, onClick, disabled = false, pressed }: ToolButtonProps) {
+function ToolButton({
+  label,
+  shortcut,
+  children,
+  onClick,
+  disabled = false,
+  pressed,
+}: ToolButtonProps) {
   return (
     <Tooltip.Root>
       <Tooltip.Trigger asChild>
@@ -30,8 +67,9 @@ function ToolButton({ label, children, onClick, disabled = false, pressed }: Too
         </button>
       </Tooltip.Trigger>
       <Tooltip.Portal>
-        <Tooltip.Content className={styles.tooltip} sideOffset={7}>
-          {label}
+        <Tooltip.Content className={`${styles.tooltip} ${ptdThemeClass}`} sideOffset={7}>
+          <span>{label}</span>
+          {shortcut && <kbd>{shortcut}</kbd>}
           <Tooltip.Arrow className={styles.tooltipArrow} />
         </Tooltip.Content>
       </Tooltip.Portal>
@@ -53,133 +91,161 @@ export function Toolbar() {
   const canAlign = selectedCount >= 2 && !hasLocked
   const canDistribute = selectedCount >= 3 && !hasLocked
   const canUngroup = Boolean(store.primaryComponent.value?.component === 'RoyGroup') && !hasLocked
-
   const align = (value: Alignment) => () => store.align(value)
   const distribute = (value: Distribution) => () => store.distribute(value)
   const layer = (value: LayerAction) => () => store.moveLayer(value)
 
   return (
     <Tooltip.Provider delayDuration={450} skipDelayDuration={150}>
-      <header className={styles.toolbar} aria-label="模板编辑工具栏">
-        <div className={styles.identity}>
-          <span className={styles.productMark}>PT</span>
-          <span className={styles.documentTitle}>
-            {store.pageConfig.value.title || '未命名模板'}
-          </span>
-        </div>
-
-        <nav className={styles.commandStrip} aria-label="编辑命令">
-          <div className={styles.group}>
-            <ToolButton label="撤销" onClick={() => store.undo()} disabled={!store.canUndo.value}>
-              ↶
+      <nav className={styles.toolbar} aria-label="模板编辑命令" data-ptd-region="command-bar">
+        <div className={styles.commands}>
+          <div className={styles.group} aria-label="历史">
+            <ToolButton
+              label="撤销"
+              shortcut="Ctrl Z"
+              onClick={() => store.undo()}
+              disabled={!store.canUndo.value}
+            >
+              <RiArrowGoBackLine />
             </ToolButton>
-            <ToolButton label="重做" onClick={() => store.redo()} disabled={!store.canRedo.value}>
-              ↷
+            <ToolButton
+              label="重做"
+              shortcut="Ctrl Y"
+              onClick={() => store.redo()}
+              disabled={!store.canRedo.value}
+            >
+              <RiArrowGoForwardLine />
             </ToolButton>
           </div>
           <ToolSeparator />
-          <div className={styles.group}>
-            <ToolButton label="复制" onClick={() => store.copy()} disabled={selectedCount === 0}>
-              复制
+          <div className={styles.group} aria-label="剪贴板">
+            <ToolButton
+              label="复制"
+              shortcut="Ctrl C"
+              onClick={() => store.copy()}
+              disabled={selectedCount === 0}
+            >
+              <RiFileCopyLine />
             </ToolButton>
-            <ToolButton label="剪切" onClick={() => store.cut()} disabled={!canModify}>
-              剪切
+            <ToolButton
+              label="剪切"
+              shortcut="Ctrl X"
+              onClick={() => store.cut()}
+              disabled={!canModify}
+            >
+              <RiScissorsLine />
             </ToolButton>
             <ToolButton
               label="粘贴"
+              shortcut="Ctrl V"
               onClick={() => store.paste()}
               disabled={!store.clipboard.value}
             >
-              粘贴
+              <RiClipboardLine />
             </ToolButton>
-            <ToolButton label="删除" onClick={() => store.deleteSelected()} disabled={!canModify}>
-              删除
+            <ToolButton
+              label={`删除${selectedCount > 1 ? ` ${selectedCount} 个组件` : '组件'}`}
+              shortcut="Delete"
+              onClick={() => store.deleteSelected()}
+              disabled={!canModify}
+            >
+              <RiDeleteBinLine />
             </ToolButton>
           </div>
           <ToolSeparator />
-          <div className={styles.group}>
+          <div className={styles.group} aria-label="层级与锁定">
             <ToolButton
               label={hasLocked ? '解锁所选组件' : '锁定所选组件'}
               onClick={() => store.setLock(!hasLocked)}
               disabled={selectedCount === 0}
               pressed={hasLocked}
             >
-              {hasLocked ? '解锁' : '锁定'}
+              {hasLocked ? <RiLockUnlockLine /> : <RiLockLine />}
             </ToolButton>
             <ToolButton label="下移一层" onClick={layer('backward')} disabled={!canModify}>
-              下移
+              <RiSendBackward />
             </ToolButton>
             <ToolButton label="上移一层" onClick={layer('forward')} disabled={!canModify}>
-              上移
+              <RiBringForward />
             </ToolButton>
             <ToolButton label="置于底层" onClick={layer('back')} disabled={!canModify}>
-              置底
+              <RiSendToBack />
             </ToolButton>
             <ToolButton label="置于顶层" onClick={layer('front')} disabled={!canModify}>
-              置顶
+              <RiBringToFront />
             </ToolButton>
           </div>
           <ToolSeparator />
-          <div className={styles.group}>
+          <div className={styles.group} aria-label="对齐与分布">
             <ToolButton label="左对齐" onClick={align('left')} disabled={!canAlign}>
-              左齐
+              <RiAlignItemLeftLine />
             </ToolButton>
             <ToolButton label="水平居中" onClick={align('center')} disabled={!canAlign}>
-              中齐
+              <RiAlignItemHorizontalCenterLine />
             </ToolButton>
             <ToolButton label="右对齐" onClick={align('right')} disabled={!canAlign}>
-              右齐
+              <RiAlignItemRightLine />
             </ToolButton>
             <ToolButton label="顶部对齐" onClick={align('top')} disabled={!canAlign}>
-              顶齐
+              <RiAlignItemTopLine />
             </ToolButton>
             <ToolButton label="垂直居中" onClick={align('middle')} disabled={!canAlign}>
-              中线
+              <RiAlignItemVerticalCenterLine />
             </ToolButton>
             <ToolButton label="底部对齐" onClick={align('bottom')} disabled={!canAlign}>
-              底齐
+              <RiAlignItemBottomLine />
             </ToolButton>
             <ToolButton
               label="水平等距分布"
               onClick={distribute('horizontal')}
               disabled={!canDistribute}
             >
-              横分
+              <RiContractLeftRightLine />
             </ToolButton>
             <ToolButton
               label="垂直等距分布"
               onClick={distribute('vertical')}
               disabled={!canDistribute}
             >
-              纵分
+              <RiContractUpDownLine />
             </ToolButton>
           </div>
           <ToolSeparator />
-          <div className={styles.group}>
-            <ToolButton label="组合所选组件" onClick={() => store.group()} disabled={!canAlign}>
-              组合
+          <div className={styles.group} aria-label="组合">
+            <ToolButton
+              label="组合所选组件"
+              shortcut="Ctrl G"
+              onClick={() => store.group()}
+              disabled={!canAlign}
+            >
+              <RiGroupLine />
             </ToolButton>
-            <ToolButton label="拆分组合" onClick={() => store.ungroup()} disabled={!canUngroup}>
-              拆分
+            <ToolButton
+              label="拆分组合"
+              shortcut="Ctrl Shift G"
+              onClick={() => store.ungroup()}
+              disabled={!canUngroup}
+            >
+              <RiSplitCellsHorizontal />
             </ToolButton>
           </div>
-        </nav>
+        </div>
 
         <div className={styles.viewStrip}>
-          <div className={styles.segmented} aria-label="页面方向">
+          <div className={styles.direction} aria-label="页面方向">
             <ToolButton
               label="纵向页面"
               onClick={() => store.setPageDirection('p')}
               pressed={store.pageConfig.value.pageDirection === 'p'}
             >
-              纵
+              <RiLandscapeLine className={styles.portraitIcon} />
             </ToolButton>
             <ToolButton
               label="横向页面"
               onClick={() => store.setPageDirection('l')}
               pressed={store.pageConfig.value.pageDirection === 'l'}
             >
-              横
+              <RiLandscapeLine />
             </ToolButton>
           </div>
           <ToolButton
@@ -187,7 +253,14 @@ export function Toolbar() {
             onClick={() => store.toggleRuler()}
             pressed={store.showRuler.value}
           >
-            标尺
+            <RiRuler2Line />
+          </ToolButton>
+          <ToolButton
+            label="缩小画布"
+            shortcut="Ctrl -"
+            onClick={() => store.setZoom(store.scale.value - 0.25)}
+          >
+            <RiZoomOutLine />
           </ToolButton>
           <label className={styles.zoomLabel}>
             <span className={styles.visuallyHidden}>画布缩放</span>
@@ -203,8 +276,15 @@ export function Toolbar() {
               <option value={2}>200%</option>
             </select>
           </label>
+          <ToolButton
+            label="放大画布"
+            shortcut="Ctrl +"
+            onClick={() => store.setZoom(store.scale.value + 0.25)}
+          >
+            <RiZoomInLine />
+          </ToolButton>
         </div>
-      </header>
+      </nav>
     </Tooltip.Provider>
   )
 }

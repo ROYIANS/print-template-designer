@@ -1,20 +1,40 @@
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
+  useState,
   type CSSProperties,
   type MouseEvent,
   type ReactNode,
 } from 'react'
+import { createPortal } from 'react-dom'
 import type { ComponentSchema } from '@ptd/core'
+import * as Tooltip from '@radix-ui/react-tooltip'
+import {
+  RiBringForward,
+  RiDeleteBinLine,
+  RiDragMove2Line,
+  RiFileCopyLine,
+  RiLockLine,
+  RiLockUnlockLine,
+} from '@remixicon/react'
 import { useEditorStore } from '../../state'
 import { getComponentRotatedStyle, mod360, type Point } from '../../utils'
 import { calculateComponentPositionAndSize } from '../../utils/calculateComponentPositionAndSize'
+import { ptdThemeClass } from '../Theme'
 import styles from './ComponentAdjuster.module.css'
 
 type HandleName = 'lt' | 't' | 'rt' | 'r' | 'rb' | 'b' | 'lb' | 'l'
 type Variables = CSSProperties & Record<`--${string}`, string>
+
+interface QuickBarPosition {
+  left: number
+  top: number
+  componentId: string | null
+  ready: boolean
+}
 
 const INITIAL_ANGLE: Record<HandleName, number> = {
   lt: 0,
@@ -63,6 +83,51 @@ interface ComponentAdjusterProps {
   children: ReactNode
 }
 
+interface QuickActionProps {
+  label: string
+  disabled?: boolean
+  danger?: boolean
+  onClick?: () => void
+  onMouseDown?: (event: MouseEvent<HTMLButtonElement>) => void
+  children: ReactNode
+}
+
+function QuickAction({
+  label,
+  disabled = false,
+  danger = false,
+  onClick,
+  onMouseDown,
+  children,
+}: QuickActionProps) {
+  return (
+    <Tooltip.Root>
+      <Tooltip.Trigger asChild>
+        <button
+          type="button"
+          className={styles.quickAction}
+          data-danger={danger || undefined}
+          aria-label={label}
+          disabled={disabled}
+          onClick={onClick}
+          onMouseDown={(event) => {
+            event.stopPropagation()
+            onMouseDown?.(event)
+          }}
+        >
+          {children}
+        </button>
+      </Tooltip.Trigger>
+      <Tooltip.Portal>
+        <Tooltip.Content className={`${styles.tooltip} ${ptdThemeClass}`} sideOffset={7}>
+          {label}
+          <Tooltip.Arrow className={styles.tooltipArrow} />
+        </Tooltip.Content>
+      </Tooltip.Portal>
+    </Tooltip.Root>
+  )
+}
+
 export function ComponentAdjuster({
   schema,
   isActive,
@@ -74,11 +139,19 @@ export function ComponentAdjuster({
 }: ComponentAdjusterProps) {
   const store = useEditorStore()
   const adjusterRef = useRef<HTMLDivElement>(null)
+  const quickBarRef = useRef<HTMLDivElement>(null)
   const cleanupRef = useRef<(() => void) | null>(null)
+  const [quickBarPosition, setQuickBarPosition] = useState<QuickBarPosition>({
+    left: 0,
+    top: 0,
+    componentId: null,
+    ready: false,
+  })
   const style = schema.style
   const isLocked = schema.isLock ?? false
   const hasLockedSelection = store.selectedComponents.value.some((component) => component.isLock)
   const showHandles = isActive && !isLocked && !hasLockedSelection
+  const showQuickBar = isActive && store.selectedIds.value.length === 1
   const pointList = useMemo(() => getPointList(schema.component), [schema.component])
   const cursors = useMemo(
     () =>
@@ -94,6 +167,75 @@ export function ComponentAdjuster({
     },
     [],
   )
+
+  useLayoutEffect(() => {
+    if (!showQuickBar) return
+
+    const adjuster = adjusterRef.current
+    const quickBar = quickBarRef.current
+    const editor = editorRef.current
+    const viewport = editor?.closest<HTMLElement>('[data-ptd-region="canvas-viewport"]')
+    if (!adjuster || !quickBar || !viewport) return
+
+    let frame = 0
+    const updatePosition = () => {
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(() => {
+        const componentRect = adjuster.getBoundingClientRect()
+        const viewportRect = viewport.getBoundingClientRect()
+        const quickBarRect = quickBar.getBoundingClientRect()
+        const margin = 6
+        const gap = 4
+        const minLeft = viewportRect.left + margin
+        const maxLeft = Math.max(minLeft, viewportRect.right - margin - quickBarRect.width)
+        const left = Math.min(Math.max(componentRect.left, minLeft), maxLeft)
+        const above = componentRect.top - quickBarRect.height - gap
+        const below = componentRect.bottom + gap
+        const top =
+          above >= viewportRect.top + margin
+            ? above
+            : Math.min(below, viewportRect.bottom - margin - quickBarRect.height)
+
+        setQuickBarPosition((current) =>
+          current.left === left &&
+          current.top === top &&
+          current.componentId === schema.id &&
+          current.ready
+            ? current
+            : {
+                left,
+                top: Math.max(viewportRect.top + margin, top),
+                componentId: schema.id,
+                ready: true,
+              },
+        )
+      })
+    }
+
+    updatePosition()
+    viewport.addEventListener('scroll', updatePosition, { passive: true })
+    window.addEventListener('resize', updatePosition)
+    const observer = new ResizeObserver(updatePosition)
+    observer.observe(viewport)
+    observer.observe(adjuster)
+
+    return () => {
+      cancelAnimationFrame(frame)
+      viewport.removeEventListener('scroll', updatePosition)
+      window.removeEventListener('resize', updatePosition)
+      observer.disconnect()
+    }
+  }, [
+    editorRef,
+    scale,
+    schema.id,
+    showQuickBar,
+    style.height,
+    style.left,
+    style.rotate,
+    style.top,
+    style.width,
+  ])
 
   const startSession = useCallback(
     (move: (event: globalThis.MouseEvent) => void, finish: () => void) => {
@@ -258,43 +400,100 @@ export function ComponentAdjuster({
     '--adjuster-rotate': `${style.rotate ?? 0}deg`,
   }
 
+  const quickBarVariables: Variables = {
+    '--quick-bar-left': `${quickBarPosition.left}px`,
+    '--quick-bar-top': `${quickBarPosition.top}px`,
+  }
+
+  const duplicate = () => {
+    store.copy()
+    store.paste()
+  }
+
   return (
-    <div
-      ref={adjusterRef}
-      style={variables}
-      className={`${styles.adjuster} ${isActive ? styles.active : ''} ${isLocked ? styles.locked : ''}`}
-      onMouseDown={handleMouseDownOnShape}
-    >
-      {showHandles && !['RoySimpleTable', 'RoyComplexTable'].includes(schema.component) && (
-        <button
-          type="button"
-          className={styles.rotate}
-          onMouseDown={handleRotate}
-          aria-label="旋转组件"
-        />
-      )}
-      {isLocked && <span className={styles.lock} title="已锁定" />}
-      {showHandles && (
-        <button
-          type="button"
-          className={styles.move}
-          onMouseDown={handleMove}
-          aria-label="移动组件"
-        />
-      )}
-      {showHandles &&
-        pointList.map((point) => (
+    <>
+      <div
+        ref={adjusterRef}
+        style={variables}
+        className={`${styles.adjuster} ${isActive ? styles.active : ''} ${isLocked ? styles.locked : ''}`}
+        onMouseDown={handleMouseDownOnShape}
+      >
+        {showHandles && !['RoySimpleTable', 'RoyComplexTable'].includes(schema.component) && (
           <button
             type="button"
-            key={point}
-            className={styles.point}
-            style={getPointVariables(point, style.width, style.height, cursors[point])}
-            onMouseDown={(event) => handleResize(point, event)}
-            aria-label={`从 ${point} 控点调整尺寸`}
+            className={styles.rotate}
+            onMouseDown={handleRotate}
+            aria-label="旋转组件"
           />
-        ))}
-      <div className={styles.container}>{children}</div>
-    </div>
+        )}
+        {isLocked && <span className={styles.lock} title="已锁定" />}
+        {showHandles && !showQuickBar && (
+          <button
+            type="button"
+            className={styles.move}
+            onMouseDown={handleMove}
+            aria-label="移动组件"
+          />
+        )}
+        {showHandles &&
+          pointList.map((point) => (
+            <button
+              type="button"
+              key={point}
+              className={styles.point}
+              style={getPointVariables(point, style.width, style.height, cursors[point])}
+              onMouseDown={(event) => handleResize(point, event)}
+              aria-label={`从 ${point} 控点调整尺寸`}
+            />
+          ))}
+        <div className={styles.container}>{children}</div>
+      </div>
+      {showQuickBar &&
+        typeof document !== 'undefined' &&
+        createPortal(
+        <Tooltip.Provider delayDuration={350} skipDelayDuration={120}>
+          <div
+            ref={quickBarRef}
+            className={`${styles.quickBar} ${ptdThemeClass}`}
+            data-ready={
+              (quickBarPosition.ready && quickBarPosition.componentId === schema.id) || undefined
+            }
+            style={quickBarVariables}
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <span className={styles.quickLabel}>{schema.name || schema.component}</span>
+            <QuickAction label="拖动组件" disabled={isLocked} onMouseDown={handleMove}>
+              <RiDragMove2Line />
+            </QuickAction>
+            <QuickAction
+              label={isLocked ? '解锁组件' : '锁定组件'}
+              onClick={() => store.setLock(!isLocked)}
+            >
+              {isLocked ? <RiLockUnlockLine /> : <RiLockLine />}
+            </QuickAction>
+            <QuickAction label="复制组件" disabled={isLocked} onClick={duplicate}>
+              <RiFileCopyLine />
+            </QuickAction>
+            <QuickAction
+              label="上移一层"
+              disabled={isLocked}
+              onClick={() => store.moveLayer('forward')}
+            >
+              <RiBringForward />
+            </QuickAction>
+            <QuickAction
+              label="删除组件"
+              danger
+              disabled={isLocked}
+              onClick={() => store.deleteSelected()}
+            >
+              <RiDeleteBinLine />
+            </QuickAction>
+          </div>
+        </Tooltip.Provider>,
+          document.body,
+        )}
+    </>
   )
 }
 

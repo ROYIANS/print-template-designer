@@ -1,5 +1,6 @@
 .canvasWrapper {
   position: relative;
+  isolation: isolate;
   box-sizing: border-box;
   width: max-content;
   min-width: 100%;
@@ -8,7 +9,57 @@
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: 56px 96px 160px;
+  padding: 64px 96px 160px;
+  background-color: var(--ptd-surface-canvas);
+  background-image:
+    repeating-linear-gradient(
+      135deg,
+      color-mix(in oklch, var(--ptd-border) 32%, transparent) 0,
+      color-mix(in oklch, var(--ptd-border) 32%, transparent) 1px,
+      transparent 1px,
+      transparent 7px
+    ),
+    linear-gradient(var(--ptd-border-subtle) 1px, transparent 1px),
+    linear-gradient(90deg, var(--ptd-border-subtle) 1px, transparent 1px);
+  background-position: -1px -1px;
+  background-size: 24px 24px;
+}
+
+.workbenchFrame {
+  position: absolute;
+  z-index: var(--ptd-layer-base);
+  inset: 20px 24px 32px;
+  border: 1px solid color-mix(in oklch, var(--ptd-border-strong) 42%, transparent);
+  pointer-events: none;
+}
+
+.frameNode,
+.paperNode {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  box-sizing: border-box;
+  transform: rotate(45deg);
+  border: 1px solid color-mix(in oklch, var(--ptd-selection) 42%, var(--ptd-border));
+  background: var(--ptd-surface-canvas);
+  pointer-events: none;
+}
+
+.frameNodeTopLeft {
+  top: -4px;
+  left: -4px;
+}
+.frameNodeTopRight {
+  top: -4px;
+  right: -4px;
+}
+.frameNodeBottomLeft {
+  bottom: -4px;
+  left: -4px;
+}
+.frameNodeBottomRight {
+  right: -4px;
+  bottom: -4px;
 }
 
 .canvas {
@@ -18,21 +69,78 @@
   height: var(--canvas-height);
   transform: scale(var(--canvas-scale));
   transform-origin: 0 0;
-  background: var(--canvas-background);
   color: var(--canvas-color);
+  background: var(--canvas-background);
+  box-shadow: var(--ptd-shadow-paper);
   font-family: var(--canvas-font-family);
   font-size: var(--canvas-font-size);
   line-height: var(--canvas-line-height);
-  box-shadow:
-    rgba(0, 0, 0, 0.12) 0 1px 3px,
-    rgba(0, 0, 0, 0.24) 0 1px 2px;
 }
 
 .canvasStage {
   position: relative;
+  z-index: var(--ptd-layer-stage);
   width: var(--canvas-scaled-width);
   height: var(--canvas-scaled-height);
   flex: 0 0 auto;
+}
+
+.canvasStage::before,
+.canvasStage::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+  opacity: 0.68;
+}
+
+.canvasStage::before {
+  right: 0;
+  bottom: calc(100% + 11px);
+  left: 0;
+  height: 7px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--ptd-border-strong) 0,
+    var(--ptd-border-strong) 1px,
+    transparent 1px,
+    transparent 12px
+  );
+}
+
+.canvasStage::after {
+  top: 0;
+  right: calc(100% + 11px);
+  bottom: 0;
+  width: 7px;
+  background-image: repeating-linear-gradient(
+    0deg,
+    var(--ptd-border-strong) 0,
+    var(--ptd-border-strong) 1px,
+    transparent 1px,
+    transparent 12px
+  );
+}
+
+.paperNode {
+  z-index: var(--ptd-layer-selection);
+  background: var(--ptd-surface-canvas);
+}
+
+.paperNodeTopLeft {
+  top: -4px;
+  left: -4px;
+}
+.paperNodeTopRight {
+  top: -4px;
+  right: -4px;
+}
+.paperNodeBottomLeft {
+  bottom: -4px;
+  left: -4px;
+}
+.paperNodeBottomRight {
+  right: -4px;
+  bottom: -4px;
 }
 
 .marginTop {
@@ -44,9 +152,17 @@
 
 .marginLine {
   position: absolute;
-  height: 0;
+  z-index: var(--ptd-layer-guide);
   width: 100%;
-  border-top: 1px dashed #ccc;
+  height: 0;
+  border-top: 1px dashed var(--ptd-proof);
+  opacity: 0.42;
   pointer-events: none;
-  z-index: 50;
+}
+
+@media (max-width: 1179px) {
+  .canvasWrapper {
+    padding-right: 48px;
+    padding-left: 48px;
+  }
 }

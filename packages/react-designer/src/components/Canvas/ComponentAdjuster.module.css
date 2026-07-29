@@ -1,116 +1,219 @@
 .adjuster {
-  margin: 0;
-  padding: 0;
   position: absolute;
-  user-select: none;
-  box-sizing: border-box;
   left: var(--adjuster-left);
   top: var(--adjuster-top);
   width: var(--adjuster-width);
   height: var(--adjuster-height);
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
   transform: rotate(var(--adjuster-rotate));
-  border: 0.5px dashed rgba(100, 100, 100, 0.4);
+  border: 1px dashed var(--ptd-border-strong);
+  user-select: none;
 }
 
 .active {
   border-style: solid;
-  border-color: var(--ptd-color-primary, #4579e1);
+  border-color: var(--ptd-selection);
+  box-shadow: 0 0 0 1px color-mix(in oklch, var(--ptd-selection) 12%, transparent);
 }
 .locked {
   border-style: dotted;
 }
-
 .adjuster:not(.active):hover {
-  border-color: rgba(100, 100, 100, 0.6);
+  border-color: var(--ptd-text-muted);
 }
-
 .adjuster.active:hover {
-  border-color: var(--ptd-color-primary, #4579e1);
+  border-color: var(--ptd-selection);
 }
 
 .rotate {
   position: absolute;
-  top: -28px;
+  top: calc(100% + 18px);
   left: 50%;
-  transform: translateX(-50%);
-  cursor: grab;
   width: 10px;
   height: 10px;
-  border-radius: 50%;
-  border: 1px solid var(--ptd-color-primary, #4579e1);
-  background: #fff;
   display: block;
   padding: 0;
+  transform: translateX(-50%);
+  border: 1px solid var(--ptd-selection);
+  border-radius: 50%;
+  background: var(--ptd-surface-raised);
+  cursor: grab;
 }
 
 .rotate::after {
   content: '';
-  height: 20px;
-  border-right: 1px dashed var(--ptd-color-primary, #4579e1);
   position: absolute;
-  left: 3.5px;
-  top: 10px;
+  bottom: 9px;
+  left: 3px;
+  height: 20px;
+  border-right: 1px dashed var(--ptd-selection);
 }
-
 .rotate:active {
   cursor: grabbing;
 }
 
 .lock {
   position: absolute;
-  top: -15px;
+  z-index: var(--ptd-layer-selection);
+  top: -17px;
   right: 0;
-  z-index: 9;
-  width: 10px;
-  height: 10px;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23999' d='M12 1a5 5 0 0 1 5 5v3h1a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V11a2 2 0 0 1 2-2h1V6a5 5 0 0 1 5-5zm0 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm0-10a3 3 0 0 0-3 3v3h6V6a3 3 0 0 0-3-3z'/%3E%3C/svg%3E")
-    center/contain no-repeat;
+  width: 9px;
+  height: 8px;
+  border: 1px solid var(--ptd-text-muted);
+  border-radius: 1px;
+  background: var(--ptd-surface-raised);
+}
+.lock::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 1px;
+  width: 5px;
+  height: 6px;
+  border: 1px solid var(--ptd-text-muted);
+  border-bottom: 0;
+  border-radius: 4px 4px 0 0;
 }
 
 .move {
   position: absolute;
+  z-index: var(--ptd-layer-selection);
   top: 0;
   left: -22px;
-  z-index: 9;
   width: 16px;
   height: 16px;
-  cursor: move;
-  background: rgba(200, 210, 240, 0.8);
-  border-radius: 2px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 0;
+  display: grid;
+  place-items: center;
   padding: 0;
+  border: 1px solid var(--ptd-selection);
+  border-radius: var(--ptd-radius-1);
+  background: var(--ptd-selection-subtle);
+  cursor: move;
+}
+.move::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  background-image: radial-gradient(circle, var(--ptd-selection-strong) 1px, transparent 1.5px);
+  background-size: 4px 4px;
 }
 
-.move::before {
-  content: '⠿';
-  font-size: 10px;
-  color: #666;
+.quickBar {
+  position: fixed;
+  z-index: var(--ptd-layer-floating);
+  top: var(--quick-bar-top);
+  left: var(--quick-bar-left);
+  height: 28px;
+  display: flex;
+  align-items: stretch;
+  overflow: visible;
+  opacity: 0;
+  color: var(--ptd-paper-0);
+  background: var(--ptd-action);
+  box-shadow: var(--ptd-shadow-control);
+  white-space: nowrap;
+}
+
+.quickBar[data-ready='true'] {
+  opacity: 1;
+}
+
+.quickLabel {
+  max-width: 148px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  padding: 0 9px;
+  border-right: 1px solid color-mix(in oklch, var(--ptd-paper-0) 24%, transparent);
+  font-size: 11px;
+  font-weight: 650;
   line-height: 1;
+  text-overflow: ellipsis;
+}
+
+.quickAction {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  color: color-mix(in oklch, var(--ptd-paper-0) 82%, var(--ptd-action));
+  background: transparent;
+  cursor: pointer;
+  transition:
+    color var(--ptd-duration-instant) var(--ptd-ease-out),
+    background-color var(--ptd-duration-instant) var(--ptd-ease-out),
+    transform var(--ptd-duration-instant) var(--ptd-ease-out);
+}
+
+.quickAction svg {
+  width: 15px;
+  height: 15px;
+}
+
+.quickAction:hover:not(:disabled),
+.quickAction:focus-visible {
+  color: var(--ptd-paper-0);
+  background: color-mix(in oklch, var(--ptd-paper-0) 18%, transparent);
+}
+
+.quickAction[data-danger='true']:hover:not(:disabled),
+.quickAction[data-danger='true']:focus-visible {
+  background: var(--ptd-danger);
+}
+
+.quickAction:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.quickAction:focus-visible {
+  outline: 1px solid var(--ptd-paper-0);
+  outline-offset: -2px;
+}
+
+.quickAction:disabled {
+  opacity: 0.42;
+  cursor: default;
+}
+
+.tooltip {
+  z-index: var(--ptd-layer-tooltip);
+  padding: 6px 8px;
+  border: 1px solid var(--ptd-graphite-700);
+  border-radius: var(--ptd-radius-1);
+  color: var(--ptd-paper-0);
+  background: var(--ptd-graphite-950);
+  box-shadow: var(--ptd-shadow-floating);
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+.tooltipArrow {
+  fill: var(--ptd-graphite-950);
 }
 
 .point {
   position: absolute;
-  border: 1px solid var(--ptd-color-primary, #4579e1);
-  box-shadow: 0 0 2px #bbb;
-  background: #fff;
-  width: 6px;
-  height: 6px;
-  border-radius: 0;
-  z-index: 9;
+  z-index: var(--ptd-layer-selection);
   left: var(--point-left);
   top: var(--point-top);
-  margin-left: -4px;
+  width: 7px;
+  height: 7px;
   margin-top: -4px;
-  cursor: var(--point-cursor);
+  margin-left: -4px;
   padding: 0;
+  border: 1px solid var(--ptd-selection);
+  border-radius: 0;
+  background: var(--ptd-surface-raised);
+  cursor: var(--point-cursor);
 }
 
 .container {
-  cursor: initial;
   width: 100%;
   height: 100%;
   overflow: hidden;
+  cursor: initial;
 }
