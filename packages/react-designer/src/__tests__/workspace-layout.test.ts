@@ -5,6 +5,7 @@ import {
   INSPECTOR_MIN,
   RESOURCE_PANEL_MAX,
   RESOURCE_PANEL_MIN,
+  RESOURCE_PANEL_DEFAULT,
   workspaceModeForWidth,
 } from '../hooks/useWorkspaceLayout'
 
@@ -17,6 +18,7 @@ describe('workspace layout contracts', () => {
   })
 
   it('keeps resizable panels inside recoverable bounds', () => {
+    expect(RESOURCE_PANEL_DEFAULT).toBe(280)
     expect(clampPanelWidth('resources', 40)).toBe(RESOURCE_PANEL_MIN)
     expect(clampPanelWidth('resources', 999)).toBe(RESOURCE_PANEL_MAX)
     expect(clampPanelWidth('inspector', 40)).toBe(INSPECTOR_MIN)

@@ -2,14 +2,27 @@ import {
   useCallback,
   useEffect,
   useRef,
+  useState,
   type CSSProperties,
   type DragEvent,
   type KeyboardEvent,
   type MouseEvent,
+  type PointerEvent as ReactPointerEvent,
 } from 'react'
 import { useSignals } from '@preact/signals-react/runtime'
 import { getPageDimensions, mmToPx } from '@ptd/core'
-import { componentCatalog, createComponentSchema, PTD_COMPONENT_MIME } from '../../catalog'
+import {
+  createComponentSchema,
+  createDrawnComponentSchema,
+  drawnComponentGeometry,
+  findAvailableCatalogItem,
+  isDrawnComponentType,
+  isDrawingGestureLongEnough,
+  PTD_COMPONENT_MIME,
+  type ComponentPoint,
+  type DrawnComponentType,
+  type ShapeDrawGeometry,
+} from '../../catalog'
 import { useEditorStore } from '../../state'
 import { getComponentRotatedStyle } from '../../utils'
 import {
@@ -27,19 +40,43 @@ import { CanvasContextMenu } from './CanvasContextMenu'
 import styles from './Canvas.module.css'
 
 type CanvasVariables = CSSProperties & Record<`--${string}`, string>
+type ShapePreviewVariables = CSSProperties & Record<`--${string}`, string>
+
+interface DrawSession {
+  pointerId: number
+  tool: DrawnComponentType
+  start: ComponentPoint
+  end: ComponentPoint
+  clientStart: ComponentPoint
+  clientEnd: ComponentPoint
+  constrain: boolean
+}
+
+interface PanSession {
+  pointerId: number
+  viewport: HTMLElement
+  clientStart: ComponentPoint
+  scrollStart: ComponentPoint
+}
 
 export function Canvas({ onOpenInspector }: { onOpenInspector: () => void }) {
   useSignals()
   const store = useEditorStore()
+  const wrapperRef = useRef<HTMLDivElement>(null)
   const editorRef = useRef<HTMLDivElement>(null)
   const editorLineRef = useRef<EditorLineHandle>(null)
   const selectionCleanupRef = useRef<(() => void) | null>(null)
+  const drawSessionRef = useRef<DrawSession | null>(null)
+  const panSessionRef = useRef<PanSession | null>(null)
   const contextPointRef = useRef<SelectionPoint>({ x: 0, y: 0 })
+  const [drawSession, setDrawSession] = useState<DrawSession | null>(null)
+  const [isPanning, setIsPanning] = useState(false)
 
   const components = store.components.value
   const pageConfig = store.pageConfig.value
   const scale = store.scale.value
   const selectedIds = store.selectedIds.value
+  const effectiveTool = store.effectiveTool.value
   const { width: pageWidthPx, height: pageHeightPx } = getPageDimensions(pageConfig)
   const pageWidthMm =
     pageConfig.pageDirection === 'l' ? pageConfig.pageHeight : pageConfig.pageWidth
@@ -53,6 +90,31 @@ export function Canvas({ onOpenInspector }: { onOpenInspector: () => void }) {
     [],
   )
 
+  const cancelDrawing = useCallback(() => {
+    drawSessionRef.current = null
+    setDrawSession(null)
+  }, [])
+
+  const cancelPanning = useCallback(() => {
+    panSessionRef.current = null
+    setIsPanning(false)
+  }, [])
+
+  useEffect(() => {
+    const drawing = drawSessionRef.current
+    if (drawing && drawing.tool !== effectiveTool) cancelDrawing()
+    if (panSessionRef.current && effectiveTool !== 'hand') cancelPanning()
+  }, [cancelDrawing, cancelPanning, effectiveTool])
+
+  useEffect(() => {
+    const cancelInteractions = () => {
+      cancelDrawing()
+      cancelPanning()
+    }
+    window.addEventListener('blur', cancelInteractions)
+    return () => window.removeEventListener('blur', cancelInteractions)
+  }, [cancelDrawing, cancelPanning])
+
   const handleDragOver = useCallback((event: DragEvent<HTMLDivElement>) => {
     event.preventDefault()
     event.dataTransfer.dropEffect = 'copy'
@@ -64,9 +126,9 @@ export function Canvas({ onOpenInspector }: { onOpenInspector: () => void }) {
       const componentType =
         event.dataTransfer.getData(PTD_COMPONENT_MIME) ||
         event.dataTransfer.getData('componentType')
-      const item = componentCatalogItem(componentType)
+      const item = findAvailableCatalogItem(componentType)
       const editor = editorRef.current
-      if (!item || !editor) return
+      if (!item || item.creationMode !== 'insert' || !editor) return
       const rect = editor.getBoundingClientRect()
       store.addComponent(
         createComponentSchema(
@@ -84,7 +146,8 @@ export function Canvas({ onOpenInspector }: { onOpenInspector: () => void }) {
 
   const handleMouseDown = useCallback(
     (event: MouseEvent<HTMLDivElement>) => {
-      if (event.button !== 0 || event.target !== event.currentTarget) return
+      if (effectiveTool !== 'select' || event.button !== 0 || event.target !== event.currentTarget)
+        return
       const editor = editorRef.current
       if (!editor) return
       event.preventDefault()
@@ -176,7 +239,132 @@ export function Canvas({ onOpenInspector }: { onOpenInspector: () => void }) {
       window.addEventListener('blur', cancel)
       frame = requestAnimationFrame(tick)
     },
-    [pageHeightPx, pageWidthPx, scale, store],
+    [effectiveTool, pageHeightPx, pageWidthPx, scale, store],
+  )
+
+  const canvasPoint = useCallback(
+    (clientX: number, clientY: number): ComponentPoint => {
+      const editor = editorRef.current
+      if (!editor) return { x: 0, y: 0 }
+      return canvasPointFromClient(editor.getBoundingClientRect(), clientX, clientY, scale, {
+        width: pageWidthPx,
+        height: pageHeightPx,
+      })
+    },
+    [pageHeightPx, pageWidthPx, scale],
+  )
+
+  const handlePanPointerDown = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      if (effectiveTool !== 'hand' || event.button !== 0) return
+      const viewport = event.currentTarget.closest<HTMLElement>(
+        '[data-ptd-region="canvas-viewport"]',
+      )
+      if (!viewport) return
+      event.preventDefault()
+      event.stopPropagation()
+      event.currentTarget.setPointerCapture(event.pointerId)
+      panSessionRef.current = {
+        pointerId: event.pointerId,
+        viewport,
+        clientStart: { x: event.clientX, y: event.clientY },
+        scrollStart: { x: viewport.scrollLeft, y: viewport.scrollTop },
+      }
+      setIsPanning(true)
+    },
+    [effectiveTool],
+  )
+
+  const handlePanPointerMove = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
+    const current = panSessionRef.current
+    if (!current || current.pointerId !== event.pointerId) return
+    event.preventDefault()
+    current.viewport.scrollLeft = current.scrollStart.x - (event.clientX - current.clientStart.x)
+    current.viewport.scrollTop = current.scrollStart.y - (event.clientY - current.clientStart.y)
+  }, [])
+
+  const handlePanPointerEnd = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      if (panSessionRef.current?.pointerId !== event.pointerId) return
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.releasePointerCapture(event.pointerId)
+      }
+      cancelPanning()
+    },
+    [cancelPanning],
+  )
+
+  const handleDrawPointerDown = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      if (!isDrawnComponentType(effectiveTool) || event.button !== 0) return
+      event.preventDefault()
+      event.stopPropagation()
+      event.currentTarget.focus({ preventScroll: true })
+      event.currentTarget.setPointerCapture(event.pointerId)
+      const start = canvasPoint(event.clientX, event.clientY)
+      const session: DrawSession = {
+        pointerId: event.pointerId,
+        tool: effectiveTool,
+        start,
+        end: start,
+        clientStart: { x: event.clientX, y: event.clientY },
+        clientEnd: { x: event.clientX, y: event.clientY },
+        constrain: event.shiftKey,
+      }
+      drawSessionRef.current = session
+      setDrawSession(session)
+    },
+    [canvasPoint, effectiveTool],
+  )
+
+  const handleDrawPointerMove = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      const current = drawSessionRef.current
+      if (!current || current.pointerId !== event.pointerId) return
+      event.preventDefault()
+      const next: DrawSession = {
+        ...current,
+        end: canvasPoint(event.clientX, event.clientY),
+        clientEnd: { x: event.clientX, y: event.clientY },
+        constrain: event.shiftKey,
+      }
+      drawSessionRef.current = next
+      setDrawSession(next)
+    },
+    [canvasPoint],
+  )
+
+  const handleDrawPointerUp = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      const current = drawSessionRef.current
+      if (!current || current.pointerId !== event.pointerId) return
+      event.preventDefault()
+      const end = canvasPoint(event.clientX, event.clientY)
+      const clientEnd = { x: event.clientX, y: event.clientY }
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.releasePointerCapture(event.pointerId)
+      }
+      cancelDrawing()
+      if (store.effectiveTool.value !== current.tool) return
+      if (!isDrawingGestureLongEnough(current.clientStart, clientEnd)) return
+      const component = createDrawnComponentSchema(
+        current.tool,
+        current.start,
+        end,
+        { width: pageWidthPx, height: pageHeightPx },
+        event.shiftKey,
+      )
+      if (component) store.addComponent(component)
+    },
+    [cancelDrawing, canvasPoint, pageHeightPx, pageWidthPx, store],
+  )
+
+  const handleDrawPointerCancel = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      if (drawSessionRef.current?.pointerId !== event.pointerId) return
+      cancelDrawing()
+    },
+    [cancelDrawing],
   )
 
   const handleContextMenu = useCallback(
@@ -235,9 +423,38 @@ export function Canvas({ onOpenInspector }: { onOpenInspector: () => void }) {
     '--margin-bottom': `${mmToPx(pageConfig.pageMarginBottom)}px`,
   }
   const area = store.areaSelection.value.style
+  const previewGeometry: ShapeDrawGeometry | null = drawSession
+    ? drawnComponentGeometry(
+        drawSession.tool,
+        drawSession.start,
+        drawSession.end,
+        { width: pageWidthPx, height: pageHeightPx },
+        drawSession.constrain,
+      )
+    : null
+  const previewStyle: ShapePreviewVariables | undefined = previewGeometry
+    ? {
+        '--preview-left': `${previewGeometry.left}px`,
+        '--preview-top': `${previewGeometry.top}px`,
+        '--preview-width': `${previewGeometry.width}px`,
+        '--preview-height': `${previewGeometry.height}px`,
+        '--preview-rotate': `${previewGeometry.rotate}deg`,
+      }
+    : undefined
 
   return (
-    <div className={styles.canvasWrapper} style={canvasStyle}>
+    <div
+      ref={wrapperRef}
+      className={styles.canvasWrapper}
+      style={canvasStyle}
+      data-effective-tool={effectiveTool}
+      data-panning={isPanning || undefined}
+      onPointerDown={handlePanPointerDown}
+      onPointerMove={handlePanPointerMove}
+      onPointerUp={handlePanPointerEnd}
+      onPointerCancel={handlePanPointerEnd}
+      onLostPointerCapture={handlePanPointerEnd}
+    >
       <div className={styles.canvasStage}>
         {store.showRuler.value && (
           <Ruler widthMm={pageWidthMm} heightMm={pageHeightMm} scale={scale} />
@@ -253,6 +470,7 @@ export function Canvas({ onOpenInspector }: { onOpenInspector: () => void }) {
             id="ptd-designer-canvas"
             className={styles.canvas}
             data-ptd-region="paper"
+            data-effective-tool={effectiveTool}
             aria-label="设计纸张"
             tabIndex={0}
             onContextMenu={handleContextMenu}
@@ -260,6 +478,11 @@ export function Canvas({ onOpenInspector }: { onOpenInspector: () => void }) {
             onDragOver={handleDragOver}
             onDrop={handleDrop}
             onMouseDown={handleMouseDown}
+            onPointerDown={handleDrawPointerDown}
+            onPointerMove={handleDrawPointerMove}
+            onPointerUp={handleDrawPointerUp}
+            onPointerCancel={handleDrawPointerCancel}
+            onLostPointerCapture={handleDrawPointerCancel}
           >
             {components.map((schema) => (
               <ComponentAdjuster
@@ -274,6 +497,14 @@ export function Canvas({ onOpenInspector }: { onOpenInspector: () => void }) {
                 <ComponentRenderer schema={schema} />
               </ComponentAdjuster>
             ))}
+            {previewGeometry && drawSession && (
+              <div
+                className={styles.drawPreview}
+                data-tool={drawSession.tool}
+                style={previewStyle}
+                aria-hidden="true"
+              />
+            )}
             {store.isSelectingArea.value && <Area {...area} />}
             <EditorLine ref={editorLineRef} />
             <div className={`${styles.marginLine} ${styles.marginTop}`} />
@@ -283,8 +514,4 @@ export function Canvas({ onOpenInspector }: { onOpenInspector: () => void }) {
       </div>
     </div>
   )
-}
-
-function componentCatalogItem(type: string) {
-  return componentCatalog.find((item) => item.type === type)
 }

@@ -1,0 +1,9 @@
+{"file": ".trellis/spec/monorepo/directory-structure.md", "reason": "core 与 react-designer 的目录和公共入口约束"}
+{"file": ".trellis/spec/monorepo/typescript-conventions.md", "reason": "catalog metadata、group union 与严格类型约束"}
+{"file": ".trellis/spec/monorepo/styling-conventions.md", "reason": "组件面板 CSS Modules 与 token 使用规范"}
+{"file": ".trellis/spec/monorepo/quality-guidelines.md", "reason": "lint、format、测试与构建门禁"}
+{"file": ".trellis/spec/monorepo/ptd-ui-system.md", "reason": "Adobe/InDesign 式专业工具台、Tool Dock、资源面板与组件目录视觉契约"}
+{"file": ".trellis/spec/monorepo/react-designer-contract.md", "reason": "创建组件必须保持 store/history/drag-drop 合同"}
+{"file": ".trellis/tasks/07-29-component-catalog/research/component-audit.md", "reason": "现有 12 类型、11 个可创建项、冗余判断、缺失能力与五组 taxonomy"}
+{"file": ".trellis/tasks/07-29-component-catalog/prd.md", "reason": "规划占位组件、available/planned 类型边界、PS/AI 式持久绘制工具与完整验收标准"}
+{"file": ".trellis/tasks/07-29-component-catalog/research/sidebar-benchmark.md", "reason": "用户参考图对比、当前 12 图标/220px 面板问题与已确认的两级侧栏方案"}

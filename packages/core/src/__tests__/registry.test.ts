@@ -1,9 +1,61 @@
 import { describe, it, expect } from 'vitest'
-import { ComponentRegistry, defaultRegistry, type ComponentDefinition } from '../registry/component-registry'
+import {
+  ComponentRegistry,
+  defaultRegistry,
+  type ComponentDefinition,
+} from '../registry/component-registry'
+
+const CREATABLE_TYPES = [
+  'RoySimpleText',
+  'RoyText',
+  'RoySimpleTable',
+  'RoyComplexTable',
+  'RoyImage',
+  'RoyQRCode',
+  'RoyBarCode',
+  'RoyLine',
+  'RoyRect',
+  'RoyCircle',
+  'RoyStar',
+]
 
 describe('ComponentRegistry', () => {
   it('defaultRegistry has all 12 built-in components', () => {
     expect(defaultRegistry.getAll()).toHaveLength(12)
+  })
+
+  it('exposes exactly 11 catalog definitions and keeps groups internal', () => {
+    expect(defaultRegistry.getCatalogDefinitions().map((definition) => definition.type)).toEqual(
+      CREATABLE_TYPES,
+    )
+    expect(defaultRegistry.get('RoyGroup')).toMatchObject({ internal: true })
+    expect(defaultRegistry.get('RoyGroup')?.catalog).toBeUndefined()
+  })
+
+  it('provides complete canonical metadata for every creatable definition', () => {
+    for (const definition of defaultRegistry.getCatalogDefinitions()) {
+      expect(definition.catalog.id).not.toBe('')
+      expect(definition.catalog.description).not.toBe('')
+      expect(definition.catalog.keywords.length).toBeGreaterThanOrEqual(3)
+      expect(['text', 'table', 'image', 'code', 'shape']).toContain(definition.catalog.group)
+      expect(['basic', 'complex']).toContain(definition.catalog.maturity)
+      expect(['insert', 'draw']).toContain(definition.catalog.creationMode)
+    }
+    expect(
+      new Set(defaultRegistry.getCatalogDefinitions().map(({ catalog }) => catalog.id)).size,
+    ).toBe(11)
+  })
+
+  it('preserves persisted categories while clarifying product names', () => {
+    expect(defaultRegistry.get('RoyText')).toMatchObject({ name: '富文本', category: 'common' })
+    expect(defaultRegistry.get('RoySimpleTable')).toMatchObject({
+      name: '自由表格',
+      category: 'data',
+    })
+    expect(defaultRegistry.get('RoyCircle')).toMatchObject({ name: '椭圆', category: 'shape' })
+    expect(defaultRegistry.get('RoySimpleText')?.catalog?.creationMode).toBe('draw')
+    expect(defaultRegistry.get('RoyText')?.catalog?.creationMode).toBe('insert')
+    expect(defaultRegistry.get('RoyRect')?.catalog?.creationMode).toBe('draw')
   })
 
   it('get returns definition for known type', () => {
@@ -36,6 +88,14 @@ describe('ComponentRegistry', () => {
       name: 'Custom',
       icon: '',
       category: 'common',
+      catalog: {
+        id: 'custom-text',
+        group: 'text',
+        description: 'Custom description',
+        keywords: ['custom', 'text', 'label'],
+        maturity: 'basic',
+        creationMode: 'insert',
+      },
       defaultStyle: { width: 100, height: 50, rotate: 0, opacity: 1 },
       defaultProps: '',
     })

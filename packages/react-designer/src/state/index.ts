@@ -4,6 +4,7 @@ export type {
   AreaSelection,
   CanvasGuide,
   Distribution,
+  EditorTool,
   GuideAxis,
   GuideColor,
   LayerAction,

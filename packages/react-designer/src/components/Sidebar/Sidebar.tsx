@@ -1,10 +1,21 @@
-import { useMemo, useState, type DragEvent, type PointerEvent, type ReactNode } from 'react'
+import {
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type DragEvent,
+  type KeyboardEvent,
+  type PointerEvent,
+  type ReactNode,
+} from 'react'
 import { useSignals } from '@preact/signals-react/runtime'
-import { getPageDimensions, type ComponentCategory, type ComponentType } from '@ptd/core'
+import { getPageDimensions } from '@ptd/core'
 import * as Tooltip from '@radix-ui/react-tooltip'
 import {
   RiAddLine,
   RiArrowDownLine,
+  RiArrowDownSLine,
   RiArrowUpLine,
   RiCloseLine,
   RiCursorLine,
@@ -13,17 +24,28 @@ import {
   RiDraggable,
   RiFileList2Line,
   RiFileCopyLine,
-  RiFolderImageLine,
+  RiApps2Line,
+  RiHand,
   RiLock2Line,
   RiPagesLine,
   RiSearchLine,
   RiStackLine,
 } from '@remixicon/react'
 import {
+  catalogGroups,
   componentCatalog,
   createComponentSchema,
+  findAvailableCatalogItem,
+  frequentCatalogItems,
+  isAvailableCatalogItem,
+  isDrawnComponentType,
+  isDrawingComponentType,
   PTD_COMPONENT_MIME,
-  type CatalogItem,
+  searchComponentCatalog,
+  type AvailableCatalogItem,
+  type CreatableComponentType,
+  type DrawingComponentType,
+  type PlannedCatalogItem,
 } from '../../catalog'
 import type { ResourcePanelId, WorkspaceMode } from '../../hooks/useWorkspaceLayout'
 import { useEditorStore } from '../../state'
@@ -40,31 +62,24 @@ interface SidebarProps {
 }
 
 const RESOURCE_PANELS = [
+  { value: 'components', label: '组件', icon: RiApps2Line },
   { value: 'pages', label: '页面', icon: RiPagesLine },
   { value: 'layers', label: '图层', icon: RiStackLine },
   { value: 'data', label: '数据', icon: RiDatabase2Line },
-  { value: 'assets', label: '资产与组件', icon: RiFolderImageLine },
 ] satisfies Array<{
   value: ResourcePanelId
   label: string
   icon: typeof RiPagesLine
 }>
 
-const CREATE_TYPES = [
-  'RoySimpleText',
-  'RoyImage',
-  'RoySimpleTable',
-  'RoyQRCode',
-  'RoyBarCode',
-  'RoyRect',
-  'RoyLine',
-] satisfies Array<Exclude<ComponentType, 'RoyGroup'>>
+const INSERT_TOOL_TYPES = ['RoyImage', 'RoySimpleTable'] satisfies readonly CreatableComponentType[]
 
-const CATEGORY_NAMES: Record<ComponentCategory, string> = {
-  common: '通用',
-  data: '数据',
-  shape: '形状',
-}
+const DRAW_TOOL_TYPES = [
+  'RoyLine',
+  'RoyRect',
+  'RoyCircle',
+  'RoyStar',
+] satisfies readonly CreatableComponentType[]
 
 const PTD_PAGE_MIME = 'application/x-ptd-page'
 
@@ -72,11 +87,19 @@ export function Sidebar({ mode, activePanel, open, onTogglePanel, onResizeStart 
   useSignals()
   const store = useEditorStore()
   const page = getPageDimensions(store.pageConfig.value)
-  const createTools = CREATE_TYPES.map((type) =>
-    componentCatalog.find((item) => item.type === type),
-  ).filter((item): item is CatalogItem => Boolean(item))
+  const insertTools = INSERT_TOOL_TYPES.map(findAvailableCatalogItem).filter(
+    (item): item is AvailableCatalogItem => Boolean(item),
+  )
+  const textTool = findAvailableCatalogItem('RoySimpleText')
+  const TextToolIcon = textTool?.icon
+  const effectiveTool = store.effectiveTool.value
 
-  const create = (item: CatalogItem) => {
+  const create = (item: AvailableCatalogItem) => {
+    if (item.creationMode === 'draw') {
+      if (isDrawnComponentType(item.type)) store.setActiveTool(item.type)
+      return
+    }
+    store.setActiveTool('select')
     const offset = (store.components.value.length % 6) * 12
     const component = createComponentSchema(
       item.type,
@@ -96,36 +119,69 @@ export function Sidebar({ mode, activePanel, open, onTogglePanel, onResizeStart 
     >
       <Tooltip.Provider delayDuration={400} skipDelayDuration={120}>
         <nav className={styles.toolDock} aria-label="画布工具">
-          <DockButton label="选择工具" shortcut="V" pressed onClick={() => store.clearSelection()}>
-            <RiCursorLine />
-          </DockButton>
-          <span className={styles.dockRule} />
-          {createTools.map((item) => {
-            const Icon = item.icon
-            return (
-              <DockButton key={item.type} label={`添加${item.name}`} onClick={() => create(item)}>
+          <div className={styles.dockZone} role="group" aria-label="创建与交互工具">
+            <span className={styles.dockZoneLabel}>工具</span>
+            <DockButton
+              label="选择工具"
+              shortcut="V"
+              stateKind="tool"
+              pressed={effectiveTool === 'select'}
+              onClick={() => store.setActiveTool('select')}
+            >
+              <RiCursorLine />
+            </DockButton>
+            <DockButton
+              label="抓手工具"
+              shortcut="H"
+              stateKind="tool"
+              pressed={effectiveTool === 'hand'}
+              onClick={() => store.setActiveTool('hand')}
+            >
+              <RiHand />
+            </DockButton>
+            {textTool && TextToolIcon && (
+              <DockButton
+                label="文本框工具"
+                stateKind="tool"
+                pressed={effectiveTool === 'RoySimpleText'}
+                onClick={() => create(textTool)}
+              >
+                <TextToolIcon />
+              </DockButton>
+            )}
+            <ShapeToolGroup />
+            {insertTools.map((item) => {
+              const Icon = item.icon
+              return (
+                <DockButton key={item.type} label={`添加${item.name}`} onClick={() => create(item)}>
+                  <Icon />
+                </DockButton>
+              )
+            })}
+          </div>
+          <span className={styles.dockGrow} />
+          <div className={styles.dockZone} role="group" aria-label="工作区资源面板">
+            <span className={styles.dockZoneLabel}>面板</span>
+            {RESOURCE_PANELS.map(({ value, label, icon: Icon }) => (
+              <DockButton
+                key={value}
+                label={`${open && activePanel === value ? '关闭' : '打开'}${label}面板`}
+                stateKind="panel"
+                pressed={open && activePanel === value}
+                onClick={() => onTogglePanel(value)}
+              >
                 <Icon />
               </DockButton>
-            )
-          })}
-          <span className={styles.dockGrow} />
-          <span className={styles.dockRule} />
-          {RESOURCE_PANELS.map(({ value, label, icon: Icon }) => (
-            <DockButton
-              key={value}
-              label={`${open && activePanel === value ? '关闭' : '打开'}${label}面板`}
-              pressed={open && activePanel === value}
-              onClick={() => onTogglePanel(value)}
-            >
-              <Icon />
-            </DockButton>
-          ))}
+            ))}
+          </div>
         </nav>
         <div className={styles.panelSlot} hidden={!open} data-ptd-region="resource-panel">
           {activePanel === 'pages' && <PagesPanel onClose={() => onTogglePanel('pages')} />}
           {activePanel === 'layers' && <LayersPanel onClose={() => onTogglePanel('layers')} />}
           {activePanel === 'data' && <DataPanel onClose={() => onTogglePanel('data')} />}
-          {activePanel === 'assets' && <AssetsPanel onClose={() => onTogglePanel('assets')} />}
+          {activePanel === 'components' && (
+            <ComponentsPanel onClose={() => onTogglePanel('components')} />
+          )}
           <button
             type="button"
             className={styles.resizeHandle}
@@ -142,12 +198,16 @@ function DockButton({
   label,
   shortcut,
   pressed,
+  stateKind,
+  className,
   children,
   onClick,
 }: {
   label: string
   shortcut?: string
   pressed?: boolean
+  stateKind?: 'tool' | 'panel'
+  className?: string
   children: ReactNode
   onClick: () => void
 }) {
@@ -156,9 +216,10 @@ function DockButton({
       <Tooltip.Trigger asChild>
         <button
           type="button"
-          className={styles.dockButton}
+          className={`${styles.dockButton} ${className ?? ''}`}
           aria-label={label}
           aria-pressed={pressed}
+          data-state-kind={stateKind}
           onClick={onClick}
         >
           {children}
@@ -176,6 +237,153 @@ function DockButton({
         </Tooltip.Content>
       </Tooltip.Portal>
     </Tooltip.Root>
+  )
+}
+
+function ShapeToolGroup() {
+  useSignals()
+  const store = useEditorStore()
+  const menuId = useId()
+  const [open, setOpen] = useState(false)
+  const rootRef = useRef<HTMLDivElement>(null)
+  const disclosureRef = useRef<HTMLButtonElement>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
+  const activeShape = isDrawingComponentType(store.activeTool.value)
+    ? store.activeTool.value
+    : store.lastDrawingTool.value
+  const activeItem = findAvailableCatalogItem(activeShape)
+  const shapeItems = DRAW_TOOL_TYPES.map(findAvailableCatalogItem).filter(
+    (item): item is AvailableCatalogItem => Boolean(item),
+  )
+
+  useEffect(() => {
+    if (!open) return
+    const selected = menuRef.current?.querySelector<HTMLButtonElement>(
+      `[data-shape-type="${activeShape}"]`,
+    )
+    selected?.focus()
+    const closeOnOutsidePointer = (event: globalThis.PointerEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) setOpen(false)
+    }
+    document.addEventListener('pointerdown', closeOnOutsidePointer)
+    return () => document.removeEventListener('pointerdown', closeOnOutsidePointer)
+  }, [activeShape, open])
+
+  if (!activeItem) return null
+  const ActiveIcon = activeItem.icon
+
+  const selectShape = (type: DrawingComponentType) => {
+    store.setActiveTool(type)
+    setOpen(false)
+  }
+
+  const handleMenuKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    const items = Array.from(
+      event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="menuitemradio"]'),
+    )
+    const currentIndex = items.indexOf(document.activeElement as HTMLButtonElement)
+    if ((event.key === 'Enter' || event.key === ' ') && currentIndex >= 0) {
+      event.preventDefault()
+      event.stopPropagation()
+      items[currentIndex]?.click()
+      return
+    }
+    let nextIndex: number | null = null
+    if (event.key === 'ArrowDown' || event.key === 'ArrowRight') {
+      nextIndex = (currentIndex + 1 + items.length) % items.length
+    } else if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') {
+      nextIndex = (currentIndex - 1 + items.length) % items.length
+    } else if (event.key === 'Home') {
+      nextIndex = 0
+    } else if (event.key === 'End') {
+      nextIndex = items.length - 1
+    } else if (event.key === 'Escape') {
+      event.preventDefault()
+      event.stopPropagation()
+      setOpen(false)
+      disclosureRef.current?.focus()
+      return
+    }
+    if (nextIndex === null || items.length === 0) return
+    event.preventDefault()
+    event.stopPropagation()
+    items[nextIndex]?.focus()
+  }
+
+  return (
+    <div
+      ref={rootRef}
+      className={styles.shapeToolGroup}
+      role="group"
+      aria-label="图形工具"
+      data-active-tool={isDrawingComponentType(store.effectiveTool.value) || undefined}
+    >
+      <DockButton
+        className={styles.shapePrimary}
+        label={`使用${activeItem.name}工具`}
+        stateKind="tool"
+        pressed={isDrawingComponentType(store.effectiveTool.value)}
+        onClick={() => store.setActiveTool(activeShape)}
+      >
+        <ActiveIcon />
+      </DockButton>
+      <Tooltip.Root>
+        <Tooltip.Trigger asChild>
+          <button
+            ref={disclosureRef}
+            type="button"
+            className={styles.shapeDisclosure}
+            aria-label="选择图形工具"
+            aria-haspopup="menu"
+            aria-expanded={open}
+            aria-controls={menuId}
+            onClick={() => setOpen((current) => !current)}
+          >
+            <RiArrowDownSLine aria-hidden="true" />
+          </button>
+        </Tooltip.Trigger>
+        <Tooltip.Portal>
+          <Tooltip.Content
+            className={`${styles.tooltip} ${ptdThemeClass}`}
+            side="right"
+            sideOffset={8}
+          >
+            选择图形工具
+            <Tooltip.Arrow className={styles.tooltipArrow} />
+          </Tooltip.Content>
+        </Tooltip.Portal>
+      </Tooltip.Root>
+      {open && (
+        <div
+          ref={menuRef}
+          id={menuId}
+          className={styles.shapeToolMenu}
+          role="menu"
+          aria-label="选择图形工具"
+          onKeyDown={handleMenuKeyDown}
+        >
+          <span className={styles.shapeMenuTitle}>图形工具</span>
+          {shapeItems.map((item) => {
+            const Icon = item.icon
+            return (
+              <button
+                key={item.type}
+                type="button"
+                role="menuitemradio"
+                aria-checked={activeShape === item.type}
+                data-shape-type={item.type}
+                onClick={() => {
+                  if (isDrawingComponentType(item.type)) selectShape(item.type)
+                }}
+              >
+                <Icon aria-hidden="true" />
+                <span>{item.name}</span>
+              </button>
+            )
+          })}
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -215,11 +423,7 @@ function PageActionButton({
         </button>
       </Tooltip.Trigger>
       <Tooltip.Portal>
-        <Tooltip.Content
-          className={`${styles.tooltip} ${ptdThemeClass}`}
-          side="top"
-          sideOffset={8}
-        >
+        <Tooltip.Content className={`${styles.tooltip} ${ptdThemeClass}`} side="top" sideOffset={8}>
           <span>{label}</span>
           <Tooltip.Arrow className={styles.tooltipArrow} />
         </Tooltip.Content>
@@ -363,7 +567,7 @@ function LayersPanel({ onClose }: { onClose: () => void }) {
             ))}
           </ol>
         ) : (
-          <PanelEmpty title="画布中还没有对象" detail="使用左侧创建工具，或从资产面板添加组件。" />
+          <PanelEmpty title="画布中还没有对象" detail="使用左侧创建工具，或从组件面板添加对象。" />
         )}
       </PanelBody>
       <PanelFooter>列表顶部对应纸张最上层</PanelFooter>
@@ -401,21 +605,30 @@ function DataPanel({ onClose }: { onClose: () => void }) {
   )
 }
 
-function AssetsPanel({ onClose }: { onClose: () => void }) {
+function ComponentsPanel({ onClose }: { onClose: () => void }) {
   useSignals()
   const store = useEditorStore()
   const [query, setQuery] = useState('')
+  const [plannedOpen, setPlannedOpen] = useState(false)
   const page = getPageDimensions(store.pageConfig.value)
-  const filtered = useMemo(() => {
-    const normalized = query.trim().toLocaleLowerCase()
-    return normalized
-      ? componentCatalog.filter((item) =>
-          `${item.name}${item.description}${item.type}`.toLocaleLowerCase().includes(normalized),
-        )
-      : componentCatalog
-  }, [query])
+  const filtered = useMemo(() => searchComponentCatalog(query), [query])
+  const effectiveTool = store.effectiveTool.value
+  const searchActive = query.trim().length > 0
+  const availableItems = filtered.filter(isAvailableCatalogItem)
+  const plannedItems = filtered.filter(
+    (item): item is PlannedCatalogItem => item.kind === 'planned',
+  )
+  const allAvailable = componentCatalog.filter(isAvailableCatalogItem)
+  const allPlanned = componentCatalog.filter(
+    (item): item is PlannedCatalogItem => item.kind === 'planned',
+  )
 
-  const create = (item: CatalogItem) => {
+  const create = (item: AvailableCatalogItem) => {
+    if (item.creationMode === 'draw') {
+      if (isDrawnComponentType(item.type)) store.setActiveTool(item.type)
+      return
+    }
+    store.setActiveTool('select')
     const offset = (store.components.value.length % 6) * 12
     const component = createComponentSchema(
       item.type,
@@ -425,7 +638,7 @@ function AssetsPanel({ onClose }: { onClose: () => void }) {
     store.addComponent(component)
     store.requestComponentReveal(component.id)
   }
-  const drag = (item: CatalogItem) => (event: DragEvent<HTMLButtonElement>) => {
+  const drag = (item: AvailableCatalogItem) => (event: DragEvent<HTMLButtonElement>) => {
     event.dataTransfer.effectAllowed = 'copy'
     event.dataTransfer.setData(PTD_COMPONENT_MIME, item.type)
     event.dataTransfer.setData('componentType', item.type)
@@ -434,8 +647,11 @@ function AssetsPanel({ onClose }: { onClose: () => void }) {
 
   return (
     <PanelRoot data-ptd-region="component-panel">
-      <PanelHeader title="资产与组件" meta={`${filtered.length} 项`}>
-        <PanelCloseButton label="关闭资产面板" onClick={onClose} />
+      <PanelHeader
+        title="组件"
+        meta={`${availableItems.length} 可用 · ${plannedItems.length} 规划`}
+      >
+        <PanelCloseButton label="关闭组件面板" onClick={onClose} />
       </PanelHeader>
       <PanelTools>
         <label className={styles.search}>
@@ -450,36 +666,112 @@ function AssetsPanel({ onClose }: { onClose: () => void }) {
         </label>
       </PanelTools>
       <PanelBody>
-        {(['common', 'data', 'shape'] as const).map((category) => {
-          const items = filtered.filter((item) => item.category === category)
-          if (items.length === 0) return null
-          return (
-            <section key={category} className={styles.catalogSection}>
-              <h3>{CATEGORY_NAMES[category]}</h3>
-              <div className={styles.catalogList}>
-                {items.map((item) => {
-                  const Icon = item.icon
-                  return (
-                    <button
-                      key={item.type}
-                      type="button"
-                      className={styles.catalogItem}
-                      draggable
-                      onClick={() => create(item)}
-                      onDragStart={drag(item)}
-                      title={`${item.name}：${item.description}`}
-                    >
-                      <Icon aria-hidden="true" />
-                      <span>{item.name}</span>
-                      <small>{item.description}</small>
-                    </button>
-                  )
-                })}
+        {searchActive ? (
+          <>
+            {availableItems.length > 0 && (
+              <CatalogSection
+                id="search-results"
+                name="搜索结果"
+                introduction={`${availableItems.length} 个可用组件`}
+              >
+                <div className={styles.catalogSearchList}>
+                  {availableItems.map((item) => (
+                    <CatalogSearchItem
+                      key={item.id}
+                      item={item}
+                      active={effectiveTool === item.type}
+                      onCreate={() => create(item)}
+                      onDragStart={item.creationMode === 'insert' ? drag(item) : undefined}
+                    />
+                  ))}
+                </div>
+              </CatalogSection>
+            )}
+            {plannedItems.length > 0 && (
+              <PlannedCatalogSection
+                items={plannedItems}
+                open
+                forceOpen
+                onOpenChange={setPlannedOpen}
+              />
+            )}
+          </>
+        ) : (
+          <>
+            <CatalogSection
+              id="frequent"
+              name="常用"
+              introduction="高频创建组件"
+              meta={`${frequentCatalogItems.length} 项`}
+            >
+              <div className={styles.catalogTileGrid}>
+                {frequentCatalogItems.map((item) => (
+                  <CatalogAvailableButton
+                    key={item.id}
+                    item={item}
+                    variant="tile"
+                    active={item.creationMode === 'draw' && effectiveTool === item.type}
+                    onCreate={() => create(item)}
+                    onDragStart={item.creationMode === 'insert' ? drag(item) : undefined}
+                  />
+                ))}
               </div>
-            </section>
-          )
-        })}
-        {filtered.length === 0 && (
+            </CatalogSection>
+            {catalogGroups
+              .filter((group) => group.id !== 'shape')
+              .map((group) => {
+                const items = allAvailable.filter((item) => item.group === group.id)
+                return (
+                  <CatalogSection
+                    key={group.id}
+                    id={group.id}
+                    name={group.name}
+                    introduction={group.introduction}
+                    meta={`${items.length} 项`}
+                  >
+                    <div className={styles.catalogTileGrid}>
+                      {items.map((item) => (
+                        <CatalogAvailableButton
+                          key={item.id}
+                          item={item}
+                          variant="tile"
+                          active={item.creationMode === 'draw' && effectiveTool === item.type}
+                          onCreate={() => create(item)}
+                          onDragStart={item.creationMode === 'insert' ? drag(item) : undefined}
+                        />
+                      ))}
+                    </div>
+                  </CatalogSection>
+                )
+              })}
+            <CatalogSection
+              id="shape"
+              name="图形"
+              introduction="选择工具后，在纸张上拖动绘制"
+              meta="4 项"
+            >
+              <div className={styles.shapePresetGrid}>
+                {allAvailable
+                  .filter((item) => item.group === 'shape')
+                  .map((item) => (
+                    <CatalogAvailableButton
+                      key={item.id}
+                      item={item}
+                      variant="shape"
+                      active={effectiveTool === item.type}
+                      onCreate={() => create(item)}
+                    />
+                  ))}
+              </div>
+            </CatalogSection>
+            <PlannedCatalogSection
+              items={allPlanned}
+              open={plannedOpen}
+              onOpenChange={setPlannedOpen}
+            />
+          </>
+        )}
+        {filtered.length === 0 && searchActive && (
           <div className={styles.emptyState}>
             <strong>没有匹配的组件</strong>
             <span>换一个名称或组件类型试试。</span>
@@ -489,8 +781,160 @@ function AssetsPanel({ onClose }: { onClose: () => void }) {
           </div>
         )}
       </PanelBody>
-      <PanelFooter>点击添加到纸张中央，也可拖入画布定位</PanelFooter>
+      <PanelFooter>绘制类先选工具；插入类可点击或拖入画布</PanelFooter>
     </PanelRoot>
+  )
+}
+
+function CatalogSection({
+  id,
+  name,
+  introduction,
+  meta,
+  children,
+}: {
+  id: string
+  name: string
+  introduction: string
+  meta?: string
+  children: ReactNode
+}) {
+  const headingId = `catalog-section-${id}`
+  return (
+    <section className={styles.catalogSection} aria-labelledby={headingId}>
+      <div className={styles.catalogGroupHeader}>
+        <h3 id={headingId}>{name}</h3>
+        {meta && <span>{meta}</span>}
+      </div>
+      <p className={styles.catalogGroupIntro}>{introduction}</p>
+      {children}
+    </section>
+  )
+}
+
+function CatalogAvailableButton({
+  item,
+  variant,
+  active,
+  onCreate,
+  onDragStart,
+}: {
+  item: AvailableCatalogItem
+  variant: 'tile' | 'shape'
+  active: boolean
+  onCreate: () => void
+  onDragStart?: (event: DragEvent<HTMLButtonElement>) => void
+}) {
+  const Icon = item.icon
+  return (
+    <Tooltip.Root>
+      <Tooltip.Trigger asChild>
+        <button
+          type="button"
+          className={variant === 'shape' ? styles.shapePreset : styles.catalogTile}
+          data-active-tool={active || undefined}
+          draggable={Boolean(onDragStart)}
+          onClick={onCreate}
+          onDragStart={onDragStart}
+          aria-label={`${item.name}：${item.description}`}
+        >
+          <Icon aria-hidden="true" />
+          <span>{item.name}</span>
+        </button>
+      </Tooltip.Trigger>
+      <Tooltip.Portal>
+        <Tooltip.Content
+          className={`${styles.catalogTooltip} ${ptdThemeClass}`}
+          side="right"
+          sideOffset={8}
+        >
+          <strong>{item.name}</strong>
+          <span>{item.description}</span>
+          <Tooltip.Arrow className={styles.tooltipArrow} />
+        </Tooltip.Content>
+      </Tooltip.Portal>
+    </Tooltip.Root>
+  )
+}
+
+function CatalogSearchItem({
+  item,
+  active,
+  onCreate,
+  onDragStart,
+}: {
+  item: AvailableCatalogItem
+  active: boolean
+  onCreate: () => void
+  onDragStart?: (event: DragEvent<HTMLButtonElement>) => void
+}) {
+  const Icon = item.icon
+  return (
+    <button
+      type="button"
+      className={styles.catalogSearchItem}
+      data-active-tool={active || undefined}
+      draggable={Boolean(onDragStart)}
+      onClick={onCreate}
+      onDragStart={onDragStart}
+      aria-label={`${item.name}：${item.description}`}
+    >
+      <Icon aria-hidden="true" />
+      <span>
+        <strong>{item.name}</strong>
+        <small>{item.description}</small>
+      </span>
+    </button>
+  )
+}
+
+function PlannedCatalogSection({
+  items,
+  open,
+  forceOpen = false,
+  onOpenChange,
+}: {
+  items: readonly PlannedCatalogItem[]
+  open: boolean
+  forceOpen?: boolean
+  onOpenChange: (open: boolean) => void
+}) {
+  return (
+    <details
+      className={styles.plannedSection}
+      open={open}
+      onToggle={(event) => onOpenChange(event.currentTarget.open)}
+    >
+      <summary onClick={forceOpen ? (event) => event.preventDefault() : undefined}>
+        <span>
+          <strong>即将支持</strong>
+          <small>{items.length} 项 · 规划中</small>
+        </span>
+        <RiArrowDownSLine aria-hidden="true" />
+      </summary>
+      <div className={styles.plannedList}>
+        {items.map((item) => {
+          const Icon = item.icon
+          return (
+            <button
+              key={item.id}
+              type="button"
+              className={styles.plannedItem}
+              disabled
+              draggable={false}
+              aria-label={`${item.name}：${item.description}，规划中`}
+            >
+              <Icon aria-hidden="true" />
+              <span>
+                <strong>{item.name}</strong>
+                <small>{item.description}</small>
+              </span>
+              <em>规划中</em>
+            </button>
+          )
+        })}
+      </div>
+    </details>
   )
 }
 

@@ -27,6 +27,12 @@ Internal command boundary:
 
 ```ts
 class EditorStore {
+  readonly activeTool: Signal<EditorTool>
+  readonly temporaryHand: Signal<boolean>
+  readonly effectiveTool: ReadonlySignal<EditorTool>
+  readonly lastDrawingTool: Signal<DrawingComponentType>
+  setActiveTool(tool: EditorTool): void
+  setTemporaryHand(active: boolean): void
   syncExternal(template: TemplateSchema): void
   updateComponent(id: string, patch: Partial<ComponentSchema>, transient?: boolean): void
   updateComponentStyle(id: string, patch: Partial<ComponentStyle>, transient?: boolean): void
@@ -42,6 +48,14 @@ class EditorStore {
   undo(): void
   redo(): void
 }
+```
+
+Tool types:
+
+```ts
+type DrawingComponentType = 'RoyLine' | 'RoyRect' | 'RoyCircle' | 'RoyStar'
+type DrawnComponentType = 'RoySimpleText' | DrawingComponentType
+type EditorTool = 'select' | 'hand' | DrawnComponentType
 ```
 
 Host style import:
@@ -71,6 +85,27 @@ import '@ptd/react-designer/styles.css'
 - A new edit after undo discards the redo branch.
 - Locked components reject content, style, geometry and structural commands; changing `isLock` to
   unlock remains allowed.
+
+#### Persistent tools, temporary Hand and drawn creation
+
+- `activeTool` is the persistent user choice. `temporaryHand` is a UI-only Space override;
+  `effectiveTool` is `hand` only while that override is active and otherwise equals `activeTool`.
+- `lastDrawingTool` tracks only the four Shape subtypes. Select, Hand, Text and Space must not replace
+  the remembered Shape used by the grouped Dock control.
+- `H` selects persistent Hand; `V` and Escape select `select`. Space keydown outside editable controls
+  sets temporary Hand; keyup, window blur and hook cleanup clear it even if focus has since moved.
+- Hand pan sessions own only pointer/client origins and viewport scroll origins. Pointer move changes
+  only `scrollLeft/scrollTop`; it does not clear selection, mutate Schema, call `onChange` or write history.
+- `RoySimpleText` and Shape catalog clicks activate persistent draw tools and create nothing immediately.
+  `RoyText` and other insert-mode entries retain click/native-drag insertion.
+- Draw preview is local Canvas state. A valid pointer-up runs geometry normalization/clamp and exactly
+  one `addComponent()`; preview movement, sub-4px client-space drags and every cancellation path create
+  no Schema, host emission or history node.
+- Pointer cancel, lost pointer capture, tool/effective-tool change and window blur must close the current
+  Pan/Draw session. Releasing temporary Space-Hand returns to the persistent Text/Shape tool without
+  resurrecting the cancelled preview.
+- Shape menu keys are scoped: Arrow/Home/End navigate; Enter/Space choose; Escape closes only the menu.
+  These keys must not bubble to object nudge, temporary Hand or global Escape handling.
 
 #### Clipboard placement
 
@@ -132,29 +167,36 @@ import '@ptd/react-designer/styles.css'
 
 ### 4. Validation & Error Matrix
 
-| Condition                                | Required behavior                                           |
-| ---------------------------------------- | ----------------------------------------------------------- |
-| `value` is the exact last-emitted object | No history reset                                            |
-| `value` is a new external object         | Replace template; reset history baseline and selection      |
-| First user mutation then undo            | Restore initial `value`                                     |
-| Gesture emits many transient updates     | One final history entry                                     |
-| Gesture is cancelled                     | Restore the exact gesture-start value; add no history entry |
-| Selection contains a locked component    | Destructive/structural command is a no-op                   |
-| Context click targets unselected object   | Select that object before rendering component commands      |
-| Context click targets selected group item | Preserve the existing multi-selection                       |
-| Context click targets blank paper         | Clear selection; expose page properties and positioned paste |
-| `pasteAt` receives a multi-selection      | Preserve relative geometry; regenerate every id; one history |
-| Switch an existing page                   | Change UI page only; clear local selection; no host/history  |
-| Add or duplicate a page                   | Insert after source; select new page; one host/history       |
-| Duplicate a page with groups              | Regenerate page, component and recursive child ids           |
-| Delete the only page                      | No-op; template always retains at least one manual page       |
-| Reorder around the active page            | Preserve active `page.id` and valid component selection       |
-| History removes the active page           | Select nearest valid page; never expose an invalid index      |
-| Structured `propValue` (array/object)    | Inspector is read-only; never coerce to string              |
-| Host omits `styles.css` import           | Integration is invalid; UI styling is not guaranteed        |
-| Built CSS Module default export is `{}`  | Invalid package build; host elements receive no class names |
-| Host omits a peer dependency             | Workspace/install validation must fail before release       |
-| App build overlaps package `clean`       | Invalid verification order; rerun sequentially              |
+| Condition                                 | Required behavior                                                 |
+| ----------------------------------------- | ----------------------------------------------------------------- |
+| `value` is the exact last-emitted object  | No history reset                                                  |
+| `value` is a new external object          | Replace template; reset history baseline and selection            |
+| First user mutation then undo             | Restore initial `value`                                           |
+| Gesture emits many transient updates      | One final history entry                                           |
+| Gesture is cancelled                      | Restore the exact gesture-start value; add no history entry       |
+| Select/Text/Shape + Space keydown         | `effectiveTool=hand`; persistent tool/history/selection unchanged |
+| Space keyup, blur or cleanup              | Clear temporary Hand; restore exact persistent tool               |
+| Hand pointer drag                         | Change viewport scroll only; no host/history/selection mutation   |
+| Text/Shape tool activation                | UI state only; do not create a component                          |
+| Valid Text/Shape pointer-up               | One component, one host emission and one history entry            |
+| Short/cancelled/lost-capture draw         | Clear preview; no component/emission/history                      |
+| Shape menu Escape                         | Close menu; preserve active Shape tool                            |
+| Selection contains a locked component     | Destructive/structural command is a no-op                         |
+| Context click targets unselected object   | Select that object before rendering component commands            |
+| Context click targets selected group item | Preserve the existing multi-selection                             |
+| Context click targets blank paper         | Clear selection; expose page properties and positioned paste      |
+| `pasteAt` receives a multi-selection      | Preserve relative geometry; regenerate every id; one history      |
+| Switch an existing page                   | Change UI page only; clear local selection; no host/history       |
+| Add or duplicate a page                   | Insert after source; select new page; one host/history            |
+| Duplicate a page with groups              | Regenerate page, component and recursive child ids                |
+| Delete the only page                      | No-op; template always retains at least one manual page           |
+| Reorder around the active page            | Preserve active `page.id` and valid component selection           |
+| History removes the active page           | Select nearest valid page; never expose an invalid index          |
+| Structured `propValue` (array/object)     | Inspector is read-only; never coerce to string                    |
+| Host omits `styles.css` import            | Integration is invalid; UI styling is not guaranteed              |
+| Built CSS Module default export is `{}`   | Invalid package build; host elements receive no class names       |
+| Host omits a peer dependency              | Workspace/install validation must fail before release             |
+| App build overlaps package `clean`        | Invalid verification order; rerun sequentially                    |
 
 ### 5. Good / Base / Bad Cases
 
@@ -162,8 +204,11 @@ import '@ptd/react-designer/styles.css'
   builds after dependency packages.
 - **Base**: a single designer edits one page; the first update, undo and redo all preserve schema and
   selection invariants.
-- **Bad**: module-global signals make two designers share selection/history; a group array is edited
-  through a text area; or Web build runs while tsup is cleaning designer `dist`.
+- **Good tool flow**: Rectangle is persistent, Space temporarily pans, keyup returns to Rectangle,
+  and the next valid drag adds one Rectangle as one undo step.
+- **Bad**: module-global signals make two designers share selection/history; Space overwrites
+  `activeTool`; Shape-menu keys reach global shortcuts; preview updates stream into history; a group
+  array is edited through a text area; or Web build runs while tsup is cleaning designer `dist`.
 
 ### 6. Tests Required
 
@@ -171,6 +216,14 @@ import '@ptd/react-designer/styles.css'
 - Store unit test: first mutation undo/redo and redo-branch truncation.
 - Store unit test: a committed transient gesture produces one snapshot; a cancelled gesture restores
   the exact starting template without history; locked commands are no-ops.
+- Store/keyboard test: temporary Space-Hand parameterizes Select, Text and Shape; keyup/blur/cleanup
+  restores the exact persistent tool and preserves last Shape, selection, history and `onChange` count.
+- Geometry test: Text forward/reverse/clamp, closed-Shape Shift, Line midpoint/length/angle, CSS-pixel
+  threshold and non-mutation of registry defaults.
+- Canvas/browser test: persistent Hand changes only viewport scroll with grab/grabbing cursor; Text
+  activation creates nothing; one valid text frame is one undo step; cancel/lost capture creates none.
+- Sidebar test/browser assertion: six primary tools use 40×40 targets and centered 20×20 glyphs;
+  Shape disclosure overlays without shifting the glyph; menu Space/Escape never activates Hand/Select.
 - Store unit test: `pasteAt` preserves multi-selection geometry, selects fresh ids, emits one host
   change, creates one history entry, undoes as one operation and clamps into physical page bounds.
 - Store unit test: add/duplicate/delete/reorder page commands cover fresh recursive ids, final-page
@@ -206,4 +259,21 @@ function Host() {
   const [template, setTemplate] = useState(initialTemplate)
   return <Designer value={template} onChange={setTemplate} />
 }
+```
+
+#### Wrong tool state
+
+```ts
+// Space destroys the user's persistent tool and panning pollutes template history.
+store.setActiveTool('hand')
+store.updateTemplate({ viewportLeft: nextScrollLeft })
+```
+
+#### Correct tool state
+
+```ts
+// Space is temporary UI state; viewport panning never enters TemplateSchema.
+store.setTemporaryHand(true)
+viewport.scrollLeft = nextScrollLeft
+store.setTemporaryHand(false)
 ```

@@ -7,7 +7,11 @@ export type {
   ComponentStyle,
   ComponentPosition,
   ComponentType,
+  CreatableComponentType,
   ComponentCategory,
+  ComponentCatalogGroup,
+  ComponentMaturity,
+  ComponentCreationMode,
   DataSourceField,
   DataFieldType,
   DataSet,
@@ -25,6 +29,10 @@ export type { PageDimensions } from './utils'
 export { DataBindingEngine, convertByType } from './data-binding'
 
 export { ComponentRegistry, defaultRegistry } from './registry'
-export type { ComponentDefinition } from './registry'
+export type {
+  CatalogComponentDefinition,
+  ComponentCatalogMetadata,
+  ComponentDefinition,
+} from './registry'
 
 export { serialize, deserialize } from './serialization'

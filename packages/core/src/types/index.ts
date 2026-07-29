@@ -5,7 +5,11 @@ export type {
   ComponentStyle,
   ComponentPosition,
   ComponentType,
+  CreatableComponentType,
   ComponentCategory,
+  ComponentCatalogGroup,
+  ComponentMaturity,
+  ComponentCreationMode,
 } from './component-schema'
 export type { DataSourceField, DataFieldType, DataSet } from './data-source'
 export type { TemplateSchema, TemplatePage } from './template-schema'

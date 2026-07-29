@@ -261,7 +261,7 @@ PTD 是一张数字化的制版工作台：**精密、轻快、可信，带有�
 │ Context Bar：历史 + 当前页面/单选/多选/参考线命令                  │ 40
 ├────┬──────────────┬──────────────────────────┬─────────────────────┤
 │Dock│ Resource     │ Canvas / Ruler / Paper   │ Inspector           │
-│ 44 │ 220, 按需    │ minmax(0, 1fr)           │ 304, 按需           │
+│ 52 │ 280, 按需    │ minmax(0, 1fr)           │ 304, 按需           │
 ├────┴──────────────┴──────────────────────────┴─────────────────────┤
 │ Status Bar：页码、选择、页面尺寸、参考线、缩放                      │ 24
 └────────────────────────────────────────────────────────────────────┘
@@ -272,18 +272,23 @@ PTD 是一张数字化的制版工作台：**精密、轻快、可信，带有�
   --ptd-app-bar-height: 36px;
   --ptd-command-bar-height: 40px;
   --ptd-status-bar-height: 24px;
-  --ptd-tool-dock-width: 44px;
-  --ptd-resource-panel-width: 220px;
+  --ptd-tool-dock-width: 52px;
+  --ptd-resource-panel-width: 280px;
   --ptd-inspector-width: 304px;
 }
 ```
 
 - Document Bar 只放文档身份和真实文档级动作；不存在的预览、云保存或同步状态不得占位。
-- Context Bar 依据页面、单选、多选和参考线选择切换命令；无关命令移除而不是永久禁用。
-- Tool Dock 固定展示高频创建工具和 Pages/Layers/Data/Assets 资源入口。它使用与面板相连的
-  中性纸灰/石墨 surface；常态图标中性，Active 与 Focus 才引入钴蓝。Document Bar 承担深色
-  视觉锚点，Dock 不应表现成与画布割裂的第二套导航产品。
-- Resource Panel 默认宽 220px、限制在 200–360px；Inspector 默认 304px、限制在 280–420px。
+- Context Bar 依据 effective tool、页面、单选、多选和参考线选择切换命令；Text/Shape/Hand 工具
+  优先显示当前模式、直接操作和退出提示，返回 Select 后才恢复页面/选择上下文。
+- Tool Dock 分为“工具”和“面板”两区：Select/Hand/Text/Shape/Image/Table 属于操作入口，
+  Components/Pages/Layers/Data 只负责披露资源面板。它使用与面板相连的中性纸灰/石墨 surface；
+  常态图标中性，键盘 Focus 才固定使用钴蓝。Document Bar 承担深色视觉锚点，Dock 不应表现成
+  与画布割裂的第二套导航产品。
+- Persistent tool 激活使用 raised paper、石墨 hairline 与 inset keycap 底边；资源面板入口打开时
+  表现为连接到相邻面板的中性 tab。禁止用“钴蓝左竖线 + 大面积浅钴蓝底”同时表达这两种状态，
+  普通 Dock 按钮不使用外投影。
+- Resource Panel 默认宽 280px、限制在 240–360px；Inspector 默认 304px、限制在 280–420px。
   两者均可折叠和拖动调整，最后宽度在当前 Designer 实例中保留。
 - 无组件选择时 Inspector 必须展示真实 Page Inspector，而不是空状态；只读信息不得伪装成输入框。
 - 左侧面板和右侧 Inspector 各自只有一个主滚动容器；标题、搜索和底栏不参与滚动。
@@ -306,23 +311,30 @@ PanelRoot
 
 - `PanelHeader` 高 40px，不能在内容区重复同名标题。
 - 列表使用平面行或紧凑 tile；不使用卡片套卡片。
-- 选中行使用浅钴蓝背景、低透明点阵和左侧 2px inset 指示，同时保留文字/图标变化。
+- 左侧 Resource Panel 的当前 Page/Layer 使用中性 raised surface、上下 hairline 与字重表达；不得
+  使用钴蓝左竖线叠加浅蓝底。Canvas 对象选择仍使用专属钴蓝 overlay，两者不能混为后台导航态。
 - Hover 才出现的次要动作必须提供键盘可达的替代入口。
 - 空状态包含：当前状态、下一步价值和一个明确动作。
 
 ## 7. 组件库面板
 
-- 分类沿用 Legacy：通用、数据、形状；将来扩展业务组件时只新增 catalog 数据。
-- 每个组件项包含 Remix line 图标、名称和可选快捷提示。
-- 组件图标默认使用石墨灰，只有 Hover/Focus/Active 才进入钴蓝状态，避免目录常态被主色淹没。
-- 默认使用单列 40px 高的平面高密度行；图标、名称和简短说明形成稳定三列，不使用大卡片。
-- 行使用透明边框和 2px 圆角；Hover/Focus 才进入 sunken/raised 状态。
-- 同时支持拖拽和点击添加。拖拽不是唯一创建路径。
+- Catalog 使用独立于持久 Schema category 的五组 taxonomy：文本、表格、图像、编码、图形；
+  `common/data/shape` 与既有 `ComponentType` 只承担模板兼容，不能直接决定面板分组。
+- Header 明确区分可用与规划数量。可用区提供“常用”四项、两列内容 tile 和四列 Shape preset；
+  名称与 Remix line 图标承担日常扫描，长描述进入 Tooltip/搜索结果，不用 9px 常驻说明堆密度。
+- `basic/complex` 是 catalog 元数据，不在每个可用 tile 上重复显示。所有 planned item 集中在默认
+  折叠的“即将支持”，保留禁用、不可拖拽和“规划中”语义；搜索命中时可强制显示但不得创建。
+- `creationMode='insert'` 的项支持点击居中与 native drag 定位；`creationMode='draw'` 的 Text/Shape
+  点击只激活 persistent tool，必须由 Paper 拖框后创建。拖拽不是 insert 项的唯一创建路径。
+- Shape 使用一个 Dock 工具组和四个面板 preset；Dock 主按钮为完整 40×40、图标 20×20 居中，
+  disclosure 作为右下角 16×16 覆盖目标，不能压缩主按钮或把图标挤偏。
+- 当前 Shape preset 使用中性 graphite 边缘/字重与 inset edge，不使用蓝色左线或浅蓝填充。
 - Drag preview 显示组件图标与名称，不能复制整张面板卡片。
 - 创建 Schema 只能调用统一 Component Catalog/Factory，面板不能自己拼接默认属性。
-- 新组件添加后自动选中，写入一个历史节点，并发出一次最终 `onChange`。
-- 点击 Dock 或 Catalog 创建后，Canvas viewport 应把新组件平滑带回可见中心，并在完成后消费
-  一次性 reveal 请求；该请求属于 UI state，不进入模板或历史。拖拽创建保留用户落点，不强制居中。
+- Insert 或有效 Draw 每次只添加一个完整 Schema、写入一个历史节点并发出一次最终 `onChange`；
+  tool activation、preview、Hand/pan、short/cancelled draw 不发出模板变更。
+- Insert 点击创建后，Canvas viewport 应把新组件平滑带回可见中心并消费一次性 reveal 请求；
+  Draw/native drag 保留用户落点，不强制居中。Reveal 只属于 UI state。
 
 ### 7.1 Pages 资源面板
 
@@ -347,6 +359,9 @@ PanelRoot
 - 禁止使用 Emoji、Unicode 箭头或“左齐/中齐/横分”等文字缩写代替正式图标。
 - 每个图标按钮必须有 `aria-label` 和 Tooltip；Tooltip 同时展示名称与快捷键。
 - 图标按钮视觉尺寸 28px；在 coarse pointer 下将可点击区域提升到至少 40px。
+- Tool Dock 的主入口固定使用 40×40 target 和 20×20 图标，所有 glyph 共用同一光学中心；组合工具的
+  disclosure 只能叠加在角落，不能改变主图标 grid cell。Shape 菜单必须消费 Arrow/Home/End、
+  Enter/Space 与 Escape，禁止继续冒泡到对象移动、临时 Hand 或全局退出工具快捷键。
 - 命令按领域分组：历史、剪贴板、排列、层级、组合、视图。
 - 低频排列命令可进入 Dropdown；撤销、重做、删除、锁定、组合和缩放保持可发现。
 - 禁用按钮保留位置，使用 `opacity: 0.45` 并移除事件；不靠 `cursor: not-allowed` 表达状态。
@@ -404,6 +419,16 @@ PanelRoot
   的大面积底色；朱红参考线是用户显式选择的编辑标记，不等同于固定校样装饰。
 - 校样朱红可用于出血/危险边界、套准裁切标记和关键提醒，不用于普通选中框。
 - 旋转、缩放和移动反馈不得改变组件本身的 Schema 样式。
+- Editor tool 分为 persistent `activeTool` 与临时覆盖后的 `effectiveTool`。`H` 激活 persistent Hand，
+  `V`/Escape 返回 Select；可编辑控件外按住 Space 只临时令 effective tool 为 Hand，keyup、blur 或
+  卸载必须恢复原 persistent Text/Shape/Select，且不得修改 last-used Shape。
+- Hand 只通过 pointer drag 改变 Canvas viewport 的 `scrollLeft/scrollTop`，idle 使用 `grab`、drag
+  使用 `grabbing`；不得清除选择、移动 Paper/对象/参考线、触发 `onChange` 或写历史。pointer cancel、
+  lost capture、工具切换与 window blur 都必须清理 pan session。
+- `RoySimpleText` 与四种 Shape 是 persistent draw tools。Pointer down/move 产生本地 preview，4 CSS px
+  以下、Escape、Hand/Space、pointer cancel、lost capture 与 blur 都只取消；有效 pointer up 归一化、
+  clamp 页面几何并调用一次 `addComponent()`。Text 支持正反拖框且 Shift 不约束；闭合 Shape 的 Shift
+  等比，Line 使用中点、欧氏长度与 `atan2` 角度。
 - 框选区域使用清晰边框和不超过 8% 的选中色透明填充，不能遮挡待选组件。拖动接近 Canvas
   viewport 边缘时应按距离渐进自动滚动；滚动后的框选坐标必须使用实时 Paper 矩形重新换算，
   并限制在未缩放纸张边界内，不能继续沿用按下瞬间缓存的屏幕矩形。

@@ -1,0 +1,43 @@
+{
+  "id": "component-catalog",
+  "name": "component-catalog",
+  "title": "组件目录、占位与专业侧栏工具",
+  "description": "Create a professional component inventory, planned placeholders, persistent shape/text tools, viewport Hand panning, and a two-level tool/resource sidebar inspired by established editors.",
+  "status": "in_progress",
+  "dev_type": "feature",
+  "scope": "core catalog metadata; react-designer catalog, grouped tool dock, task-oriented component panel, context bar, canvas shape/text drawing, Hand/Space viewport panning, keyboard behavior, visual styling and tests",
+  "package": "react-designer",
+  "priority": "P2",
+  "creator": "ROYIANS",
+  "assignee": "ROYIANS",
+  "createdAt": "2026-07-29",
+  "completedAt": null,
+  "branch": "feature/refc",
+  "base_branch": "feature/refc",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": null,
+  "relatedFiles": [
+    "packages/core/src/registry/component-registry.ts",
+    "packages/react-designer/src/catalog/componentCatalog.ts",
+    "packages/react-designer/src/components/Sidebar/Sidebar.tsx",
+    "packages/react-designer/src/components/Canvas/Canvas.tsx",
+    "packages/react-designer/src/components/Toolbar/Toolbar.tsx",
+    "packages/react-designer/src/state/editor.ts",
+    "packages/react-designer/src/hooks/useEditorKeyboard.ts"
+  ],
+  "notes": "Keep the 11 creatable engine types and RoyGroup internal. Planned capabilities appear in one collapsed disabled roadmap section. Existing shapes use one grouped Dock tool; RoySimpleText becomes a persistent drawn-frame tool; Hand/H and temporary Space pan only the viewport. Shape disclosure must not disturb the 40px optical icon grid.",
+  "meta": {
+    "catalog_groups": 5,
+    "creatable_components": 11,
+    "planned_placeholders": 7,
+    "drawing_tools": 5,
+    "hand_tool": true,
+    "temporary_space_pan": true,
+    "dock_shape_groups": 1,
+    "default_resource_panel_width": 280
+  }
+}
