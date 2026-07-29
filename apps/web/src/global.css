@@ -1,3 +1,13 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Outfit:wght@400;500;600;700&display=swap');
+
+@font-face {
+  font-family: 'Sarasa UI SC';
+  src: url('/assets/fonts/SarasaUiSC.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
 :root {
   color-scheme: light;
   font-synthesis: none;

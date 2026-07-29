@@ -18,7 +18,7 @@ const INITIAL_TEMPLATE: TemplateSchema = {
     background: '#fcfdff',
     color: '#1d2735',
     fontSize: 12,
-    fontFamily: 'SimSun, serif',
+    fontFamily: "'Noto Serif SC', 'Noto Serif CJK SC', 'Source Han Serif SC', serif",
     lineHeight: 1.4,
   },
   pages: [
@@ -38,7 +38,7 @@ const INITIAL_TEMPLATE: TemplateSchema = {
             rotate: 0,
             opacity: 1,
             fontSize: 28,
-            fontFamily: 'SimHei, sans-serif',
+            fontFamily: "'Noto Serif SC', 'Noto Serif CJK SC', 'Source Han Serif SC', serif",
             color: '#1d2735',
             justifyContent: 'center',
             alignItems: 'center',
