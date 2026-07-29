@@ -1,0 +1,8 @@
+{"file":".trellis/spec/monorepo/package-conventions.md","reason":"Preserve @ptd/react-designer package build, CSS export and host consumption contracts."}
+{"file":".trellis/spec/monorepo/typescript-conventions.md","reason":"Keep the workspace shell and UI state strict without any or suppression escapes."}
+{"file":".trellis/spec/monorepo/directory-structure.md","reason":"Place new internal React shell components and hooks in the correct package layer."}
+{"file":".trellis/spec/monorepo/styling-conventions.md","reason":"Use CSS Modules and tokenized CSS variables correctly for designer UI and resizable geometry."}
+{"file":".trellis/spec/monorepo/quality-guidelines.md","reason":"Apply lint, test, build and artifact requirements during implementation."}
+{"file":".trellis/spec/monorepo/react-designer-contract.md","reason":"Preserve controlled Designer, isolated store, history and package integration behavior."}
+{"file":".trellis/spec/monorepo/ptd-ui-system.md","reason":"Apply the current PTD visual, accessibility, ruler, panel and responsive contracts before updating the shell contract."}
+{"file":".trellis/tasks/07-29-canvas-first-ui-finalize/research/layout-synthesis.md","reason":"Implement the approved Canvas-first information architecture and explicit scope boundaries."}

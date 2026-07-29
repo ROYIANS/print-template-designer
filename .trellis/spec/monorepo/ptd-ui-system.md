@@ -38,7 +38,8 @@ PTD 是一张数字化的制版工作台：**精密、轻快、可信，带有�
 4. **边界表达层级**：优先使用 1px 边线和 surface 差异；阴影只属于纸张和浮层。
 5. **渐进披露**：常用动作直接可见，高级配置、危险动作和次要命令按需展开。
 6. **状态不能只靠颜色**：选中、锁定、错误和禁用同时通过图标、边界或文本表达。
-7. **沿用成熟心智模型**：Legacy 已验证的五个左侧入口和画布工作流保留，但实现完全 React 化。
+7. **沿用成熟心智模型**：保留 Legacy 已验证的画布工作流，把固定五入口 Rail 重组为高频
+   Tool Dock 与 Pages/Layers/Data/Assets 按需资源面板。
 8. **结构即装饰**：工程感来自网格、细线、刻度、节点和精确对齐，不来自无业务意义的工程编号。
 9. **先定义契约再写局部样式**：尺寸、颜色、层级、滚动与交互状态必须使用统一 token。
 
@@ -193,10 +194,11 @@ PTD 是一张数字化的制版工作台：**精密、轻快、可信，带有�
 ```css
 .ptdTheme {
   --ptd-font-ui:
-    'Outfit Variable', 'Sarasa UI SC', 'Sarasa Gothic SC', 'Microsoft YaHei UI', 'PingFang SC',
-    sans-serif;
+    'Outfit', 'Outfit Variable', 'Sarasa UI SC', 'Sarasa Gothic SC', 'Microsoft YaHei UI',
+    'PingFang SC', sans-serif;
   --ptd-font-metric:
-    'Outfit Variable', 'Sarasa UI SC', 'Sarasa Gothic SC', 'Microsoft YaHei UI', sans-serif;
+    'Outfit', 'Outfit Variable', 'Sarasa UI SC', 'Sarasa Gothic SC', 'Microsoft YaHei UI',
+    sans-serif;
   --ptd-font-serif: 'Noto Serif SC', 'Noto Serif CJK SC', 'Source Han Serif SC', 'Songti SC', serif;
 
   --ptd-text-10: 0.625rem;
@@ -213,9 +215,10 @@ PTD 是一张数字化的制版工作台：**精密、轻快、可信，带有�
   按 glyph fallback 组合，不把等宽字体当作“工程感”。
 - 衬线内容统一使用 Noto Serif SC 系列，仅用于模板叙事、预览标题或明确要求衬线的内容；
   表单、工具栏、坐标和快捷键仍使用 UI sans。
-- Outfit Variable 体积很小，由宿主直接引入 `@fontsource-variable/outfit`；示例 Web 已完成
-  接入。Sarasa UI SC 与 Noto Serif SC 的完整中文字体文件体积较大，由宿主通过
-  `@font-face` 自托管；公共 token 已提供稳定 fallback。可复用设计器包不强制注入大型 CJK 字体。
+- Outfit 与 Noto Serif SC 由宿主通过 Google Fonts 或等价 Web Font 服务引入；离线部署必须
+  提供可控的本地镜像或依赖系统 fallback。Sarasa UI SC 没有可靠的通用 Web 服务版本，示例 Web
+  通过 `@font-face` 自托管完整 `SarasaUiSC.ttf`。可复用设计器包只提供字体栈，不强制注入大型
+  CJK 字体资产。
 - 常规控件正文为 12–13px；面板标题 13px；文档标题 15px；产品名不超过 18px。
 - 标尺、坐标、尺寸和缩放使用 `font-variant-numeric: tabular-nums`。
 - 画布内部字体由 `TemplateSchema` 控制，不继承设计器 Chrome 的字体决策。
@@ -252,39 +255,40 @@ PTD 是一张数字化的制版工作台：**精密、轻快、可信，带有�
 
 ```text
 ┌────────────────────────────────────────────────────────────────────┐
-│ App Bar：产品、文档标题、保存/预览等文档级动作                     │ 48
+│ Document Bar：品牌、文档身份、真实载入/保存动作                     │ 36
 ├────────────────────────────────────────────────────────────────────┤
-│ Command Bar：撤销、编辑、排列、组合、视图与缩放                     │ 44
+│ Context Bar：历史 + 当前页面/单选/多选/参考线命令                  │ 40
 ├────┬──────────────┬──────────────────────────┬─────────────────────┤
-│Rail│ Left Panel   │ Canvas / Ruler / Paper   │ Inspector           │
-│ 48 │ 252          │ minmax(0, 1fr)           │ 288                 │
+│Dock│ Resource     │ Canvas / Ruler / Paper   │ Inspector           │
+│ 44 │ 220, 按需    │ minmax(0, 1fr)           │ 304, 按需           │
 ├────┴──────────────┴──────────────────────────┴─────────────────────┤
-│ Status Bar：选择状态、页面尺寸、缩放、本地状态                      │ 26
+│ Status Bar：页码、选择、页面尺寸、参考线、缩放                      │ 24
 └────────────────────────────────────────────────────────────────────┘
 ```
 
 ```css
 .ptdTheme {
-  --ptd-app-bar-height: 48px;
-  --ptd-command-bar-height: 44px;
-  --ptd-status-bar-height: 26px;
-  --ptd-rail-width: 48px;
-  --ptd-left-panel-width: 252px;
-  --ptd-inspector-width: 288px;
+  --ptd-app-bar-height: 36px;
+  --ptd-command-bar-height: 40px;
+  --ptd-status-bar-height: 24px;
+  --ptd-tool-dock-width: 44px;
+  --ptd-resource-panel-width: 220px;
+  --ptd-inspector-width: 304px;
 }
 ```
 
-- App Bar 只放文档级动作；编辑命令只放 Command Bar，不混成一条无限横向列表。
-- App Bar 品牌区宽度必须对齐 `Rail + Left Panel`（默认 300px）这条主结构线；窄宽度折叠时，
-  品牌区一起切换到 compact 宽度，不额外添加交点装饰。
-- Command Bar 的编辑命令与视图命令分别形成左右两个实体 Command Deck。Deck 使用 1px 边框、
-  raised surface 和 `--ptd-shadow-deck`，不能把所有按钮散落在一条无边界平面栏中。
-- 左侧 Rail 固定展示：组件、结构、属性、数据源、全局设置。
-- Rail 可使用深蓝石墨作为工作区视觉脊柱；常态图标使用中性灰，Hover 提亮，Active 才引入
-  钴蓝与低透明点阵。不得把深色扩散到整个 Left Panel 或 Inspector。
+- Document Bar 只放文档身份和真实文档级动作；不存在的预览、云保存或同步状态不得占位。
+- Context Bar 依据页面、单选、多选和参考线选择切换命令；无关命令移除而不是永久禁用。
+- Tool Dock 固定展示高频创建工具和 Pages/Layers/Data/Assets 资源入口。它可使用深蓝石墨作为
+  工作区视觉脊柱；常态图标中性，Active 才引入钴蓝。
+- Resource Panel 默认宽 220px、限制在 200–360px；Inspector 默认 304px、限制在 280–420px。
+  两者均可折叠和拖动调整，最后宽度在当前 Designer 实例中保留。
+- 无组件选择时 Inspector 必须展示真实 Page Inspector，而不是空状态；只读信息不得伪装成输入框。
 - 左侧面板和右侧 Inspector 各自只有一个主滚动容器；标题、搜索和底栏不参与滚动。
 - 画布滚动只发生在 Canvas viewport，不能让整个应用页面滚动。
 - 中央列必须 `min-width: 0`；固定面板不能挤破画布，而应触发自身响应式策略。
+- 活动资源、开合和宽度属于实例级 UI state，不写入 `TemplateSchema`、不触发 `onChange`，也不
+  进入模板撤销历史。
 
 ### 6.2 面板原语
 
@@ -309,12 +313,14 @@ PanelRoot
 - 分类沿用 Legacy：通用、数据、形状；将来扩展业务组件时只新增 catalog 数据。
 - 每个组件项包含 Remix line 图标、名称和可选快捷提示。
 - 组件图标默认使用石墨灰，只有 Hover/Focus/Active 才进入钴蓝状态，避免目录常态被主色淹没。
-- 默认使用两列紧凑 tile，视觉高度 52–56px；不是 Legacy 的 95px 阴影卡片。
-- Tile 使用 1px 边框、2px 圆角和透明背景；Hover/Focus 才提升到 raised surface。
+- 默认使用单列 40px 高的平面高密度行；图标、名称和简短说明形成稳定三列，不使用大卡片。
+- 行使用透明边框和 2px 圆角；Hover/Focus 才进入 sunken/raised 状态。
 - 同时支持拖拽和点击添加。拖拽不是唯一创建路径。
 - Drag preview 显示组件图标与名称，不能复制整张面板卡片。
 - 创建 Schema 只能调用统一 Component Catalog/Factory，面板不能自己拼接默认属性。
 - 新组件添加后自动选中，写入一个历史节点，并发出一次最终 `onChange`。
+- 点击 Dock 或 Catalog 创建后，Canvas viewport 应把新组件平滑带回可见中心，并在完成后消费
+  一次性 reveal 请求；该请求属于 UI state，不进入模板或历史。拖拽创建保留用户落点，不强制居中。
 
 ## 8. 工具栏与图标
 
@@ -356,6 +362,9 @@ PanelRoot
 - 水平标尺创建 X 轴位置的垂直参考线，垂直标尺创建 Y 轴位置的水平参考线；支持点击或拖拽
   创建、拖动调整、点击选择、双击或 Delete 删除。选中态必须在标尺显示三角标点，并显示
   `X/Y + 0.1mm` 精度位置标签。
+- 指针在水平或垂直标尺移动时，应以当前新建颜色显示一条低透明临时参考线和 `X/Y + 0.1mm`
+  位置标签；该预览只存在于组件本地状态，点击后才写入参考线会话。固定参考线的位置标签在
+  选中或 Hover 该线时显示，不能要求先选中才能读取位置。
 - 参考线提供钴蓝、朱红、翠绿、琥珀四种颜色，并支持整体显隐、锁定和清空。颜色既是新建默认色，
   也可修改当前选中参考线；锁定后禁止创建、移动、换色、删除和清空。
 - 参考线位置必须被限制在当前页面物理边界内；普通方向键按 0.1mm 微调，Shift + 方向键按 1mm
@@ -366,14 +375,19 @@ PanelRoot
   的大面积底色；朱红参考线是用户显式选择的编辑标记，不等同于固定校样装饰。
 - 校样朱红可用于出血/危险边界、套准裁切标记和关键提醒，不用于普通选中框。
 - 旋转、缩放和移动反馈不得改变组件本身的 Schema 样式。
+- 框选区域使用清晰边框和不超过 8% 的选中色透明填充，不能遮挡待选组件。拖动接近 Canvas
+  viewport 边缘时应按距离渐进自动滚动；滚动后的框选坐标必须使用实时 Paper 矩形重新换算，
+  并限制在未缩放纸张边界内，不能继续沿用按下瞬间缓存的屏幕矩形。
 - 画布 Overlay 测量需监听滚动、`window.resize`、DOM mutation、画布层与滚动容器的
   `ResizeObserver`，并通过 `requestAnimationFrame` 节流。
 - 画布缩放只改变 stage/paper，不缩放应用 Chrome、Tooltip 或面板。
 
 ### 10.1 单选组件快捷条
 
-- 单选组件时，选中框与 Selection Quick Bar 共享同一钴蓝语义；Hover 仍只显示弱虚线边框，
-  多选只显示一套多选移动入口，不能为每个对象重复浮条。
+- 单选组件时，选中框与 Selection Quick Bar 共享同一钴蓝语义；未激活组件常态不显示边界，
+  Hover 才显示弱钴蓝虚线和不超过 5% 的钴蓝透明蒙版。Hover/选中边界必须由不参与盒模型的
+  Overlay 绘制，不能用实体 `border` 缩小组件内容区域；多选只显示一套多选移动入口，不能为
+  每个对象重复浮条。
 - Quick Bar 显示组件名称，并提供拖动、锁定/解锁、复制、上移一层和删除五个高频动作；
   每个图标动作必须有 `aria-label`、Tooltip、focus-visible、disabled 和危险态。
 - 锁定组件仍显示 Quick Bar，但除“解锁”外的破坏性或几何动作全部禁用。
@@ -426,11 +440,15 @@ loading、error、success。
 
 ## 14. 响应式与输入方式
 
-PTD 是桌面优先的生产工具，但不能假设所有桌面设备都有精细鼠标。
+PTD 是桌面优先的生产工具，但不能假设所有桌面设备都有精细鼠标。响应阈值以 Designer
+容器宽度为准，不读取设备类型，也不只依赖 `window.innerWidth`。
 
-- `>= 1180px`：Rail、左侧面板、画布、Inspector 同时显示。
-- `960–1179px`：Rail 保留；左侧面板或 Inspector 至少一个转为可切换 overlay panel。
-- `< 960px`：进入 compact workspace；两个侧面板均通过 overlay/drawer 打开，画布保持完整能力。
+- `>= 1440px`：wide；Tool Dock、Resource Panel、Canvas、Inspector 默认同时显示。
+- `1180–1439px`：standard；Tool Dock 与 Inspector 默认显示，Resource Panel 默认折叠。
+- `< 1180px`：compact；Tool Dock 保持，Resource Panel 与 Inspector 作为互斥 overlay 打开。
+- 从一个档位切到另一个档位时采用该档位的安全默认开合；用户仍可用 Context Bar 入口恢复面板。
+- compact overlay 打开一个必须关闭另一个；Scrim 或 Escape 可关闭当前 overlay。overlay 宽度以
+  Designer 容器为边界，禁止使用 `100vw` 推算嵌入式设计器宽度。
 - 不因窄屏删除关键功能；只改变入口和披露层级。
 - `pointer: coarse` 时控件命中区域至少 40px，并取消依赖 Hover 才可发现的操作。
 - 浏览器缩放到 200% 时，工具栏允许分组折叠，不能产生不可达的横向命令。
@@ -443,9 +461,16 @@ PTD 是桌面优先的生产工具，但不能假设所有桌面设备都有精�
 <div data-ptd-region="designer" />
 <header data-ptd-region="app-bar" />
 <nav data-ptd-region="command-bar" />
-<aside data-ptd-region="component-panel" />
-<main data-ptd-region="canvas-viewport" />
+<aside data-ptd-region="left-sidebar" />
+<div data-ptd-region="resource-panel" />
+<div data-ptd-region="pages-panel" />
+<div data-ptd-region="structure-panel" />
+<div data-ptd-region="data-panel" />
+<div data-ptd-region="component-panel" />
+<div data-ptd-region="canvas-viewport" />
+<div data-ptd-region="paper" />
 <aside data-ptd-region="inspector" />
+<aside data-ptd-region="page-inspector" />
 <footer data-ptd-region="status-bar" />
 ```
 
