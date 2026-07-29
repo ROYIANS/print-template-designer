@@ -1,0 +1,273 @@
+.rulers,
+.horizontal,
+.vertical,
+.unit {
+  position: absolute;
+}
+
+.rulers {
+  z-index: var(--ptd-layer-guide);
+  inset: 0;
+  color: var(--ptd-text-muted);
+  font-family: var(--ptd-font-metric);
+  font-size: 8px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.horizontal {
+  right: 0;
+  bottom: calc(100% + 10px);
+  left: 0;
+  height: 22px;
+  padding: 0;
+  border-bottom: 1px solid color-mix(in oklch, var(--ptd-border-strong) 70%, transparent);
+  border-top: 0;
+  border-right: 0;
+  border-left: 0;
+  color: inherit;
+  background: transparent;
+  cursor: crosshair;
+  pointer-events: auto;
+}
+
+.vertical {
+  top: 0;
+  right: calc(100% + 10px);
+  bottom: 0;
+  width: 24px;
+  padding: 0;
+  border-right: 1px solid color-mix(in oklch, var(--ptd-border-strong) 70%, transparent);
+  border-top: 0;
+  border-bottom: 0;
+  border-left: 0;
+  color: inherit;
+  background: transparent;
+  cursor: crosshair;
+  pointer-events: auto;
+}
+
+.horizontal:focus-visible,
+.vertical:focus-visible,
+.guide:focus-visible {
+  outline: 2px solid var(--ptd-focus);
+  outline-offset: 2px;
+}
+
+.horizontal:disabled,
+.vertical:disabled {
+  cursor: default;
+}
+
+.unit {
+  right: calc(100% + 10px);
+  bottom: calc(100% + 10px);
+  width: 24px;
+  height: 22px;
+  display: grid;
+  place-items: end center;
+  padding-bottom: 4px;
+  box-sizing: border-box;
+  color: var(--ptd-text-muted);
+  background: color-mix(in oklch, var(--ptd-surface-canvas) 86%, transparent);
+}
+
+.mark {
+  position: absolute;
+  box-sizing: border-box;
+  color: var(--ptd-text-muted);
+  border-color: color-mix(in oklch, var(--ptd-border-strong) 68%, transparent);
+  pointer-events: none;
+}
+
+.mark[data-axis='x'] {
+  bottom: 0;
+  left: var(--ruler-position);
+  height: 5px;
+  border-left-width: 1px;
+  border-left-style: solid;
+}
+
+.mark[data-axis='y'] {
+  top: var(--ruler-position);
+  right: 0;
+  width: 5px;
+  border-top-width: 1px;
+  border-top-style: solid;
+}
+
+.mark[data-kind='major'][data-axis='x'] {
+  height: 9px;
+}
+
+.mark[data-kind='major'][data-axis='y'] {
+  width: 9px;
+}
+
+.mark[data-kind='endpoint'][data-axis='x'] {
+  height: 12px;
+  border-color: var(--ptd-text-muted);
+}
+
+.mark[data-kind='endpoint'][data-axis='y'] {
+  width: 12px;
+  border-color: var(--ptd-text-muted);
+}
+
+.label {
+  position: absolute;
+  color: var(--ptd-text-muted);
+  white-space: nowrap;
+}
+
+.mark[data-axis='x'] .label {
+  bottom: 11px;
+  left: 0;
+  transform: translateX(-50%);
+}
+
+.mark[data-axis='y'] .label {
+  top: 0;
+  right: 11px;
+  transform: translateY(-50%) rotate(-90deg);
+}
+
+.mark[data-axis='x'][data-edge='start'] .label {
+  transform: none;
+}
+
+.mark[data-axis='x'][data-edge='end'] .label {
+  transform: translateX(-100%);
+}
+
+.mark[data-axis='y'][data-edge='start'] .label {
+  transform: translateY(1px) rotate(-90deg);
+  transform-origin: right top;
+}
+
+.mark[data-axis='y'][data-edge='end'] .label {
+  transform: translateY(-100%) rotate(-90deg);
+  transform-origin: right bottom;
+}
+
+.guide {
+  position: absolute;
+  z-index: var(--ptd-layer-guide);
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: var(--guide-color);
+  background: transparent;
+  pointer-events: auto;
+}
+
+.guide[data-color='cobalt'] {
+  --guide-color: var(--ptd-guide-cobalt);
+}
+
+.guide[data-color='vermilion'] {
+  --guide-color: var(--ptd-guide-vermilion);
+}
+
+.guide[data-color='emerald'] {
+  --guide-color: var(--ptd-guide-emerald);
+}
+
+.guide[data-color='amber'] {
+  --guide-color: var(--ptd-guide-amber);
+}
+
+.guide[data-axis='x'] {
+  top: 0;
+  bottom: 0;
+  left: var(--guide-position);
+  width: 9px;
+  transform: translateX(-4px);
+  cursor: ew-resize;
+}
+
+.guide[data-axis='y'] {
+  top: var(--guide-position);
+  right: 0;
+  left: 0;
+  height: 9px;
+  transform: translateY(-4px);
+  cursor: ns-resize;
+}
+
+.guideStroke {
+  position: absolute;
+  background: currentColor;
+  opacity: 0.68;
+  pointer-events: none;
+}
+
+.guide[data-axis='x'] .guideStroke {
+  top: 0;
+  bottom: 0;
+  left: 4px;
+  width: 1px;
+}
+
+.guide[data-axis='y'] .guideStroke {
+  top: 4px;
+  right: 0;
+  left: 0;
+  height: 1px;
+}
+
+.guideMarker {
+  position: absolute;
+  display: block;
+  background: currentColor;
+  pointer-events: none;
+}
+
+.guide[data-axis='x'] .guideMarker {
+  top: -12px;
+  left: 0;
+  width: 9px;
+  height: 9px;
+  clip-path: polygon(50% 100%, 0 0, 100% 0);
+}
+
+.guide[data-axis='y'] .guideMarker {
+  top: 0;
+  left: -12px;
+  width: 9px;
+  height: 9px;
+  clip-path: polygon(100% 50%, 0 0, 0 100%);
+}
+
+.guide[data-selected='true'] .guideStroke {
+  opacity: 0.92;
+  box-shadow: 0 0 0 1px color-mix(in oklch, currentColor 16%, transparent);
+}
+
+.guideLabel {
+  position: absolute;
+  display: block;
+  padding: 3px 5px;
+  border: 1px solid currentColor;
+  border-radius: var(--ptd-radius-1);
+  color: var(--ptd-text-strong);
+  background: var(--ptd-surface-raised);
+  box-shadow: var(--ptd-shadow-control);
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.guide[data-axis='x'] .guideLabel {
+  top: 6px;
+  left: 10px;
+}
+
+.guide[data-axis='y'] .guideLabel {
+  top: 10px;
+  left: 6px;
+}

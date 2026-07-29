@@ -15,6 +15,7 @@ import { Area } from './Area'
 import { ComponentAdjuster } from './ComponentAdjuster'
 import { ComponentRenderer } from './ComponentRenderer'
 import { EditorLine, type EditorLineHandle } from './EditorLine'
+import { Ruler } from './Ruler'
 import styles from './Canvas.module.css'
 
 type CanvasVariables = CSSProperties & Record<`--${string}`, string>
@@ -31,6 +32,10 @@ export function Canvas() {
   const scale = store.scale.value
   const selectedIds = store.selectedIds.value
   const { width: pageWidthPx, height: pageHeightPx } = getPageDimensions(pageConfig)
+  const pageWidthMm =
+    pageConfig.pageDirection === 'l' ? pageConfig.pageHeight : pageConfig.pageWidth
+  const pageHeightMm =
+    pageConfig.pageDirection === 'l' ? pageConfig.pageWidth : pageConfig.pageHeight
 
   useEffect(
     () => () => {
@@ -147,17 +152,10 @@ export function Canvas() {
 
   return (
     <div className={styles.canvasWrapper} style={canvasStyle}>
-      <div className={styles.workbenchFrame} aria-hidden="true" data-ptd-decoration="frame">
-        <span className={`${styles.frameNode} ${styles.frameNodeTopLeft}`} />
-        <span className={`${styles.frameNode} ${styles.frameNodeTopRight}`} />
-        <span className={`${styles.frameNode} ${styles.frameNodeBottomLeft}`} />
-        <span className={`${styles.frameNode} ${styles.frameNodeBottomRight}`} />
-      </div>
       <div className={styles.canvasStage}>
-        <span className={`${styles.paperNode} ${styles.paperNodeTopLeft}`} aria-hidden="true" />
-        <span className={`${styles.paperNode} ${styles.paperNodeTopRight}`} aria-hidden="true" />
-        <span className={`${styles.paperNode} ${styles.paperNodeBottomLeft}`} aria-hidden="true" />
-        <span className={`${styles.paperNode} ${styles.paperNodeBottomRight}`} aria-hidden="true" />
+        {store.showRuler.value && (
+          <Ruler widthMm={pageWidthMm} heightMm={pageHeightMm} scale={scale} />
+        )}
         <div
           ref={editorRef}
           id="ptd-designer-canvas"

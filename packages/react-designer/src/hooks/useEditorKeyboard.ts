@@ -58,7 +58,8 @@ export function useEditorKeyboard(
       }
       if (key === 'delete' || key === 'backspace') {
         event.preventDefault()
-        store.deleteSelected()
+        if (store.selectedGuideId.value) store.removeSelectedGuide()
+        else store.deleteSelected()
         return
       }
       const distance = event.shiftKey ? 10 : 1
@@ -70,6 +71,20 @@ export function useEditorKeyboard(
       }
       const delta = movement[key]
       if (delta) {
+        const selectedGuide = store.guides.value.find(
+          (guide) => guide.id === store.selectedGuideId.value,
+        )
+        if (selectedGuide) {
+          const guideDelta = selectedGuide.axis === 'x' ? delta[0] : delta[1]
+          if (guideDelta !== 0) {
+            event.preventDefault()
+            store.moveGuide(
+              selectedGuide.id,
+              Math.max(0, selectedGuide.positionMm + guideDelta / 10),
+            )
+          }
+          return
+        }
         event.preventDefault()
         store.moveSelection(delta[0], delta[1])
       }

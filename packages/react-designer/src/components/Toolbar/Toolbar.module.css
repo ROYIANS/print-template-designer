@@ -15,14 +15,18 @@
 .commands,
 .viewStrip,
 .group,
-.direction {
+.direction,
+.guideTools,
+.guideColors {
   display: flex;
   align-items: center;
 }
 
 .commands {
+  width: 100%;
   min-width: 0;
   max-width: 100%;
+  box-sizing: border-box;
   justify-self: start;
   gap: var(--ptd-space-1);
   padding: 3px 4px;
@@ -51,6 +55,67 @@
 .direction {
   padding: 1px;
   background: var(--ptd-surface-sunken);
+}
+
+.guideTools {
+  gap: 1px;
+  padding-left: 3px;
+  border-left: 1px solid var(--ptd-border);
+}
+
+.guideColors {
+  gap: 1px;
+  padding-right: 2px;
+}
+
+.guideColor {
+  width: 20px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--ptd-radius-1);
+  background: transparent;
+  cursor: pointer;
+}
+
+.guideColor span {
+  width: 9px;
+  height: 9px;
+  box-sizing: border-box;
+  border: 1px solid color-mix(in oklch, var(--ptd-graphite-950) 18%, transparent);
+  background: var(--guide-swatch);
+}
+
+.guideColor[data-color='cobalt'] {
+  --guide-swatch: var(--ptd-guide-cobalt);
+}
+
+.guideColor[data-color='vermilion'] {
+  --guide-swatch: var(--ptd-guide-vermilion);
+}
+
+.guideColor[data-color='emerald'] {
+  --guide-swatch: var(--ptd-guide-emerald);
+}
+
+.guideColor[data-color='amber'] {
+  --guide-swatch: var(--ptd-guide-amber);
+}
+
+.guideColor:hover,
+.guideColor[data-active='true'] {
+  background: var(--ptd-surface-sunken);
+}
+
+.guideColor[data-active='true'] span {
+  box-shadow: 0 0 0 1px var(--ptd-surface-raised), 0 0 0 2px var(--guide-swatch);
+}
+
+.guideColor:focus-visible {
+  outline: 2px solid var(--ptd-focus);
+  outline-offset: 1px;
 }
 
 .separator {

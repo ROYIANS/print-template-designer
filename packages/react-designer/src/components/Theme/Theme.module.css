@@ -39,6 +39,10 @@
   --ptd-selection-subtle: var(--ptd-cobalt-100);
   --ptd-proof: var(--ptd-vermilion-600);
   --ptd-proof-subtle: var(--ptd-vermilion-100);
+  --ptd-guide-cobalt: var(--ptd-cobalt-600);
+  --ptd-guide-vermilion: var(--ptd-vermilion-600);
+  --ptd-guide-emerald: oklch(53% 0.14 155);
+  --ptd-guide-amber: oklch(66% 0.15 82);
   --ptd-success: oklch(47% 0.105 145);
   --ptd-danger: oklch(46% 0.17 27);
   --ptd-focus: var(--ptd-cobalt-600);

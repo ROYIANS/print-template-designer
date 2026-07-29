@@ -10,20 +10,6 @@
   background: var(--ptd-surface-raised);
 }
 
-.appBar::after {
-  content: '';
-  position: absolute;
-  z-index: var(--ptd-layer-stage);
-  bottom: -4px;
-  left: calc(var(--ptd-rail-width) + var(--ptd-left-panel-width) - 4px);
-  width: 7px;
-  height: 7px;
-  transform: rotate(45deg);
-  border: 1px solid var(--ptd-border);
-  background: var(--ptd-surface-raised);
-  pointer-events: none;
-}
-
 .brand,
 .document,
 .actions {
@@ -143,9 +129,6 @@
 @media (max-width: 1080px) {
   .appBar {
     grid-template-columns: 190px minmax(0, 1fr) auto;
-  }
-  .appBar::after {
-    left: 186px;
   }
   .productName,
   .document span {

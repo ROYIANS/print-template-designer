@@ -9,6 +9,15 @@ const PASTE_OFFSET = 12
 export type Alignment = 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom'
 export type Distribution = 'horizontal' | 'vertical'
 export type LayerAction = 'forward' | 'backward' | 'front' | 'back'
+export type GuideAxis = 'x' | 'y'
+export type GuideColor = 'cobalt' | 'vermilion' | 'emerald' | 'amber'
+
+export interface CanvasGuide {
+  id: string
+  axis: GuideAxis
+  positionMm: number
+  color: GuideColor
+}
 
 export interface AreaSelection {
   style: { top: number; left: number; width: number; height: number }
@@ -61,6 +70,11 @@ export class EditorStore {
   readonly selectedIds = signal<string[]>([])
   readonly scale = signal(1)
   readonly showRuler = signal(true)
+  readonly guides = signal<CanvasGuide[]>([])
+  readonly guidesVisible = signal(true)
+  readonly guidesLocked = signal(false)
+  readonly activeGuideColor = signal<GuideColor>('cobalt')
+  readonly selectedGuideId = signal<string | null>(null)
   readonly areaSelection = signal<AreaSelection>({
     style: { top: 0, left: 0, width: 0, height: 0 },
     componentIds: [],
@@ -109,6 +123,8 @@ export class EditorStore {
       Math.max(0, template.pages.length - 1),
     )
     this.selectedIds.value = []
+    this.guides.value = []
+    this.selectedGuideId.value = null
     this.history.value = [template]
     this.historyIndex.value = 0
     this.gestureStart = null
@@ -116,6 +132,7 @@ export class EditorStore {
 
   selectComponent(id: string, additive = false): void {
     if (!this.components.value.some((component) => component.id === id)) return
+    this.selectedGuideId.value = null
     if (!additive) {
       this.selectedIds.value = [id]
       return
@@ -128,10 +145,79 @@ export class EditorStore {
   selectComponents(ids: string[]): void {
     const available = new Set(this.components.value.map((component) => component.id))
     this.selectedIds.value = [...new Set(ids)].filter((id) => available.has(id))
+    this.selectedGuideId.value = null
   }
 
   clearSelection(): void {
     this.selectedIds.value = []
+    this.selectedGuideId.value = null
+  }
+
+  addGuide(axis: GuideAxis, positionMm: number): string | null {
+    if (this.guidesLocked.value || !Number.isFinite(positionMm)) return null
+    const id = this.idFactory()
+    this.guides.value = [
+      ...this.guides.value,
+      {
+        id,
+        axis,
+        positionMm: this.clampGuidePosition(axis, positionMm),
+        color: this.activeGuideColor.value,
+      },
+    ]
+    this.selectedIds.value = []
+    this.selectedGuideId.value = id
+    this.guidesVisible.value = true
+    return id
+  }
+
+  selectGuide(id: string | null): void {
+    if (id && !this.guides.value.some((guide) => guide.id === id)) return
+    this.selectedIds.value = []
+    this.selectedGuideId.value = id
+  }
+
+  moveGuide(id: string, positionMm: number): void {
+    if (this.guidesLocked.value || !Number.isFinite(positionMm)) return
+    this.guides.value = this.guides.value.map((guide) =>
+      guide.id === id
+        ? { ...guide, positionMm: this.clampGuidePosition(guide.axis, positionMm) }
+        : guide,
+    )
+  }
+
+  removeGuide(id: string): void {
+    if (this.guidesLocked.value) return
+    this.guides.value = this.guides.value.filter((guide) => guide.id !== id)
+    if (this.selectedGuideId.value === id) this.selectedGuideId.value = null
+  }
+
+  removeSelectedGuide(): void {
+    const id = this.selectedGuideId.value
+    if (id) this.removeGuide(id)
+  }
+
+  setGuideColor(color: GuideColor): void {
+    this.activeGuideColor.value = color
+    const selected = this.selectedGuideId.value
+    if (!selected || this.guidesLocked.value) return
+    this.guides.value = this.guides.value.map((guide) =>
+      guide.id === selected ? { ...guide, color } : guide,
+    )
+  }
+
+  toggleGuidesVisible(): void {
+    this.guidesVisible.value = !this.guidesVisible.value
+  }
+
+  toggleGuidesLocked(): void {
+    this.guidesLocked.value = !this.guidesLocked.value
+  }
+
+  clearGuides(): void {
+    if (this.guidesLocked.value) return
+    this.guides.value = []
+    this.selectedGuideId.value = null
   }
 
   startAreaSelection(left: number, top: number): void {
@@ -431,6 +517,10 @@ export class EditorStore {
       ...this.template.value,
       pageConfig: { ...this.pageConfig.value, pageDirection: direction },
     })
+    this.guides.value = this.guides.value.map((guide) => ({
+      ...guide,
+      positionMm: this.clampGuidePosition(guide.axis, guide.positionMm),
+    }))
   }
 
   setZoom(scale: number): void {
@@ -524,6 +614,13 @@ export class EditorStore {
 
   private hasLockedSelection(): boolean {
     return this.selectedComponents.value.some((component) => component.isLock)
+  }
+
+  private clampGuidePosition(axis: GuideAxis, positionMm: number): number {
+    const { pageDirection, pageWidth, pageHeight } = this.pageConfig.value
+    const width = pageDirection === 'l' ? number(pageHeight) : number(pageWidth)
+    const height = pageDirection === 'l' ? number(pageWidth) : number(pageHeight)
+    return Math.min(axis === 'x' ? width : height, Math.max(0, positionMm))
   }
 }
 

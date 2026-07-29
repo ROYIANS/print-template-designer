@@ -17,6 +17,8 @@ import {
   RiContractLeftRightLine,
   RiContractUpDownLine,
   RiDeleteBinLine,
+  RiEyeLine,
+  RiEyeOffLine,
   RiFileCopyLine,
   RiGroupLine,
   RiLandscapeLine,
@@ -30,7 +32,7 @@ import {
   RiZoomInLine,
   RiZoomOutLine,
 } from '@remixicon/react'
-import type { Alignment, Distribution, LayerAction } from '../../state'
+import type { Alignment, Distribution, GuideColor, LayerAction } from '../../state'
 import { useEditorStore } from '../../state'
 import { ptdThemeClass } from '../Theme'
 import styles from './Toolbar.module.css'
@@ -43,6 +45,13 @@ interface ToolButtonProps {
   disabled?: boolean
   pressed?: boolean
 }
+
+const GUIDE_COLORS: Array<{ value: GuideColor; label: string }> = [
+  { value: 'cobalt', label: '钴蓝参考线' },
+  { value: 'vermilion', label: '朱红参考线' },
+  { value: 'emerald', label: '翠绿参考线' },
+  { value: 'amber', label: '琥珀参考线' },
+]
 
 function ToolButton({
   label,
@@ -81,6 +90,42 @@ function ToolSeparator() {
   return <Separator.Root className={styles.separator} orientation="vertical" decorative />
 }
 
+function GuideColorButton({
+  color,
+  label,
+  active,
+  onClick,
+}: {
+  color: GuideColor
+  label: string
+  active: boolean
+  onClick: () => void
+}) {
+  return (
+    <Tooltip.Root>
+      <Tooltip.Trigger asChild>
+        <button
+          type="button"
+          className={styles.guideColor}
+          data-color={color}
+          data-active={active || undefined}
+          aria-label={label}
+          aria-pressed={active}
+          onClick={onClick}
+        >
+          <span />
+        </button>
+      </Tooltip.Trigger>
+      <Tooltip.Portal>
+        <Tooltip.Content className={`${styles.tooltip} ${ptdThemeClass}`} sideOffset={7}>
+          <span>{label}</span>
+          <Tooltip.Arrow className={styles.tooltipArrow} />
+        </Tooltip.Content>
+      </Tooltip.Portal>
+    </Tooltip.Root>
+  )
+}
+
 export function Toolbar() {
   useSignals()
   const store = useEditorStore()
@@ -91,6 +136,7 @@ export function Toolbar() {
   const canAlign = selectedCount >= 2 && !hasLocked
   const canDistribute = selectedCount >= 3 && !hasLocked
   const canUngroup = Boolean(store.primaryComponent.value?.component === 'RoyGroup') && !hasLocked
+  const hasGuides = store.guides.value.length > 0
   const align = (value: Alignment) => () => store.align(value)
   const distribute = (value: Distribution) => () => store.distribute(value)
   const layer = (value: LayerAction) => () => store.moveLayer(value)
@@ -255,6 +301,42 @@ export function Toolbar() {
           >
             <RiRuler2Line />
           </ToolButton>
+          <div className={styles.guideTools} aria-label="参考线设置">
+            <div className={styles.guideColors} aria-label="参考线颜色">
+              {GUIDE_COLORS.map((item) => (
+                <GuideColorButton
+                  key={item.value}
+                  color={item.value}
+                  label={item.label}
+                  active={store.activeGuideColor.value === item.value}
+                  onClick={() => store.setGuideColor(item.value)}
+                />
+              ))}
+            </div>
+            <ToolButton
+              label={store.guidesVisible.value ? '隐藏参考线' : '显示参考线'}
+              onClick={() => store.toggleGuidesVisible()}
+              disabled={!hasGuides}
+              pressed={store.guidesVisible.value && hasGuides}
+            >
+              {store.guidesVisible.value ? <RiEyeLine /> : <RiEyeOffLine />}
+            </ToolButton>
+            <ToolButton
+              label={store.guidesLocked.value ? '解锁参考线' : '锁定参考线'}
+              onClick={() => store.toggleGuidesLocked()}
+              disabled={!hasGuides}
+              pressed={store.guidesLocked.value}
+            >
+              {store.guidesLocked.value ? <RiLockUnlockLine /> : <RiLockLine />}
+            </ToolButton>
+            <ToolButton
+              label="清空参考线"
+              onClick={() => store.clearGuides()}
+              disabled={!hasGuides || store.guidesLocked.value}
+            >
+              <RiDeleteBinLine />
+            </ToolButton>
+          </div>
           <ToolButton
             label="缩小画布"
             shortcut="Ctrl -"

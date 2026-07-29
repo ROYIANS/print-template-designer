@@ -88,6 +88,50 @@ describe('EditorStore history and ownership', () => {
 })
 
 describe('EditorStore commands', () => {
+  it('keeps colored guide state outside the template history', () => {
+    let id = 0
+    const initial = template()
+    const store = new EditorStore(initial, { idFactory: () => `guide-${++id}` })
+
+    const guideId = store.addGuide('x', 24.5)
+    store.setGuideColor('vermilion')
+    store.moveGuide(guideId!, 30)
+
+    expect(store.guides.value).toEqual([
+      { id: 'guide-1', axis: 'x', positionMm: 30, color: 'vermilion' },
+    ])
+    expect(store.template.value).toBe(initial)
+    expect(store.history.value).toHaveLength(1)
+
+    store.toggleGuidesLocked()
+    store.moveGuide(guideId!, 40)
+    store.removeSelectedGuide()
+    expect(store.guides.value[0]?.positionMm).toBe(30)
+
+    store.toggleGuidesLocked()
+    store.removeSelectedGuide()
+    expect(store.guides.value).toEqual([])
+  })
+
+  it('keeps guides inside the physical page across creation, movement and rotation', () => {
+    let id = 0
+    const store = new EditorStore(template(), { idFactory: () => `guide-${++id}` })
+
+    const vertical = store.addGuide('x', 999)
+    const horizontal = store.addGuide('y', -12)
+    expect(store.guides.value.map((guide) => guide.positionMm)).toEqual([210, 0])
+
+    store.moveGuide(vertical!, -1)
+    store.moveGuide(horizontal!, 999)
+    expect(store.guides.value.map((guide) => guide.positionMm)).toEqual([0, 297])
+
+    store.setPageDirection('l')
+    expect(store.guides.value.map((guide) => guide.positionMm)).toEqual([0, 210])
+
+    store.moveGuide(vertical!, 999)
+    expect(store.guides.value[0]?.positionMm).toBe(297)
+  })
+
   it('copies, cuts and pastes with fresh ids and offsets', () => {
     let id = 0
     const store = new EditorStore(template(), { idFactory: () => `new-${++id}` })
