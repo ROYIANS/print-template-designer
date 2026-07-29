@@ -12,6 +12,7 @@
 | [Package Conventions](./package-conventions.md) | package.json, tsconfig, exports | Done |
 | [TypeScript Conventions](./typescript-conventions.md) | Strict TS, shared base config | Done |
 | [Styling Conventions](./styling-conventions.md) | CSS Modules vs CSS Variables | Done |
+| [PTD UI System](./ptd-ui-system.md) | Product visual language, tokens, workspace, panels and interaction contracts | Done |
 | [Quality Guidelines](./quality-guidelines.md) | ESLint flat config, Prettier, Node ≥20 | Done |
 | [React Designer Contract](./react-designer-contract.md) | Controlled state, commands, history and host integration | Done |
 
@@ -26,6 +27,7 @@ Before writing any code for a task in this monorepo, **always read these files**
 | [Package Conventions](./package-conventions.md) | tsup config, `exports` field order (`types` before `import`/`require`), `peerDependencies` rules — getting these wrong breaks consumers silently |
 | [TypeScript Conventions](./typescript-conventions.md) | `strict: true` is non-negotiable; `as any` and `@ts-ignore` are forbidden; all public API must export through `src/index.ts` only |
 | [Styling Conventions](./styling-conventions.md) | CSS Modules for designer UI, CSS Custom Properties for canvas components — mixing these up causes style leakage and print-safety issues |
+| [PTD UI System](./ptd-ui-system.md) | Read before changing the designer shell, toolbar, panels, icons, forms, canvas Chrome or Portal layers |
 | [Directory Structure](./directory-structure.md) | Where each package/app lives and what it owns — putting code in the wrong layer creates circular dependencies |
 | [Quality Guidelines](./quality-guidelines.md) | ESLint flat config + Prettier — CI will reject non-compliant code |
 

@@ -56,6 +56,22 @@
 * **状态管理**：用 `@preact/signals-react` 替代 Vuex，对应模块：editor state / snapshot（撤销/重做）/ compose（组合）/ copy（复制粘贴）/ layer / lock
 * 组件渲染桥接：通过 React ref + useEffect 调用 `@ptd/components` 的 class 实例
 
+### PR4 UI direction（已确认）
+
+* 遵循 `.trellis/spec/monorepo/ptd-ui-system.md`：参考 Zed 的冷纸白/蓝石墨中性与克制钴蓝交互，
+  保留稀少校样朱红；钴蓝不得扩散为大面积通用后台蓝
+* 完整工作区使用 App Bar + Command Bar + 左侧 Rail/Panel + Canvas + Inspector + Status Bar
+* 保留 Legacy 的组件/结构/属性/数据源/全局设置五入口，不复制 Vue/Vuex/vxe 实现
+* 高密度、低装饰、薄边框、2px 低圆角；禁止营销页卡片、大阴影、持续动画和文字缩写伪图标
+* 图标统一使用 Remix Icon line SVG；所有图标按钮提供 `aria-label`、Tooltip 和 focus-visible 状态
+* 左侧组件面板首个切片同时支持拖拽与点击创建，统一通过 Catalog/Factory 生成 Schema
+* 左右面板复用同一 PanelRoot/Header/Body/Footer 结构，每个面板只有一个主滚动容器
+* Portal 内容必须继承共享 PTD theme token，并遵守统一 overlay layer 合同
+* Paper 与 Starter/Demo Schema 使用冷中性白；工程网格、斜线装配材质、结构节点和无数字刻线
+  只能出现在 Pasteboard/Chrome，不进入模板或导出内容
+* 单选组件显示与选中框一体的浮动快捷条，包含名称、拖动、锁定/解锁、复制、上移一层和删除；
+  快捷条独立于组件旋转和画布缩放，并自动限制在 Canvas viewport 内
+
 ## Acceptance Criteria (evolving)
 
 * [x] `<Designer>` 可在 `apps/web` 中渲染，不报 TypeScript 错误
@@ -67,6 +83,12 @@
 * [x] 框选多组件正常工作
 * [ ] 右键菜单正常弹出并执行操作
 * [ ] SketchRuler 标尺正常显示，可开关
+* [x] 完整工作区在 1600×1000 与 1366×768 下具有清晰层级，画布保持主视觉
+* [x] 左侧 Rail 五入口可键盘切换，组件面板不是空壳
+* [x] 组件可通过拖拽或点击添加；两条路径均自动选中、产生一个历史节点并调用一次最终 `onChange`
+* [x] 工具栏不再使用 Unicode/文字缩写伪图标，低频命令不会挤压画布视图控制
+* [x] UI token、稳定 `data-ptd-region`、Portal 层级与 reduced-motion 合同通过检查
+* [x] 单选 Quick Bar 在普通与旋转组件上保持水平，并在 Canvas viewport 内完成边界避让
 
 ## Definition of Done
 
@@ -102,7 +124,9 @@
 - [x] PR1：tsup 配置 + 目录骨架 + signals 状态层 + `<Designer>` 空壳
 - [x] PR2：画布核心（ComponentAdjuster + 拖拽放置 + 选中/移动/缩放/旋转）
 - [x] PR3：工具栏操作（对齐/分布/层级/组合/拆分/撤销重做）+ 属性面板
-- [ ] PR4（下一步）：左侧 sidebar 5 个面板 + SketchRuler + 右键菜单 + 组件拖拽入口
+- [x] PR4-A：PTD UI tokens + 完整工作区外壳 + 左侧 Rail/组件面板 + 创建入口 + 图标工具栏
+- [ ] PR4-B：结构/属性/数据源/全局面板内容 + SketchRuler
+- [ ] PR4-C：右键菜单 + 响应式面板 + 浏览器交互验收
 - [ ] PR5：`apps/web` 全量浏览器验收（受控示例已接入）
 
 * `packages/react-designer/src/index.ts` 已导出 `<Designer>` 及相关公共类型

@@ -4,3 +4,5 @@
 {"file": ".trellis/spec/monorepo/package-conventions.md", "reason": "package.json exports 字段顺序、构建输出验证"}
 {"file": ".trellis/tasks/05-21-react-designer-package/info.md", "reason": "核对 PR3 技术设计契约"}
 {"file": ".trellis/tasks/05-21-react-designer-package/research/pr1-pr2-stabilization.md", "reason": "核对高风险问题均已处理"}
+{"file": ".trellis/spec/monorepo/ptd-ui-system.md", "reason": "检查 PR4 UI token、布局、交互状态、无障碍、Portal 和视觉验收合规性"}
+{"file": ".trellis/tasks/05-21-react-designer-package/research/pr4-ui-synthesis.md", "reason": "检查实现是否保留 Legacy 心智模型并避免复制其过时视觉"}
