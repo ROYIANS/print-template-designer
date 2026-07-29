@@ -1,0 +1,43 @@
+{
+  "name": "@ptd/components",
+  "version": "0.1.0",
+  "description": "Canvas components for Print Template Designer (Preact Signals)",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@ptd/core": "workspace:*",
+    "bwip-js": "^3.4.0",
+    "easyqrcodejs": "^4.6.0"
+  },
+  "peerDependencies": {
+    "@preact/signals-core": "^1"
+  },
+  "devDependencies": {
+    "@preact/signals-core": "^1.8.0",
+    "@types/bwip-js": "^3.2.0",
+    "jsdom": "^25.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

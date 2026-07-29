@@ -1,0 +1,16 @@
+.renderer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.groupChild {
+  position: absolute;
+  left: var(--child-left);
+  top: var(--child-top);
+  width: var(--child-width);
+  height: var(--child-height);
+  transform: rotate(var(--child-rotate));
+  transform-origin: center;
+}

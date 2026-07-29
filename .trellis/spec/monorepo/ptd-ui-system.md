@@ -1,0 +1,511 @@
+# PTD UI 系统规范
+
+> 适用于 `@ptd/react-designer` 及其宿主应用中的编辑器工作区。规范来源于 PTD Legacy
+> 的真实操作结构、Workshop 高密度工具台规范、Vidorra Blueprint 的“结构即装饰”方法，
+> 以及当前 React 架构约束；它不是营销站设计规范，也不要求复制任何第三方产品外观。
+
+## 1. Design Context
+
+### 目标用户
+
+- 在企业内部配置出库单、标签、票据、报表和业务打印模板的实施、运营与开发人员。
+- 用户通常在桌面浏览器中连续工作，重视精确、效率、可预测性和键盘操作。
+- 用户可能不了解组件 Schema，但熟悉纸张、字段、层级、对齐、数据源和打印预览。
+
+### 核心任务
+
+1. 从组件库创建文本、图形、图片、条码、二维码和表格。
+2. 在真实纸张尺度上完成选中、移动、缩放、旋转、对齐、组合和层级调整。
+3. 编辑组件属性、页面设置和数据字段绑定。
+4. 通过结构树理解复杂模板，并可靠撤销误操作。
+5. 在导出或保存前确认模板的页面边界、数据内容和最终视觉结果。
+
+### 品牌语气
+
+PTD 是一张数字化的制版工作台：**精密、轻快、可信，带有纸张与校样工具的触感**。
+
+- 主体是冷纸白与带蓝相的石墨灰，不使用纯白和纯黑铺满界面。
+- Legacy Logo 作为当前可替换品牌资产复用，但不参与主题 token 推导。
+- 克制钴蓝用于主要操作、选中、焦点和工具图标；它只表达明确交互状态，不得退化为
+  大面积通用后台蓝。校样朱红只用于出血、校样与印刷提醒，必须稀少。
+- 视觉记忆点是“纸张、标尺、套准与校样”，不是玻璃、霓虹、渐变或 SaaS 卡片。
+
+## 2. 设计原则
+
+1. **画布优先**：编辑对象永远是视觉中心；应用 Chrome 不与纸张争夺注意力。
+2. **精确胜过装饰**：位置、尺寸、层级和状态必须清晰，装饰不得降低读数效率。
+3. **高密度但不拥挤**：使用紧凑控件、清晰分组和稳定节奏，不靠大块留白制造高级感。
+4. **边界表达层级**：优先使用 1px 边线和 surface 差异；阴影只属于纸张和浮层。
+5. **渐进披露**：常用动作直接可见，高级配置、危险动作和次要命令按需展开。
+6. **状态不能只靠颜色**：选中、锁定、错误和禁用同时通过图标、边界或文本表达。
+7. **沿用成熟心智模型**：保留 Legacy 已验证的画布工作流，把固定五入口 Rail 重组为高频
+   Tool Dock 与 Pages/Layers/Data/Assets 按需资源面板。
+8. **结构即装饰**：工程感来自网格、细线、刻度、节点和精确对齐，不来自无业务意义的工程编号。
+9. **先定义契约再写局部样式**：尺寸、颜色、层级、滚动与交互状态必须使用统一 token。
+
+## 3. 技术与边界
+
+- React UI 使用 CSS Modules；画布动态几何使用 CSS Custom Properties。
+- 交互原语优先使用 Radix UI；不引入带视觉意见的完整 UI 框架。
+- 不引入 Tailwind 或 CSS-in-JS。Workshop 的 cva/Tailwind 写法只吸收“变体集中管理”的思想。
+- React 组件变体使用显式 TypeScript union、`data-variant` 和 `data-size`；默认值必须显式声明。
+- 静态颜色、间距、圆角和阴影禁止写入 JSX `style`；Schema 驱动或几何计算产生的 CSS 变量例外。
+- 禁止 `!important`、`as any`、`@ts-ignore` 和运行时 CSS 注入。
+- `@ptd/react-designer/styles.css` 是唯一公共样式入口。
+- 应用级定制通过稳定的 `data-ptd-*` 属性和公共 token 完成，不依赖 CSS Module 生成类名。
+
+## 4. Token 架构
+
+### 4.1 原始色板
+
+使用 OKLCH 定义现代浏览器色板，并保持相同色相下的感知明度一致。
+
+```css
+.ptdTheme {
+  /* Cool paper */
+  --ptd-paper-0: oklch(99.2% 0.004 255);
+  --ptd-paper-1: oklch(98.2% 0.006 255);
+  --ptd-paper-2: oklch(96.5% 0.008 255);
+  --ptd-paper-3: oklch(93.7% 0.011 255);
+  --ptd-paper-4: oklch(89.5% 0.014 255);
+
+  /* Blue graphite */
+  --ptd-graphite-950: oklch(21% 0.02 258);
+  --ptd-graphite-900: oklch(27% 0.021 258);
+  --ptd-graphite-800: oklch(35% 0.02 258);
+  --ptd-graphite-700: oklch(44% 0.018 258);
+  --ptd-graphite-600: oklch(53% 0.016 258);
+  --ptd-graphite-500: oklch(62% 0.014 258);
+  --ptd-graphite-400: oklch(71% 0.012 258);
+  --ptd-graphite-300: oklch(82% 0.01 258);
+
+  /* Proof vermilion */
+  --ptd-vermilion-700: oklch(45% 0.16 35);
+  --ptd-vermilion-600: oklch(52% 0.175 35);
+  --ptd-vermilion-500: oklch(59% 0.17 35);
+  --ptd-vermilion-100: oklch(94% 0.035 35);
+
+  /* Editor cobalt */
+  --ptd-cobalt-700: oklch(48% 0.22 265);
+  --ptd-cobalt-600: oklch(57% 0.245 265);
+  --ptd-cobalt-100: oklch(94.5% 0.04 260);
+}
+```
+
+钴蓝与校样朱红均不得大面积铺底。中性 surface 应占视觉重量约 90%，明确状态色不超过
+10%。钴蓝统一操作、选中与焦点；朱红仅保留印刷校样语义。Logo 的自身颜色不定义 UI
+状态，也不要求组件跟随 Logo 换色。
+
+### 4.2 语义颜色
+
+```css
+.ptdTheme {
+  --ptd-surface-app: var(--ptd-paper-2);
+  --ptd-surface-panel: var(--ptd-paper-1);
+  --ptd-surface-raised: var(--ptd-paper-0);
+  --ptd-surface-sunken: var(--ptd-paper-3);
+  --ptd-surface-canvas: oklch(91.5% 0.012 255);
+  --ptd-surface-paper: var(--ptd-paper-0);
+
+  --ptd-text-strong: var(--ptd-graphite-950);
+  --ptd-text: var(--ptd-graphite-800);
+  --ptd-text-muted: var(--ptd-graphite-600);
+  --ptd-text-disabled: var(--ptd-graphite-400);
+
+  --ptd-border-strong: var(--ptd-graphite-400);
+  --ptd-border: var(--ptd-graphite-300);
+  --ptd-border-subtle: var(--ptd-paper-4);
+
+  --ptd-action: var(--ptd-cobalt-600);
+  --ptd-action-hover: var(--ptd-cobalt-700);
+  --ptd-action-subtle: var(--ptd-cobalt-100);
+  --ptd-selection: var(--ptd-cobalt-600);
+  --ptd-selection-strong: var(--ptd-cobalt-700);
+  --ptd-selection-subtle: var(--ptd-cobalt-100);
+  --ptd-proof: var(--ptd-vermilion-600);
+  --ptd-proof-subtle: var(--ptd-vermilion-100);
+
+  --ptd-success: oklch(47% 0.105 145);
+  --ptd-warning: oklch(58% 0.13 72);
+  --ptd-danger: oklch(46% 0.17 27);
+  --ptd-focus: var(--ptd-cobalt-600);
+}
+```
+
+- 正文对背景至少达到 WCAG AA 4.5:1。
+- 图标、边框、焦点环和选中指示至少达到 3:1。
+- Placeholder 不是标签，且颜色同样要满足正文对比度要求。
+- 错误状态使用 `--ptd-danger`；校样朱红不能代替错误语义。
+
+### 4.3 间距、尺寸与圆角
+
+以 4px 为基本单位，只使用以下阶梯：
+
+```css
+.ptdTheme {
+  --ptd-space-1: 4px;
+  --ptd-space-2: 8px;
+  --ptd-space-3: 12px;
+  --ptd-space-4: 16px;
+  --ptd-space-6: 24px;
+  --ptd-space-8: 32px;
+
+  --ptd-control-xs: 24px;
+  --ptd-control-sm: 28px;
+  --ptd-control-md: 32px;
+  --ptd-control-touch: 40px;
+
+  --ptd-radius-1: 2px;
+  --ptd-radius-2: 4px;
+  --ptd-radius-round: 999px;
+}
+```
+
+- 普通按钮、输入框、列表行和面板使用 2px 圆角。
+- 浮层和空状态容器最多使用 4px 圆角。
+- 只有单选、状态点、头像和旋转控制点可以为圆形或 pill。
+- 不允许使用 8px 以上大圆角作为默认视觉。
+
+### 4.4 阴影与层级
+
+```css
+.ptdTheme {
+  --ptd-shadow-paper: 0 1px 2px oklch(22% 0.014 48 / 12%), 0 8px 24px oklch(22% 0.014 48 / 8%);
+  --ptd-shadow-floating: 0 8px 24px oklch(22% 0.014 48 / 16%);
+  --ptd-shadow-modal: 0 20px 56px oklch(22% 0.014 48 / 22%);
+
+  --ptd-layer-canvas: 0;
+  --ptd-layer-guide: 20;
+  --ptd-layer-selection: 30;
+  --ptd-layer-sticky: 100;
+  --ptd-layer-floating: 1200;
+  --ptd-layer-context: 1250;
+  --ptd-layer-modal-backdrop: 1400;
+  --ptd-layer-modal: 1410;
+  --ptd-layer-toast: 1600;
+  --ptd-layer-tooltip: 1700;
+}
+```
+
+按钮、列表项和普通面板禁止各自添加阴影。纸张、Dropdown/Popover、Modal 与 Toast 才能使用阴影。
+
+## 5. 字体与数值
+
+```css
+.ptdTheme {
+  --ptd-font-ui:
+    'Outfit', 'Outfit Variable', 'Sarasa UI SC', 'Sarasa Gothic SC', 'Microsoft YaHei UI',
+    'PingFang SC', sans-serif;
+  --ptd-font-metric:
+    'Outfit', 'Outfit Variable', 'Sarasa UI SC', 'Sarasa Gothic SC', 'Microsoft YaHei UI',
+    sans-serif;
+  --ptd-font-serif: 'Noto Serif SC', 'Noto Serif CJK SC', 'Source Han Serif SC', 'Songti SC', serif;
+
+  --ptd-text-10: 0.625rem;
+  --ptd-text-11: 0.6875rem;
+  --ptd-text-12: 0.75rem;
+  --ptd-text-13: 0.8125rem;
+  --ptd-text-15: 0.9375rem;
+  --ptd-text-18: 1.125rem;
+}
+```
+
+- 产品 UI 使用固定字号，避免流式字号破坏工具布局。
+- 中文操作 UI 以 Sarasa UI SC 为主；Outfit 负责拉丁字母、数字和产品字标。两者在同一行
+  按 glyph fallback 组合，不把等宽字体当作“工程感”。
+- 衬线内容统一使用 Noto Serif SC 系列，仅用于模板叙事、预览标题或明确要求衬线的内容；
+  表单、工具栏、坐标和快捷键仍使用 UI sans。
+- Outfit 与 Noto Serif SC 由宿主通过 Google Fonts 或等价 Web Font 服务引入；离线部署必须
+  提供可控的本地镜像或依赖系统 fallback。Sarasa UI SC 没有可靠的通用 Web 服务版本，示例 Web
+  通过 `@font-face` 自托管完整 `SarasaUiSC.ttf`。可复用设计器包只提供字体栈，不强制注入大型
+  CJK 字体资产。
+- 常规控件正文为 12–13px；面板标题 13px；文档标题 15px；产品名不超过 18px。
+- 标尺、坐标、尺寸和缩放使用 `font-variant-numeric: tabular-nums`。
+- 画布内部字体由 `TemplateSchema` 控制，不继承设计器 Chrome 的字体决策。
+- 浏览器 200% 缩放必须仍可操作；窄空间通过布局折叠解决，不能禁止页面缩放。
+
+### 5.1 品牌资产
+
+- 当前阶段 App Bar 复用 Legacy 的圆形 PTD Logo，不以临时字母块、Emoji 或套准框替代；
+  后续可以直接替换正式品牌资产，而不修改主题色与交互状态。
+- Logo 保持资产本身的透明底和颜色，不通过 CSS mask 强行重染；标准视觉尺寸为 24–28px。
+- `PTD` 拉丁字标使用 Outfit 650–700；中文产品名使用 UI 字体，二者是一个品牌单元。
+- 朱红套准、裁切或校样符号可以出现在功能场景，但不能冒充产品 Logo。
+
+### 5.2 结构装饰语汇
+
+从 Vidorra Blueprint、Zed 与 Workshop 只吸收适合密集工具台的结构原子：
+
+- **Hairline**：App Bar、Command Bar、Panel 与 Status Bar 使用贯穿区域的 1px 冷蓝灰细线。
+- **Engineering grid**：Pasteboard 可使用极淡工程纸网格；纸张本身保持干净，网格不能穿入模板。
+- **Mount texture**：Pasteboard 可叠加低对比 135° 斜线，表达纸张装配区而非真实打印材质；
+  斜线、工程网格、工作区内框和节点均必须 `pointer-events: none`。
+- **Workbench frame**：Pasteboard 不添加包围纸张和标尺的重复工作区外框；Paper 边缘、真实标尺
+  基线和应用分区线已经提供足够边界。禁止菱形、空心方块、纸张角点等纯装饰节点。
+- **Dot field**：选中行可使用 8px 低透明点阵与 2px inset 指示，但不得铺成高饱和色块。
+- **Physical press**：可交互 tile/按钮允许 1px inset 底边形成轻微实体感；hover 摊平，active
+  下压 `translateY(1px) scale(0.99)`。普通面板仍禁止外投影。
+- **Ruler/ticks**：任何视觉上类似标尺的刻线都必须对应真实毫米尺寸、页面方向和当前画布缩放；
+  禁止使用无数字、固定间距且与纸张尺寸无关的伪标尺。
+- 禁止 `PRO / 01`、坐标角标、伪图纸编号、无意义英文缩写等装饰性工程文字。
+
+## 6. 工作区布局合同
+
+### 6.1 桌面结构
+
+```text
+┌────────────────────────────────────────────────────────────────────┐
+│ Document Bar：品牌、文档身份、真实载入/保存动作                     │ 36
+├────────────────────────────────────────────────────────────────────┤
+│ Context Bar：历史 + 当前页面/单选/多选/参考线命令                  │ 40
+├────┬──────────────┬──────────────────────────┬─────────────────────┤
+│Dock│ Resource     │ Canvas / Ruler / Paper   │ Inspector           │
+│ 44 │ 220, 按需    │ minmax(0, 1fr)           │ 304, 按需           │
+├────┴──────────────┴──────────────────────────┴─────────────────────┤
+│ Status Bar：页码、选择、页面尺寸、参考线、缩放                      │ 24
+└────────────────────────────────────────────────────────────────────┘
+```
+
+```css
+.ptdTheme {
+  --ptd-app-bar-height: 36px;
+  --ptd-command-bar-height: 40px;
+  --ptd-status-bar-height: 24px;
+  --ptd-tool-dock-width: 44px;
+  --ptd-resource-panel-width: 220px;
+  --ptd-inspector-width: 304px;
+}
+```
+
+- Document Bar 只放文档身份和真实文档级动作；不存在的预览、云保存或同步状态不得占位。
+- Context Bar 依据页面、单选、多选和参考线选择切换命令；无关命令移除而不是永久禁用。
+- Tool Dock 固定展示高频创建工具和 Pages/Layers/Data/Assets 资源入口。它可使用深蓝石墨作为
+  工作区视觉脊柱；常态图标中性，Active 才引入钴蓝。
+- Resource Panel 默认宽 220px、限制在 200–360px；Inspector 默认 304px、限制在 280–420px。
+  两者均可折叠和拖动调整，最后宽度在当前 Designer 实例中保留。
+- 无组件选择时 Inspector 必须展示真实 Page Inspector，而不是空状态；只读信息不得伪装成输入框。
+- 左侧面板和右侧 Inspector 各自只有一个主滚动容器；标题、搜索和底栏不参与滚动。
+- 画布滚动只发生在 Canvas viewport，不能让整个应用页面滚动。
+- 中央列必须 `min-width: 0`；固定面板不能挤破画布，而应触发自身响应式策略。
+- 活动资源、开合和宽度属于实例级 UI state，不写入 `TemplateSchema`、不触发 `onChange`，也不
+  进入模板撤销历史。
+
+### 6.2 面板原语
+
+所有左侧面板和右侧 Inspector 复用相同结构：
+
+```text
+PanelRoot
+├─ PanelHeader      面板身份、数量、折叠/关闭动作
+├─ PanelTools?      搜索、筛选或上下文操作
+├─ PanelBody        唯一主滚动容器
+└─ PanelFooter?     固定的创建/应用动作
+```
+
+- `PanelHeader` 高 40px，不能在内容区重复同名标题。
+- 列表使用平面行或紧凑 tile；不使用卡片套卡片。
+- 选中行使用浅钴蓝背景、低透明点阵和左侧 2px inset 指示，同时保留文字/图标变化。
+- Hover 才出现的次要动作必须提供键盘可达的替代入口。
+- 空状态包含：当前状态、下一步价值和一个明确动作。
+
+## 7. 组件库面板
+
+- 分类沿用 Legacy：通用、数据、形状；将来扩展业务组件时只新增 catalog 数据。
+- 每个组件项包含 Remix line 图标、名称和可选快捷提示。
+- 组件图标默认使用石墨灰，只有 Hover/Focus/Active 才进入钴蓝状态，避免目录常态被主色淹没。
+- 默认使用单列 40px 高的平面高密度行；图标、名称和简短说明形成稳定三列，不使用大卡片。
+- 行使用透明边框和 2px 圆角；Hover/Focus 才进入 sunken/raised 状态。
+- 同时支持拖拽和点击添加。拖拽不是唯一创建路径。
+- Drag preview 显示组件图标与名称，不能复制整张面板卡片。
+- 创建 Schema 只能调用统一 Component Catalog/Factory，面板不能自己拼接默认属性。
+- 新组件添加后自动选中，写入一个历史节点，并发出一次最终 `onChange`。
+- 点击 Dock 或 Catalog 创建后，Canvas viewport 应把新组件平滑带回可见中心，并在完成后消费
+  一次性 reveal 请求；该请求属于 UI state，不进入模板或历史。拖拽创建保留用户落点，不强制居中。
+
+## 8. 工具栏与图标
+
+- 图标系统统一为 Remix Icon line 风格；激活态可使用对应 fill 图标，但不得混用多套图标语言。
+- 标准工具图标 16px，重要文档级动作 18px；描边粗细保持一致。
+- 禁止使用 Emoji、Unicode 箭头或“左齐/中齐/横分”等文字缩写代替正式图标。
+- 每个图标按钮必须有 `aria-label` 和 Tooltip；Tooltip 同时展示名称与快捷键。
+- 图标按钮视觉尺寸 28px；在 coarse pointer 下将可点击区域提升到至少 40px。
+- 命令按领域分组：历史、剪贴板、排列、层级、组合、视图。
+- 低频排列命令可进入 Dropdown；撤销、重做、删除、锁定、组合和缩放保持可发现。
+- 禁用按钮保留位置，使用 `opacity: 0.45` 并移除事件；不靠 `cursor: not-allowed` 表达状态。
+
+## 9. 表单与属性检查器
+
+- Label 始终可见，Placeholder 只给示例，不能承担字段名称。
+- 常规输入高度 28px，关键 Select/Combobox 高度 32px，圆角 2px。
+- 几何属性优先组成 X/Y/W/H 二列网格，使用等宽数值和清晰单位后缀。
+- 内容、布局、文本、填充、边框和高级设置按分区组织；高级设置默认折叠。
+- 混合值显示明确的“多值”状态，不能伪造默认颜色或数字。
+- 数字输入在提交前保留合法草稿；空值或非法值不能静默写成 0。
+- 锁定组件的字段禁用，并在面板顶部提供明确的“解锁组件”动作。
+- 错误在 blur/commit 时显示在字段下方，并通过 `aria-describedby` 关联。
+
+## 10. 画布视觉合同
+
+- Pasteboard 使用 `--ptd-surface-canvas`；纸张使用冷白 `--ptd-surface-paper` 和唯一的 paper shadow。
+- Starter/Demo Schema 也必须使用冷中性纸白，不能通过 `pageConfig.background` 把默认纸张覆盖为
+  奶油色或暖白；示例内容的正文中性色使用蓝石墨，朱红仅保留真实校样语义。
+- Paper shadow 由 1px 硬边框、约 4px 右下实体偏移与一层柔和长阴影组成，表达装配在工作台上的
+  纸张；阴影不能复制到面板或组件卡片。
+- Pasteboard 可以同时包含低对比斜线材质和 24px 工程网格；不使用包围标尺的工作区外框、
+  菱形、纸张角点或无语义边缘刻线。所有装饰必须停留在应用 Chrome/Pasteboard，绝不能进入
+  Paper 内容或导出结果。
+- 标尺打开时，在 Paper 顶部与左侧显示真实毫米标尺：5mm 次刻度、10mm 主刻度、20mm 数字
+  标签，并始终显示 `0`、实际页面终点和 `mm` 单位。横竖方向必须随 `pageDirection` 交换，
+  屏幕位置随画布缩放变化，毫米数值本身不变。
+- 标尺关闭时，刻度、数字、基线和单位必须整体移除，不能残留一层“装饰版标尺”。
+- 标尺是工具，不是装饰：刻度低对比，主刻度和当前指针读数清晰，数字使用 tabular nums。
+- 水平标尺创建 X 轴位置的垂直参考线，垂直标尺创建 Y 轴位置的水平参考线；支持点击或拖拽
+  创建、拖动调整、点击选择、双击或 Delete 删除。选中态必须在标尺显示三角标点，并显示
+  `X/Y + 0.1mm` 精度位置标签。
+- 指针在水平或垂直标尺移动时，应以当前新建颜色显示一条低透明临时参考线和 `X/Y + 0.1mm`
+  位置标签；该预览只存在于组件本地状态，点击后才写入参考线会话。固定参考线的位置标签在
+  选中或 Hover 该线时显示，不能要求先选中才能读取位置。
+- 参考线提供钴蓝、朱红、翠绿、琥珀四种颜色，并支持整体显隐、锁定和清空。颜色既是新建默认色，
+  也可修改当前选中参考线；锁定后禁止创建、移动、换色、删除和清空。
+- 参考线位置必须被限制在当前页面物理边界内；普通方向键按 0.1mm 微调，Shift + 方向键按 1mm
+  微调。页面方向变化时，超出新边界的参考线必须收回页面内。
+- 参考线属于宿主编辑会话的 UI 状态，不写入 `TemplateSchema`、不进入打印/导出结果，也不创建
+  模板撤销历史节点。后续若需持久化，应由宿主保存独立的编辑会话数据。
+- 页面边距使用弱朱红虚线；选中框与控制点使用主题钴蓝。钴蓝只服务于交互，不作为面板或画布
+  的大面积底色；朱红参考线是用户显式选择的编辑标记，不等同于固定校样装饰。
+- 校样朱红可用于出血/危险边界、套准裁切标记和关键提醒，不用于普通选中框。
+- 旋转、缩放和移动反馈不得改变组件本身的 Schema 样式。
+- 框选区域使用清晰边框和不超过 8% 的选中色透明填充，不能遮挡待选组件。拖动接近 Canvas
+  viewport 边缘时应按距离渐进自动滚动；滚动后的框选坐标必须使用实时 Paper 矩形重新换算，
+  并限制在未缩放纸张边界内，不能继续沿用按下瞬间缓存的屏幕矩形。
+- 画布 Overlay 测量需监听滚动、`window.resize`、DOM mutation、画布层与滚动容器的
+  `ResizeObserver`，并通过 `requestAnimationFrame` 节流。
+- 画布缩放只改变 stage/paper，不缩放应用 Chrome、Tooltip 或面板。
+
+### 10.1 单选组件快捷条
+
+- 单选组件时，选中框与 Selection Quick Bar 共享同一钴蓝语义；未激活组件常态不显示边界，
+  Hover 才显示弱钴蓝虚线和不超过 5% 的钴蓝透明蒙版。Hover/选中边界必须由不参与盒模型的
+  Overlay 绘制，不能用实体 `border` 缩小组件内容区域；多选只显示一套多选移动入口，不能为
+  每个对象重复浮条。
+- Quick Bar 显示组件名称，并提供拖动、锁定/解锁、复制、上移一层和删除五个高频动作；
+  每个图标动作必须有 `aria-label`、Tooltip、focus-visible、disabled 和危险态。
+- 锁定组件仍显示 Quick Bar，但除“解锁”外的破坏性或几何动作全部禁用。
+- Quick Bar 必须作为独立 Selection Overlay 保持屏幕水平，不能继承组件旋转或画布缩放。
+- Overlay 位置以 Canvas viewport 为可视边界：监听 viewport 滚动、`window.resize`、组件与 viewport
+  的 `ResizeObserver`，经 `requestAnimationFrame` 节流；顶部空间不足时放到组件下方，水平位置
+  必须 clamp，不能被侧栏或滚动视口裁切。
+- Quick Bar 只改变编辑器 UI，不得写入 `TemplateSchema`、修改组件样式或出现在打印/导出结果中。
+
+## 11. Portal 与主题合同
+
+Radix Tooltip、DropdownMenu、ContextMenu、Popover 和 Dialog 通过 Portal 离开 Designer DOM
+后，不会继承根节点 token。因此：
+
+- Designer 根节点和每个 Portal Content 必须同时应用共享 `ptdTheme` 类。
+- 禁止在单个浮层内重新声明一套颜色或写 magic-number `z-index`。
+- 浮层使用第 4.4 节语义 layer token。
+- ContextMenu 必须高于普通 floating，低于 Modal、Toast 和 Tooltip。
+- 新增 Portal 组件时至少验证：在左侧面板、右侧 Inspector、画布和 Modal 内均可见、可点、可键盘操作。
+
+## 12. 交互状态与无障碍
+
+每个交互组件至少实现：default、hover、focus-visible、active、disabled；异步组件还需
+loading、error、success。
+
+- `focus-visible` 使用 2px `--ptd-focus` 外环和 1px offset，不能裸写 `outline: none`。
+- Radix Tabs/Menu/Radio 使用其 roving tabindex 和键盘语义，不重新发明键盘模型。
+- 删除组件优先立即执行并允许撤销；批量或不可逆删除才使用确认对话框。
+- 所有拖拽动作必须有点击、菜单或键盘替代路径。
+- 锁定、警告和错误不能仅通过颜色表达。
+- 可交互图标必须有可访问名称；装饰图标设置 `aria-hidden="true"`。
+
+## 13. Motion
+
+```css
+.ptdTheme {
+  --ptd-duration-instant: 120ms;
+  --ptd-duration-state: 180ms;
+  --ptd-duration-panel: 240ms;
+  --ptd-ease-out: cubic-bezier(0.25, 1, 0.5, 1);
+  --ptd-ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+}
+```
+
+- Hover、按下和颜色变化使用 120–180ms。
+- 面板开合和浮层进入使用 180–240ms；退出约为进入的 75%。
+- 只动画 `transform` 与 `opacity`。折叠内容使用 grid row 技术，不直接动画 height。
+- 禁止 bounce、elastic、持续 pulse 和装饰性入场动画。
+- `prefers-reduced-motion: reduce` 下移除空间位移，保留瞬时状态反馈。
+
+## 14. 响应式与输入方式
+
+PTD 是桌面优先的生产工具，但不能假设所有桌面设备都有精细鼠标。响应阈值以 Designer
+容器宽度为准，不读取设备类型，也不只依赖 `window.innerWidth`。
+
+- `>= 1440px`：wide；Tool Dock、Resource Panel、Canvas、Inspector 默认同时显示。
+- `1180–1439px`：standard；Tool Dock 与 Inspector 默认显示，Resource Panel 默认折叠。
+- `< 1180px`：compact；Tool Dock 保持，Resource Panel 与 Inspector 作为互斥 overlay 打开。
+- 从一个档位切到另一个档位时采用该档位的安全默认开合；用户仍可用 Context Bar 入口恢复面板。
+- compact overlay 打开一个必须关闭另一个；Scrim 或 Escape 可关闭当前 overlay。overlay 宽度以
+  Designer 容器为边界，禁止使用 `100vw` 推算嵌入式设计器宽度。
+- 不因窄屏删除关键功能；只改变入口和披露层级。
+- `pointer: coarse` 时控件命中区域至少 40px，并取消依赖 Hover 才可发现的操作。
+- 浏览器缩放到 200% 时，工具栏允许分组折叠，不能产生不可达的横向命令。
+
+## 15. 稳定定制入口
+
+核心区域必须提供稳定属性：
+
+```tsx
+<div data-ptd-region="designer" />
+<header data-ptd-region="app-bar" />
+<nav data-ptd-region="command-bar" />
+<aside data-ptd-region="left-sidebar" />
+<div data-ptd-region="resource-panel" />
+<div data-ptd-region="pages-panel" />
+<div data-ptd-region="structure-panel" />
+<div data-ptd-region="data-panel" />
+<div data-ptd-region="component-panel" />
+<div data-ptd-region="canvas-viewport" />
+<div data-ptd-region="paper" />
+<aside data-ptd-region="inspector" />
+<aside data-ptd-region="page-inspector" />
+<footer data-ptd-region="status-bar" />
+```
+
+- CSS Module 类名是内部实现，不是宿主定制 API。
+- 宿主可以在 Designer 外层覆盖公开 token，但不能依赖内部 DOM 顺序。
+- 动态 Schema 样式仍具有画布内容内的最高优先级，不得污染应用 Chrome。
+
+## 16. UX 文案与术语
+
+- 统一使用：组件、结构、属性、数据源、全局设置、组合、拆分、锁定、解锁、置顶、置底。
+- 按钮使用明确动作，如“添加文本”“解锁组件”“删除 3 个组件”，不用“确定”“提交”。
+- 空状态说明下一步：`画布中还没有组件。拖入一个组件，或点击组件名称开始。`
+- 错误信息包含发生了什么、原因和恢复方式，不能只写“操作失败”。
+- Tooltip 可补充快捷键，但不能承载完成任务所必需的唯一说明。
+
+## 17. 禁止模式
+
+- 大圆角 Card、Chip、Pill 成为默认构图。
+- 多层卡片嵌套、每个区域都有阴影。
+- 玻璃拟态、发光边框、紫蓝渐变、渐变文字或装饰性 blob。
+- 在工作台中使用营销页式大标题和大面积无功能留白。
+- 文本缩写冒充图标；混用 Remix、Emoji 和不同描边风格。
+- 依赖 Hover 的唯一操作入口。
+- 每个面板维护不同的 Header、滚动区和空状态实现。
+- Portal 内硬编码 `z-index`，或因层级问题关闭焦点陷阱。
+- 为视觉方便修改 `TemplateSchema` 或把 UI 状态写入模板。
+
+## 18. 验收门槛
+
+每个 PR4 UI 切片至少完成：
+
+1. 1600×1000、1366×768、1024×768 三种尺寸截图。
+2. 无选择、单选、多选、锁定、面板折叠和画布滚动状态检查。
+3. 键盘 Tab/Arrow/Escape、Tooltip、Menu 和 Focus Ring 检查。
+4. 100% 与 200% 浏览器缩放检查；50%、75%、100%、150% 画布缩放检查。
+5. CSS 扫描：无 `!important`、无静态 inline style、无未 token 化颜色和 magic z-index。
+6. TypeScript、Vitest、ESLint、包构建、CSS Module 映射断言和 Web 生产构建通过。
+7. 浏览器实际截图确认，而不是只验证 CSS 文件存在。

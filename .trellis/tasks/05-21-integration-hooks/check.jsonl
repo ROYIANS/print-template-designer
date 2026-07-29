@@ -1,0 +1,2 @@
+{"file": ".trellis/spec/monorepo/quality-guidelines.md", "reason": "ESLint/Prettier 规范，检查代码风格合规性"}
+{"file": ".trellis/spec/monorepo/typescript-conventions.md", "reason": "strict TS 合规检查：钩子接口类型安全，禁止 as any"}

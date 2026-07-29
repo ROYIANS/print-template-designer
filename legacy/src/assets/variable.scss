@@ -1,0 +1,249 @@
+#roy-print-template-designer {
+  --primary-color-50: rgba(69, 121, 225, 0.5);
+  --primary-color-30: rgba(69, 121, 225, 0.3);
+  --prism-background: #f4f4f4;
+  --prism-line-highlight-background: #eeeeee;
+  --prism-selection-background: #aaaaaa;
+  --prism-inline-background: var(--prism-background);
+  --bg-color-rgb: 255, 255, 255;
+  --bg-color-soft: #fafafa;
+  --bg-color-mute: #f2f2f2;
+  --roy-text-color-primary: #303133;
+  --roy-text-color-regular: #606266;
+  --roy-text-color-secondary: #909399;
+  --roy-text-color-placeholder: #a8abb2;
+  --roy-text-color-disabled: #c0c4cc;
+  --roy-color-white: #ffffff;
+  --roy-color-black: #000000;
+  --roy-color-primary: #4579e1;
+  --roy-color-primary-light-3: #7da1ea;
+  --roy-color-primary-light-5: #a2bcf0;
+  --roy-color-primary-light-7: #c7d7f6;
+  --roy-color-primary-light-8: #dae4f9;
+  --roy-color-primary-light-9: #ecf2fc;
+  --roy-color-primary-dark-2: #3e6dcb;
+  --roy-color-success: #009688;
+  --roy-color-success-light-3: #4db6ac;
+  --roy-color-success-light-5: #80cbc4;
+  --roy-color-success-light-7: #b3e0db;
+  --roy-color-success-light-8: #cceae7;
+  --roy-color-success-light-9: #e6f5f3;
+  --roy-color-success-dark-2: #08777a;
+  --roy-color-warning: #f18f18;
+  --roy-color-warning-light-3: #f5b15d;
+  --roy-color-warning-light-5: #f8c78c;
+  --roy-color-warning-light-7: #fbddba;
+  --roy-color-warning-light-8: #fce9d1;
+  --roy-color-warning-light-9: #fef4e8;
+  --roy-color-warning-dark-2: #d98116;
+  --roy-color-danger: #f54536;
+  --roy-color-danger-light-3: #f87d72;
+  --roy-color-danger-light-5: #faa29b;
+  --roy-color-danger-light-7: #fcc7c3;
+  --roy-color-danger-light-8: #fddad7;
+  --roy-color-danger-light-9: #feeceb;
+  --roy-color-danger-dark-2: #dd3e31;
+  --roy-color-error: #f54536;
+  --roy-color-error-light-3: #f87d72;
+  --roy-color-error-light-5: #faa29b;
+  --roy-color-error-light-7: #fcc7c3;
+  --roy-color-error-light-8: #fddad7;
+  --roy-color-error-light-9: #feeceb;
+  --roy-color-error-dark-2: #dd3e31;
+  --roy-color-info: #00bcd3;
+  --roy-color-info-light-3: #4dd0e0;
+  --roy-color-info-light-5: #80dee9;
+  --roy-color-info-light-7: #b3ebf2;
+  --roy-color-info-light-8: #ccf2f6;
+  --roy-color-info-light-9: #e6f8fb;
+  --roy-color-info-dark-2: #0a9be;
+  --roy-bg-color: #ffffff;
+  --roy-bg-color-page: #f2f3f5;
+  --roy-bg-color-overlay: #ffffff;
+  --roy-bg-block-color: #f0f0f0;
+  --roy-border-block-color: #d5d5d5;
+  --roy-border-color: #dcdfe6;
+  --roy-border-color-light: #e4e7ed;
+  --roy-border-color-lighter: #ebeef5;
+  --roy-border-color-extra-light: #f2f6fc;
+  --roy-border-color-dark: #d4d7de;
+  --roy-border-color-darker: #cdd0d6;
+  --roy-fill-color: #f0f2f5;
+  --roy-fill-color-light: #f5f7fa;
+  --roy-fill-color-lighter: #fafafa;
+  --roy-fill-color-extra-light: #fafcff;
+  --roy-fill-color-dark: #ebedf0;
+  --roy-fill-color-darker: #e6e8eb;
+  --roy-fill-color-blank: #ffffff;
+  --roy-box-shadow: 0px 12px 32px 4px rgba(0, 0, 0, 0.04),
+    0px 8px 20px rgba(0, 0, 0, 0.08);
+  --roy-box-shadow-light: 0px 0px 12px rgba(0, 0, 0, 0.12);
+  --roy-box-shadow-lighter: 0px 0px 6px rgba(0, 0, 0, 0.12);
+  --roy-box-shadow-dark: 0px 16px 48px 16px rgba(0, 0, 0, 0.08),
+    0px 12px 32px rgba(0, 0, 0, 0.12), 0px 8px 16px -8px rgba(0, 0, 0, 0.16);
+  --roy-disabled-bg-color: var(--roy-fill-color-light);
+  --roy-disabled-text-color: var(--roy-text-color-placeholder);
+  --roy-disabled-border-color: var(--roy-border-color-light);
+  --roy-overlay-color: rgba(0, 0, 0, 0.8);
+  --roy-overlay-color-light: rgba(0, 0, 0, 0.7);
+  --roy-overlay-color-lighter: rgba(0, 0, 0, 0.5);
+  --roy-mask-color: rgba(255, 255, 255, 0.9);
+  --roy-mask-color-extra-light: rgba(255, 255, 255, 0.3);
+  --roy-border-width: 1px;
+  --roy-border-style: solid;
+  --roy-border-color-hover: var(--roy-text-color-disabled);
+  --roy-border: var(--roy-border-width) var(--roy-border-style)
+    var(--roy-border-color);
+  --roy-svg-monochrome-grey: var(--roy-border-color);
+  --roy-color-primary-rgb: 64, 158, 255;
+  --roy-color-success-rgb: 103, 194, 58;
+  --roy-color-warning-rgb: 230, 162, 60;
+  --roy-color-danger-rgb: 245, 108, 108;
+  --roy-color-error-rgb: 245, 108, 108;
+  --roy-color-info-rgb: 144, 147, 153;
+  --roy-font-size-extra-large: 20px;
+  --roy-font-size-large: 18px;
+  --roy-font-size-medium: 16px;
+  --roy-font-size-base: 14px;
+  --roy-font-size-small: 13px;
+  --roy-font-size-extra-small: 12px;
+  --roy-font-family: 'Helvetica Neue', Helvetica, 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', '\5fae\8f6f\96c5\9ed1', Arial,
+    sans-serif;
+  --roy-font-weight-primary: 500;
+  --roy-font-line-height-primary: 24px;
+  --roy-index-normal: 1;
+  --roy-index-top: 1000;
+  --roy-index-popper: 2000;
+  --roy-border-radius-base: 4px;
+  --roy-border-radius-small: 2px;
+  --roy-border-radius-round: 20px;
+  --roy-border-radius-circle: 100%;
+  --roy-transition-duration: 0.3s;
+  --roy-transition-duration-fast: 0.2s;
+  --roy-transition-function-ease-in-out-bezier: cubic-bezier(
+    0.645,
+    0.045,
+    0.355,
+    1
+  );
+  --roy-transition-function-fast-bezier: cubic-bezier(0.23, 1, 0.32, 1);
+  --roy-transition-all: all var(--roy-transition-duration)
+    var(--roy-transition-function-ease-in-out-bezier);
+  --roy-transition-fade: opacity var(--roy-transition-duration)
+    var(--roy-transition-function-fast-bezier);
+  --roy-transition-md-fade: transform var(--roy-transition-duration)
+      var(--roy-transition-function-fast-bezier),
+    opacity var(--roy-transition-duration)
+      var(--roy-transition-function-fast-bezier);
+  --roy-transition-fade-linear: opacity var(--roy-transition-duration-fast)
+    linear;
+  --roy-transition-border: border-color var(--roy-transition-duration-fast)
+    var(--roy-transition-function-ease-in-out-bezier);
+  --roy-transition-box-shadow: box-shadow var(--roy-transition-duration-fast)
+    var(--roy-transition-function-ease-in-out-bezier);
+  --roy-transition-color: color var(--roy-transition-duration-fast)
+    var(--roy-transition-function-ease-in-out-bezier);
+  --roy-component-size-large: 40px;
+  --roy-component-size: 32px;
+  --roy-component-size-small: 24px;
+  --roy-menu-active-color: var(--roy-color-primary);
+  --roy-menu-text-color: var(--roy-text-color-primary);
+  --roy-menu-hover-text-color: var(--roy-color-primary);
+  --roy-menu-bg-color: var(--roy-fill-color-blank);
+  --roy-menu-hover-bg-color: var(--roy-color-primary-light-9);
+  --roy-menu-item-height: 56px;
+  --roy-menu-sub-item-height: calc(var(--roy-menu-item-height) - 6px);
+  --roy-menu-horizontal-sub-item-height: 36px;
+  --roy-menu-item-font-size: var(--roy-font-size-base);
+  --roy-menu-item-hover-fill: var(--roy-color-primary-light-9);
+  --roy-menu-border-color: var(--roy-border-color);
+  --roy-menu-base-level-padding: 20px;
+  --roy-menu-level-padding: 20px;
+  --roy-menu-icon-width: 24px;
+  --roy-menu-bar-background: #4978e4;
+}
+
+#roy-print-template-designer[theme='dark'] {
+  --prism-background: #181818;
+  --prism-line-highlight-background: #444444;
+  --prism-selection-background: #444444;
+  --prism-inline-background: #2d2d2d;
+  --bg-color-rgb: 0, 0, 0;
+  --bg-color-soft: #242424;
+  --bg-color-mute: #2c2c2c;
+  --roy-text-color-primary: #e5eaf3;
+  --roy-text-color-regular: #cfd3dc;
+  --roy-text-color-secondary: #a3a6ad;
+  --roy-text-color-placeholder: #8d9095;
+  --roy-text-color-disabled: #6c6e72;
+  --roy-color-primary: #4579e1;
+  --roy-color-primary-light-3: #30559e;
+  --roy-color-primary-light-5: #233d71;
+  --roy-color-primary-light-7: #1c305a;
+  --roy-color-primary-light-8: #152444;
+  --roy-color-primary-light-9: #0e182d;
+  --roy-color-primary-dark-2: #5886e4;
+  --roy-color-success: #009688;
+  --roy-color-success-light-3: #00695f;
+  --roy-color-success-light-5: #004b44;
+  --roy-color-success-light-7: #002d29;
+  --roy-color-success-light-8: #001e1b;
+  --roy-color-success-light-9: #000f0e;
+  --roy-color-success-dark-2: #1aa194;
+  --roy-color-warning: #f18f18;
+  --roy-color-warning-light-3: #a96411;
+  --roy-color-warning-light-5: #79480c;
+  --roy-color-warning-light-7: #482b07;
+  --roy-color-warning-light-8: #301d05;
+  --roy-color-warning-light-9: #180e02;
+  --roy-color-warning-dark-2: #f29a2f;
+  --roy-color-danger: #f54536;
+  --roy-color-danger-light-3: #ac3026;
+  --roy-color-danger-light-5: #7b231b;
+  --roy-color-danger-light-7: #4a1510;
+  --roy-color-danger-light-8: #310e0b;
+  --roy-color-danger-light-9: #180705;
+  --roy-color-danger-dark-2: #f6584a;
+  --roy-color-error: #f54536;
+  --roy-color-error-light-3: #ac3026;
+  --roy-color-error-light-5: #7b231b;
+  --roy-color-error-light-7: #4a1510;
+  --roy-color-error-light-8: #310e0b;
+  --roy-color-error-light-9: #180705;
+  --roy-color-error-dark-2: #f6584a;
+  --roy-color-info: #00bcd3;
+  --roy-color-info-light-3: #008494;
+  --roy-color-info-light-5: #005e6a;
+  --roy-color-info-light-7: #00383f;
+  --roy-color-info-light-8: #00262a;
+  --roy-color-info-light-9: #001315;
+  --roy-color-info-dark-2: #1ac3d7;
+  --roy-box-shadow: 0px 12px 32px 4px rgba(0, 0, 0, 0.36),
+    0px 8px 20px rgba(0, 0, 0, 0.72);
+  --roy-box-shadow-light: 0px 0px 12px rgba(0, 0, 0, 0.72);
+  --roy-box-shadow-lighter: 0px 0px 6px rgba(0, 0, 0, 0.72);
+  --roy-box-shadow-dark: 0px 16px 48px 16px rgba(0, 0, 0, 0.72),
+    0px 12px 32px #000000, 0px 8px 16px -8px #000000;
+  --roy-bg-color-page: #0a0a0a;
+  --roy-bg-color: #141414;
+  --roy-bg-color-overlay: #1d1e1f;
+  --roy-bg-block-color: #4d4d4f;
+  --roy-border-block-color: #878787;
+  --roy-border-color-darker: #636466;
+  --roy-border-color-dark: #58585b;
+  --roy-border-color: #4c4d4f;
+  --roy-border-color-light: #414243;
+  --roy-border-color-lighter: #363637;
+  --roy-border-color-extra-light: #2b2b2c;
+  --roy-fill-color-darker: #424243;
+  --roy-fill-color-dark: #39393a;
+  --roy-fill-color: #303030;
+  --roy-fill-color-light: #262727;
+  --roy-fill-color-lighter: #1d1d1d;
+  --roy-fill-color-extra-light: #191919;
+  --roy-fill-color-blank: transparent;
+  --roy-mask-color: rgba(0, 0, 0, 0.8);
+  --roy-mask-color-extra-light: rgba(0, 0, 0, 0.3);
+  --roy-menu-bar-background: #222222;
+}

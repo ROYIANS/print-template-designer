@@ -1,0 +1,329 @@
+.inspector {
+  height: 100%;
+  overflow-y: auto;
+  color: var(--ptd-text);
+  background: var(--ptd-surface-panel);
+  border-left: 1px solid var(--ptd-border);
+}
+.heading {
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid var(--ptd-border);
+}
+.heading h2 {
+  margin: 2px 0 0;
+  font-size: 15px;
+  line-height: 1.4;
+}
+.eyebrow {
+  color: var(--ptd-action);
+  font-size: 9px;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+}
+.section {
+  padding: 12px 16px 16px;
+  border-bottom: 1px solid var(--ptd-border-subtle);
+}
+.section h3 {
+  margin: 0 0 10px;
+  color: var(--ptd-text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.segmented {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2px;
+  padding: 2px;
+  background: var(--ptd-surface-sunken);
+  border: 1px solid var(--ptd-border-subtle);
+  border-radius: var(--ptd-radius-1);
+}
+
+.segmented button {
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: var(--ptd-radius-1);
+  color: var(--ptd-text-muted);
+  background: transparent;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.segmented button:hover {
+  color: var(--ptd-text-strong);
+  background: color-mix(in oklch, var(--ptd-surface-raised) 60%, transparent);
+}
+
+.segmented button[aria-pressed='true'] {
+  color: var(--ptd-selection-strong);
+  background: var(--ptd-surface-raised);
+  border-color: var(--ptd-border);
+  box-shadow: var(--ptd-shadow-deck);
+}
+
+.segmented button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.portraitIcon {
+  transform: rotate(90deg);
+}
+
+.readoutGrid,
+.readoutList {
+  margin: 0;
+}
+
+.readoutGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 12px;
+}
+
+.readoutList {
+  display: grid;
+  gap: 8px;
+}
+
+.readout {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.readoutList .readout {
+  grid-template-columns: minmax(76px, auto) minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+}
+
+.readout dt {
+  color: var(--ptd-text-muted);
+  font-size: 9px;
+}
+
+.readout dd {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  overflow: hidden;
+  color: var(--ptd-text-strong);
+  font-family: var(--ptd-font-metric);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.swatch {
+  width: 12px;
+  height: 12px;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  border: 1px solid var(--ptd-border-strong);
+  border-radius: 50%;
+}
+
+.settingRow {
+  min-height: 56px;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 16px;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.settingRow > span:nth-child(2) {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.settingRow strong {
+  color: var(--ptd-text-strong);
+  font-size: 11px;
+}
+
+.settingRow small {
+  color: var(--ptd-text-muted);
+  font-size: 9px;
+}
+
+.settingIcon {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  color: var(--ptd-text-muted);
+  background: var(--ptd-surface-sunken);
+  border-radius: var(--ptd-radius-1);
+}
+
+.settingIcon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.settingRow input {
+  accent-color: var(--ptd-selection);
+}
+
+.segmented button:focus-visible,
+.settingRow input:focus-visible {
+  outline: 2px solid var(--ptd-focus);
+  outline-offset: 1px;
+}
+.structuredNotice {
+  display: grid;
+  gap: 4px;
+  padding: 10px;
+  border: 1px solid var(--ptd-border-subtle);
+  color: var(--ptd-text-muted);
+  background: var(--ptd-surface-sunken);
+  font-size: 10px;
+  line-height: 1.5;
+}
+.structuredNotice strong {
+  color: var(--ptd-text);
+  font-size: 11px;
+}
+.field {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  color: var(--ptd-text-muted);
+  font-size: 10px;
+}
+.fieldGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 8px;
+}
+.field input,
+.field textarea,
+.field select {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--ptd-border);
+  border-radius: 2px;
+  color: var(--ptd-text-strong);
+  background: var(--ptd-surface-raised);
+  font: inherit;
+  font-size: 12px;
+}
+.field input,
+.field select {
+  height: 30px;
+  padding: 0 7px;
+}
+.field input[type='color'] {
+  padding: 3px;
+}
+.field textarea {
+  min-height: 68px;
+  padding: 7px;
+  resize: vertical;
+  line-height: 1.5;
+}
+.field input:hover:not(:disabled),
+.field textarea:hover:not(:disabled),
+.field select:hover:not(:disabled) {
+  border-color: var(--ptd-border-strong);
+}
+.field input:focus-visible,
+.field textarea:focus-visible,
+.field select:focus-visible,
+.unlockButton:focus-visible {
+  outline: 2px solid var(--ptd-focus);
+  outline-offset: 1px;
+}
+.field input:disabled,
+.field textarea:disabled,
+.field select:disabled {
+  color: var(--ptd-text-disabled);
+  background: var(--ptd-surface-sunken);
+}
+.lockRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+}
+.lockRow span {
+  display: grid;
+  gap: 2px;
+}
+.lockRow strong {
+  font-size: 12px;
+}
+.lockRow small {
+  color: var(--ptd-text-muted);
+  font-size: 10px;
+}
+.lockRow input {
+  accent-color: var(--ptd-selection);
+}
+.empty {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  min-height: 280px;
+  padding: 28px;
+  text-align: center;
+}
+.emptyGlyph {
+  width: 26px;
+  height: 26px;
+  color: var(--ptd-text-muted);
+}
+.empty h3 {
+  margin: 12px 0 4px;
+  font-size: 13px;
+}
+.empty p,
+.summary {
+  color: var(--ptd-text-muted);
+  font-size: 11px;
+  line-height: 1.65;
+}
+.summary {
+  margin: 0;
+  padding: 12px 16px 0;
+}
+.unlockButton {
+  margin: 16px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--ptd-action);
+  border-radius: 2px;
+  color: var(--ptd-action);
+  background: var(--ptd-action-subtle);
+  font: inherit;
+  cursor: pointer;
+}
+.unlockButton:hover:not(:disabled) {
+  background: color-mix(in oklch, var(--ptd-action-subtle) 72%, var(--ptd-action));
+}
+.unlockButton:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.unlockButton:disabled {
+  opacity: 0.45;
+  cursor: default;
+}

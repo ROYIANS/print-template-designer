@@ -1,0 +1,97 @@
+.theme {
+  --ptd-paper-0: oklch(99.2% 0.004 255);
+  --ptd-paper-1: oklch(98.2% 0.006 255);
+  --ptd-paper-2: oklch(96.5% 0.008 255);
+  --ptd-paper-3: oklch(93.7% 0.011 255);
+  --ptd-paper-4: oklch(89.5% 0.014 255);
+  --ptd-graphite-950: oklch(21% 0.02 258);
+  --ptd-graphite-900: oklch(27% 0.021 258);
+  --ptd-graphite-800: oklch(35% 0.02 258);
+  --ptd-graphite-700: oklch(44% 0.018 258);
+  --ptd-graphite-600: oklch(53% 0.016 258);
+  --ptd-graphite-500: oklch(62% 0.014 258);
+  --ptd-graphite-400: oklch(71% 0.012 258);
+  --ptd-graphite-300: oklch(82% 0.01 258);
+  --ptd-vermilion-700: oklch(45% 0.16 35);
+  --ptd-vermilion-600: oklch(52% 0.175 35);
+  --ptd-vermilion-100: oklch(94% 0.035 35);
+  --ptd-cobalt-700: oklch(48% 0.22 265);
+  --ptd-cobalt-600: oklch(57% 0.245 265);
+  --ptd-cobalt-100: oklch(94.5% 0.04 260);
+  --ptd-surface-app: var(--ptd-paper-2);
+  --ptd-surface-panel: var(--ptd-paper-1);
+  --ptd-surface-raised: var(--ptd-paper-0);
+  --ptd-surface-sunken: var(--ptd-paper-3);
+  --ptd-surface-canvas: oklch(91.5% 0.012 255);
+  --ptd-surface-paper: var(--ptd-paper-0);
+  --ptd-text-strong: var(--ptd-graphite-950);
+  --ptd-text: var(--ptd-graphite-800);
+  --ptd-text-muted: var(--ptd-graphite-600);
+  --ptd-text-disabled: var(--ptd-graphite-400);
+  --ptd-border-strong: var(--ptd-graphite-400);
+  --ptd-border: var(--ptd-graphite-300);
+  --ptd-border-subtle: var(--ptd-paper-4);
+  --ptd-action: var(--ptd-cobalt-600);
+  --ptd-action-hover: var(--ptd-cobalt-700);
+  --ptd-action-subtle: var(--ptd-cobalt-100);
+  --ptd-selection: var(--ptd-cobalt-600);
+  --ptd-selection-strong: var(--ptd-cobalt-700);
+  --ptd-selection-subtle: var(--ptd-cobalt-100);
+  --ptd-proof: var(--ptd-vermilion-600);
+  --ptd-proof-subtle: var(--ptd-vermilion-100);
+  --ptd-guide-cobalt: var(--ptd-cobalt-600);
+  --ptd-guide-vermilion: var(--ptd-vermilion-600);
+  --ptd-guide-emerald: oklch(53% 0.14 155);
+  --ptd-guide-amber: oklch(66% 0.15 82);
+  --ptd-success: oklch(47% 0.105 145);
+  --ptd-danger: oklch(46% 0.17 27);
+  --ptd-focus: var(--ptd-cobalt-600);
+  --ptd-space-1: 4px;
+  --ptd-space-2: 8px;
+  --ptd-space-3: 12px;
+  --ptd-space-4: 16px;
+  --ptd-space-6: 24px;
+  --ptd-space-8: 32px;
+  --ptd-control-xs: 24px;
+  --ptd-control-sm: 28px;
+  --ptd-control-md: 32px;
+  --ptd-radius-1: 2px;
+  --ptd-radius-2: 4px;
+  --ptd-shadow-paper:
+    0 0 0 1px oklch(71% 0.012 258 / 78%), 4px 4px 0 oklch(21% 0.02 258 / 10%),
+    0 18px 38px oklch(21% 0.02 258 / 10%);
+  --ptd-shadow-control: 0 2px 8px oklch(21% 0.02 258 / 20%);
+  --ptd-shadow-deck:
+    0 1px 2px oklch(21% 0.02 258 / 10%), inset 0 1px 0 oklch(99.2% 0.004 255 / 88%);
+  --ptd-shadow-floating: 0 8px 24px oklch(21% 0.02 258 / 16%);
+  --ptd-app-bar-height: 36px;
+  --ptd-command-bar-height: 40px;
+  --ptd-status-bar-height: 24px;
+  --ptd-tool-dock-width: 44px;
+  --ptd-resource-panel-width: 220px;
+  --ptd-inspector-width: 304px;
+  --ptd-layer-base: 0;
+  --ptd-layer-stage: 1;
+  --ptd-layer-canvas: 10;
+  --ptd-layer-guide: 20;
+  --ptd-layer-selection: 30;
+  --ptd-layer-sticky: 100;
+  --ptd-layer-floating: 1200;
+  --ptd-layer-tooltip: 1700;
+  --ptd-font-ui:
+    'Outfit', 'Outfit Variable', 'Sarasa UI SC', 'Sarasa Gothic SC', 'Microsoft YaHei UI',
+    'PingFang SC', sans-serif;
+  --ptd-font-metric:
+    'Outfit', 'Outfit Variable', 'Sarasa UI SC', 'Sarasa Gothic SC', 'Microsoft YaHei UI',
+    sans-serif;
+  --ptd-font-serif: 'Noto Serif SC', 'Noto Serif CJK SC', 'Source Han Serif SC', 'Songti SC', serif;
+  --ptd-duration-instant: 120ms;
+  --ptd-duration-state: 180ms;
+  --ptd-duration-panel: 240ms;
+  --ptd-ease-out: cubic-bezier(0.25, 1, 0.5, 1);
+  --ptd-ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  color: var(--ptd-text);
+  font-family: var(--ptd-font-ui);
+  font-size: 12px;
+  font-kerning: normal;
+}

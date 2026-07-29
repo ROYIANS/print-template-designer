@@ -1,0 +1,2 @@
+{"file": ".trellis/spec/monorepo/quality-guidelines.md", "reason": "构建产物验证，Node >=20 约定"}
+{"file": ".trellis/spec/monorepo/directory-structure.md", "reason": "docker/ 目录结构规范"}

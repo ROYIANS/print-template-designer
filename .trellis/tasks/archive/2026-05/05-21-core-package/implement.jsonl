@@ -1,0 +1,5 @@
+{"file": ".trellis/tasks/05-21-core-package/prd.md", "reason": "本任务完整需求、技术决策和验收标准"}
+{"file": ".trellis/tasks/archive/2026-05/05-20-refc-blueprint/prd.md", "reason": "整体架构蓝图，@ptd/core 职责定义和包结构决策"}
+{"file": ".trellis/spec/monorepo/package-conventions.md", "reason": "monorepo 包配置规范"}
+{"file": ".trellis/spec/monorepo/typescript-conventions.md", "reason": "TypeScript 编码规范"}
+{"file": ".trellis/spec/monorepo/quality-guidelines.md", "reason": "质量标准（lint/typecheck/test）"}

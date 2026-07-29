@@ -1,0 +1,73 @@
+.canvasWrapper {
+  position: relative;
+  isolation: isolate;
+  box-sizing: border-box;
+  width: max-content;
+  min-width: 100%;
+  height: max-content;
+  min-height: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 48px 48px 120px;
+  background-color: var(--ptd-surface-canvas);
+  background-image:
+    repeating-linear-gradient(
+      135deg,
+      color-mix(in oklch, var(--ptd-border) 32%, transparent) 0,
+      color-mix(in oklch, var(--ptd-border) 32%, transparent) 1px,
+      transparent 1px,
+      transparent 7px
+    ),
+    linear-gradient(var(--ptd-border-subtle) 1px, transparent 1px),
+    linear-gradient(90deg, var(--ptd-border-subtle) 1px, transparent 1px);
+  background-position: -1px -1px;
+  background-size: 24px 24px;
+}
+
+.canvas {
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: var(--canvas-width);
+  height: var(--canvas-height);
+  transform: scale(var(--canvas-scale));
+  transform-origin: 0 0;
+  color: var(--canvas-color);
+  background: var(--canvas-background);
+  box-shadow: var(--ptd-shadow-paper);
+  font-family: var(--canvas-font-family);
+  font-size: var(--canvas-font-size);
+  line-height: var(--canvas-line-height);
+}
+
+.canvasStage {
+  position: relative;
+  z-index: var(--ptd-layer-stage);
+  width: var(--canvas-scaled-width);
+  height: var(--canvas-scaled-height);
+  flex: 0 0 auto;
+}
+
+.marginTop {
+  top: var(--margin-top);
+}
+.marginBottom {
+  bottom: var(--margin-bottom);
+}
+
+.marginLine {
+  position: absolute;
+  z-index: var(--ptd-layer-guide);
+  width: 100%;
+  height: 0;
+  border-top: 1px dashed var(--ptd-proof);
+  opacity: 0.42;
+  pointer-events: none;
+}
+
+@media (max-width: 1179px) {
+  .canvasWrapper {
+    padding-right: 48px;
+    padding-left: 48px;
+  }
+}

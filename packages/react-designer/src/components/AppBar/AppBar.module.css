@@ -1,0 +1,154 @@
+.appBar {
+  position: relative;
+  z-index: var(--ptd-layer-sticky);
+  min-width: 0;
+  min-height: var(--ptd-app-bar-height);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  color: var(--ptd-graphite-300);
+  background: var(--ptd-graphite-950);
+  border-bottom: 1px solid var(--ptd-graphite-800);
+  container-type: inline-size;
+}
+
+.brand,
+.document,
+.actions {
+  display: flex;
+  align-items: center;
+}
+
+.brand {
+  align-self: stretch;
+  gap: 7px;
+  padding: 0 var(--ptd-space-3) 0 9px;
+  border-right: 1px solid var(--ptd-graphite-800);
+}
+
+.legacyLogo {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+  background: url('./legacy-logo.png') center / contain no-repeat;
+}
+
+.wordmark {
+  color: var(--ptd-paper-0);
+  font-family: var(--ptd-font-metric);
+  font-size: 14px;
+  font-weight: 750;
+  letter-spacing: 0.11em;
+}
+
+.productName {
+  color: var(--ptd-graphite-400);
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.document {
+  min-width: 0;
+  gap: var(--ptd-space-3);
+  padding: 0 var(--ptd-space-3);
+}
+
+.document strong {
+  overflow: hidden;
+  color: var(--ptd-paper-0);
+  font-size: 11px;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.documentMeta {
+  flex: 0 0 auto;
+  color: var(--ptd-graphite-400);
+  font-family: var(--ptd-font-metric);
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.actions {
+  gap: 2px;
+  padding-right: 4px;
+}
+
+.quietAction,
+.primaryAction {
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 9px;
+  border: 1px solid transparent;
+  border-radius: var(--ptd-radius-1);
+  font: inherit;
+  font-size: 10px;
+  cursor: pointer;
+  transition:
+    color var(--ptd-duration-instant) var(--ptd-ease-out),
+    background-color var(--ptd-duration-instant) var(--ptd-ease-out),
+    border-color var(--ptd-duration-instant) var(--ptd-ease-out);
+}
+
+.quietAction svg,
+.primaryAction svg {
+  width: 15px;
+  height: 15px;
+}
+
+.quietAction {
+  color: var(--ptd-graphite-300);
+  background: transparent;
+}
+
+.quietAction:hover:not(:disabled) {
+  color: var(--ptd-paper-0);
+  background: var(--ptd-graphite-800);
+}
+
+.primaryAction {
+  color: var(--ptd-paper-0);
+  background: var(--ptd-action);
+  border-color: color-mix(in oklch, var(--ptd-action) 74%, var(--ptd-paper-0));
+}
+
+.primaryAction:hover:not(:disabled) {
+  background: var(--ptd-action-hover);
+  border-color: var(--ptd-action-hover);
+}
+
+.quietAction:focus-visible,
+.primaryAction:focus-visible {
+  outline: 2px solid var(--ptd-paper-0);
+  outline-offset: -2px;
+}
+
+.quietAction:disabled,
+.primaryAction:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+@container (max-width: 880px) {
+  .productName,
+  .documentMeta {
+    display: none;
+  }
+}
+
+@container (max-width: 650px) {
+  .actions button span {
+    display: none;
+  }
+
+  .quietAction,
+  .primaryAction {
+    width: 28px;
+    justify-content: center;
+    padding: 0;
+  }
+}

@@ -1,0 +1,50 @@
+# Stage 1: Build
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# Copy workspace config files
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml* ./
+COPY tsconfig.base.json ./
+
+# Copy server source
+COPY apps/server/ ./apps/server/
+
+# Install dependencies
+RUN pnpm install --frozen-lockfile
+
+# Generate Prisma client
+RUN cd apps/server && pnpm exec prisma generate
+
+# Build server
+RUN pnpm --filter server build
+
+# Stage 2: Run
+FROM node:20-alpine AS runner
+
+WORKDIR /app
+
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# Copy package files for production install
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/pnpm-workspace.yaml ./
+COPY --from=builder /app/apps/server/package.json ./apps/server/
+
+# Install production dependencies only
+RUN pnpm install --prod --frozen-lockfile --filter server
+
+# Copy built files and prisma
+COPY --from=builder /app/apps/server/dist ./apps/server/dist
+COPY --from=builder /app/apps/server/prisma ./apps/server/prisma
+COPY --from=builder /app/apps/server/node_modules/.prisma ./apps/server/node_modules/.prisma
+
+WORKDIR /app/apps/server
+
+EXPOSE 3001
+
+CMD ["node", "dist/main.js"]

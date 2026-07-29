@@ -1,0 +1,6 @@
+{"file":".trellis/spec/monorepo/typescript-conventions.md","reason":"Verify strict typing and public API boundaries."}
+{"file":".trellis/spec/monorepo/styling-conventions.md","reason":"Verify CSS Modules, tokens and inline-style exceptions."}
+{"file":".trellis/spec/monorepo/quality-guidelines.md","reason":"Verify lint, tests, builds, CSS artifacts and forbidden patterns."}
+{"file":".trellis/spec/monorepo/react-designer-contract.md","reason":"Verify controlled value, history and host integration remain intact."}
+{"file":".trellis/spec/monorepo/ptd-ui-system.md","reason":"Verify visual hierarchy, accessibility, panel behavior, ruler and responsive acceptance."}
+{"file":".trellis/tasks/07-29-canvas-first-ui-finalize/research/layout-synthesis.md","reason":"Check the implementation against approved Canvas-first decisions and non-goals."}

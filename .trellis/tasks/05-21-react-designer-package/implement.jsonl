@@ -1,0 +1,10 @@
+{"file": ".trellis/spec/monorepo/package-conventions.md", "reason": "tsup 构建配置、package.json exports 字段顺序、peerDependencies 约定"}
+{"file": ".trellis/spec/monorepo/typescript-conventions.md", "reason": "strict TS、禁止 as any、公共 API 只通过 index.ts 导出"}
+{"file": ".trellis/spec/monorepo/styling-conventions.md", "reason": "CSS Modules 用法、Radix UI data-* 属性样式化、禁止 inline style"}
+{"file": ".trellis/spec/monorepo/directory-structure.md", "reason": "monorepo 目录结构、packages/ 解剖、apps/ 解剖"}
+{"file": ".trellis/spec/monorepo/quality-guidelines.md", "reason": "ESLint flat config、Prettier、Node >=20 约定"}
+{"file": ".trellis/tasks/05-21-react-designer-package/info.md", "reason": "PR3 实例级状态、命令、历史与 UI 技术设计"}
+{"file": ".trellis/tasks/05-21-react-designer-package/research/pr3-legacy-behavior.md", "reason": "旧版命令行为与新增对齐语义映射"}
+{"file": ".trellis/tasks/05-21-react-designer-package/research/pr1-pr2-stabilization.md", "reason": "PR1/PR2 风险与稳定化验收清单"}
+{"file": ".trellis/spec/monorepo/ptd-ui-system.md", "reason": "PR4 的 PTD 专属视觉语言、布局尺寸、面板原语、图标、Portal 与响应式合同"}
+{"file": ".trellis/tasks/05-21-react-designer-package/research/pr4-ui-synthesis.md", "reason": "Workshop 方法、Legacy 成熟结构与 React 实现边界的取舍依据"}

@@ -1,18 +1,32 @@
-.DS_Store
+# Dependencies
 node_modules
-/dist
-/lib
+.pnp
+.pnp.js
 
+# Build outputs
+dist
+lib
+build
+out
+.turbo
 
-# local env files
+# Environment files
+.env
 .env.local
 .env.*.local
+.env.development
+.env.production
 
-# Log files
+# Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
 
 # Editor directories and files
 .idea
@@ -22,3 +36,14 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.sw?
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Test coverage
+coverage
+.nyc_output
+
+# Misc
+.cache
+.parcel-cache

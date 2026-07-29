@@ -1,0 +1,35 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Outfit:wght@400;500;600;700&display=swap');
+
+@font-face {
+  font-family: 'Sarasa UI SC';
+  src: url('/assets/fonts/SarasaUiSC.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: light;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  overflow: hidden;
+  background: oklch(91.5% 0.012 255);
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}

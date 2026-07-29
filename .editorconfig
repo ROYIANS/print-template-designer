@@ -1,13 +1,15 @@
-[*.{js,jsx,ts,tsx,vue}]
-# 缩进使用空格
-indent_style = space
-# 缩进2个字符
-indent_size = 2
-# 行结尾使用 lf !!!!
+root = true
+
+[*]
+charset = utf-8
 end_of_line = lf
-# 删除行尾空格
+indent_style = space
+indent_size = 2
 trim_trailing_whitespace = true
-# 文件结尾添加一个空行
 insert_final_newline = true
-# 行最大长度
-max_line_length = 100
+
+[*.md]
+trim_trailing_whitespace = false
+
+[Makefile]
+indent_style = tab
