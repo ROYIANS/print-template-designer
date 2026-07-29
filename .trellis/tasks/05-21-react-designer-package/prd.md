@@ -58,13 +58,13 @@
 
 ## Acceptance Criteria (evolving)
 
-* [ ] `<Designer>` 可在 `apps/web` 中渲染，不报 TypeScript 错误
+* [x] `<Designer>` 可在 `apps/web` 中渲染，不报 TypeScript 错误
 * [ ] 拖拽组件到画布后，`onChange` 被调用，`TemplateSchema` 中新增对应 `ComponentSchema`
-* [ ] 选中组件后，属性面板显示该组件的 style 属性，修改后画布实时更新
-* [ ] 撤销/重做功能正常工作
-* [ ] 对齐/分布、层级操作正常工作
-* [ ] 组合/拆分正常工作
-* [ ] 框选多组件正常工作
+* [x] 选中组件后，属性面板显示该组件的 style 属性，修改后画布实时更新
+* [x] 撤销/重做功能正常工作
+* [x] 对齐/分布、层级操作正常工作
+* [x] 组合/拆分正常工作
+* [x] 框选多组件正常工作
 * [ ] 右键菜单正常弹出并执行操作
 * [ ] SketchRuler 标尺正常显示，可开关
 
@@ -99,15 +99,15 @@
 
 ## Implementation Plan
 
-- PR1：tsup 配置 + 目录骨架 + signals 状态层 + `<Designer>` 空壳
-- PR2：画布核心（ComponentAdjuster + 拖拽放置 + 选中/移动/缩放/旋转）
-- PR3：工具栏操作（对齐/分布/层级/组合/拆分/撤销重做）+ 属性面板
-- PR4：左侧 sidebar 5 个面板 + SketchRuler + 右键菜单 + Area 框选
-- PR5：`apps/web` 接入 + 全量验收
+- [x] PR1：tsup 配置 + 目录骨架 + signals 状态层 + `<Designer>` 空壳
+- [x] PR2：画布核心（ComponentAdjuster + 拖拽放置 + 选中/移动/缩放/旋转）
+- [x] PR3：工具栏操作（对齐/分布/层级/组合/拆分/撤销重做）+ 属性面板
+- [ ] PR4（下一步）：左侧 sidebar 5 个面板 + SketchRuler + 右键菜单 + 组件拖拽入口
+- [ ] PR5：`apps/web` 全量浏览器验收（受控示例已接入）
 
-* `packages/react-designer/src/index.ts` 目前只有 `export {}`
+* `packages/react-designer/src/index.ts` 已导出 `<Designer>` 及相关公共类型
 * `@ptd/components` 的组件是 Vanilla JS class，需要在 React 中通过 `useRef` + `useEffect` 桥接
 * `@preact/signals-react` 用于细粒度响应式更新，避免整棵树重渲染
-* **构建工具：tsup**（`@ptd/core` 和 `@ptd/components` 已用 tsup，保持一致）；需在 `react-designer` 中新增 `tsup.config.ts`，开启 `injectStyle` 或单独输出 CSS 文件
+* **构建工具：tsup**（与 `@ptd/core`、`@ptd/components` 保持一致）；CSS 单独输出，并通过 `@ptd/react-designer/styles.css` 显式导入，不使用 `injectStyle`
 * Legacy 布局参考截图：左侧数据源/字段树 + 中间画布（带标尺）+ 右侧属性面板，顶部双工具栏
 * Legacy 状态模块对应关系：`global.js` → editor signal、`snapshot.js` → undo/redo signal、`compose.js` → group signal、`copy.js` → clipboard signal、`layer.js` → layer signal、`lock.js` → lock signal

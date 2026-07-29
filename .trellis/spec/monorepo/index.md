@@ -13,6 +13,7 @@
 | [TypeScript Conventions](./typescript-conventions.md) | Strict TS, shared base config | Done |
 | [Styling Conventions](./styling-conventions.md) | CSS Modules vs CSS Variables | Done |
 | [Quality Guidelines](./quality-guidelines.md) | ESLint flat config, Prettier, Node ≥20 | Done |
+| [React Designer Contract](./react-designer-contract.md) | Controlled state, commands, history and host integration | Done |
 
 ---
 

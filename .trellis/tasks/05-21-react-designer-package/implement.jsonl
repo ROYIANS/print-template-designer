@@ -3,3 +3,6 @@
 {"file": ".trellis/spec/monorepo/styling-conventions.md", "reason": "CSS Modules 用法、Radix UI data-* 属性样式化、禁止 inline style"}
 {"file": ".trellis/spec/monorepo/directory-structure.md", "reason": "monorepo 目录结构、packages/ 解剖、apps/ 解剖"}
 {"file": ".trellis/spec/monorepo/quality-guidelines.md", "reason": "ESLint flat config、Prettier、Node >=20 约定"}
+{"file": ".trellis/tasks/05-21-react-designer-package/info.md", "reason": "PR3 实例级状态、命令、历史与 UI 技术设计"}
+{"file": ".trellis/tasks/05-21-react-designer-package/research/pr3-legacy-behavior.md", "reason": "旧版命令行为与新增对齐语义映射"}
+{"file": ".trellis/tasks/05-21-react-designer-package/research/pr1-pr2-stabilization.md", "reason": "PR1/PR2 风险与稳定化验收清单"}

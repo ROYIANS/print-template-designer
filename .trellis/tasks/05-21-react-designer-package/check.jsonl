@@ -2,3 +2,5 @@
 {"file": ".trellis/spec/monorepo/typescript-conventions.md", "reason": "strict TS 合规检查：禁止 as any、@ts-ignore，公共 API 导出规范"}
 {"file": ".trellis/spec/monorepo/styling-conventions.md", "reason": "CSS Modules 合规检查：禁止 inline style，Radix UI 样式化方式"}
 {"file": ".trellis/spec/monorepo/package-conventions.md", "reason": "package.json exports 字段顺序、构建输出验证"}
+{"file": ".trellis/tasks/05-21-react-designer-package/info.md", "reason": "核对 PR3 技术设计契约"}
+{"file": ".trellis/tasks/05-21-react-designer-package/research/pr1-pr2-stabilization.md", "reason": "核对高风险问题均已处理"}

@@ -27,9 +27,9 @@
     "packages/core/src/types/component-schema.ts",
     "apps/web/src/App.tsx"
   ],
-  "notes": "PR1+PR2 已完成并提交（commit dec3f3a）。PR3 待实现：工具栏操作 + 属性面板。PR4 待实现：左侧 sidebar + SketchRuler + 右键菜单。PR5 待实现：apps/web 接入验收。",
+  "notes": "PR1+PR2 已提交（dec3f3a）。PR3 已完成：实例级 EditorStore、完整历史、统一命令层、工具栏、属性面板、快捷键与 apps/web 受控示例；20 个 react-designer 测试通过。PR4 下一步：左侧 sidebar、SketchRuler、右键菜单与组件拖拽入口。PR5 剩余全量浏览器验收。",
   "meta": {
     "pr1_commit": "dec3f3a",
-    "progress": "PR1+PR2 done, PR3 next"
+    "progress": "PR1+PR2+PR3 done, PR4 next"
   }
 }

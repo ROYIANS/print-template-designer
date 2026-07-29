@@ -94,6 +94,37 @@ Each package still has TWO tsconfig files (for IDE + typecheck):
 
 Framework packages (react, preact) go in `peerDependencies`, not `dependencies`.
 
+> **Host rule**: peer dependencies are not inherited transitively. Every app consuming
+> `@ptd/react-designer` must declare `react`, `react-dom`, and `@preact/signals-react` itself.
+
+### Extracted CSS package export
+
+React designer CSS is extracted by tsup and must be a public package subpath:
+
+```json
+{
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./styles.css": "./dist/index.css"
+  },
+  "style": "./dist/index.css",
+  "sideEffects": ["**/*.css"]
+}
+```
+
+Consumers import it explicitly:
+
+```ts
+import '@ptd/react-designer/styles.css'
+```
+
+Do not enable runtime `injectStyle` for a CSS Modules package. Explicit CSS is compatible with
+SSR/CSP, lets hosts control ordering, and avoids tsup/esbuild CSS Modules export mismatches.
+
 ## Build Script Convention
 
 Root `package.json` scripts run all packages via pnpm filter:
