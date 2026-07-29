@@ -124,6 +124,127 @@ describe('EditorStore commands', () => {
     expect(store.currentPageIndex.value).toBe(1)
   })
 
+  it('adds a blank page as one controlled history mutation', () => {
+    let id = 0
+    const onChange = vi.fn()
+    const store = new EditorStore(template(), {
+      idFactory: () => `page-${++id}`,
+      onChange,
+    })
+    store.selectComponent('a')
+    store.addGuide('x', 24)
+
+    expect(store.addPage()).toBe('page-2')
+    expect(store.template.value.pages.map((page) => page.id)).toEqual(['page-1', 'page-2'])
+    expect(store.currentPageIndex.value).toBe(1)
+    expect(store.components.value).toEqual([])
+    expect(store.selectedIds.value).toEqual([])
+    expect(store.guides.value).toEqual([])
+    expect(store.history.value).toHaveLength(2)
+    expect(onChange).toHaveBeenCalledTimes(1)
+
+    store.undo()
+    expect(store.template.value.pages.map((page) => page.id)).toEqual(['page-1'])
+    expect(store.currentPageIndex.value).toBe(0)
+    store.redo()
+    expect(store.template.value.pages.map((page) => page.id)).toEqual(['page-1', 'page-2'])
+    expect(store.currentPage.value).toBeDefined()
+  })
+
+  it('duplicates a page with fresh nested component ids', () => {
+    let id = 0
+    const sourceChild = component('child-original', 4)
+    const group: ComponentSchema = {
+      id: 'group-original',
+      component: 'RoyGroup',
+      propValue: [sourceChild],
+      style: { left: 10, top: 12, width: 20, height: 20, rotate: 0, opacity: 1 },
+      groupStyle: {},
+      position: {},
+    }
+    const store = new EditorStore(template([group]), {
+      idFactory: () => `duplicate-${++id}`,
+    })
+
+    expect(store.duplicatePage()).toBe('duplicate-1')
+    const copiedPage = store.template.value.pages[1]
+    const copiedGroup = copiedPage?.componentData[0]
+    const copiedChild = Array.isArray(copiedGroup?.propValue)
+      ? (copiedGroup.propValue[0] as ComponentSchema | undefined)
+      : undefined
+    expect(copiedPage?.id).toBe('duplicate-1')
+    expect(copiedGroup?.id).toBe('duplicate-2')
+    expect(copiedChild?.id).toBe('duplicate-3')
+    expect(copiedGroup).not.toBe(group)
+    expect(copiedChild).not.toBe(sourceChild)
+    expect(store.currentPageIndex.value).toBe(1)
+    expect(store.history.value).toHaveLength(2)
+  })
+
+  it('deletes a page, selects the nearest survivor and protects the final page', () => {
+    const initial = template()
+    initial.pages.push(
+      { id: 'page-2', componentData: [component('c', 12)] },
+      { id: 'page-3', componentData: [component('d', 24)] },
+    )
+    const onChange = vi.fn()
+    const store = new EditorStore(initial, { onChange })
+    store.setCurrentPage(1)
+
+    store.deletePage()
+    expect(store.template.value.pages.map((page) => page.id)).toEqual(['page-1', 'page-3'])
+    expect(store.currentPage.value?.id).toBe('page-3')
+    expect(store.history.value).toHaveLength(2)
+    expect(onChange).toHaveBeenCalledTimes(1)
+
+    store.undo()
+    expect(store.template.value.pages.map((page) => page.id)).toEqual([
+      'page-1',
+      'page-2',
+      'page-3',
+    ])
+    expect(store.currentPage.value?.id).toBe('page-3')
+
+    const single = new EditorStore(template(), { onChange })
+    single.deletePage()
+    expect(single.template.value.pages).toHaveLength(1)
+    expect(single.history.value).toHaveLength(1)
+  })
+
+  it('reorders pages while preserving active page identity and selection', () => {
+    const initial = template()
+    initial.pages.push(
+      { id: 'page-2', componentData: [component('c', 12)] },
+      { id: 'page-3', componentData: [component('d', 24)] },
+    )
+    const onChange = vi.fn()
+    const store = new EditorStore(initial, { onChange })
+    store.setCurrentPage(1)
+    store.selectComponent('c')
+
+    store.movePage(1, 0)
+    expect(store.template.value.pages.map((page) => page.id)).toEqual([
+      'page-2',
+      'page-1',
+      'page-3',
+    ])
+    expect(store.currentPage.value?.id).toBe('page-2')
+    expect(store.currentPageIndex.value).toBe(0)
+    expect(store.selectedIds.value).toEqual(['c'])
+    expect(store.history.value).toHaveLength(2)
+    expect(onChange).toHaveBeenCalledTimes(1)
+
+    store.undo()
+    expect(store.template.value.pages.map((page) => page.id)).toEqual([
+      'page-1',
+      'page-2',
+      'page-3',
+    ])
+    expect(store.currentPage.value?.id).toBe('page-2')
+    expect(store.currentPageIndex.value).toBe(1)
+    expect(store.selectedIds.value).toEqual(['c'])
+  })
+
   it('keeps colored guide state outside the template history', () => {
     let id = 0
     const initial = template()

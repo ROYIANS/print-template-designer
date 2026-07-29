@@ -2,17 +2,17 @@
   "id": "multi-page-support",
   "name": "multi-page-support",
   "title": "多页可视化管理",
-  "description": "",
-  "status": "planning",
-  "dev_type": null,
-  "scope": null,
-  "package": null,
+  "description": "Complete manual page structure management in @ptd/react-designer: add, duplicate, delete and reorder pages with correct ids, selection and history semantics.",
+  "status": "in_progress",
+  "dev_type": "feature",
+  "scope": "packages/react-designer page commands and Pages Resource Panel",
+  "package": "@ptd/react-designer",
   "priority": "P2",
   "creator": "ROYIANS",
   "assignee": "ROYIANS",
   "createdAt": "2026-05-21",
   "completedAt": null,
-  "branch": null,
+  "branch": "feature/refc",
   "base_branch": "feature/refc",
   "worktree_path": null,
   "commit": null,
@@ -20,7 +20,17 @@
   "subtasks": [],
   "children": [],
   "parent": null,
-  "relatedFiles": [],
-  "notes": "",
-  "meta": {}
+  "relatedFiles": [
+    "packages/core/src/types/template-schema.ts",
+    "packages/react-designer/src/state/editor.ts",
+    "packages/react-designer/src/components/Sidebar/Sidebar.tsx",
+    "packages/react-designer/src/components/Sidebar/Sidebar.module.css",
+    "packages/react-designer/src/__tests__/editor.test.ts"
+  ],
+  "notes": "Manual page structure management is complete: add, recursive-id-safe duplicate, delete with final-page guard, id-preserving reorder, repaired Undo/Redo page state and a five-action Pages footer. The user confirmed manual design pages plus derived automatic render pages; Word-style overflow pagination remains in data preview/export. Browser QA passed at 1600/1366/1024 after lifting Tooltip.Provider over the Resource Panel. Native HTML5 drag still requires one manual release check because the browser helper cannot synthesize DataTransfer.",
+  "meta": {
+    "source_task": "05-21-react-designer-package",
+    "next": "05-21-datasource-refactor",
+    "progress": "implementation and verification complete; awaiting commit"
+  }
 }

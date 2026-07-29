@@ -4,6 +4,7 @@ import {
   type ComponentSchema,
   type ComponentStyle,
   type PageDirection,
+  type TemplatePage,
   type TemplateSchema,
 } from '@ptd/core'
 import { getComponentRotatedStyle } from '../utils'
@@ -72,6 +73,14 @@ function regenerateIds(component: ComponentSchema, idFactory: () => string): Com
     )
   }
   return next
+}
+
+function duplicatePage(page: TemplatePage, idFactory: () => string): TemplatePage {
+  return {
+    ...clone(page),
+    id: idFactory(),
+    componentData: page.componentData.map((component) => regenerateIds(component, idFactory)),
+  }
 }
 
 export class EditorStore {
@@ -146,11 +155,58 @@ export class EditorStore {
     if (!Number.isInteger(index) || index < 0 || index >= this.template.value.pages.length) return
     if (this.currentPageIndex.value === index) return
     this.currentPageIndex.value = index
-    this.selectedIds.value = []
-    this.componentToReveal.value = null
-    this.guides.value = []
-    this.selectedGuideId.value = null
-    this.cancelAreaSelection()
+    this.resetPageSession()
+  }
+
+  addPage(): string {
+    const pages = [...this.template.value.pages]
+    const page: TemplatePage = { id: this.idFactory(), componentData: [] }
+    const insertionIndex = Math.min(this.currentPageIndex.value + 1, pages.length)
+    pages.splice(insertionIndex, 0, page)
+    this.commit({ ...this.template.value, pages }, false, page.id)
+    return page.id
+  }
+
+  duplicatePage(index = this.currentPageIndex.value): string | null {
+    const source = this.template.value.pages[index]
+    if (!source) return null
+    const page = duplicatePage(source, this.idFactory)
+    const pages = [...this.template.value.pages]
+    pages.splice(index + 1, 0, page)
+    this.commit({ ...this.template.value, pages }, false, page.id)
+    return page.id
+  }
+
+  deletePage(index = this.currentPageIndex.value): void {
+    const pages = this.template.value.pages
+    if (pages.length <= 1 || !pages[index]) return
+    const activePageId = this.currentPage.value?.id
+    const next = pages.filter((_, pageIndex) => pageIndex !== index)
+    const preferredPageId =
+      activePageId === pages[index]?.id
+        ? next[Math.min(index, next.length - 1)]?.id
+        : activePageId
+    this.commit({ ...this.template.value, pages: next }, false, preferredPageId)
+  }
+
+  movePage(fromIndex: number, toIndex: number): void {
+    const pages = this.template.value.pages
+    if (
+      !Number.isInteger(fromIndex) ||
+      !Number.isInteger(toIndex) ||
+      fromIndex < 0 ||
+      fromIndex >= pages.length ||
+      toIndex < 0 ||
+      toIndex >= pages.length ||
+      fromIndex === toIndex
+    )
+      return
+    const activePageId = this.currentPage.value?.id
+    const next = [...pages]
+    const [page] = next.splice(fromIndex, 1)
+    if (!page) return
+    next.splice(toIndex, 0, page)
+    this.commit({ ...this.template.value, pages: next }, false, activePageId)
   }
 
   selectComponent(id: string, additive = false): void {
@@ -656,13 +712,20 @@ export class EditorStore {
     this.updateCurrentPage(() => components)
   }
 
-  private commit(template: TemplateSchema, transient = false): void {
+  private commit(
+    template: TemplateSchema,
+    transient = false,
+    preferredPageId?: string,
+  ): void {
     if (template === this.template.value) return
+    const previousPageId = this.currentPage.value?.id
     this.template.value = template
+    this.repairCurrentPage(preferredPageId)
     this.lastEmitted = template
     this.onChange?.(template)
     if (!transient) this.pushHistory(template)
-    this.repairSelection()
+    if (previousPageId !== this.currentPage.value?.id) this.resetPageSession()
+    else this.repairSelection()
   }
 
   private pushHistory(template: TemplateSchema): void {
@@ -677,11 +740,33 @@ export class EditorStore {
   private restoreHistory(): void {
     const template = this.history.value[this.historyIndex.value]
     if (!template) return
+    const previousPageId = this.currentPage.value?.id
     this.template.value = template
+    this.repairCurrentPage(previousPageId)
     this.lastEmitted = template
     this.onChange?.(template)
     this.gestureStart = null
-    this.repairSelection()
+    if (previousPageId !== this.currentPage.value?.id) this.resetPageSession()
+    else this.repairSelection()
+  }
+
+  private repairCurrentPage(preferredPageId?: string): void {
+    const pages = this.template.value.pages
+    const preferredIndex = preferredPageId
+      ? pages.findIndex((page) => page.id === preferredPageId)
+      : -1
+    this.currentPageIndex.value =
+      preferredIndex >= 0
+        ? preferredIndex
+        : Math.min(this.currentPageIndex.value, Math.max(0, pages.length - 1))
+  }
+
+  private resetPageSession(): void {
+    this.selectedIds.value = []
+    this.componentToReveal.value = null
+    this.guides.value = []
+    this.selectedGuideId.value = null
+    this.cancelAreaSelection()
   }
 
   private repairSelection(): void {

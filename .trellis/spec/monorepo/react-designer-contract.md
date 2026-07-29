@@ -34,6 +34,11 @@ class EditorStore {
   commitGesture(): void
   cancelGesture(): void
   pasteAt(left: number, top: number): void
+  setCurrentPage(index: number): void
+  addPage(): string
+  duplicatePage(index?: number): string | null
+  deletePage(index?: number): void
+  movePage(fromIndex: number, toIndex: number): void
   undo(): void
   redo(): void
 }
@@ -94,6 +99,24 @@ import '@ptd/react-designer/styles.css'
   `Shift+F10` / the Context Menu key. Radix owns roving focus, Arrow navigation, Enter selection and
   Escape dismissal.
 
+#### Manual pages and derived pagination
+
+- `TemplateSchema.pages` is the ordered list of manually designed physical pages. Page switching is
+  instance UI navigation: it clears page-local selection/guides/reveal state but does not emit
+  `onChange` or create template history.
+- Add inserts one blank page after the current page. Duplicate inserts a deep independent copy after
+  the source and regenerates the page id plus every component and nested group-child id.
+- Delete must never remove the final page. When deleting the current page, select the page now at the
+  deleted index or the previous final page when the deleted page was last.
+- Reorder is a single immutable `pages` replacement and preserves the active page by `page.id`, not
+  by its former numeric index. Add, duplicate, delete and reorder each emit once and create exactly
+  one history entry.
+- History restore preserves the active page id when it still exists; otherwise it clamps
+  `currentPageIndex` into the restored page array and clears stale page-local selection state.
+- Automatic overflow pagination is derived preview/print output, not a mutation of the manual page
+  list. Future table/list/long-text flow rules must generate ephemeral render pages and must not write
+  those pages back into `TemplateSchema.pages`.
+
 #### Package consumption
 
 - `@ptd/react-designer` extracts CSS to `dist/index.css` and exports it as `./styles.css`.
@@ -121,6 +144,12 @@ import '@ptd/react-designer/styles.css'
 | Context click targets selected group item | Preserve the existing multi-selection                       |
 | Context click targets blank paper         | Clear selection; expose page properties and positioned paste |
 | `pasteAt` receives a multi-selection      | Preserve relative geometry; regenerate every id; one history |
+| Switch an existing page                   | Change UI page only; clear local selection; no host/history  |
+| Add or duplicate a page                   | Insert after source; select new page; one host/history       |
+| Duplicate a page with groups              | Regenerate page, component and recursive child ids           |
+| Delete the only page                      | No-op; template always retains at least one manual page       |
+| Reorder around the active page            | Preserve active `page.id` and valid component selection       |
+| History removes the active page           | Select nearest valid page; never expose an invalid index      |
 | Structured `propValue` (array/object)    | Inspector is read-only; never coerce to string              |
 | Host omits `styles.css` import           | Integration is invalid; UI styling is not guaranteed        |
 | Built CSS Module default export is `{}`  | Invalid package build; host elements receive no class names |
@@ -144,6 +173,8 @@ import '@ptd/react-designer/styles.css'
   the exact starting template without history; locked commands are no-ops.
 - Store unit test: `pasteAt` preserves multi-selection geometry, selects fresh ids, emits one host
   change, creates one history entry, undoes as one operation and clamps into physical page bounds.
+- Store unit test: add/duplicate/delete/reorder page commands cover fresh recursive ids, final-page
+  protection, one host/history mutation, active-page identity and Undo/Redo index repair.
 - Geometry unit test: group → scale/rotate/move → ungroup preserves visual geometry.
 - Inspector helper test: structured values are read-only; numeric primitive values preserve type.
 - Package build assertion: ESM, CJS, DTS and `dist/index.css` exist; ESM/CJS contain non-empty CSS

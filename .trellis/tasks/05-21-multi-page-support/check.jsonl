@@ -1,3 +1,6 @@
 {"file": ".trellis/spec/monorepo/quality-guidelines.md", "reason": "ESLint/Prettier 规范，检查代码风格合规性"}
 {"file": ".trellis/spec/monorepo/typescript-conventions.md", "reason": "strict TS 合规检查：多页状态类型安全，禁止 as any"}
 {"file": ".trellis/spec/monorepo/styling-conventions.md", "reason": "CSS Modules 合规检查：禁止 inline style"}
+{"file": ".trellis/spec/monorepo/react-designer-contract.md", "reason": "检查页面命令的受控值、历史、选择与外部同步语义"}
+{"file": ".trellis/spec/monorepo/ptd-ui-system.md", "reason": "检查 Pages 面板、拖拽替代入口、响应式与无障碍合同"}
+{"file": ".trellis/tasks/05-21-multi-page-support/research/current-page-contract.md", "reason": "核对页面 identity、最后一页保护和历史修复决策"}

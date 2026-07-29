@@ -2,3 +2,6 @@
 {"file": ".trellis/spec/monorepo/typescript-conventions.md", "reason": "strict TS、公共 API 类型导出，多页状态类型定义"}
 {"file": ".trellis/spec/monorepo/styling-conventions.md", "reason": "CSS Modules 用法，多页 UI 组件样式规范"}
 {"file": ".trellis/spec/monorepo/quality-guidelines.md", "reason": "ESLint/Prettier/Node >=20 约定"}
+{"file": ".trellis/spec/monorepo/react-designer-contract.md", "reason": "受控模板、完整历史、页面导航与 Store 命令边界"}
+{"file": ".trellis/spec/monorepo/ptd-ui-system.md", "reason": "Pages Resource Panel、固定 Footer、键盘替代入口与响应式层级合同"}
+{"file": ".trellis/tasks/05-21-multi-page-support/research/current-page-contract.md", "reason": "现有页面 Schema、currentPageIndex 与多页命令决策"}
