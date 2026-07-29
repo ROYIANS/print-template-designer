@@ -62,12 +62,13 @@ Every package under `packages/` must have:
 
 Each package still has TWO tsconfig files (for IDE + typecheck):
 
-| File | Purpose |
-|------|---------|
-| `tsconfig.json` | IDE + `tsc --noEmit` typecheck |
+| File                  | Purpose                                                |
+| --------------------- | ------------------------------------------------------ |
+| `tsconfig.json`       | IDE + `tsc --noEmit` typecheck                         |
 | `tsconfig.build.json` | Kept for reference; tsup uses `tsconfig.json` directly |
 
 `tsconfig.json`:
+
 ```json
 {
   "extends": "../../tsconfig.base.json",
@@ -85,12 +86,12 @@ Each package still has TWO tsconfig files (for IDE + typecheck):
 
 ## peerDependencies
 
-| Package | peerDependencies |
-|---------|-----------------|
-| `@ptd/core` | none |
-| `@ptd/components` | `@preact/signals-core: ^1` |
+| Package               | peerDependencies                                              |
+| --------------------- | ------------------------------------------------------------- |
+| `@ptd/core`           | none                                                          |
+| `@ptd/components`     | `@preact/signals-core: ^1`                                    |
 | `@ptd/react-designer` | `react: >=18`, `react-dom: >=18`, `@preact/signals-react: ^2` |
-| `@ptd/export` | none |
+| `@ptd/export`         | none                                                          |
 
 Framework packages (react, preact) go in `peerDependencies`, not `dependencies`.
 
@@ -155,9 +156,15 @@ The Web development command must build `@ptd/core`, `@ptd/components`, and
 `@ptd/react-designer` sequentially before starting their watchers and Vite. A Vite-only command
 can consume missing or stale package `dist` output.
 
+The same dependency order applies to clean CI typechecks. Workspace packages publish their type
+entry from `dist/index.d.ts`, while `typecheck` uses `tsc --noEmit` and does not create that file.
+CI must therefore typecheck and build each upstream package before typechecking its consumer
+(`core` -> `components` -> `react-designer` -> `web`). Do not typecheck every package before the
+first build; local ignored `dist` output can hide the resulting clean-runner resolution failure.
+
 Individual package:
+
 ```bash
 pnpm --filter @ptd/core build
 pnpm --filter web dev
 ```
-

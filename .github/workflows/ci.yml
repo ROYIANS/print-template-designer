@@ -57,11 +57,14 @@ jobs:
             exit 1
           }
 
-      - name: Typecheck frontend
+      - name: Typecheck and build frontend dependencies
         run: |
           pnpm --filter @ptd/core typecheck
+          pnpm --filter @ptd/core build
           pnpm --filter @ptd/components typecheck
+          pnpm --filter @ptd/components build
           pnpm --filter @ptd/react-designer typecheck
+          pnpm --filter @ptd/react-designer build
           pnpm --filter web typecheck
 
       - name: Test frontend packages
@@ -73,12 +76,8 @@ jobs:
       - name: Lint frontend
         run: pnpm lint:frontend
 
-      - name: Build frontend
-        run: |
-          pnpm --filter @ptd/core build
-          pnpm --filter @ptd/components build
-          pnpm --filter @ptd/react-designer build
-          pnpm --filter web build
+      - name: Build web
+        run: pnpm --filter web build
 
   publish-web-image:
     name: Publish web image
