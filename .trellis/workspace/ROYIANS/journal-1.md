@@ -391,3 +391,36 @@ Upgraded apps/server to NestJS 11 and Prisma 7.9 with SQLite driver adapter and 
 ### Next Steps
 
 - None - task complete
+
+
+## Session 12: Professional component catalog and canvas tools
+
+**Date**: 2026-07-30
+**Task**: Professional component catalog and canvas tools
+**Branch**: `feature/refc`
+
+### Summary
+
+Built the five-group component catalog with planned placeholders, a two-level neutral sidebar, grouped Shape tools, persistent Text-frame drawing, viewport-only Hand/Space panning, Context Bar guidance, focused geometry/tool-state tests, and updated UI/integration contracts.
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `965c18163d489957dca21403cd71548316fad0d0` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
