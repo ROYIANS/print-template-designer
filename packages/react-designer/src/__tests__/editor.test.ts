@@ -77,6 +77,24 @@ describe('EditorStore history and ownership', () => {
     expect(store.components.value[0]?.style.left).toBe(0)
   })
 
+  it('cancels a transient gesture without adding history', () => {
+    const initial = template()
+    const onChange = vi.fn()
+    const store = new EditorStore(initial, { onChange })
+    store.selectComponent('a')
+    store.beginGesture()
+    store.transformComponent('a', { left: 12 }, true)
+
+    store.cancelGesture()
+
+    expect(store.template.value).toBe(initial)
+    expect(store.components.value[0]?.style.left).toBe(0)
+    expect(store.history.value).toHaveLength(1)
+    expect(store.canUndo.value).toBe(false)
+    expect(store.selectedIds.value).toEqual(['a'])
+    expect(onChange).toHaveBeenCalledTimes(2)
+  })
+
   it('keeps instances isolated and does not mutate caller input', () => {
     const initial = template()
     const first = new EditorStore(initial)

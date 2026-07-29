@@ -5,6 +5,7 @@ import {
   isHexColor,
   parseFiniteNumber,
   parseTextPropValue,
+  scrubNumberValue,
 } from '../components/PropertyInspector/propertyValue'
 
 function component(type: ComponentSchema['component'], propValue: unknown): ComponentSchema {
@@ -42,5 +43,14 @@ describe('property inspector value guards', () => {
     expect(isHexColor('#cf4d34')).toBe(true)
     expect(isHexColor('#fff')).toBe(false)
     expect(isHexColor('mixed')).toBe(false)
+  })
+
+  it('calculates normal, accelerated, precise and clamped scrub values', () => {
+    expect(scrubNumberValue(100, 8)).toBe(104)
+    expect(scrubNumberValue(100, -8, { shiftKey: true })).toBe(60)
+    expect(scrubNumberValue(10, 8, { altKey: true })).toBe(10.4)
+    expect(scrubNumberValue(98, 8, { max: 100 })).toBe(100)
+    expect(scrubNumberValue(2, -8, { min: 1 })).toBe(1)
+    expect(scrubNumberValue(1, 8, { step: 5 })).toBe(21)
   })
 })

@@ -18,7 +18,11 @@
   "commit": null,
   "pr_url": null,
   "subtasks": [],
-  "children": ["07-29-canvas-first-ui-finalize", "07-29-designer-ui-refinement"],
+  "children": [
+    "07-29-canvas-first-ui-finalize",
+    "07-29-designer-ui-refinement",
+    "07-29-inspector-scrub-refinement"
+  ],
   "parent": null,
   "relatedFiles": [
     "packages/react-designer/src/",

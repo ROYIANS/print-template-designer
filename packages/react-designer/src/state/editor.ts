@@ -564,6 +564,16 @@ export class EditorStore {
     this.pushHistory(this.template.value)
   }
 
+  cancelGesture(): void {
+    const start = this.gestureStart
+    this.gestureStart = null
+    if (!start || start === this.template.value) return
+    this.template.value = start
+    this.lastEmitted = start
+    this.onChange?.(start)
+    this.repairSelection()
+  }
+
   undo(): void {
     if (!this.canUndo.value) return
     this.historyIndex.value -= 1

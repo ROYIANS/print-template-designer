@@ -1,0 +1,4 @@
+{"file":".trellis/spec/monorepo/ptd-ui-system.md","reason":"Authoritative Inspector hierarchy, control, token, responsive and accessibility contract."}
+{"file":".trellis/spec/monorepo/react-designer-contract.md","reason":"Editor state, history and public package behavior constraints."}
+{"file":".trellis/spec/monorepo/styling-conventions.md","reason":"CSS Module, token and dynamic-style rules for the UI implementation."}
+{"file":".trellis/spec/frontend/component-guidelines.md","reason":"General component accessibility and interaction guidance; React implementation follows newer monorepo contracts where they differ."}

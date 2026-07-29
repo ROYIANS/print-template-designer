@@ -25,55 +25,24 @@
   border-bottom: 1px solid var(--ptd-border-subtle);
 }
 
-.section > summary {
-  min-height: 34px;
+.sectionHeading {
+  min-height: 32px;
   display: flex;
   align-items: center;
   gap: var(--ptd-space-2);
   padding: 0 var(--ptd-space-3);
   color: var(--ptd-text-strong);
   background: color-mix(in oklch, var(--ptd-surface-panel) 92%, var(--ptd-surface-sunken));
-  cursor: pointer;
-  list-style: none;
-  user-select: none;
 }
 
-.section > summary::-webkit-details-marker {
-  display: none;
-}
-
-.section > summary::before {
-  content: '';
-  width: 5px;
-  height: 5px;
-  flex: 0 0 auto;
-  transform: rotate(-45deg);
-  border-right: 1px solid var(--ptd-text-muted);
-  border-bottom: 1px solid var(--ptd-text-muted);
-  transition: transform var(--ptd-duration-instant) var(--ptd-ease-out);
-}
-
-.section[open] > summary::before {
-  transform: rotate(45deg) translate(-1px, -1px);
-}
-
-.section > summary:hover {
-  background: var(--ptd-surface-sunken);
-}
-
-.section > summary:focus-visible {
-  position: relative;
-  z-index: var(--ptd-layer-stage);
-  outline: 2px solid var(--ptd-focus);
-  outline-offset: -2px;
-}
-
-.section > summary > span {
+.sectionHeading > span,
+.disclosure > summary > span {
   font-size: 11px;
   font-weight: 680;
 }
 
-.section > summary > small {
+.sectionHeading > small,
+.disclosure > summary > small {
   min-width: 0;
   margin-left: auto;
   overflow: hidden;
@@ -87,6 +56,66 @@
 
 .sectionBody {
   padding: 10px var(--ptd-space-3) var(--ptd-space-3);
+}
+
+.advancedWrap {
+  min-width: 0;
+  grid-column: 1 / -1;
+}
+
+.disclosure {
+  margin-top: 2px;
+  overflow: hidden;
+  border: 1px solid var(--ptd-border-subtle);
+  border-radius: var(--ptd-radius-1);
+}
+
+.disclosure > summary {
+  min-height: 30px;
+  display: flex;
+  align-items: center;
+  gap: var(--ptd-space-2);
+  padding: 0 var(--ptd-space-2);
+  color: var(--ptd-text-strong);
+  background: var(--ptd-surface-sunken);
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+
+.disclosure > summary::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  flex: 0 0 auto;
+  transform: rotate(-45deg);
+  border-right: 1px solid var(--ptd-text-muted);
+  border-bottom: 1px solid var(--ptd-text-muted);
+  transition: transform var(--ptd-duration-instant) var(--ptd-ease-out);
+}
+
+.disclosure[open] > summary::before {
+  transform: rotate(45deg) translate(-1px, -1px);
+}
+
+.disclosure > summary:hover {
+  background: color-mix(in oklch, var(--ptd-surface-sunken) 76%, var(--ptd-surface-raised));
+}
+
+.disclosure > summary:focus-visible {
+  position: relative;
+  z-index: var(--ptd-layer-stage);
+  outline: 2px solid var(--ptd-focus);
+  outline-offset: -2px;
+}
+
+.disclosureBody {
+  padding: var(--ptd-space-2);
+  border-top: 1px solid var(--ptd-border-subtle);
 }
 
 .fieldGrid {
@@ -106,10 +135,49 @@
   grid-column: 1 / -1;
 }
 
-.fieldLabel {
+.fieldLabel,
+.scrubLabel {
   color: var(--ptd-text-muted);
   font-size: 9px;
   line-height: 1.2;
+}
+
+.scrubLabel {
+  width: max-content;
+  max-width: 100%;
+  margin: 0 -2px;
+  padding: 0 2px;
+  overflow: hidden;
+  border: 0;
+  border-radius: var(--ptd-radius-1);
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: ew-resize;
+  touch-action: none;
+  user-select: none;
+}
+
+.scrubLabel:hover:not(:disabled),
+.scrubLabel[data-active='true'] {
+  color: var(--ptd-selection-strong);
+  background: var(--ptd-selection-subtle);
+}
+
+.scrubLabel[data-active='true'] {
+  cursor: col-resize;
+}
+
+.scrubLabel:focus-visible {
+  outline: 1px solid var(--ptd-focus);
+  outline-offset: 1px;
+}
+
+.scrubLabel:disabled {
+  color: var(--ptd-text-disabled);
+  cursor: default;
 }
 
 .numberControl {

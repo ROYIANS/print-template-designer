@@ -1,0 +1,3 @@
+{"file":".trellis/spec/monorepo/ptd-ui-system.md","reason":"Verify Inspector disclosure, scrub accessibility, responsive behavior and token compliance."}
+{"file":".trellis/spec/monorepo/quality-guidelines.md","reason":"Run the required typecheck, test, lint, build and static-quality gates."}
+{"file":".trellis/spec/monorepo/react-designer-contract.md","reason":"Verify gesture history and schema/public API behavior remain correct."}

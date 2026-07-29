@@ -1,4 +1,12 @@
-import { useEffect, useState, type CSSProperties, type ReactNode } from 'react'
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type PointerEvent as ReactPointerEvent,
+  type ReactNode,
+} from 'react'
 import { useSignals } from '@preact/signals-react/runtime'
 import { getPageDimensions, pxToMm, type ComponentSchema, type ComponentStyle } from '@ptd/core'
 import { RiAddLine, RiLandscapeLine, RiRuler2Line, RiSubtractLine } from '@remixicon/react'
@@ -9,6 +17,7 @@ import {
   isHexColor,
   parseFiniteNumber,
   parseTextPropValue,
+  scrubNumberValue,
 } from './propertyValue'
 import styles from './PropertyInspector.module.css'
 
@@ -16,15 +25,25 @@ type ColorVariables = CSSProperties & { '--field-color': string }
 
 interface FieldProps {
   label: string
+  labelControl?: ReactNode
   wide?: boolean
   children: ReactNode
 }
 
-function Field({ label, wide = false, children }: FieldProps) {
+function Field({ label, labelControl, wide = false, children }: FieldProps) {
   return (
     <div className={styles.field} data-wide={wide || undefined}>
-      <span className={styles.fieldLabel}>{label}</span>
+      {labelControl ?? <span className={styles.fieldLabel}>{label}</span>}
       {children}
+    </div>
+  )
+}
+
+function SectionHeading({ title, meta }: { title: string; meta?: string }) {
+  return (
+    <div className={styles.sectionHeading}>
+      <span>{title}</span>
+      {meta && <small>{meta}</small>}
     </div>
   )
 }
@@ -33,20 +52,35 @@ function InspectorSection({
   title,
   meta,
   children,
-  defaultOpen = true,
 }: {
   title: string
   meta?: string
   children: ReactNode
-  defaultOpen?: boolean
 }) {
   return (
-    <details className={styles.section} open={defaultOpen}>
+    <section className={styles.section}>
+      <SectionHeading title={title} meta={meta} />
+      <div className={styles.sectionBody}>{children}</div>
+    </section>
+  )
+}
+
+function InspectorDisclosure({
+  title,
+  meta,
+  children,
+}: {
+  title: string
+  meta?: string
+  children: ReactNode
+}) {
+  return (
+    <details className={styles.disclosure}>
       <summary>
         <span>{title}</span>
         {meta && <small>{meta}</small>}
       </summary>
-      <div className={styles.sectionBody}>{children}</div>
+      <div className={styles.disclosureBody}>{children}</div>
     </details>
   )
 }
@@ -89,6 +123,7 @@ const NUMBER_FIELDS: Array<{
   label: string
   unit?: string
   step?: number
+  scrubStep?: number
   min?: number
   max?: number
   scale?: number
@@ -98,7 +133,16 @@ const NUMBER_FIELDS: Array<{
   { key: 'width', label: '宽度', unit: 'px', min: 1 },
   { key: 'height', label: '高度', unit: 'px', min: 1 },
   { key: 'rotate', label: '旋转', unit: '°' },
-  { key: 'opacity', label: '透明度', unit: '%', step: 5, min: 0, max: 100, scale: 100 },
+  {
+    key: 'opacity',
+    label: '透明度',
+    unit: '%',
+    step: 5,
+    scrubStep: 1,
+    min: 0,
+    max: 100,
+    scale: 100,
+  },
   { key: 'fontSize', label: '字号', unit: 'px', min: 1 },
   { key: 'borderWidth', label: '边框', unit: 'px', min: 0 },
 ]
@@ -109,6 +153,63 @@ const FONT_OPTIONS: Array<[string, string]> = [
   ["'Outfit', 'Outfit Variable', sans-serif", 'Outfit'],
   ["'Microsoft YaHei UI', 'PingFang SC', sans-serif", '系统无衬线'],
 ]
+
+const CONTENT_COMPONENTS = new Set<ComponentSchema['component']>([
+  'RoySimpleText',
+  'RoyText',
+  'RoySimpleTable',
+  'RoyComplexTable',
+  'RoyImage',
+  'RoyQRCode',
+  'RoyBarCode',
+  'RoyGroup',
+])
+const TYPOGRAPHY_COMPONENTS = new Set<ComponentSchema['component']>([
+  'RoySimpleText',
+  'RoyText',
+  'RoySimpleTable',
+  'RoyComplexTable',
+])
+const ALIGNMENT_COMPONENTS = new Set<ComponentSchema['component']>(['RoySimpleText'])
+const BACKGROUND_COMPONENTS = new Set<ComponentSchema['component']>([
+  'RoySimpleText',
+  'RoyText',
+  'RoySimpleTable',
+  'RoyComplexTable',
+  'RoyLine',
+  'RoyRect',
+  'RoyCircle',
+  'RoyStar',
+  'RoyImage',
+  'RoyQRCode',
+  'RoyBarCode',
+])
+const BORDER_COMPONENTS = new Set<ComponentSchema['component']>([
+  'RoySimpleText',
+  'RoyText',
+  'RoySimpleTable',
+  'RoyComplexTable',
+  'RoyRect',
+  'RoyCircle',
+  'RoyImage',
+  'RoyQRCode',
+  'RoyBarCode',
+])
+const BORDER_STYLE_COMPONENTS = new Set<ComponentSchema['component']>([
+  'RoySimpleText',
+  'RoyText',
+  'RoyRect',
+  'RoyCircle',
+  'RoyImage',
+  'RoyQRCode',
+  'RoyBarCode',
+])
+const RADIUS_COMPONENTS = new Set<ComponentSchema['component']>([
+  'RoySimpleText',
+  'RoyText',
+  'RoyRect',
+  'RoyImage',
+])
 
 export function PropertyInspector() {
   useSignals()
@@ -205,6 +306,7 @@ function SingleInspector({ component }: { component: ComponentSchema }) {
   const [textDraft, setTextDraft] = useState<string | null>(null)
   const start = () => store.beginGesture()
   const finish = () => store.commitGesture()
+  const cancel = () => store.cancelGesture()
   const updateStyle = (key: keyof ComponentStyle, value: unknown) =>
     store.updateComponentStyle(component.id, { [key]: value }, true)
   const updateDiscreteStyle = (key: keyof ComponentStyle, value: unknown) => {
@@ -216,6 +318,15 @@ function SingleInspector({ component }: { component: ComponentSchema }) {
   useEffect(() => () => store.commitGesture(), [store])
 
   const editableText = isEditableTextPropValue(component)
+  const showsContent = CONTENT_COMPONENTS.has(component.component)
+  const showsTypography = TYPOGRAPHY_COMPONENTS.has(component.component)
+  const showsAlignment = ALIGNMENT_COMPONENTS.has(component.component)
+  const showsTextColor = TYPOGRAPHY_COMPONENTS.has(component.component)
+  const showsBackground = BACKGROUND_COMPONENTS.has(component.component)
+  const showsBorder = BORDER_COMPONENTS.has(component.component)
+  const showsBorderStyle = BORDER_STYLE_COMPONENTS.has(component.component)
+  const showsRadius = RADIUS_COMPONENTS.has(component.component)
+  const showsAppearance = showsTextColor || showsBackground || showsBorder
   const fontValue = text(component.style.fontFamily, FONT_OPTIONS[0]![0])
   const fontOptions = FONT_OPTIONS.some(([value]) => value === fontValue)
     ? FONT_OPTIONS
@@ -235,63 +346,65 @@ function SingleInspector({ component }: { component: ComponentSchema }) {
         />
       }
     >
-      <InspectorSection title="内容" meta={editableText ? '可编辑' : '结构化'}>
-        {editableText ? (
-          <Field label={component.component === 'RoyText' ? '内容源码' : '文本值'} wide>
-            {component.component === 'RoyText' ? (
-              <textarea
-                className={styles.textArea}
-                aria-label="内容源码"
-                value={textDraft ?? printable(component.propValue)}
-                disabled={locked}
-                onFocus={(event) => {
-                  setTextDraft(event.currentTarget.value)
-                  start()
-                }}
-                onBlur={() => {
-                  setTextDraft(null)
-                  finish()
-                }}
-                onChange={(event) => {
-                  const draft = event.target.value
-                  setTextDraft(draft)
-                  const value = parseTextPropValue(component.propValue, draft)
-                  if (value !== null)
-                    store.updateComponent(component.id, { propValue: value }, true)
-                }}
-              />
-            ) : (
-              <input
-                className={styles.textControl}
-                type="text"
-                aria-label="文本值"
-                value={textDraft ?? printable(component.propValue)}
-                disabled={locked}
-                onFocus={(event) => {
-                  setTextDraft(event.currentTarget.value)
-                  start()
-                }}
-                onBlur={() => {
-                  setTextDraft(null)
-                  finish()
-                }}
-                onChange={(event) => {
-                  const draft = event.target.value
-                  setTextDraft(draft)
-                  const value = parseTextPropValue(component.propValue, draft)
-                  if (value !== null)
-                    store.updateComponent(component.id, { propValue: value }, true)
-                }}
-              />
-            )}
-          </Field>
-        ) : (
-          <div className={styles.structuredNotice} role="note">
-            <strong>结构化内容由专用编辑器维护</strong>
-            <span>此面板仍可调整几何、层级与视觉样式。</span>
-          </div>
-        )}
-      </InspectorSection>
+      {showsContent && (
+        <InspectorSection title="内容" meta={editableText ? '可编辑' : '专用编辑器'}>
+          {editableText ? (
+            <Field label={component.component === 'RoyText' ? '内容源码' : '文本值'} wide>
+              {component.component === 'RoyText' ? (
+                <textarea
+                  className={styles.textArea}
+                  aria-label="内容源码"
+                  value={textDraft ?? printable(component.propValue)}
+                  disabled={locked}
+                  onFocus={(event) => {
+                    setTextDraft(event.currentTarget.value)
+                    start()
+                  }}
+                  onBlur={() => {
+                    setTextDraft(null)
+                    finish()
+                  }}
+                  onChange={(event) => {
+                    const draft = event.target.value
+                    setTextDraft(draft)
+                    const value = parseTextPropValue(component.propValue, draft)
+                    if (value !== null)
+                      store.updateComponent(component.id, { propValue: value }, true)
+                  }}
+                />
+              ) : (
+                <input
+                  className={styles.textControl}
+                  type="text"
+                  aria-label="文本值"
+                  value={textDraft ?? printable(component.propValue)}
+                  disabled={locked}
+                  onFocus={(event) => {
+                    setTextDraft(event.currentTarget.value)
+                    start()
+                  }}
+                  onBlur={() => {
+                    setTextDraft(null)
+                    finish()
+                  }}
+                  onChange={(event) => {
+                    const draft = event.target.value
+                    setTextDraft(draft)
+                    const value = parseTextPropValue(component.propValue, draft)
+                    if (value !== null)
+                      store.updateComponent(component.id, { propValue: value }, true)
+                  }}
+                />
+              )}
+            </Field>
+          ) : (
+            <div className={styles.structuredNotice} role="note">
+              <strong>结构化内容由专用编辑器维护</strong>
+              <span>此面板仍可调整几何、层级与视觉样式。</span>
+            </div>
+          )}
+        </InspectorSection>
+      )}
 
       <InspectorSection title="几何" meta="位置与尺寸">
         <div className={styles.fieldGrid}>
@@ -303,6 +416,7 @@ function SingleInspector({ component }: { component: ComponentSchema }) {
               disabled={locked}
               onStart={start}
               onFinish={finish}
+              onCancel={cancel}
               onValue={(value) => updateStyle(key, value / scale)}
               {...attributes}
             />
@@ -310,115 +424,142 @@ function SingleInspector({ component }: { component: ComponentSchema }) {
         </div>
       </InspectorSection>
 
-      <InspectorSection title="排版" meta="文字与对齐">
-        <div className={styles.fieldGrid}>
-          <NumberInput
-            label="字号"
-            value={numeric(component.style.fontSize)}
-            unit="px"
-            min={1}
-            disabled={locked}
-            onStart={start}
-            onFinish={finish}
-            onValue={(value) => updateStyle('fontSize', value)}
-          />
-          <SelectInput
-            label="字体"
-            value={fontValue}
-            disabled={locked}
-            options={fontOptions}
-            onStart={start}
-            onFinish={finish}
-            onValue={(value) => updateStyle('fontFamily', value)}
-          />
-          <SegmentedInput
-            label="水平对齐"
-            value={text(component.style.justifyContent, 'flex-start')}
-            disabled={locked}
-            wide
-            options={[
-              { value: 'flex-start', label: '左' },
-              { value: 'center', label: '中' },
-              { value: 'flex-end', label: '右' },
-            ]}
-            onValue={(value) => updateDiscreteStyle('justifyContent', value)}
-          />
-          <SegmentedInput
-            label="垂直对齐"
-            value={text(component.style.alignItems, 'flex-start')}
-            disabled={locked}
-            wide
-            options={[
-              { value: 'flex-start', label: '上' },
-              { value: 'center', label: '中' },
-              { value: 'flex-end', label: '下' },
-            ]}
-            onValue={(value) => updateDiscreteStyle('alignItems', value)}
-          />
-        </div>
-      </InspectorSection>
+      {showsTypography && (
+        <InspectorSection title="排版" meta="文字与对齐">
+          <div className={styles.fieldGrid}>
+            <NumberInput
+              label="字号"
+              value={numeric(component.style.fontSize)}
+              unit="px"
+              min={1}
+              disabled={locked}
+              onStart={start}
+              onFinish={finish}
+              onCancel={cancel}
+              onValue={(value) => updateStyle('fontSize', value)}
+            />
+            <SelectInput
+              label="字体"
+              value={fontValue}
+              disabled={locked}
+              options={fontOptions}
+              onStart={start}
+              onFinish={finish}
+              onValue={(value) => updateStyle('fontFamily', value)}
+            />
+            {showsAlignment && (
+              <>
+                <SegmentedInput
+                  label="水平对齐"
+                  value={text(component.style.justifyContent, 'flex-start')}
+                  disabled={locked}
+                  wide
+                  options={[
+                    { value: 'flex-start', label: '左' },
+                    { value: 'center', label: '中' },
+                    { value: 'flex-end', label: '右' },
+                  ]}
+                  onValue={(value) => updateDiscreteStyle('justifyContent', value)}
+                />
+                <SegmentedInput
+                  label="垂直对齐"
+                  value={text(component.style.alignItems, 'flex-start')}
+                  disabled={locked}
+                  wide
+                  options={[
+                    { value: 'flex-start', label: '上' },
+                    { value: 'center', label: '中' },
+                    { value: 'flex-end', label: '下' },
+                  ]}
+                  onValue={(value) => updateDiscreteStyle('alignItems', value)}
+                />
+              </>
+            )}
+          </div>
+        </InspectorSection>
+      )}
 
-      <InspectorSection title="外观" meta="填充与描边" defaultOpen={false}>
-        <div className={styles.fieldGrid}>
-          <ColorInput
-            label="文字"
-            value={color(component.style.color, '#1d2735')}
-            disabled={locked}
-            onStart={start}
-            onFinish={finish}
-            onValue={(value) => updateStyle('color', value)}
-          />
-          <ColorInput
-            label="背景"
-            value={color(component.style.background, '#f8fafc')}
-            disabled={locked}
-            onStart={start}
-            onFinish={finish}
-            onValue={(value) => updateStyle('background', value)}
-          />
-          <ColorInput
-            label="边框色"
-            value={color(component.style.borderColor, '#7d8999')}
-            disabled={locked}
-            onStart={start}
-            onFinish={finish}
-            onValue={(value) => updateStyle('borderColor', value)}
-          />
-          <NumberInput
-            label="边框宽"
-            value={numeric(component.style.borderWidth)}
-            unit="px"
-            min={0}
-            disabled={locked}
-            onStart={start}
-            onFinish={finish}
-            onValue={(value) => updateStyle('borderWidth', value)}
-          />
-          <NumberInput
-            label="圆角"
-            value={cssNumber(component.style.borderRadius)}
-            unit="px"
-            min={0}
-            disabled={locked}
-            onStart={start}
-            onFinish={finish}
-            onValue={(value) => updateStyle('borderRadius', `${value}px`)}
-          />
-          <SegmentedInput
-            label="边框样式"
-            value={text(component.style.borderType, 'solid')}
-            disabled={locked}
-            wide
-            options={[
-              { value: 'solid', label: '实线' },
-              { value: 'dashed', label: '虚线' },
-              { value: 'dotted', label: '点线' },
-              { value: 'none', label: '无' },
-            ]}
-            onValue={(value) => updateDiscreteStyle('borderType', value)}
-          />
-        </div>
-      </InspectorSection>
+      {showsAppearance && (
+        <InspectorSection title="外观" meta={showsBorder ? '颜色与描边' : '填充'}>
+          <div className={styles.fieldGrid}>
+            {showsTextColor && (
+              <ColorInput
+                label="文字"
+                value={color(component.style.color, '#1d2735')}
+                disabled={locked}
+                onStart={start}
+                onFinish={finish}
+                onValue={(value) => updateStyle('color', value)}
+              />
+            )}
+            {showsBackground && (
+              <ColorInput
+                label={component.component === 'RoyLine' ? '线条' : '背景'}
+                value={color(component.style.background, '#f8fafc')}
+                disabled={locked}
+                onStart={start}
+                onFinish={finish}
+                onValue={(value) => updateStyle('background', value)}
+              />
+            )}
+            {showsBorder && (
+              <div className={styles.advancedWrap}>
+                <InspectorDisclosure title="高级描边与圆角" meta="按需展开">
+                  <div className={styles.fieldGrid}>
+                    <ColorInput
+                      label="边框色"
+                      value={color(component.style.borderColor, '#7d8999')}
+                      disabled={locked}
+                      onStart={start}
+                      onFinish={finish}
+                      onValue={(value) => updateStyle('borderColor', value)}
+                    />
+                    <NumberInput
+                      label="边框宽"
+                      value={numeric(component.style.borderWidth)}
+                      unit="px"
+                      min={0}
+                      disabled={locked}
+                      onStart={start}
+                      onFinish={finish}
+                      onCancel={cancel}
+                      onValue={(value) => updateStyle('borderWidth', value)}
+                    />
+                    {showsRadius && (
+                      <NumberInput
+                        label="圆角"
+                        value={cssNumber(component.style.borderRadius)}
+                        unit="px"
+                        min={0}
+                        disabled={locked}
+                        onStart={start}
+                        onFinish={finish}
+                        onCancel={cancel}
+                        onValue={(value) => updateStyle('borderRadius', `${value}px`)}
+                      />
+                    )}
+                    {showsBorderStyle && (
+                      <SegmentedInput
+                        label="边框样式"
+                        value={text(component.style.borderType, 'solid')}
+                        disabled={locked}
+                        wide
+                        options={[
+                          { value: 'solid', label: '实线' },
+                          { value: 'dashed', label: '虚线' },
+                          { value: 'dotted', label: '点线' },
+                          { value: 'none', label: '无' },
+                        ]}
+                        onValue={(value) => updateDiscreteStyle('borderType', value)}
+                      />
+                    )}
+                  </div>
+                </InspectorDisclosure>
+              </div>
+            )}
+          </div>
+        </InspectorSection>
+      )}
     </InspectorShell>
   )
 }
@@ -428,6 +569,7 @@ function BatchInspector({ components }: { components: ComponentSchema[] }) {
   const locked = components.some((component) => component.isLock)
   const start = () => store.beginGesture()
   const finish = () => store.commitGesture()
+  const cancel = () => store.cancelGesture()
   useEffect(() => () => store.commitGesture(), [store])
 
   const shared = (key: keyof ComponentStyle): { mixed: boolean; value: unknown } => {
@@ -440,6 +582,9 @@ function BatchInspector({ components }: { components: ComponentSchema[] }) {
   const opacity = shared('opacity')
   const fontSize = shared('fontSize')
   const sharedColor = shared('color')
+  const allSupportTypography = components.every((component) =>
+    TYPOGRAPHY_COMPONENTS.has(component.component),
+  )
 
   return (
     <InspectorShell
@@ -463,7 +608,7 @@ function BatchInspector({ components }: { components: ComponentSchema[] }) {
           {locked ? '先解锁后再修改共同样式。' : '混合值保持为空，录入后应用到全部所选对象。'}
         </span>
       </div>
-      <InspectorSection title="批量外观" meta={`${components.length} 项`}>
+      <InspectorSection title="共同属性" meta={`${components.length} 项`}>
         <div className={styles.fieldGrid}>
           <NumberInput
             label="透明度"
@@ -473,31 +618,40 @@ function BatchInspector({ components }: { components: ComponentSchema[] }) {
             step={5}
             min={0}
             max={100}
+            scrubStep={1}
             disabled={locked}
             onStart={start}
             onFinish={finish}
+            onCancel={cancel}
             onValue={(value) => store.updateSelectedStyles({ opacity: value / 100 }, true)}
           />
-          <NumberInput
-            label="字号"
-            value={fontSize.mixed ? null : numeric(fontSize.value)}
-            placeholder={fontSize.mixed ? '混合' : '未设置'}
-            unit="px"
-            min={1}
-            disabled={locked}
-            onStart={start}
-            onFinish={finish}
-            onValue={(value) => store.updateSelectedStyles({ fontSize: value }, true)}
-          />
-          <ColorInput
-            label="文字"
-            value={sharedColor.mixed || !isHexColor(sharedColor.value) ? null : sharedColor.value}
-            placeholder={sharedColor.mixed ? '混合：输入颜色' : '未设置'}
-            disabled={locked}
-            onStart={start}
-            onFinish={finish}
-            onValue={(value) => store.updateSelectedStyles({ color: value }, true)}
-          />
+          {allSupportTypography && (
+            <>
+              <NumberInput
+                label="字号"
+                value={fontSize.mixed ? null : numeric(fontSize.value)}
+                placeholder={fontSize.mixed ? '混合' : '未设置'}
+                unit="px"
+                min={1}
+                disabled={locked}
+                onStart={start}
+                onFinish={finish}
+                onCancel={cancel}
+                onValue={(value) => store.updateSelectedStyles({ fontSize: value }, true)}
+              />
+              <ColorInput
+                label="文字"
+                value={
+                  sharedColor.mixed || !isHexColor(sharedColor.value) ? null : sharedColor.value
+                }
+                placeholder={sharedColor.mixed ? '混合：输入颜色' : '未设置'}
+                disabled={locked}
+                onStart={start}
+                onFinish={finish}
+                onValue={(value) => store.updateSelectedStyles({ color: value }, true)}
+              />
+            </>
+          )}
         </div>
       </InspectorSection>
     </InspectorShell>
@@ -511,11 +665,21 @@ interface NumberInputProps {
   placeholder?: string
   unit?: string
   step?: number
+  scrubStep?: number
   min?: number
   max?: number
   onStart: () => void
   onFinish: () => void
+  onCancel: () => void
   onValue: (value: number) => void
+}
+
+interface ScrubSession {
+  pointerId: number
+  startX: number
+  startValue: number
+  lastValue: number
+  moved: boolean
 }
 
 function NumberInput({
@@ -525,42 +689,140 @@ function NumberInput({
   placeholder,
   unit,
   step = 1,
+  scrubStep = step,
   min,
   max,
   onStart,
   onFinish,
+  onCancel,
   onValue,
 }: NumberInputProps) {
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState('')
+  const [scrubbing, setScrubbing] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const scrubRef = useRef<ScrubSession | null>(null)
   const shownValue = editing ? draft : value === null ? '' : formatNumber(value)
   const parsedDraft = parseFiniteNumber(draft, { min, max })
   const invalid = editing && draft.trim() !== '' && parsedDraft === null
+  const scrubbable = !disabled && value !== null
 
   const apply = (nextDraft: string) => {
     const parsed = parseFiniteNumber(nextDraft, { min, max })
     if (parsed !== null) onValue(parsed)
   }
   const nudge = (direction: -1 | 1) => {
-    const base = value ?? 0
-    const next = clamp(roundForStep(base + direction * step, step), min, max)
+    if (value === null) return
+    const next = clamp(roundForStep(value + direction * step, step), min, max)
     onStart()
     onValue(next)
     onFinish()
   }
 
+  const clearPointerCapture = (target: HTMLButtonElement, pointerId: number) => {
+    scrubRef.current = null
+    if (target.hasPointerCapture(pointerId)) target.releasePointerCapture(pointerId)
+  }
+
+  const cancelScrub = (target: HTMLButtonElement, pointerId: number) => {
+    const session = scrubRef.current
+    if (!session || session.pointerId !== pointerId) return
+    clearPointerCapture(target, pointerId)
+    if (!session.moved) return
+    setScrubbing(false)
+    onCancel()
+  }
+
+  const handleScrubPointerDown = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    if (!scrubbable || value === null || event.button !== 0 || event.pointerType === 'touch') return
+    event.preventDefault()
+    event.currentTarget.focus({ preventScroll: true })
+    event.currentTarget.setPointerCapture(event.pointerId)
+    scrubRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startValue: value,
+      lastValue: value,
+      moved: false,
+    }
+  }
+
+  const handleScrubPointerMove = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    const session = scrubRef.current
+    if (!session || session.pointerId !== event.pointerId) return
+    const deltaX = event.clientX - session.startX
+    if (!session.moved) {
+      if (Math.abs(deltaX) < 3) return
+      session.moved = true
+      setScrubbing(true)
+      onStart()
+    }
+    const next = scrubNumberValue(session.startValue, deltaX, {
+      step: scrubStep,
+      min,
+      max,
+      shiftKey: event.shiftKey,
+      altKey: event.altKey,
+    })
+    if (next === session.lastValue) return
+    session.lastValue = next
+    onValue(next)
+  }
+
+  const handleScrubPointerUp = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    const session = scrubRef.current
+    if (!session || session.pointerId !== event.pointerId) return
+    const moved = session.moved
+    clearPointerCapture(event.currentTarget, event.pointerId)
+    if (moved) {
+      setScrubbing(false)
+      onFinish()
+      return
+    }
+    inputRef.current?.focus({ preventScroll: true })
+  }
+
+  const handleScrubKeyDown = (event: ReactKeyboardEvent<HTMLButtonElement>) => {
+    const session = scrubRef.current
+    if (event.key !== 'Escape' || !session) return
+    event.preventDefault()
+    cancelScrub(event.currentTarget, session.pointerId)
+  }
+
   return (
-    <Field label={label}>
+    <Field
+      label={label}
+      labelControl={
+        <button
+          type="button"
+          className={styles.scrubLabel}
+          tabIndex={-1}
+          aria-label={`${label}，左右拖动调整数值`}
+          title={scrubbable ? '左右拖动调整；Shift 加速，Alt 精调' : undefined}
+          disabled={!scrubbable}
+          data-active={scrubbing || undefined}
+          onPointerDown={handleScrubPointerDown}
+          onPointerMove={handleScrubPointerMove}
+          onPointerUp={handleScrubPointerUp}
+          onPointerCancel={(event) => cancelScrub(event.currentTarget, event.pointerId)}
+          onLostPointerCapture={(event) => cancelScrub(event.currentTarget, event.pointerId)}
+          onKeyDown={handleScrubKeyDown}
+        >
+          {label}
+        </button>
+      }
+    >
       <div className={styles.numberControl} data-disabled={disabled || undefined}>
         <button
           type="button"
           aria-label={`${label}减少${step}`}
-          disabled={disabled}
+          disabled={disabled || value === null}
           onClick={() => nudge(-1)}
         >
           <RiSubtractLine aria-hidden="true" />
         </button>
         <input
+          ref={inputRef}
           type="text"
           inputMode="decimal"
           aria-label={label}
@@ -587,7 +849,7 @@ function NumberInput({
         <button
           type="button"
           aria-label={`${label}增加${step}`}
-          disabled={disabled}
+          disabled={disabled || value === null}
           onClick={() => nudge(1)}
         >
           <RiAddLine aria-hidden="true" />

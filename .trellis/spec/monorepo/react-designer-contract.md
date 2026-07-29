@@ -32,6 +32,7 @@ class EditorStore {
   updateComponentStyle(id: string, patch: Partial<ComponentStyle>, transient?: boolean): void
   beginGesture(): void
   commitGesture(): void
+  cancelGesture(): void
   undo(): void
   redo(): void
 }
@@ -59,6 +60,8 @@ import '@ptd/react-designer/styles.css'
 - The initial `value` is snapshot zero, so the first edit is undoable.
 - A pointer or form gesture may emit transient updates, but `commitGesture()` adds at most one
   history entry.
+- `cancelGesture()` restores the exact gesture-start `TemplateSchema`, emits that restoration through
+  `onChange`, preserves valid selection, and adds no history entry.
 - A new edit after undo discards the redo branch.
 - Locked components reject content, style, geometry and structural commands; changing `isLock` to
   unlock remains allowed.
@@ -78,18 +81,19 @@ import '@ptd/react-designer/styles.css'
 
 ### 4. Validation & Error Matrix
 
-| Condition | Required behavior |
-|---|---|
-| `value` is the exact last-emitted object | No history reset |
-| `value` is a new external object | Replace template; reset history baseline and selection |
-| First user mutation then undo | Restore initial `value` |
-| Gesture emits many transient updates | One final history entry |
-| Selection contains a locked component | Destructive/structural command is a no-op |
-| Structured `propValue` (array/object) | Inspector is read-only; never coerce to string |
-| Host omits `styles.css` import | Integration is invalid; UI styling is not guaranteed |
-| Built CSS Module default export is `{}` | Invalid package build; host elements receive no class names |
-| Host omits a peer dependency | Workspace/install validation must fail before release |
-| App build overlaps package `clean` | Invalid verification order; rerun sequentially |
+| Condition                                | Required behavior                                           |
+| ---------------------------------------- | ----------------------------------------------------------- |
+| `value` is the exact last-emitted object | No history reset                                            |
+| `value` is a new external object         | Replace template; reset history baseline and selection      |
+| First user mutation then undo            | Restore initial `value`                                     |
+| Gesture emits many transient updates     | One final history entry                                     |
+| Gesture is cancelled                     | Restore the exact gesture-start value; add no history entry |
+| Selection contains a locked component    | Destructive/structural command is a no-op                   |
+| Structured `propValue` (array/object)    | Inspector is read-only; never coerce to string              |
+| Host omits `styles.css` import           | Integration is invalid; UI styling is not guaranteed        |
+| Built CSS Module default export is `{}`  | Invalid package build; host elements receive no class names |
+| Host omits a peer dependency             | Workspace/install validation must fail before release       |
+| App build overlaps package `clean`       | Invalid verification order; rerun sequentially              |
 
 ### 5. Good / Base / Bad Cases
 
@@ -104,7 +108,8 @@ import '@ptd/react-designer/styles.css'
 
 - Store unit test: two stores do not share template, selection, clipboard or history.
 - Store unit test: first mutation undo/redo and redo-branch truncation.
-- Store unit test: transient gesture produces one snapshot and locked commands are no-ops.
+- Store unit test: a committed transient gesture produces one snapshot; a cancelled gesture restores
+  the exact starting template without history; locked commands are no-ops.
 - Geometry unit test: group → scale/rotate/move → ungroup preserves visual geometry.
 - Inspector helper test: structured values are read-only; numeric primitive values preserve type.
 - Package build assertion: ESM, CJS, DTS and `dist/index.css` exist; ESM/CJS contain non-empty CSS
