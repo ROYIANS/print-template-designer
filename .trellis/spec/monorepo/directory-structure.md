@@ -16,7 +16,10 @@ print-template-designer/
   apps/
     web/            Designer web app (React + Vite)
     server/         NestJS + Prisma backend
-  docker/           Dockerfile.web, Dockerfile.server, docker-compose.yml
+  docker/           Dockerfiles and runtime service configuration (for example nginx.conf)
+  docker-compose.yml Pull-only deployment entrypoint (no server-side image build)
+  deploy.sh         Linux / macOS / Git Bash deployment script
+  deploy.ps1        PowerShell 7 deployment script
   legacy/           Original Vue 2 source — READ ONLY, do not modify
   .trellis/         Trellis workflow, tasks, spec
   package.json      Root — private: true, pnpm workspaces
@@ -58,6 +61,16 @@ apps/server/
   tsconfig.json
   tsconfig.build.json
 ```
+
+## Deployment Layout
+
+- Runtime images are built by CI and published to GHCR.
+- The root `docker-compose.yml` references published images with `image:` and must not add a
+  `build:` fallback. Deployment hosts pull immutable or channel tags; they do not compile source.
+- Image build files and runtime configuration stay under `docker/`.
+- Root deployment scripts are the public operator entrypoints and must keep Bash and PowerShell 7
+  behavior aligned.
+- Local secrets belong in the gitignored `.env`; `.env.example` contains safe defaults only.
 
 ## Naming Conventions
 

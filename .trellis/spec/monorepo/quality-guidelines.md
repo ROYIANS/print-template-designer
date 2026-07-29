@@ -11,6 +11,7 @@ When using Claude Code (CLI or agent) to edit files, the tool enforces a **read-
 This is a Claude Code platform constraint, not a permissions issue. If you see a "File has not been read yet" error, the fix is always to read the file first, then retry the edit.
 
 **Pattern to follow:**
+
 ```
 Read(file_path)          ← always first
 Edit(file_path, ...)     ← then edit
@@ -22,13 +23,13 @@ This applies to both the main agent and all sub-agents (`trellis-implement`, `tr
 
 ## Toolchain
 
-| Tool | Version | Config |
-|------|---------|--------|
-| ESLint | v9 (flat config) | `eslint.config.js` at root |
-| Prettier | v3 | `.prettierrc.json` at root |
-| TypeScript | v5+ | `tsconfig.base.json` + per-package |
-| Node | ≥ 20 | `engines` field in all `package.json` |
-| pnpm | ≥ 9 | `pnpm-workspace.yaml` |
+| Tool       | Version          | Config                                        |
+| ---------- | ---------------- | --------------------------------------------- |
+| ESLint     | v9 (flat config) | `eslint.config.js` at root                    |
+| Prettier   | v3               | `.prettierrc.json` at root                    |
+| TypeScript | v5+              | `tsconfig.base.json` + per-package            |
+| Node       | ≥ 20             | `engines` field in all `package.json`         |
+| pnpm       | 10.15.1          | root `packageManager` + `pnpm-workspace.yaml` |
 
 ---
 
@@ -94,6 +95,7 @@ All `packages/*` use **Vitest** for unit tests.
 ### vitest.config.ts (required in every package)
 
 Default for pure logic packages (no DOM):
+
 ```ts
 import { defineConfig } from 'vitest/config'
 
@@ -105,6 +107,7 @@ export default defineConfig({
 ```
 
 For packages that use DOM APIs (`@ptd/components` and any future browser-only packages), use `jsdom`:
+
 ```ts
 import { defineConfig } from 'vitest/config'
 
