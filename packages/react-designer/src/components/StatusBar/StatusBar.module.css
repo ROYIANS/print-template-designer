@@ -1,0 +1,25 @@
+.status {
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  color: var(--ptd-ink-400);
+  background: var(--ptd-paper-100);
+  border-top: 1px solid var(--ptd-line);
+  font-size: 10px;
+}
+.divider {
+  width: 1px;
+  height: 12px;
+  background: var(--ptd-line);
+}
+.grow {
+  flex: 1;
+}
+.signal {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ptd-ok);
+}

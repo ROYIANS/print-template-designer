@@ -1,25 +1,26 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, type CSSProperties } from 'react'
 import type { ComponentSchema } from '@ptd/core'
 import {
-  RoySimpleText,
-  RoyText,
-  RoyLine,
-  RoyRect,
-  RoyCircle,
-  RoyStar,
-  RoyImage,
-  RoyQRCode,
   RoyBarCode,
-  RoyGroup,
-  RoySimpleTable,
+  RoyCircle,
   RoyComplexTable,
+  RoyImage,
+  RoyLine,
+  RoyQRCode,
+  RoyRect,
+  RoySimpleTable,
+  RoySimpleText,
+  RoyStar,
+  RoyText,
   type BaseComponent,
 } from '@ptd/components'
+import { getScaledGroupChildren } from '../../utils/groupGeometry'
 import styles from './ComponentRenderer.module.css'
 
 type ComponentConstructor = new (schema: ComponentSchema) => BaseComponent
+type Variables = CSSProperties & Record<`--${string}`, string>
 
-const COMPONENT_MAP: Record<string, ComponentConstructor> = {
+const COMPONENT_MAP: Partial<Record<ComponentSchema['component'], ComponentConstructor>> = {
   RoySimpleText,
   RoyText,
   RoyLine,
@@ -29,7 +30,6 @@ const COMPONENT_MAP: Record<string, ComponentConstructor> = {
   RoyImage,
   RoyQRCode,
   RoyBarCode,
-  RoyGroup,
   RoySimpleTable,
   RoyComplexTable,
 }
@@ -39,33 +39,62 @@ interface ComponentRendererProps {
 }
 
 export function ComponentRenderer({ schema }: ComponentRendererProps) {
+  if (schema.component === 'RoyGroup') return <GroupRenderer schema={schema} />
+  return <VanillaRenderer schema={schema} />
+}
+
+function GroupRenderer({ schema }: ComponentRendererProps) {
+  const children = getScaledGroupChildren(schema)
+  return (
+    <div className={styles.renderer} role="group" aria-label={schema.name ?? '组合组件'}>
+      {children.map((child) => {
+        const variables: Variables = {
+          '--child-left': `${numeric(child.style.left)}px`,
+          '--child-top': `${numeric(child.style.top)}px`,
+          '--child-width': `${child.style.width}px`,
+          '--child-height': `${child.style.height}px`,
+          '--child-rotate': `${child.style.rotate ?? 0}deg`,
+        }
+        return (
+          <div key={child.id} className={styles.groupChild} style={variables}>
+            <ComponentRenderer schema={child} />
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function VanillaRenderer({ schema }: ComponentRendererProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const instanceRef = useRef<BaseComponent | null>(null)
 
   useEffect(() => {
-    const el = containerRef.current
-    if (!el) return
-
-    const Ctor = COMPONENT_MAP[schema.component]
-    if (!Ctor) return
-
-    // Create and mount instance
-    const instance = new Ctor(schema)
-    instance.mount(el)
+    const element = containerRef.current
+    const Constructor = COMPONENT_MAP[schema.component]
+    if (!element || !Constructor) return
+    const instance = new Constructor(withoutOuterTransform(schema))
+    instance.mount(element)
     instanceRef.current = instance
-
     return () => {
       instance.destroy()
       instanceRef.current = null
     }
-    // Only run on mount/unmount — schema changes handled below
+    // Mount lifecycle follows the renderer type; the next effect handles schema updates.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [schema.component])
 
-  // Update when schema changes (but component type stays the same)
   useEffect(() => {
-    instanceRef.current?.update(schema)
+    instanceRef.current?.update(withoutOuterTransform(schema))
   }, [schema])
 
   return <div ref={containerRef} className={styles.renderer} />
+}
+
+function withoutOuterTransform(schema: ComponentSchema): ComponentSchema {
+  return { ...schema, style: { ...schema.style, rotate: 0 } }
+}
+
+function numeric(value: unknown): number {
+  return typeof value === 'number' ? value : 0
 }

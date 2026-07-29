@@ -1,44 +1,35 @@
-import { useCallback, useEffect, useRef, useState, type MouseEvent, type ReactNode } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  type CSSProperties,
+  type MouseEvent,
+  type ReactNode,
+} from 'react'
 import type { ComponentSchema } from '@ptd/core'
-import {
-  curComponentSignal,
-  curComponentIndexSignal,
-  isClickComponentSignal,
-  isInEditorSignal,
-  setShapeStyle,
-} from '../../state'
-import { recordSnapshot } from '../../state/snapshot'
-import {
-  mod360,
-  type Point,
-} from '../../utils'
+import { useEditorStore } from '../../state'
+import { getComponentRotatedStyle, mod360, type Point } from '../../utils'
 import { calculateComponentPositionAndSize } from '../../utils/calculateComponentPositionAndSize'
 import styles from './ComponentAdjuster.module.css'
 
 type HandleName = 'lt' | 't' | 'rt' | 'r' | 'rb' | 'b' | 'lb' | 'l'
+type Variables = CSSProperties & Record<`--${string}`, string>
 
 const INITIAL_ANGLE: Record<HandleName, number> = {
-  lt: 0, t: 45, rt: 90, r: 135, rb: 180, b: 225, lb: 270, l: 315,
+  lt: 0,
+  t: 45,
+  rt: 90,
+  r: 135,
+  rb: 180,
+  b: 225,
+  lb: 270,
+  l: 315,
 }
 
-const ANGLE_TO_CURSOR = [
-  { start: 338, end: 23, cursor: 'nw' },
-  { start: 23, end: 68, cursor: 'n' },
-  { start: 68, end: 113, cursor: 'ne' },
-  { start: 113, end: 158, cursor: 'e' },
-  { start: 158, end: 203, cursor: 'se' },
-  { start: 203, end: 248, cursor: 's' },
-  { start: 248, end: 293, cursor: 'sw' },
-  { start: 293, end: 338, cursor: 'w' },
-]
-
-function getCursorForPoint(point: HandleName, rotate: number): string {
-  const angle = mod360(INITIAL_ANGLE[point] + rotate)
-  for (const { start, end, cursor } of ANGLE_TO_CURSOR) {
-    if (angle < 23 || angle >= 338) return 'nw-resize'
-    if (start <= angle && angle < end) return cursor + '-resize'
-  }
-  return 'nw-resize'
+function getCursor(point: HandleName, rotate: number): string {
+  const index = Math.round(mod360(INITIAL_ANGLE[point] + rotate) / 45) % 8
+  return `${['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'][index]}-resize`
 }
 
 function getPointList(component: string): HandleName[] {
@@ -47,37 +38,26 @@ function getPointList(component: string): HandleName[] {
   return ['lt', 't', 'rt', 'r', 'rb', 'b', 'lb', 'l']
 }
 
-function getPointStyle(
+function getPointVariables(
   point: HandleName,
   width: number,
   height: number,
   cursor: string,
-): React.CSSProperties {
-  const hasT = /t/.test(point)
-  const hasB = /b/.test(point)
-  const hasL = /l/.test(point)
-  const hasR = /r/.test(point)
-  let left = 0
-  let top = 0
-
-  if (point.length === 2) {
-    left = hasL ? 0 : width
-    top = hasT ? 0 : height
-  } else {
-    if (hasT || hasB) { left = width / 2; top = hasT ? 0 : height }
-    if (hasL || hasR) { left = hasL ? 0 : width; top = Math.floor(height / 2) }
+): Variables {
+  const vertical = point.length === 1 && (point === 't' || point === 'b')
+  const horizontal = point.length === 1 && (point === 'l' || point === 'r')
+  return {
+    '--point-left': `${vertical ? width / 2 : point.includes('r') ? width : 0}px`,
+    '--point-top': `${horizontal ? Math.floor(height / 2) : point.includes('b') ? height : 0}px`,
+    '--point-cursor': cursor,
   }
-
-  return { marginLeft: '-4px', marginTop: '-4px', left: `${left}px`, top: `${top}px`, cursor }
 }
 
 interface ComponentAdjusterProps {
   schema: ComponentSchema
-  index: number
   isActive: boolean
   editorRef: React.RefObject<HTMLDivElement | null>
   scale: number
-  onChange?: (value: import('@ptd/core').TemplateSchema) => void
   onMove?: (isDownward: boolean, isRightward: boolean) => void
   onMoveEnd?: () => void
   children: ReactNode
@@ -85,271 +65,239 @@ interface ComponentAdjusterProps {
 
 export function ComponentAdjuster({
   schema,
-  index,
   isActive,
   editorRef,
   scale,
-  onChange,
   onMove,
   onMoveEnd,
   children,
 }: ComponentAdjusterProps) {
+  const store = useEditorStore()
   const adjusterRef = useRef<HTMLDivElement>(null)
-  const [cursors, setCursors] = useState<Partial<Record<HandleName, string>>>({})
-
+  const cleanupRef = useRef<(() => void) | null>(null)
   const style = schema.style
   const isLocked = schema.isLock ?? false
-  const showActive = isActive && !isLocked
-  const pointList = getPointList(schema.component)
+  const hasLockedSelection = store.selectedComponents.value.some((component) => component.isLock)
+  const showHandles = isActive && !isLocked && !hasLockedSelection
+  const pointList = useMemo(() => getPointList(schema.component), [schema.component])
+  const cursors = useMemo(
+    () =>
+      Object.fromEntries(
+        pointList.map((point) => [point, getCursor(point, style.rotate ?? 0)]),
+      ) as Record<HandleName, string>,
+    [pointList, style.rotate],
+  )
 
-  const updateCursors = useCallback(() => {
-    const rotate = mod360(style.rotate ?? 0)
-    const next: Partial<Record<HandleName, string>> = {}
-    for (const point of pointList) {
-      next[point] = getCursorForPoint(point, rotate)
-    }
-    setCursors(next)
-  }, [style.rotate, pointList])
+  useEffect(
+    () => () => {
+      cleanupRef.current?.()
+    },
+    [],
+  )
 
-  useEffect(() => {
-    updateCursors()
-  }, [updateCursors])
-
-  const handleClick = useCallback((e: MouseEvent) => {
-    e.stopPropagation()
-    e.preventDefault()
-  }, [])
+  const startSession = useCallback(
+    (move: (event: globalThis.MouseEvent) => void, finish: () => void) => {
+      cleanupRef.current?.()
+      let ended = false
+      const end = () => {
+        if (ended) return
+        ended = true
+        cleanup()
+        finish()
+      }
+      const cleanup = () => {
+        document.removeEventListener('mousemove', move)
+        document.removeEventListener('mouseup', end)
+        window.removeEventListener('blur', end)
+        cleanupRef.current = null
+      }
+      cleanupRef.current = end
+      document.addEventListener('mousemove', move)
+      document.addEventListener('mouseup', end)
+      window.addEventListener('blur', end)
+    },
+    [],
+  )
 
   const handleMouseDownOnShape = useCallback(
-    (e: MouseEvent) => {
-      isInEditorSignal.value = true
-      isClickComponentSignal.value = true
-      e.stopPropagation()
-
-      curComponentSignal.value = schema
-      curComponentIndexSignal.value = index
-      updateCursors()
+    (event: MouseEvent) => {
+      event.stopPropagation()
+      store.selectComponent(schema.id, event.shiftKey || event.metaKey || event.ctrlKey)
     },
-    [schema, index, updateCursors],
+    [schema.id, store],
   )
 
   const handleRotate = useCallback(
-    (e: MouseEvent) => {
+    (event: MouseEvent) => {
       if (isLocked) return
-      isClickComponentSignal.value = true
-      e.preventDefault()
-      e.stopPropagation()
-
-      const pos = { ...style }
-      const startY = e.clientY
-      const startX = e.clientX
-      const startRotate = pos.rotate ?? 0
-
-      const rect = adjusterRef.current!.getBoundingClientRect()
+      event.preventDefault()
+      event.stopPropagation()
+      const rect = adjusterRef.current?.getBoundingClientRect()
+      if (!rect) return
+      store.beginGesture()
       const centerX = rect.left + rect.width / 2
       const centerY = rect.top + rect.height / 2
-      const rotateDegreeBefore = Math.atan2(startY - centerY, startX - centerX) / (Math.PI / 180)
-
-      let hasMove = false
-
-      const move = (ev: globalThis.MouseEvent) => {
-        hasMove = true
-        const rotateDegreeAfter = Math.atan2(ev.clientY - centerY, ev.clientX - centerX) / (Math.PI / 180)
-        const newRotate = startRotate + rotateDegreeAfter - rotateDegreeBefore
-        setShapeStyle(schema.id, { rotate: newRotate }, onChange)
-      }
-
-      const up = () => {
-        if (hasMove) recordSnapshot()
-        document.removeEventListener('mousemove', move)
-        document.removeEventListener('mouseup', up)
-        updateCursors()
-      }
-
-      document.addEventListener('mousemove', move)
-      document.addEventListener('mouseup', up)
+      const before = (Math.atan2(event.clientY - centerY, event.clientX - centerX) * 180) / Math.PI
+      const initial = style.rotate ?? 0
+      startSession(
+        (nextEvent) => {
+          const after =
+            (Math.atan2(nextEvent.clientY - centerY, nextEvent.clientX - centerX) * 180) / Math.PI
+          store.transformComponent(schema.id, { rotate: initial + after - before }, true)
+        },
+        () => store.commitGesture(),
+      )
     },
-    [isLocked, style, schema.id, onChange, updateCursors],
+    [isLocked, schema.id, startSession, store, style.rotate],
   )
 
-  const handleMouseDownOnPoint = useCallback(
-    (point: HandleName, e: MouseEvent) => {
+  const handleResize = useCallback(
+    (point: HandleName, event: MouseEvent) => {
       if (isLocked) return
-      isInEditorSignal.value = true
-      isClickComponentSignal.value = true
-      e.stopPropagation()
-      e.preventDefault()
-
-      const currentStyle = { ...style }
-      const adjEl = adjusterRef.current
-      const w = isNaN(currentStyle.width) ? (adjEl?.clientWidth ?? 0) : currentStyle.width
-      const h = isNaN(currentStyle.height) ? (adjEl?.clientHeight ?? 0) : currentStyle.height
-      const resizeStyle: import('../../utils/calculateComponentPositionAndSize').ResizeStyle = {
-        width: w,
-        height: h,
-        left: (currentStyle.left as number | undefined) ?? 0,
-        top: (currentStyle.top as number | undefined) ?? 0,
-        rotate: currentStyle.rotate ?? 0,
+      event.preventDefault()
+      event.stopPropagation()
+      const adjuster = adjusterRef.current
+      const editor = editorRef.current
+      if (!adjuster || !editor) return
+      store.beginGesture()
+      const resizeStyle = {
+        width: Number.isFinite(style.width) ? style.width : adjuster.clientWidth,
+        height: Number.isFinite(style.height) ? style.height : adjuster.clientHeight,
+        left: typeof style.left === 'number' ? style.left : 0,
+        top: typeof style.top === 'number' ? style.top : 0,
+        rotate: style.rotate ?? 0,
       }
-      const proportion = w / h
-
+      const proportion = resizeStyle.width / resizeStyle.height
       const center: Point = {
-        x: resizeStyle.left + w / 2,
-        y: resizeStyle.top + h / 2,
+        x: resizeStyle.left + resizeStyle.width / 2,
+        y: resizeStyle.top + resizeStyle.height / 2,
       }
-
-      const editorRect = editorRef.current!.getBoundingClientRect()
-      const pointRect = (e.target as HTMLElement).getBoundingClientRect()
+      const editorRect = editor.getBoundingClientRect()
+      const pointRect = (event.currentTarget as HTMLElement).getBoundingClientRect()
       const curPoint: Point = {
-        x: Math.round(pointRect.left / scale - editorRect.left / scale + (e.target as HTMLElement).offsetWidth / scale / 2),
-        y: Math.round(pointRect.top / scale - editorRect.top / scale + (e.target as HTMLElement).offsetHeight / scale / 2),
+        x: (pointRect.left - editorRect.left + pointRect.width / 2) / scale,
+        y: (pointRect.top - editorRect.top + pointRect.height / 2) / scale,
       }
-      const symmetricPoint: Point = {
+      const symmetricPoint = {
         x: center.x - (curPoint.x - center.x),
         y: center.y - (curPoint.y - center.y),
       }
-
-      const isTable = ['RoySimpleTable', 'RoyComplexTable'].includes(schema.component)
-      const needLockProportion = schema.component === 'RoyGroup'
-
-      let needSave = false
-      let isFirst = true
-
-      const move = (ev: globalThis.MouseEvent) => {
-        if (isFirst) { isFirst = false; return }
-        needSave = true
-        const curPosition: Point = {
-          x: (ev.clientX - Math.round(editorRect.left)) / scale,
-          y: (ev.clientY - Math.round(editorRect.top)) / scale,
-        }
-        calculateComponentPositionAndSize(
-          point,
-          resizeStyle,
-          curPosition,
-          proportion,
-          needLockProportion,
-          { center, curPoint, symmetricPoint },
-          isTable ? (adjEl?.clientHeight ?? 0) : 0,
-        )
-        setShapeStyle(schema.id, {
-          width: resizeStyle.width,
-          height: resizeStyle.height,
-          left: resizeStyle.left,
-          top: resizeStyle.top,
-        }, onChange)
-      }
-
-      const up = () => {
-        document.removeEventListener('mousemove', move)
-        document.removeEventListener('mouseup', up)
-        if (needSave) recordSnapshot()
-      }
-
-      document.addEventListener('mousemove', move)
-      document.addEventListener('mouseup', up)
+      startSession(
+        (nextEvent) => {
+          calculateComponentPositionAndSize(
+            point,
+            resizeStyle,
+            {
+              x: (nextEvent.clientX - editorRect.left) / scale,
+              y: (nextEvent.clientY - editorRect.top) / scale,
+            },
+            proportion,
+            schema.component === 'RoyGroup',
+            { center, curPoint, symmetricPoint },
+            ['RoySimpleTable', 'RoyComplexTable'].includes(schema.component)
+              ? adjuster.clientHeight
+              : 0,
+          )
+          store.transformComponent(schema.id, { ...resizeStyle }, true)
+        },
+        () => store.commitGesture(),
+      )
     },
-    [isLocked, style, schema, editorRef, scale, onChange],
+    [editorRef, isLocked, scale, schema.component, schema.id, startSession, store, style],
   )
 
-  const handleMouseMoveItem = useCallback(
-    (e: MouseEvent) => {
-      if (!showActive) return
-      e.stopPropagation()
-      e.preventDefault()
-
-      const startY = e.clientY
-      const startX = e.clientX
-      const startTop = (style.top as number | undefined) ?? 0
-      const startLeft = (style.left as number | undefined) ?? 0
-
-      let hasMove = false
-
-      const move = (ev: globalThis.MouseEvent) => {
-        hasMove = true
-        const editorEl = editorRef.current
-        if (!editorEl) return
-        const curX = ev.clientX
-        const curY = ev.clientY
-        const newTop = Math.min(
-          Math.max(0, (curY - startY) / scale + startTop),
-          editorEl.offsetHeight - (adjusterRef.current?.offsetHeight ?? 0),
-        )
-        const newLeft = Math.min(
-          Math.max(0, (curX - startX) / scale + startLeft),
-          editorEl.offsetWidth - (adjusterRef.current?.offsetWidth ?? 0),
-        )
-        setShapeStyle(schema.id, { top: newTop, left: newLeft }, onChange)
-        onMove?.(curY - startY > 0, curX - startX > 0)
-      }
-
-      const up = () => {
-        if (hasMove) recordSnapshot()
-        onMoveEnd?.()
-        document.removeEventListener('mousemove', move)
-        document.removeEventListener('mouseup', up)
-      }
-
-      document.addEventListener('mousemove', move)
-      document.addEventListener('mouseup', up)
+  const handleMove = useCallback(
+    (event: MouseEvent) => {
+      if (!showHandles) return
+      event.preventDefault()
+      event.stopPropagation()
+      const editor = editorRef.current
+      const adjuster = adjusterRef.current
+      if (!editor || !adjuster) return
+      store.beginGesture()
+      const startX = event.clientX
+      const startY = event.clientY
+      const selectedBounds = store.selectedComponents.value.map((component) =>
+        getComponentRotatedStyle(component.style),
+      )
+      const selectionLeft = Math.min(...selectedBounds.map((box) => box.left))
+      const selectionTop = Math.min(...selectedBounds.map((box) => box.top))
+      const selectionRight = Math.max(...selectedBounds.map((box) => box.right))
+      const selectionBottom = Math.max(...selectedBounds.map((box) => box.bottom))
+      let lastDeltaLeft = 0
+      let lastDeltaTop = 0
+      startSession(
+        (nextEvent) => {
+          const totalDeltaLeft = Math.min(
+            editor.offsetWidth - selectionRight,
+            Math.max(-selectionLeft, (nextEvent.clientX - startX) / scale),
+          )
+          const totalDeltaTop = Math.min(
+            editor.offsetHeight - selectionBottom,
+            Math.max(-selectionTop, (nextEvent.clientY - startY) / scale),
+          )
+          store.moveSelection(totalDeltaLeft - lastDeltaLeft, totalDeltaTop - lastDeltaTop, true)
+          lastDeltaLeft = totalDeltaLeft
+          lastDeltaTop = totalDeltaTop
+          onMove?.(nextEvent.clientY > startY, nextEvent.clientX > startX)
+        },
+        () => {
+          onMoveEnd?.()
+          store.commitGesture()
+        },
+      )
     },
-    [showActive, style, schema.id, editorRef, scale, onChange, onMove, onMoveEnd],
+    [editorRef, onMove, onMoveEnd, scale, showHandles, startSession, store],
   )
 
-  const adjusterStyle: React.CSSProperties = {
-    position: 'absolute',
-    left: `${(style.left as number | undefined) ?? 0}px`,
-    top: `${(style.top as number | undefined) ?? 0}px`,
-    width: `${style.width}px`,
-    height: `${style.height}px`,
-    transform: style.rotate ? `rotate(${style.rotate}deg)` : undefined,
-    opacity: isLocked ? 0.5 : undefined,
-    border: showActive
-      ? '0.5px solid var(--ptd-color-primary, #4579e1)'
-      : '0.5px dashed rgba(100,100,100,0.4)',
-    userSelect: 'none',
-    boxSizing: 'border-box',
+  const variables: Variables = {
+    '--adjuster-left': `${number(style.left)}px`,
+    '--adjuster-top': `${number(style.top)}px`,
+    '--adjuster-width': `${style.width}px`,
+    '--adjuster-height': `${style.height}px`,
+    '--adjuster-rotate': `${style.rotate ?? 0}deg`,
   }
 
   return (
     <div
       ref={adjusterRef}
-      style={adjusterStyle}
-      className={styles.adjuster}
-      onClick={handleClick}
+      style={variables}
+      className={`${styles.adjuster} ${isActive ? styles.active : ''} ${isLocked ? styles.locked : ''}`}
       onMouseDown={handleMouseDownOnShape}
     >
-      {/* Rotate handle */}
-      {showActive && !['RoySimpleTable', 'RoyComplexTable'].includes(schema.component) && (
-        <span
+      {showHandles && !['RoySimpleTable', 'RoyComplexTable'].includes(schema.component) && (
+        <button
+          type="button"
           className={styles.rotate}
           onMouseDown={handleRotate}
-          title="Rotate"
+          aria-label="旋转组件"
         />
       )}
-
-      {/* Lock indicator */}
-      {isLocked && <span className={styles.lock} title="Locked" />}
-
-      {/* Move handle */}
-      <span
-        className={styles.move}
-        onMouseDown={handleMouseMoveItem}
-        title="Move"
-      />
-
-      {/* Resize points */}
-      {showActive &&
+      {isLocked && <span className={styles.lock} title="已锁定" />}
+      {showHandles && (
+        <button
+          type="button"
+          className={styles.move}
+          onMouseDown={handleMove}
+          aria-label="移动组件"
+        />
+      )}
+      {showHandles &&
         pointList.map((point) => (
-          <div
+          <button
+            type="button"
             key={point}
             className={styles.point}
-            style={getPointStyle(point, style.width, style.height, cursors[point] ?? 'pointer')}
-            onMouseDown={(e) => handleMouseDownOnPoint(point, e)}
+            style={getPointVariables(point, style.width, style.height, cursors[point])}
+            onMouseDown={(event) => handleResize(point, event)}
+            aria-label={`从 ${point} 控点调整尺寸`}
           />
         ))}
-
-      {/* Component content */}
       <div className={styles.container}>{children}</div>
     </div>
   )
+}
+
+function number(value: unknown): number {
+  return typeof value === 'number' ? value : 0
 }

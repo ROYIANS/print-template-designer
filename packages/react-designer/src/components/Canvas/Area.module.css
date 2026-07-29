@@ -4,4 +4,8 @@
   position: absolute;
   pointer-events: none;
   z-index: 100;
+  left: var(--area-left);
+  top: var(--area-top);
+  width: var(--area-width);
+  height: var(--area-height);
 }

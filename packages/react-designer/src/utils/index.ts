@@ -27,7 +27,11 @@ export interface Point {
 }
 
 /** Rotate point around center by `rotate` degrees. */
-export function calculateRotatedPointCoordinate(point: Point, center: Point, rotate: number): Point {
+export function calculateRotatedPointCoordinate(
+  point: Point,
+  center: Point,
+  rotate: number,
+): Point {
   const rad = angleToRadian(rotate)
   return {
     x: (point.x - center.x) * Math.cos(rad) - (point.y - center.y) * Math.sin(rad) + center.x,
@@ -46,9 +50,7 @@ export function mod360(deg: number): number {
 
 // ── Style helpers ──────────────────────────────────────────────────────────
 
-const PX_FIELDS: (keyof ComponentStyle)[] = [
-  'width', 'height', 'fontSize', 'borderWidth',
-]
+const PX_FIELDS: (keyof ComponentStyle)[] = ['width', 'height', 'fontSize', 'borderWidth']
 
 export function getShapeStyle(style: ComponentStyle): React.CSSProperties {
   const result: React.CSSProperties = {}

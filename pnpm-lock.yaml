@@ -78,6 +78,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@preact/signals-react':
+        specifier: ^2.1.0
+        version: 2.3.0(react@18.3.1)
       '@ptd/react-designer':
         specifier: workspace:*
         version: link:../../packages/react-designer

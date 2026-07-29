@@ -1,224 +1,192 @@
-import { useCallback, useRef, type DragEvent, type MouseEvent } from 'react'
-import { useSignals } from '@preact/signals-react/runtime'
-import type { ComponentSchema, TemplateSchema } from '@ptd/core'
-import { mmToPx, getPageDimensions } from '@ptd/core'
 import {
-  componentDataSignal,
-  pageConfigSignal,
-  scaleSignal,
-  curComponentSignal,
-  curComponentIndexSignal,
-  isClickComponentSignal,
-  areaDataSignal,
-  isShowAreaSignal,
-  addComponent,
-} from '../../state'
-import { recordSnapshot } from '../../state/snapshot'
+  useCallback,
+  useEffect,
+  useRef,
+  type CSSProperties,
+  type DragEvent,
+  type MouseEvent,
+} from 'react'
+import { useSignals } from '@preact/signals-react/runtime'
+import type { ComponentSchema } from '@ptd/core'
+import { defaultRegistry, getPageDimensions, mmToPx } from '@ptd/core'
+import { useEditorStore } from '../../state'
 import { generateId, getComponentRotatedStyle } from '../../utils'
+import { Area } from './Area'
 import { ComponentAdjuster } from './ComponentAdjuster'
 import { ComponentRenderer } from './ComponentRenderer'
-import { Area } from './Area'
 import { EditorLine, type EditorLineHandle } from './EditorLine'
 import styles from './Canvas.module.css'
 
-interface CanvasProps {
-  onChange?: (value: TemplateSchema) => void
-}
+type CanvasVariables = CSSProperties & Record<`--${string}`, string>
 
-export function Canvas({ onChange }: CanvasProps) {
+export function Canvas() {
   useSignals()
-
+  const store = useEditorStore()
   const editorRef = useRef<HTMLDivElement>(null)
   const editorLineRef = useRef<EditorLineHandle>(null)
+  const selectionCleanupRef = useRef<(() => void) | null>(null)
 
-  const componentData = componentDataSignal.value
-  const pageConfig = pageConfigSignal.value
-  const scale = scaleSignal.value
-  const curComponent = curComponentSignal.value
-
+  const components = store.components.value
+  const pageConfig = store.pageConfig.value
+  const scale = store.scale.value
+  const selectedIds = store.selectedIds.value
   const { width: pageWidthPx, height: pageHeightPx } = getPageDimensions(pageConfig)
-  const marginTopPx = mmToPx(pageConfig.pageMarginTop) * scale
-  const marginBottomPx = mmToPx(pageConfig.pageMarginBottom) * scale
 
-  const handleDragOver = useCallback((e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    e.dataTransfer.dropEffect = 'copy'
+  useEffect(
+    () => () => {
+      selectionCleanupRef.current?.()
+    },
+    [],
+  )
+
+  const handleDragOver = useCallback((event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    event.dataTransfer.dropEffect = 'copy'
   }, [])
 
   const handleDrop = useCallback(
-    (e: DragEvent<HTMLDivElement>) => {
-      e.preventDefault()
-      const componentType = e.dataTransfer.getData('componentType') as ComponentSchema['component']
-      if (!componentType) return
-
-      const editorRect = editorRef.current!.getBoundingClientRect()
-      const left = Math.round((e.clientX - editorRect.left) / scale)
-      const top = Math.round((e.clientY - editorRect.top) / scale)
-
-      const newSchema: ComponentSchema = {
+    (event: DragEvent<HTMLDivElement>) => {
+      event.preventDefault()
+      const componentType = event.dataTransfer.getData(
+        'componentType',
+      ) as ComponentSchema['component']
+      const definition = defaultRegistry.get(componentType)
+      const editor = editorRef.current
+      if (!definition || !editor) return
+      const rect = editor.getBoundingClientRect()
+      const schema: ComponentSchema = {
         id: generateId(),
-        component: componentType,
-        name: componentType,
-        propValue: '',
+        component: definition.type,
+        name: definition.name,
+        propValue: cloneValue(definition.defaultProps),
         style: {
           width: 100,
           height: 40,
           rotate: 0,
           opacity: 1,
-          left,
-          top,
+          ...definition.defaultStyle,
+          left: Math.round((event.clientX - rect.left) / scale),
+          top: Math.round((event.clientY - rect.top) / scale),
         },
         groupStyle: {},
         position: {},
       }
-
-      addComponent(newSchema, onChange)
-      recordSnapshot()
+      store.addComponent(schema)
     },
-    [scale, onChange],
+    [scale, store],
   )
 
   const handleMouseDown = useCallback(
-    (e: MouseEvent<HTMLDivElement>) => {
-      if (isClickComponentSignal.value) {
-        isClickComponentSignal.value = false
-        return
-      }
+    (event: MouseEvent<HTMLDivElement>) => {
+      if (event.target !== event.currentTarget) return
+      const editor = editorRef.current
+      if (!editor) return
+      store.clearSelection()
+      const rect = editor.getBoundingClientRect()
+      const startX = event.clientX
+      const startY = event.clientY
+      const startLeft = (startX - rect.left) / scale
+      const startTop = (startY - rect.top) / scale
+      store.startAreaSelection(startLeft, startTop)
 
-      // Click on empty canvas — deselect
-      curComponentSignal.value = null
-      curComponentIndexSignal.value = null
-
-      const editorRect = editorRef.current!.getBoundingClientRect()
-      const startX = e.clientX
-      const startY = e.clientY
-      const startLeft = (startX - editorRect.left) / scale
-      const startTop = (startY - editorRect.top) / scale
-
-      isShowAreaSignal.value = true
-      areaDataSignal.value = {
-        style: { left: startLeft, top: startTop, width: 0, height: 0 },
-        components: [],
-      }
-
-      const move = (ev: globalThis.MouseEvent) => {
-        const w = Math.abs((ev.clientX - startX) / scale)
-        const h = Math.abs((ev.clientY - startY) / scale)
-        const left = ev.clientX < startX ? (ev.clientX - editorRect.left) / scale : startLeft
-        const top = ev.clientY < startY ? (ev.clientY - editorRect.top) / scale : startTop
-        areaDataSignal.value = { ...areaDataSignal.value, style: { left, top, width: w, height: h } }
-      }
-
-      const up = (ev: globalThis.MouseEvent) => {
+      const cleanup = () => {
         document.removeEventListener('mousemove', move)
         document.removeEventListener('mouseup', up)
-
-        if (ev.clientX === startX && ev.clientY === startY) {
-          isShowAreaSignal.value = false
-          return
-        }
-
-        // Compute selected components
-        const { style } = areaDataSignal.value
-        const selected = componentData.filter((c) => {
-          if (c.isLock) return false
-          const cs = getComponentRotatedStyle(c.style)
-          return (
-            style.left <= cs.left &&
-            style.top <= cs.top &&
-            cs.left + cs.width <= style.left + style.width &&
-            cs.top + cs.height <= style.top + style.height
-          )
-        })
-
-        if (selected.length <= 1) {
-          isShowAreaSignal.value = false
-          areaDataSignal.value = { style: { left: 0, top: 0, width: 0, height: 0 }, components: [] }
-          return
-        }
-
-        areaDataSignal.value = { ...areaDataSignal.value, components: selected }
+        window.removeEventListener('blur', cancel)
+        selectionCleanupRef.current = null
       }
-
+      const move = (nextEvent: globalThis.MouseEvent) => {
+        const width = Math.abs((nextEvent.clientX - startX) / scale)
+        const height = Math.abs((nextEvent.clientY - startY) / scale)
+        const left =
+          nextEvent.clientX < startX ? (nextEvent.clientX - rect.left) / scale : startLeft
+        const top = nextEvent.clientY < startY ? (nextEvent.clientY - rect.top) / scale : startTop
+        store.updateAreaSelection({ left, top, width, height })
+      }
+      const up = () => {
+        cleanup()
+        const area = store.areaSelection.value.style
+        const ids = store.components.value
+          .filter((component) => {
+            if (component.isLock) return false
+            const box = getComponentRotatedStyle(component.style)
+            return (
+              area.left <= box.left &&
+              area.top <= box.top &&
+              box.right <= area.left + area.width &&
+              box.bottom <= area.top + area.height
+            )
+          })
+          .map((component) => component.id)
+        store.finishAreaSelection(ids)
+      }
+      const cancel = () => {
+        cleanup()
+        store.cancelAreaSelection()
+      }
+      selectionCleanupRef.current?.()
+      selectionCleanupRef.current = cancel
       document.addEventListener('mousemove', move)
       document.addEventListener('mouseup', up)
+      window.addEventListener('blur', cancel)
     },
-    [scale, componentData],
+    [scale, store],
   )
 
-  const handleMove = useCallback(
-    (isDownward: boolean, isRightward: boolean) => {
-      editorLineRef.current?.showLines(isDownward, isRightward, componentData, curComponent, onChange)
-    },
-    [componentData, curComponent, onChange],
-  )
-
-  const handleMoveEnd = useCallback(() => {
-    editorLineRef.current?.hideLines()
+  const handleMove = useCallback((isDownward: boolean, isRightward: boolean) => {
+    editorLineRef.current?.showLines(isDownward, isRightward)
   }, [])
 
-  const areaData = areaDataSignal.value
-  const isShowArea = isShowAreaSignal.value
+  const canvasStyle: CanvasVariables = {
+    '--canvas-width': `${pageWidthPx}px`,
+    '--canvas-height': `${pageHeightPx}px`,
+    '--canvas-scaled-width': `${pageWidthPx * scale}px`,
+    '--canvas-scaled-height': `${pageHeightPx * scale}px`,
+    '--canvas-scale': String(scale),
+    '--canvas-background': pageConfig.background,
+    '--canvas-color': pageConfig.color,
+    '--canvas-font-family': pageConfig.fontFamily,
+    '--canvas-font-size': `${pageConfig.fontSize}px`,
+    '--canvas-line-height': String(pageConfig.lineHeight),
+    '--margin-top': `${mmToPx(pageConfig.pageMarginTop)}px`,
+    '--margin-bottom': `${mmToPx(pageConfig.pageMarginBottom)}px`,
+  }
+  const area = store.areaSelection.value.style
 
   return (
-    <div className={styles.canvasWrapper}>
-      <div
-        ref={editorRef}
-        id="ptd-designer-canvas"
-        className={styles.canvas}
-        style={{
-          width: `${pageWidthPx}px`,
-          height: `${pageHeightPx}px`,
-          transform: `scale(${scale})`,
-          transformOrigin: '50% 0',
-          background: pageConfig.background,
-          color: pageConfig.color,
-          fontFamily: pageConfig.fontFamily,
-          fontSize: `${pageConfig.fontSize}px`,
-          lineHeight: String(pageConfig.lineHeight),
-        }}
-        onDragOver={handleDragOver}
-        onDrop={handleDrop}
-        onMouseDown={handleMouseDown}
-      >
-        {componentData.map((schema, index) => (
-          <ComponentAdjuster
-            key={schema.id}
-            schema={schema}
-            index={index}
-            isActive={schema.id === curComponent?.id}
-            editorRef={editorRef}
-            scale={scale}
-            onChange={onChange}
-            onMove={handleMove}
-            onMoveEnd={handleMoveEnd}
-          >
-            <ComponentRenderer schema={schema} />
-          </ComponentAdjuster>
-        ))}
-
-        {isShowArea && (
-          <Area
-            left={areaData.style.left}
-            top={areaData.style.top}
-            width={areaData.style.width}
-            height={areaData.style.height}
-          />
-        )}
-
-        <EditorLine ref={editorLineRef} />
-
-        {/* Top margin line */}
+    <div className={styles.canvasWrapper} style={canvasStyle}>
+      <div className={styles.canvasStage}>
         <div
-          className={styles.marginLine}
-          style={{ top: `${marginTopPx / scale}px` }}
-        />
-        {/* Bottom margin line */}
-        <div
-          className={styles.marginLine}
-          style={{ bottom: `${marginBottomPx / scale}px` }}
-        />
+          ref={editorRef}
+          id="ptd-designer-canvas"
+          className={styles.canvas}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+          onMouseDown={handleMouseDown}
+        >
+          {components.map((schema) => (
+            <ComponentAdjuster
+              key={schema.id}
+              schema={schema}
+              isActive={selectedIds.includes(schema.id)}
+              editorRef={editorRef}
+              scale={scale}
+              onMove={handleMove}
+              onMoveEnd={() => editorLineRef.current?.hideLines()}
+            >
+              <ComponentRenderer schema={schema} />
+            </ComponentAdjuster>
+          ))}
+          {store.isSelectingArea.value && <Area {...area} />}
+          <EditorLine ref={editorLineRef} />
+          <div className={`${styles.marginLine} ${styles.marginTop}`} />
+          <div className={`${styles.marginLine} ${styles.marginBottom}`} />
+        </div>
       </div>
     </div>
   )
+}
+
+function cloneValue<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value)) as T
 }

@@ -1,0 +1,25 @@
+:root {
+  color-scheme: light;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  overflow: hidden;
+  background: #e9e2da;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}

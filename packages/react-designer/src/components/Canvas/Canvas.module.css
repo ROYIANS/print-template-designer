@@ -1,17 +1,45 @@
 .canvasWrapper {
-  position: absolute;
-  width: 5000px;
-  height: 5000px;
+  position: relative;
+  box-sizing: border-box;
+  width: max-content;
+  min-width: 100%;
+  height: max-content;
+  min-height: 100%;
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding-top: 60px;
+  padding: 56px 96px 160px;
 }
 
 .canvas {
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: var(--canvas-width);
+  height: var(--canvas-height);
+  transform: scale(var(--canvas-scale));
+  transform-origin: 0 0;
+  background: var(--canvas-background);
+  color: var(--canvas-color);
+  font-family: var(--canvas-font-family);
+  font-size: var(--canvas-font-size);
+  line-height: var(--canvas-line-height);
+  box-shadow:
+    rgba(0, 0, 0, 0.12) 0 1px 3px,
+    rgba(0, 0, 0, 0.24) 0 1px 2px;
+}
+
+.canvasStage {
   position: relative;
-  box-shadow: rgba(0, 0, 0, 0.12) 0 1px 3px, rgba(0, 0, 0, 0.24) 0 1px 2px;
-  flex-shrink: 0;
+  width: var(--canvas-scaled-width);
+  height: var(--canvas-scaled-height);
+  flex: 0 0 auto;
+}
+
+.marginTop {
+  top: var(--margin-top);
+}
+.marginBottom {
+  bottom: var(--margin-bottom);
 }
 
 .marginLine {

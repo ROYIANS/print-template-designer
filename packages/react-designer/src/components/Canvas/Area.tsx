@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import styles from './Area.module.css'
 
 interface AreaProps {
@@ -8,10 +9,11 @@ interface AreaProps {
 }
 
 export function Area({ left, top, width, height }: AreaProps) {
-  return (
-    <div
-      className={styles.area}
-      style={{ left: `${left}px`, top: `${top}px`, width: `${width}px`, height: `${height}px` }}
-    />
-  )
+  const variables = {
+    '--area-left': `${left}px`,
+    '--area-top': `${top}px`,
+    '--area-width': `${width}px`,
+    '--area-height': `${height}px`,
+  } as CSSProperties
+  return <div className={styles.area} style={variables} />
 }

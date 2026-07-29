@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@preact/signals-react": "^2.1.0",
     "@ptd/react-designer": "workspace:*",
     "react": "^18.3.0",
     "react-dom": "^18.3.0"
