@@ -23,6 +23,8 @@ push / tag / workflow_dispatch
 - 功能分支也发布规范化 branch tag，便于当前 `feature/refc` 在合并前快速预览。
 - 部署脚本不会 `source .env` 或执行其中的内容，仅解析已知键；Compose 自行读取 `.env`。
 - 健康判断读取 Docker 容器的 health 状态，不以“容器进程已启动”代替应用可用。
+- CI 按 `core -> components -> react-designer -> web` 顺序交错执行类型检查与构建；上游包的
+  `dist/index.d.ts` 必须在下游包类型检查前生成，不能依赖本地残留的忽略产物。
 
 ## 验证记录
 
@@ -37,6 +39,8 @@ push / tag / workflow_dispatch
 - Vitest：core 23、components 30、react-designer 36，共 89 个测试通过。
 - ESLint 9：前端四个工作区通过，`--max-warnings=0`。
 - 生产构建：core、components、react-designer 与 Vite Web 顺序构建通过。
+- 干净产物验证：临时移除全部前端 `dist` 后，CI 的交错 typecheck/build 顺序、89 个测试、
+  ESLint 与 Web 生产构建全部通过；验证结束后本地忽略产物已恢复。
 
 ### 由 CI / 目标服务器完成
 
