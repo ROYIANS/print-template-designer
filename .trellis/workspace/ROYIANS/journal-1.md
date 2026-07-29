@@ -259,3 +259,36 @@ Restyled the Tool Dock into a neutral structural surface, rebuilt Page/Single/Mu
 ### Next Steps
 
 - None - task complete
+
+
+## Session 8: Refine Inspector scrubbing and disclosure hierarchy
+
+**Date**: 2026-07-29
+**Task**: Refine Inspector scrubbing and disclosure hierarchy
+**Branch**: `feature/refc`
+
+### Summary
+
+Added Photoshop-style numeric label scrubbing with Shift/Alt/Escape and cancellable editor gestures; kept frequent Inspector sections visible, reserved disclosure for advanced appearance, hid irrelevant controls by component capability, updated specs, and verified package/Web builds plus responsive browser states.
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `21847a3` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete

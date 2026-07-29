@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 7
+- **Total Sessions**: 8
 - **Last Active**: 2026-07-29
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~261 | Active |
+| `journal-1.md` | ~294 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 8 | 2026-07-29 | Refine Inspector scrubbing and disclosure hierarchy | `21847a3` | `feature/refc` |
 | 7 | 2026-07-29 | Refine professional designer UI | `f462da0` | `feature/refc` |
 | 6 | 2026-07-29 | Frontend Docker deployment completed | `9c52002`, `4cff359`, `1ab8f7a`, `1655df8`, `f65a5f1` | `feature/refc` |
 | 5 | 2026-05-21 | @ptd/components 画布组件包实现 | `0a538aa` | `feature/refc` |
