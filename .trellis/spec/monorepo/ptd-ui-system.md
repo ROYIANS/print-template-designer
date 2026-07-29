@@ -177,6 +177,7 @@ PTD 是一张数字化的制版工作台：**精密、轻快、可信，带有�
   --ptd-layer-canvas: 0;
   --ptd-layer-guide: 20;
   --ptd-layer-selection: 30;
+  --ptd-layer-scrim: 80;
   --ptd-layer-sticky: 100;
   --ptd-layer-floating: 1200;
   --ptd-layer-context: 1250;
@@ -279,8 +280,9 @@ PTD 是一张数字化的制版工作台：**精密、轻快、可信，带有�
 
 - Document Bar 只放文档身份和真实文档级动作；不存在的预览、云保存或同步状态不得占位。
 - Context Bar 依据页面、单选、多选和参考线选择切换命令；无关命令移除而不是永久禁用。
-- Tool Dock 固定展示高频创建工具和 Pages/Layers/Data/Assets 资源入口。它可使用深蓝石墨作为
-  工作区视觉脊柱；常态图标中性，Active 才引入钴蓝。
+- Tool Dock 固定展示高频创建工具和 Pages/Layers/Data/Assets 资源入口。它使用与面板相连的
+  中性纸灰/石墨 surface；常态图标中性，Active 与 Focus 才引入钴蓝。Document Bar 承担深色
+  视觉锚点，Dock 不应表现成与画布割裂的第二套导航产品。
 - Resource Panel 默认宽 220px、限制在 200–360px；Inspector 默认 304px、限制在 280–420px。
   两者均可折叠和拖动调整，最后宽度在当前 Designer 实例中保留。
 - 无组件选择时 Inspector 必须展示真实 Page Inspector，而不是空状态；只读信息不得伪装成输入框。
@@ -337,7 +339,13 @@ PanelRoot
 
 - Label 始终可见，Placeholder 只给示例，不能承担字段名称。
 - 常规输入高度 28px，关键 Select/Combobox 高度 32px，圆角 2px。
-- 几何属性优先组成 X/Y/W/H 二列网格，使用等宽数值和清晰单位后缀。
+- Page、Single 与 Multi Inspector 复用固定 Header、单一滚动 Body 和可选固定 Footer；切换状态
+  不得改变主面板的滚动与定位合同。
+- 几何属性优先组成 X/Y/W/H 二列网格，使用带增减动作、等宽数值和清晰单位后缀的紧凑步进器。
+  合法的编辑中间态在焦点内保留，完成编辑时才提交一个历史手势。
+- 二至四项的小型枚举优先使用 segmented control；约束选项使用紧凑 Select；颜色同时提供可视
+  色板和可编辑值。只有真正的长内容使用 textarea，不能把 Inspector 退化成原始输入框列表。
+- 混合值、锁定、禁用与非法草稿必须同时通过文字、图标或控件状态表达，不能只改变颜色。
 - 内容、布局、文本、填充、边框和高级设置按分区组织；高级设置默认折叠。
 - 混合值显示明确的“多值”状态，不能伪造默认颜色或数字。
 - 数字输入在提交前保留合法草稿；空值或非法值不能静默写成 0。
@@ -449,6 +457,8 @@ PTD 是桌面优先的生产工具，但不能假设所有桌面设备都有精�
 - 从一个档位切到另一个档位时采用该档位的安全默认开合；用户仍可用 Context Bar 入口恢复面板。
 - compact overlay 打开一个必须关闭另一个；Scrim 或 Escape 可关闭当前 overlay。overlay 宽度以
   Designer 容器为边界，禁止使用 `100vw` 推算嵌入式设计器宽度。
+- compact Scrim 位于 Selection 与 Sticky Panel 两个语义层之间：它必须覆盖 Quick Bar、选框和
+  画布编辑 Chrome，但不能盖住当前打开的 Resource/Inspector overlay。
 - 不因窄屏删除关键功能；只改变入口和披露层级。
 - `pointer: coarse` 时控件命中区域至少 40px，并取消依赖 Hover 才可发现的操作。
 - 浏览器缩放到 200% 时，工具栏允许分组折叠，不能产生不可达的横向命令。

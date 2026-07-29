@@ -18,7 +18,7 @@
   "commit": null,
   "pr_url": null,
   "subtasks": [],
-  "children": ["07-29-canvas-first-ui-finalize"],
+  "children": ["07-29-canvas-first-ui-finalize", "07-29-designer-ui-refinement"],
   "parent": null,
   "relatedFiles": [
     "packages/react-designer/src/",
@@ -27,9 +27,9 @@
     "packages/core/src/types/component-schema.ts",
     "apps/web/src/App.tsx"
   ],
-  "notes": "PR1+PR2 已提交（dec3f3a），PR3 已完成；CSS Module 映射修复已提交（146196c），PR4-A 工作台与规范基线已提交（7c00cfd/0900a35）。基线包含 48px App Bar、44px 双 Deck Command Bar、深石墨 Rail、五入口 Panel、Catalog/Factory、冷纸白工作台与独立 Selection Quick Bar。后续视觉复核已删除 App Bar/工作区/纸张全部菱形节点和包围标尺的重复工作区外框，将固定装饰刻线替换为真实毫米标尺，并加入 UI-only 多色参考线：点击/拖拽创建、选择、换色、显隐、锁定、清空、双击/Delete 删除及键盘微调。参考线按页面物理边界限制，不写入 TemplateSchema、导出或模板历史。5mm/10mm/20mm 分级、mm 单位、A4 终点与 50%/100%/150%/1024px 浏览器状态均已验证，当前 29 个测试通过。PR4-B/C 后续补齐结构/数据/全局面板编辑、右键菜单和完整浏览器交互验收。",
+  "notes": "PR1+PR2 已提交（dec3f3a），PR3 已完成；CSS Module 映射修复已提交（146196c），PR4-A 工作台与规范基线已提交（7c00cfd/0900a35）。基线包含 48px App Bar、44px 双 Deck Command Bar、五入口 Panel、Catalog/Factory、冷纸白工作台与独立 Selection Quick Bar。后续视觉复核已删除纯装饰节点和重复工作区外框，将固定刻线替换为真实毫米标尺，并加入 UI-only 多色参考线。07-29 UI refinement 进一步把 Dock 改为与纸张面板一致的中性结构色，Page/Single/Multi Inspector 统一为固定 Header、单滚动 Body 和固定 Footer，并以单位步进器、segmented control、紧凑 Select、色板 + HEX 取代大批原始输入框；compact Scrim 层级和 Panel Grid/ClassName 合同一并修正。wide/standard/compact、locked、multi-select 与 200% 等效空间已验证，当前 36 个测试通过。PR4-B/C 后续补齐结构/数据/全局面板编辑、右键菜单和完整浏览器交互验收。",
   "meta": {
     "pr1_commit": "dec3f3a",
-    "progress": "PR1+PR2+PR3+PR4-A done, PR4-B next"
+    "progress": "PR1+PR2+PR3+PR4-A+UI refinement done, PR4-B next"
   }
 }

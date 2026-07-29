@@ -75,6 +75,7 @@
   --ptd-layer-canvas: 10;
   --ptd-layer-guide: 20;
   --ptd-layer-selection: 30;
+  --ptd-layer-scrim: 80;
   --ptd-layer-sticky: 100;
   --ptd-layer-floating: 1200;
   --ptd-layer-tooltip: 1700;

@@ -1,0 +1,6 @@
+{"file": ".trellis/spec/monorepo/ptd-ui-system.md", "reason": "Authoritative PTD tokens, layout, inspector controls, overlay layers, accessibility and UI acceptance contract"}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "React component composition, accessibility and reusable primitive conventions"}
+{"file": ".trellis/spec/monorepo/styling-conventions.md", "reason": "CSS Modules, token usage and dynamic style boundaries"}
+{"file": ".trellis/spec/monorepo/quality-guidelines.md", "reason": "Required TypeScript, lint, test and build verification"}
+{"file": ".trellis/tasks/archive/2026-07/07-29-canvas-first-ui-finalize/info.md", "reason": "Current Canvas-first ownership, responsive behavior and known follow-up interfaces"}
+{"file": ".trellis/tasks/archive/2026-07/07-29-canvas-first-ui-finalize/research/layout-synthesis.md", "reason": "Rationale for professional Canvas-first density and current information architecture"}

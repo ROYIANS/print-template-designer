@@ -22,8 +22,8 @@
   align-items: center;
   gap: 1px;
   padding: 4px 0;
-  border-right: 1px solid var(--ptd-graphite-700);
-  background: var(--ptd-graphite-900);
+  border-right: 1px solid var(--ptd-border);
+  background: var(--ptd-surface-sunken);
 }
 
 .dockButton {
@@ -35,7 +35,7 @@
   padding: 0;
   border: 1px solid transparent;
   border-radius: var(--ptd-radius-1);
-  color: var(--ptd-graphite-400);
+  color: var(--ptd-text-muted);
   background: transparent;
   cursor: pointer;
   transition:
@@ -50,8 +50,9 @@
 }
 
 .dockButton:hover {
-  color: var(--ptd-paper-0);
-  background: var(--ptd-graphite-800);
+  color: var(--ptd-text-strong);
+  background: var(--ptd-surface-raised);
+  border-color: var(--ptd-border);
 }
 
 .dockButton:active {
@@ -59,8 +60,9 @@
 }
 
 .dockButton[aria-pressed='true'] {
-  color: var(--ptd-paper-0);
-  background: color-mix(in oklch, var(--ptd-selection) 42%, var(--ptd-graphite-900));
+  color: var(--ptd-selection-strong);
+  background: var(--ptd-selection-subtle);
+  border-color: color-mix(in oklch, var(--ptd-selection) 26%, var(--ptd-border));
   box-shadow: inset 2px 0 0 var(--ptd-selection);
 }
 
@@ -80,7 +82,7 @@
   width: 22px;
   height: 1px;
   margin: 3px 0;
-  background: var(--ptd-graphite-700);
+  background: var(--ptd-border);
 }
 
 .dockGrow {

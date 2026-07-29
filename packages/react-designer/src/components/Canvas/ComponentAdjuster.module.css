@@ -118,7 +118,7 @@
 
 .quickBar {
   position: fixed;
-  z-index: var(--ptd-layer-floating);
+  z-index: var(--ptd-layer-selection);
   top: var(--quick-bar-top);
   left: var(--quick-bar-left);
   height: 28px;
