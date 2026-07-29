@@ -19,7 +19,8 @@
   },
   "scripts": {
     "build": "pnpm -r build",
-    "dev": "pnpm --filter apps/web dev",
+    "dev": "pnpm run dev:web",
+    "dev:web": "pnpm --filter @ptd/core build && pnpm --filter @ptd/components build && pnpm --filter @ptd/react-designer build && pnpm --parallel --filter @ptd/core --filter @ptd/components --filter @ptd/react-designer --filter web dev",
     "lint": "eslint .",
     "typecheck": "pnpm -r typecheck"
   },

@@ -66,6 +66,9 @@ import '@ptd/react-designer/styles.css'
 #### Package consumption
 
 - `@ptd/react-designer` extracts CSS to `dist/index.css` and exports it as `./styles.css`.
+- Its tsup configuration maps `.css` to esbuild's `local-css` loader. tsup's CSS plugin reads the
+  generic `.css` loader even when the source filename ends in `.module.css`; configuring only
+  `.module.css` silently emits empty JavaScript class maps.
 - Every host imports the style subpath explicitly. Do not use runtime style injection: it conflicts
   with CSS Modules, CSP and SSR control.
 - Every host declares the designer's peer dependencies (`react`, `react-dom`,
@@ -84,6 +87,7 @@ import '@ptd/react-designer/styles.css'
 | Selection contains a locked component | Destructive/structural command is a no-op |
 | Structured `propValue` (array/object) | Inspector is read-only; never coerce to string |
 | Host omits `styles.css` import | Integration is invalid; UI styling is not guaranteed |
+| Built CSS Module default export is `{}` | Invalid package build; host elements receive no class names |
 | Host omits a peer dependency | Workspace/install validation must fail before release |
 | App build overlaps package `clean` | Invalid verification order; rerun sequentially |
 
@@ -103,7 +107,8 @@ import '@ptd/react-designer/styles.css'
 - Store unit test: transient gesture produces one snapshot and locked commands are no-ops.
 - Geometry unit test: group → scale/rotate/move → ungroup preserves visual geometry.
 - Inspector helper test: structured values are read-only; numeric primitive values preserve type.
-- Package build assertion: ESM, CJS, DTS and `dist/index.css` exist.
+- Package build assertion: ESM, CJS, DTS and `dist/index.css` exist; ESM/CJS contain non-empty CSS
+  Module class maps such as `Designer_designer`.
 - Host build assertion: peer dependencies resolve and `@ptd/react-designer/styles.css` imports.
 - Verification ordering: finish the designer package build before starting the host build.
 

@@ -125,15 +125,35 @@ import '@ptd/react-designer/styles.css'
 Do not enable runtime `injectStyle` for a CSS Modules package. Explicit CSS is compatible with
 SSR/CSP, lets hosts control ordering, and avoids tsup/esbuild CSS Modules export mismatches.
 
+The React designer must also preserve CSS Module default-export maps in its JavaScript output:
+
+```ts
+export default defineConfig({
+  // ...shared options
+  loader: {
+    '.css': 'local-css',
+  },
+})
+```
+
+Use the `.css` key, not `.module.css`: tsup's CSS plugin forwards `loader['.css']` for every CSS
+file it handles. Without `local-css`, the stylesheet may still be emitted while every imported
+module map becomes `{}`, leaving the rendered UI without class names.
+
 ## Build Script Convention
 
 Root `package.json` scripts run all packages via pnpm filter:
 
 ```bash
 pnpm build          # runs tsup in all packages/* and apps/
+pnpm dev            # builds Web dependencies, then watches them alongside apps/web
 pnpm typecheck      # tsc --noEmit in all packages
 pnpm lint           # eslint across workspace
 ```
+
+The Web development command must build `@ptd/core`, `@ptd/components`, and
+`@ptd/react-designer` sequentially before starting their watchers and Vite. A Vite-only command
+can consume missing or stale package `dist` output.
 
 Individual package:
 ```bash
