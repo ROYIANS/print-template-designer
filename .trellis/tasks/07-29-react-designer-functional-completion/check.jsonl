@@ -1,0 +1,4 @@
+{"file":".trellis/spec/monorepo/react-designer-contract.md","reason":"Verify selection, clipboard, paste, immutable history and public-package behavior."}
+{"file":".trellis/spec/monorepo/ptd-ui-system.md","reason":"Verify Context Menu accessibility, portal layers and responsive browser behavior."}
+{"file":".trellis/spec/monorepo/quality-guidelines.md","reason":"Run the required tests, typecheck, lint, builds and static-quality scans."}
+{"file":".trellis/tasks/07-29-react-designer-functional-completion/research/context-menu-contract.md","reason":"Check coverage against Legacy commands without reintroducing obsolete panels."}

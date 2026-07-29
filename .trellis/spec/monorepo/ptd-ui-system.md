@@ -410,6 +410,21 @@ PanelRoot
   必须 clamp，不能被侧栏或滚动视口裁切。
 - Quick Bar 只改变编辑器 UI，不得写入 `TemplateSchema`、修改组件样式或出现在打印/导出结果中。
 
+### 10.2 画布右键菜单
+
+- 右击未选中的组件时，先把该组件设为当前单选；右击现有多选中的任一成员时，必须保留完整多选；
+  右击 Paper 空白时清空组件选择并进入页面上下文。仅打开菜单或属性 Inspector 不写模板历史。
+- 组件上下文复用现有编辑命令，提供属性、复制、剪切、锁定/解锁、适用时的组合/拆分、四种层级
+  操作和删除；不能出现无实现的装饰菜单项。层级使用子菜单披露，危险删除使用明确危险态。
+- 选择中包含锁定对象时，只允许属性、复制和明确解锁。剪切、删除、组合/拆分和层级调整在 UI 中
+  不可用，并由 Store 保留第二层 no-op 防护，不能出现点击后无反馈的伪可用命令。
+- 空白上下文提供页面属性和“粘贴到此处”。剪贴板为空时粘贴禁用；多选粘贴以所选对象的可视
+  包围盒左上角对齐点击位置，保持内部相对布局，并在整体可容纳时限制到纸张物理边界。
+- Paper 必须有可访问名称和可聚焦入口，同时支持鼠标右键、`Shift+F10` 与 Context Menu 键。
+  菜单交互沿用 Radix roving focus，支持方向键、Enter 和 Escape，焦点态不能只依赖颜色。
+- ContextMenu Portal 应用共享 `ptdTheme`，使用 `--ptd-layer-context`；在 compact Inspector/Resource
+  Scrim 上方可见可操作，但仍低于 Modal、Toast 与 Tooltip。
+
 ## 11. Portal 与主题合同
 
 Radix Tooltip、DropdownMenu、ContextMenu、Popover 和 Dialog 通过 Portal 离开 Designer DOM

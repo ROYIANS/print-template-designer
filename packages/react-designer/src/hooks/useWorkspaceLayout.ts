@@ -99,6 +99,11 @@ export function useWorkspaceLayout(rootRef: RefObject<HTMLElement | null>) {
     })
   }, [])
 
+  const openInspector = useCallback(() => {
+    setInspectorOpen(true)
+    if (modeRef.current === 'compact') setResourcesOpen(false)
+  }, [])
+
   const closeOverlay = useCallback(() => {
     if (modeRef.current !== 'compact') return
     setResourcesOpen(false)
@@ -141,6 +146,7 @@ export function useWorkspaceLayout(rootRef: RefObject<HTMLElement | null>) {
     inspectorWidth,
     toggleResource,
     toggleInspector,
+    openInspector,
     closeOverlay,
     beginResize,
   }

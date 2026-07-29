@@ -33,6 +33,7 @@ class EditorStore {
   beginGesture(): void
   commitGesture(): void
   cancelGesture(): void
+  pasteAt(left: number, top: number): void
   undo(): void
   redo(): void
 }
@@ -66,6 +67,33 @@ import '@ptd/react-designer/styles.css'
 - Locked components reject content, style, geometry and structural commands; changing `isLock` to
   unlock remains allowed.
 
+#### Clipboard placement
+
+- `pasteAt(left, top)` interprets `left/top` as the requested paper-space position of the copied
+  selection's visual bounding-box top-left, not as a per-component absolute position.
+- A copied multi-selection preserves every component's relative geometry. All pasted ids, including
+  ids nested inside groups, are regenerated before insertion.
+- If the copied selection can fit on an axis of the physical page, the complete selection is clamped
+  into that page axis. A selection larger than the page keeps the requested translation rather than
+  being distorted or collapsing its relative layout.
+- One paste inserts and selects the complete copied set through one immutable template update, one
+  `onChange` emission and one history entry. Pasting a cut clipboard consumes it only after the
+  insertion succeeds.
+
+#### Canvas context commands
+
+- Context targeting is resolved before the menu opens: an unselected component becomes the sole
+  selection, a component already inside a multi-selection preserves the complete selection, and
+  blank paper clears component selection.
+- Opening a context menu or opening Properties is UI state only and must not add template history.
+- Locked selections may be inspected, copied and explicitly unlocked. Cut, delete, group/ungroup and
+  layer mutations must be unavailable in the UI and remain guarded as no-ops in `EditorStore`.
+- Blank-paper paste delegates to `pasteAt`; component commands reuse the same store methods as the
+  command bar and keyboard shortcuts rather than duplicating mutation logic.
+- The paper exposes an accessible name and supports both native pointer context-menu input and
+  `Shift+F10` / the Context Menu key. Radix owns roving focus, Arrow navigation, Enter selection and
+  Escape dismissal.
+
 #### Package consumption
 
 - `@ptd/react-designer` extracts CSS to `dist/index.css` and exports it as `./styles.css`.
@@ -89,6 +117,10 @@ import '@ptd/react-designer/styles.css'
 | Gesture emits many transient updates     | One final history entry                                     |
 | Gesture is cancelled                     | Restore the exact gesture-start value; add no history entry |
 | Selection contains a locked component    | Destructive/structural command is a no-op                   |
+| Context click targets unselected object   | Select that object before rendering component commands      |
+| Context click targets selected group item | Preserve the existing multi-selection                       |
+| Context click targets blank paper         | Clear selection; expose page properties and positioned paste |
+| `pasteAt` receives a multi-selection      | Preserve relative geometry; regenerate every id; one history |
 | Structured `propValue` (array/object)    | Inspector is read-only; never coerce to string              |
 | Host omits `styles.css` import           | Integration is invalid; UI styling is not guaranteed        |
 | Built CSS Module default export is `{}`  | Invalid package build; host elements receive no class names |
@@ -110,11 +142,15 @@ import '@ptd/react-designer/styles.css'
 - Store unit test: first mutation undo/redo and redo-branch truncation.
 - Store unit test: a committed transient gesture produces one snapshot; a cancelled gesture restores
   the exact starting template without history; locked commands are no-ops.
+- Store unit test: `pasteAt` preserves multi-selection geometry, selects fresh ids, emits one host
+  change, creates one history entry, undoes as one operation and clamps into physical page bounds.
 - Geometry unit test: group → scale/rotate/move → ungroup preserves visual geometry.
 - Inspector helper test: structured values are read-only; numeric primitive values preserve type.
 - Package build assertion: ESM, CJS, DTS and `dist/index.css` exist; ESM/CJS contain non-empty CSS
   Module class maps such as `Designer_designer`.
 - Host build assertion: peer dependencies resolve and `@ptd/react-designer/styles.css` imports.
+- Browser assertion: right-click target resolution, blank/component command sets, locked disabled
+  states, positioned paste + one-step Undo, layer submenu and `Shift+F10` keyboard entry all work.
 - Verification ordering: finish the designer package build before starting the host build.
 
 ### 7. Wrong vs Correct

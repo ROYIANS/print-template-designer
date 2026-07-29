@@ -78,6 +78,7 @@
   --ptd-layer-scrim: 80;
   --ptd-layer-sticky: 100;
   --ptd-layer-floating: 1200;
+  --ptd-layer-context: 1250;
   --ptd-layer-tooltip: 1700;
   --ptd-font-ui:
     'Outfit', 'Outfit Variable', 'Sarasa UI SC', 'Sarasa Gothic SC', 'Microsoft YaHei UI',

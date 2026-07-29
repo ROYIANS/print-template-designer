@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import type { ComponentSchema, TemplateSchema } from '@ptd/core'
+import { getPageDimensions, type ComponentSchema, type TemplateSchema } from '@ptd/core'
 import { EditorStore } from '../state/editor'
 
 function component(id: string, left: number, top = 0, width = 10, height = 10): ComponentSchema {
@@ -184,6 +184,50 @@ describe('EditorStore commands', () => {
     store.paste()
     expect(store.clipboard.value).toBeNull()
     expect(store.components.value.at(-1)?.id).toBe('new-2')
+  })
+
+  it('pastes a multi-selection at a paper position as one history entry', () => {
+    let id = 0
+    const onChange = vi.fn()
+    const store = new EditorStore(template(), {
+      idFactory: () => `pasted-${++id}`,
+      onChange,
+    })
+    store.selectComponents(['a', 'b'])
+    store.copy()
+
+    store.pasteAt(100, 80)
+
+    expect(
+      store.components.value.slice(-2).map((item) => [item.id, item.style.left, item.style.top]),
+    ).toEqual([
+      ['pasted-1', 100, 80],
+      ['pasted-2', 120, 80],
+    ])
+    expect(store.selectedIds.value).toEqual(['pasted-1', 'pasted-2'])
+    expect(store.history.value).toHaveLength(2)
+    expect(onChange).toHaveBeenCalledTimes(1)
+
+    store.undo()
+    expect(store.components.value.map((item) => item.id)).toEqual(['a', 'b'])
+  })
+
+  it('clamps a positioned paste into the physical paper bounds', () => {
+    let id = 0
+    const store = new EditorStore(template(), { idFactory: () => `pasted-${++id}` })
+    store.selectComponents(['a', 'b'])
+    store.copy()
+
+    store.pasteAt(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER)
+
+    const page = getPageDimensions(store.pageConfig.value)
+    const pasted = store.components.value.slice(-2)
+    expect(Math.max(...pasted.map((item) => Number(item.style.left) + item.style.width))).toBe(
+      page.width,
+    )
+    expect(Math.max(...pasted.map((item) => Number(item.style.top) + item.style.height))).toBe(
+      page.height,
+    )
   })
 
   it('tracks a one-shot component reveal request outside template history', () => {

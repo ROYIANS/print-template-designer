@@ -1,5 +1,11 @@
 import { computed, signal } from '@preact/signals-react'
-import type { ComponentSchema, ComponentStyle, PageDirection, TemplateSchema } from '@ptd/core'
+import {
+  getPageDimensions,
+  type ComponentSchema,
+  type ComponentStyle,
+  type PageDirection,
+  type TemplateSchema,
+} from '@ptd/core'
 import { getComponentRotatedStyle } from '../utils'
 import { createGroupMetrics, getAbsoluteGroupChildren } from '../utils/groupGeometry'
 
@@ -48,6 +54,10 @@ function randomId(): string {
 
 function number(value: unknown): number {
   return typeof value === 'number' && Number.isFinite(value) ? value : 0
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value))
 }
 
 function withPosition(component: ComponentSchema, left: number, top: number): ComponentSchema {
@@ -366,6 +376,42 @@ export class EditorStore {
     })
     this.updateCurrentPage((components) => [...components, ...pasted])
     this.selectComponents(pasted.map((component) => component.id))
+    if (clipboard.isCut) this.clipboard.value = null
+  }
+
+  pasteAt(left: number, top: number): void {
+    const clipboard = this.clipboard.value
+    if (!clipboard || !Number.isFinite(left) || !Number.isFinite(top)) return
+    const pasted = clipboard.components.map((component) => regenerateIds(component, this.idFactory))
+    const boxes = pasted.map((component) => getComponentRotatedStyle(component.style))
+    const selectionLeft = Math.min(...boxes.map((box) => box.left))
+    const selectionTop = Math.min(...boxes.map((box) => box.top))
+    const selectionRight = Math.max(...boxes.map((box) => box.right))
+    const selectionBottom = Math.max(...boxes.map((box) => box.bottom))
+    const page = getPageDimensions(this.pageConfig.value)
+    const minDeltaLeft = -selectionLeft
+    const minDeltaTop = -selectionTop
+    const maxDeltaLeft = page.width - selectionRight
+    const maxDeltaTop = page.height - selectionBottom
+    const requestedDeltaLeft = left - selectionLeft
+    const requestedDeltaTop = top - selectionTop
+    const deltaLeft =
+      minDeltaLeft <= maxDeltaLeft
+        ? clamp(requestedDeltaLeft, minDeltaLeft, maxDeltaLeft)
+        : requestedDeltaLeft
+    const deltaTop =
+      minDeltaTop <= maxDeltaTop
+        ? clamp(requestedDeltaTop, minDeltaTop, maxDeltaTop)
+        : requestedDeltaTop
+    const positioned = pasted.map((component) =>
+      withPosition(
+        component,
+        number(component.style.left) + deltaLeft,
+        number(component.style.top) + deltaTop,
+      ),
+    )
+    this.updateCurrentPage((components) => [...components, ...positioned])
+    this.selectComponents(positioned.map((component) => component.id))
     if (clipboard.isCut) this.clipboard.value = null
   }
 
