@@ -1,26 +1,131 @@
-name: GitHub Actions Build and Deploy
+name: Frontend CI & GHCR
+
 on:
   push:
-    branches:
-      - feature-1.0.0
+    branches: ['**']
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: frontend-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/print-template-designer-web
+
 jobs:
-  build-and-deploy:
+  quality:
+    name: Frontend quality
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v2.3.1
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          persist-credentials: false
-      - name: Install and Build
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate Bash and Compose deployment files
+        shell: bash
         run: |
-          npm install
-          npm run build
-      - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@3.7.1
+          bash -n deploy.sh
+          docker compose --env-file .env.example config --quiet
+
+      - name: Validate PowerShell deployment script
+        shell: pwsh
+        run: |
+          $tokens = $null
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile(
+            (Resolve-Path './deploy.ps1'),
+            [ref]$tokens,
+            [ref]$errors
+          ) | Out-Null
+          if ($errors.Count -gt 0) {
+            $errors | Format-List
+            exit 1
+          }
+
+      - name: Typecheck frontend
+        run: |
+          pnpm --filter @ptd/core typecheck
+          pnpm --filter @ptd/components typecheck
+          pnpm --filter @ptd/react-designer typecheck
+          pnpm --filter web typecheck
+
+      - name: Test frontend packages
+        run: |
+          pnpm --filter @ptd/core test
+          pnpm --filter @ptd/components test
+          pnpm --filter @ptd/react-designer test
+
+      - name: Lint frontend
+        run: pnpm lint:frontend
+
+      - name: Build frontend
+        run: |
+          pnpm --filter @ptd/core build
+          pnpm --filter @ptd/components build
+          pnpm --filter @ptd/react-designer build
+          pnpm --filter web build
+
+  publish-web-image:
+    name: Publish web image
+    if: github.event_name != 'pull_request'
+    needs: quality
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Normalize image name
+        id: image
+        shell: bash
+        run: echo "name=$(echo '${{ env.IMAGE_NAME }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
         with:
-          GITHUB_TOKEN: ${{ secrets.PRINT_TEMPLATE_DESIGNER_TOKEN }}
-          BRANCH: preview
-          FOLDER: dist
-          CLEAN: true
-          REPOSITORY_NAME: royians/print-template-designer
-          TARGET_FOLDER: /
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate image metadata
+        id: metadata
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ steps.image.outputs.name }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=ref,event=branch
+            type=ref,event=tag
+            type=sha,format=long
+
+      - name: Build and push web image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile.web
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.metadata.outputs.tags }}
+          labels: ${{ steps.metadata.outputs.labels }}
+          cache-from: type=gha,scope=web
+          cache-to: type=gha,mode=max,scope=web

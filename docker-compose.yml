@@ -1,0 +1,15 @@
+# Pull-only frontend deployment. Images are built by GitHub Actions and published to GHCR.
+services:
+  web:
+    image: ${IMAGE_REPOSITORY:-ghcr.io/royians/print-template-designer-web}:${IMAGE_TAG:-latest}
+    pull_policy: always
+    container_name: ptd-web
+    restart: unless-stopped
+    ports:
+      - '${WEB_PORT:-8080}:80'
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1/healthz >/dev/null || exit 1']
+      interval: 15s
+      timeout: 5s
+      start_period: 10s
+      retries: 5

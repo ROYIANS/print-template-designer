@@ -12,16 +12,18 @@
     "type": "git",
     "url": "git://github.com/royians/print-template-designer.git"
   },
+  "packageManager": "pnpm@10.15.1",
   "type": "module",
   "engines": {
     "node": ">=20",
-    "pnpm": ">=8"
+    "pnpm": ">=10"
   },
   "scripts": {
     "build": "pnpm -r build",
     "dev": "pnpm run dev:web",
     "dev:web": "pnpm --filter @ptd/core build && pnpm --filter @ptd/components build && pnpm --filter @ptd/react-designer build && pnpm --parallel --filter @ptd/core --filter @ptd/components --filter @ptd/react-designer --filter web dev",
     "lint": "eslint .",
+    "lint:frontend": "eslint packages/core/src packages/components/src packages/react-designer/src apps/web/src --max-warnings=0",
     "typecheck": "pnpm -r typecheck"
   },
   "devDependencies": {

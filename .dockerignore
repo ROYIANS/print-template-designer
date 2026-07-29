@@ -1,0 +1,28 @@
+# Dependency and build output
+**/node_modules
+**/dist
+**/coverage
+**/.turbo
+
+# Git, editors and local tooling
+.git
+.gitignore
+.idea
+.vscode
+.claude
+.cursor
+.trellis
+.codegraph
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+
+# Files not required by the frontend image
+apps/server
+packages/export
+legacy
+docker/Dockerfile.server
+**/*.md
+**/*.log
