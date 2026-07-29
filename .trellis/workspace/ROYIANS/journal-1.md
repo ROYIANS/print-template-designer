@@ -189,3 +189,40 @@ Populated all six .trellis/spec/frontend/ files (directory-structure, component-
 
 ### Status
 [OK] **PR1 完成，进入 PR2（画布核心）**
+
+
+## Session 6: Frontend Docker deployment completed
+
+**Date**: 2026-07-29
+**Task**: Frontend Docker deployment completed
+**Branch**: `feature/refc`
+
+### Summary
+
+Completed the pull-only GHCR frontend deployment flow, fixed clean-runner workspace type resolution by interleaving upstream builds with typechecks, verified CI and target deployment, documented the contract, and archived 05-21-docker-finalize.
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `9c52002` | (see git log) |
+| `4cff359` | (see git log) |
+| `1ab8f7a` | (see git log) |
+| `1655df8` | (see git log) |
+| `f65a5f1` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
