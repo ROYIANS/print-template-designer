@@ -15,8 +15,8 @@
 * **Legacy 功能清单**（来自 `legacy/src/`）：
   * 布局：顶部 header（标题 + 夜间模式）+ 左侧 sidebar（图标菜单 + 面板区）+ 中间画布 + 右侧属性面板
   * 左侧 sidebar 面板：组件、结构（TOC）、属性、数据源、全局设置（5 个标签页）
-  * 顶部工具栏（ToolBar）：标尺开关、锁定/解锁、对齐/分布、组合/拆分、层级、复制/粘贴/删除、缩放比例
-  * 画布（Editor）：SketchRuler 标尺、ComponentAdjuster（选中/移动/缩放/旋转）、Area 框选、EditorLine 辅助线、上下边距线、右键菜单
+  * 顶部工具栏（ToolBar）：标尺开关、参考线颜色/显隐/锁定/清空、组件锁定/解锁、对齐/分布、组合/拆分、层级、复制/粘贴/删除、缩放比例
+  * 画布（Editor）：真实毫米标尺与多色参考线、ComponentAdjuster（选中/移动/缩放/旋转）、Area 框选、EditorLine 辅助线、上下边距线、右键菜单
   * 属性面板（PagePalette）：按组件类型动态渲染表单（样式 + propValue），使用 vxe-table 表单（迁移后改为原生 React 表单）
   * 状态：Vuex 模块（global/snapshot/compose/copy/layer/lock/night-mode/ruler-things）→ 迁移为 signals
   * 撤销/重做：snapshot 模块，MAX_SNAP_SHOT_LENGTH=3
@@ -25,7 +25,8 @@
 
 * `<Designer>` 是受控组件（controlled），宿主传入 `value: TemplateSchema` + `onChange` 回调，预留 `onSave`/`onLoad` 空接口供 `05-21-integration-hooks` 扩展
 * 画布内组件渲染复用 `@ptd/components` 的 Vanilla JS class，通过 React ref + useEffect 桥接
-* SketchRuler 使用现成 React 库（`react-sketch-ruler` 或同类），不自行实现
+* 标尺采用轻量 DOM Overlay，由 `PageConfig` 毫米尺寸、页面方向和画布缩放直接生成，避免为当前
+  只读刻度需求引入一套带额外交互状态的第三方标尺库
 * 组合/拆分、框选多组件等复杂交互：本任务实现核心逻辑，如工作量过大可拆出独立子任务
 
 ## Open Questions
@@ -44,8 +45,8 @@
   * 属性面板（左侧版）：同右侧属性面板（备用入口）
   * 数据源面板：展示 `dataSource` 字段列表（绑定逻辑由 `05-21-datasource-refactor` 完成，此处做 UI 骨架）
   * 全局设置面板：`PageConfig` 编辑（纸张大小、方向、边距、字体等）
-* **顶部工具栏**：标尺开关、锁定/解锁、对齐/分布（8 种）、组合/拆分、层级（上移/下移/置顶/置底）、复制/粘贴/删除、撤销/重做、缩放比例
-* **画布**：SketchRuler 标尺、ComponentAdjuster（选中/移动/8 点缩放/旋转）、Area 框选、辅助线（EditorLine）、上下边距线、右键菜单
+* **顶部工具栏**：标尺开关、参考线颜色/显隐/锁定/清空、组件锁定/解锁、对齐/分布（8 种）、组合/拆分、层级（上移/下移/置顶/置底）、复制/粘贴/删除、撤销/重做、缩放比例
+* **画布**：真实毫米标尺与多色参考线、ComponentAdjuster（选中/移动/8 点缩放/旋转）、Area 框选、辅助线（EditorLine）、上下边距线、右键菜单
 * **属性面板**：抛弃 `vxe-table`/`vxe-form`，用通用 React 表单（原生 input/select/color picker）渲染 `ComponentStyle` 字段，所有组件共用一套面板
 * **UI 组件库**：全面采用 `@radix-ui` Primitives，自定义样式。具体用到：
   * `@radix-ui/react-context-menu` — 右键菜单
@@ -67,8 +68,12 @@
 * 左侧组件面板首个切片同时支持拖拽与点击创建，统一通过 Catalog/Factory 生成 Schema
 * 左右面板复用同一 PanelRoot/Header/Body/Footer 结构，每个面板只有一个主滚动容器
 * Portal 内容必须继承共享 PTD theme token，并遵守统一 overlay layer 合同
-* Paper 与 Starter/Demo Schema 使用冷中性白；工程网格、斜线装配材质、结构节点和无数字刻线
-  只能出现在 Pasteboard/Chrome，不进入模板或导出内容
+* Paper 与 Starter/Demo Schema 使用冷中性白；工程网格和斜线装配材质只能出现在
+  Pasteboard/Chrome，不进入模板或导出内容；禁止重复工作区外框、菱形角点和无尺寸语义的伪标尺
+* 顶部/左侧标尺使用真实毫米尺寸：5mm 次刻度、10mm 主刻度、20mm 标签、明确 `mm` 单位和
+  页面实际终点；随页面方向与画布缩放更新，并可由既有标尺命令完整开关
+* 标尺支持点击/拖拽创建参考线；参考线可选择、拖动、多色标记、显隐、锁定、清空、双击/Delete
+  删除和键盘微调；参考线只属于编辑器 UI 会话，不污染模板 Schema、打印导出或模板撤销历史
 * 单选组件显示与选中框一体的浮动快捷条，包含名称、拖动、锁定/解锁、复制、上移一层和删除；
   快捷条独立于组件旋转和画布缩放，并自动限制在 Canvas viewport 内
 
@@ -82,7 +87,8 @@
 * [x] 组合/拆分正常工作
 * [x] 框选多组件正常工作
 * [ ] 右键菜单正常弹出并执行操作
-* [ ] SketchRuler 标尺正常显示，可开关
+* [x] 真实毫米标尺正常显示并可开关；页面方向、50%/100%/150% 缩放与 A4 终点通过验收
+* [x] 多色参考线可创建、拖动、选择、换色、显隐、锁定和删除，并始终限制在纸张物理边界内
 * [x] 完整工作区在 1600×1000 与 1366×768 下具有清晰层级，画布保持主视觉
 * [x] 左侧 Rail 五入口可键盘切换，组件面板不是空壳
 * [x] 组件可通过拖拽或点击添加；两条路径均自动选中、产生一个历史节点并调用一次最终 `onChange`
@@ -115,7 +121,8 @@
 - 状态：`@preact/signals-react` 替代 Vuex（6 模块）
 - 属性面板：原生 React 表单替换 `vxe-table`/`vxe-form`，通用样式编辑器
 - 右键菜单：`@radix-ui/react-context-menu` 替换自研 `RoyContext`
-- SketchRuler：使用现成 React 库（`react-sketch-ruler` 或同类）
+- 标尺：使用由页面物理尺寸直接驱动的轻量 DOM Overlay；若后续需要拖拽辅助线或标尺原点，
+  再基于实际交互需求评估专用库
 
 **Consequences**: 零 Vue 依赖，完全 React 化；Radix UI 无样式，需自行实现所有视觉样式；signals 细粒度更新性能优于 Vuex。
 
@@ -125,7 +132,8 @@
 - [x] PR2：画布核心（ComponentAdjuster + 拖拽放置 + 选中/移动/缩放/旋转）
 - [x] PR3：工具栏操作（对齐/分布/层级/组合/拆分/撤销重做）+ 属性面板
 - [x] PR4-A：PTD UI tokens + 完整工作区外壳 + 左侧 Rail/组件面板 + 创建入口 + 图标工具栏
-- [ ] PR4-B：结构/属性/数据源/全局面板内容 + SketchRuler
+- [x] PR4-A.1：移除菱形/重复工作区外框 + 真实毫米标尺 + 多色参考线
+- [ ] PR4-B：结构/属性/数据源/全局面板内容
 - [ ] PR4-C：右键菜单 + 响应式面板 + 浏览器交互验收
 - [ ] PR5：`apps/web` 全量浏览器验收（受控示例已接入）
 

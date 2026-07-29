@@ -27,7 +27,7 @@
     "packages/core/src/types/component-schema.ts",
     "apps/web/src/App.tsx"
   ],
-  "notes": "PR1+PR2 已提交（dec3f3a），PR3 已完成并通过 20 个测试；CSS Module 映射修复已提交（146196c）。PR4-A 已实现 PTD UI 系统规范、48px App Bar、44px 双 Deck Command Bar、深石墨 Rail、五入口 Panel、组件 Catalog/Factory、拖拽/点击创建和 Remix 图标命令栏；完成 Zed/Workshop 启发的冷纸白、装配斜线、工程网格、结构节点、纸张偏移阴影与独立 Selection Quick Bar。浮条在普通/旋转组件上保持水平并限制于 Canvas viewport。Legacy Logo 仍为可替换资产，字体合同为 Outfit/Sarasa UI SC/Noto Serif。已通过 24 个测试、包/Web 构建及三档浏览器视觉验收。PR4-B/C 后续补齐结构/数据/全局面板编辑、SketchRuler、右键菜单和完整浏览器交互验收。",
+  "notes": "PR1+PR2 已提交（dec3f3a），PR3 已完成；CSS Module 映射修复已提交（146196c），PR4-A 工作台与规范基线已提交（7c00cfd/0900a35）。基线包含 48px App Bar、44px 双 Deck Command Bar、深石墨 Rail、五入口 Panel、Catalog/Factory、冷纸白工作台与独立 Selection Quick Bar。后续视觉复核已删除 App Bar/工作区/纸张全部菱形节点和包围标尺的重复工作区外框，将固定装饰刻线替换为真实毫米标尺，并加入 UI-only 多色参考线：点击/拖拽创建、选择、换色、显隐、锁定、清空、双击/Delete 删除及键盘微调。参考线按页面物理边界限制，不写入 TemplateSchema、导出或模板历史。5mm/10mm/20mm 分级、mm 单位、A4 终点与 50%/100%/150%/1024px 浏览器状态均已验证，当前 29 个测试通过。PR4-B/C 后续补齐结构/数据/全局面板编辑、右键菜单和完整浏览器交互验收。",
   "meta": {
     "pr1_commit": "dec3f3a",
     "progress": "PR1+PR2+PR3+PR4-A done, PR4-B next"

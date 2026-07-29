@@ -140,3 +140,25 @@ those patterns would reduce canvas space or compete with real rulers and page ge
   visible Canvas viewport on scroll and resize.
 - 1600×1000, 1366×768 and 1024×768 screenshots confirm full desktop, constrained desktop and
   collapsed-left-panel layouts. A rotated proof-stamp screenshot confirms overlay orientation.
+
+## Post-baseline correction: decoration must not impersonate a tool
+
+After the PR4-A baseline was committed, browser review identified two elements that reduced rather
+than increased professional credibility:
+
+- The rotated-square diamonds at App Bar intersections, workbench corners and paper corners were
+  decorative symbols without editor meaning. They were removed; hairlines now carry the structure.
+- The fixed repeating edge ticks resembled rulers but did not encode paper dimensions. They were
+  replaced with calibrated DOM rulers driven by page millimetres, direction and canvas scale.
+
+The real ruler uses 5mm minor ticks, 10mm major ticks, 20mm labels, explicit `mm`, and exact start/end
+values such as A4's 210 × 297. It follows the existing ruler visibility command and disappears as a
+complete tool when disabled. Browser checks at 50%, 100% and 150% confirmed that positions scale while
+labels preserve their physical values. This establishes a stronger rule for future decoration:
+anything visually claiming to measure, guide or register must represent actual editor state.
+
+The follow-up guide system keeps that rule operational: ruler pointer gestures create physical X/Y
+guides, selected guides project a triangular marker back onto the ruler and expose a 0.1mm label,
+and four restrained colors distinguish user-authored annotations. Visibility, locking, clearing,
+keyboard adjustment and deletion are explicit editor commands. Guides remain session-only UI state,
+so layout assistance cannot leak into printed template data or create misleading undo checkpoints.

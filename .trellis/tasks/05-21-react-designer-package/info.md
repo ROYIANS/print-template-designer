@@ -143,3 +143,23 @@ layers remain valid outside the root DOM subtree.
   `ptd-pr4-professional-frame-1366x768.png` and `ptd-pr4-professional-frame-1024x768.png`.
   `ptd-pr4-professional-selected-1600x1000-v2.png` verifies the standard Quick Bar and
   `ptd-pr4-professional-selected-rotated-1600x1000.png` verifies the rotated-component overlay.
+
+## PR4-A post-baseline visual correction
+
+- Removed every decorative rotated-square node from the App Bar intersection, workbench frame and
+  paper corners. Hairlines now express the layout without symbolic corner ornaments.
+- Replaced fixed repeating edge ticks with a real millimetre ruler generated from page dimensions.
+  It uses 5mm minor ticks, 10mm major ticks, 20mm labels, exact page endpoints and an explicit `mm`
+  unit; landscape direction swaps the physical axes and zoom scales mark positions.
+- Connected the ruler to the existing `showRuler` command so disabling it removes the complete tool,
+  not merely its labels. Removed the redundant frame around the ruler and paper.
+- Added UI-only colored guides: click/drag either ruler to create, drag to move, click to select,
+  double-click or Delete to remove, and use arrow keys for 0.1mm (Shift: 1mm) adjustment. Selected
+  guides expose a triangular ruler marker and an axis/position label. The View Deck provides cobalt,
+  vermilion, emerald and amber colors plus visibility, lock and clear commands.
+- Guide state is clamped to the physical page, excluded from `TemplateSchema`, exports and template
+  history, and reset on a genuinely external template replacement. Added Store and ruler-mark
+  coverage; the suite now has 29 passing tests.
+- Browser evidence: `ptd-real-rulers-final-1600x1000.png`, `ptd-real-rulers-hidden-1600x1000.png`,
+  `ptd-ruler-guides-final-1600x1000.png`, `ptd-ruler-component-selection-1600x1000.png`,
+  `ptd-ruler-guides-final-1024x768-v3.png` and `ptd-ruler-guides-final-landscape-150-v2.png`.
