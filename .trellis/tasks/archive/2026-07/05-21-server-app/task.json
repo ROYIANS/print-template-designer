@@ -1,0 +1,37 @@
+{
+  "id": "server-app",
+  "name": "server-app",
+  "title": "apps/server NestJS 后端",
+  "description": "Establish a current NestJS 11 / Prisma 7 server foundation with SQLite, committed migrations, template CRUD, immutable version snapshots and real HTTP integration tests.",
+  "status": "completed",
+  "dev_type": "feature",
+  "scope": "apps/server template persistence and versioning API",
+  "package": "server",
+  "priority": "P2",
+  "creator": "ROYIANS",
+  "assignee": "ROYIANS",
+  "createdAt": "2026-05-21",
+  "completedAt": "2026-07-29",
+  "branch": "feature/refc",
+  "base_branch": "feature/refc",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": null,
+  "relatedFiles": [
+    "apps/server/src/",
+    "apps/server/prisma/schema.prisma",
+    "apps/server/package.json",
+    "packages/core/src/serialization/index.ts"
+  ],
+  "notes": "The legacy Prisma 5.22 SQLite schema fails validation because that version predates SQLite Json support. Per user direction, upgrade the Server workspace to the current stable NestJS 11 / Prisma 7 / Vitest 4 stack, use Prisma 7 native SQLite Json through the core serialization contract, and deliver template CRUD/versioning. Auth, assets, datasource proxy, PDF and server-image rollout require separate contracts.",
+  "meta": {
+    "prisma": "7.9.1",
+    "nestjs": "11.1.28",
+    "vitest": "4.1.10",
+    "database": "sqlite",
+    "next": "05-21-datasource-refactor"
+  }
+}

@@ -1,0 +1,7 @@
+{"file": ".trellis/spec/monorepo/directory-structure.md", "reason": "apps/server 目录结构，NestJS + Prisma 布局规范"}
+{"file": ".trellis/spec/monorepo/typescript-conventions.md", "reason": "strict TS（NestJS 需额外开启 experimentalDecorators/emitDecoratorMetadata）"}
+{"file": ".trellis/spec/monorepo/quality-guidelines.md", "reason": "ESLint/Prettier/Node >=20 约定"}
+{"file": ".trellis/spec/monorepo/package-conventions.md", "reason": "monorepo 构建脚本约定，apps/server 与 packages/ 的依赖关系"}
+{"file": ".trellis/tasks/05-21-server-app/research/prisma-nest-baseline.md", "reason": "Prisma 5/SQLite 兼容性、字符串序列化、版本快照与测试决策"}
+{"file": ".trellis/tasks/05-21-server-app/research/prisma-7-stack.md", "reason": "用户确认的当前稳定 NestJS 11 / Prisma 7 / Vitest 4 架构、SQLite adapter、原生 Json 与兼容版本决策；本文件覆盖旧 baseline 的 Prisma 5 保留方案"}
+{"file": ".trellis/spec/monorepo/server-architecture.md", "reason": "任务完成后沉淀的 NestJS 11 / Prisma 7 / SQLite 路径、事务并发与验证规范"}

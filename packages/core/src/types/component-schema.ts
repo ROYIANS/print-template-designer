@@ -12,7 +12,15 @@ export type ComponentType =
   | 'RoyBarCode'
   | 'RoyGroup'
 
+export type CreatableComponentType = Exclude<ComponentType, 'RoyGroup'>
+
 export type ComponentCategory = 'common' | 'data' | 'shape'
+
+export type ComponentCatalogGroup = 'text' | 'table' | 'image' | 'code' | 'shape'
+
+export type ComponentMaturity = 'basic' | 'complex'
+
+export type ComponentCreationMode = 'insert' | 'draw'
 
 export interface ComponentStyle {
   width: number

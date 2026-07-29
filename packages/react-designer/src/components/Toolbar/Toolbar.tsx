@@ -17,6 +17,7 @@ import {
   RiDeleteBinLine,
   RiFileCopyLine,
   RiGroupLine,
+  RiHand,
   RiLandscapeLine,
   RiLayoutLeftLine,
   RiLayoutRightLine,
@@ -28,7 +29,9 @@ import {
 } from '@remixicon/react'
 import type { Alignment, Distribution, GuideColor } from '../../state'
 import { useEditorStore } from '../../state'
+import { findAvailableCatalogItem } from '../../catalog'
 import { ptdThemeClass } from '../Theme'
+import { getToolGuidance, type ToolGuidance } from './toolGuidance'
 import styles from './Toolbar.module.css'
 
 interface ToolbarProps {
@@ -137,6 +140,7 @@ export function Toolbar({
   const store = useEditorStore()
   const selected = store.selectedComponents.value
   const selectedGuide = store.guides.value.find((guide) => guide.id === store.selectedGuideId.value)
+  const toolGuidance = getToolGuidance(store.effectiveTool.value, store.temporaryHand.value)
 
   return (
     <Tooltip.Provider delayDuration={400} skipDelayDuration={120}>
@@ -161,7 +165,9 @@ export function Toolbar({
         </div>
 
         <div className={styles.context}>
-          {selectedGuide ? (
+          {toolGuidance ? (
+            <ActiveToolContext guidance={toolGuidance} />
+          ) : selectedGuide ? (
             <GuideContext />
           ) : selected.length > 1 ? (
             <MultiContext />
@@ -190,6 +196,34 @@ export function Toolbar({
         </div>
       </nav>
     </Tooltip.Provider>
+  )
+}
+
+function ActiveToolContext({ guidance }: { guidance: ToolGuidance }) {
+  const item = guidance.tool === 'hand' ? null : findAvailableCatalogItem(guidance.tool)
+  const Icon = item?.icon
+  return (
+    <>
+      <ContextIdentity kind={guidance.kind} name={guidance.name} />
+      <span className={styles.rule} />
+      <div className={styles.toolGuidance} aria-label={`${guidance.name}操作提示`}>
+        {Icon ? <Icon aria-hidden="true" /> : <RiHand aria-hidden="true" />}
+        <strong>{guidance.instruction}</strong>
+        {guidance.shiftHint && (
+          <span>
+            <kbd>Shift</kbd> {guidance.shiftHint}
+          </span>
+        )}
+        {guidance.secondaryHint && (
+          <span>
+            <kbd>{guidance.secondaryHint.key}</kbd> {guidance.secondaryHint.label}
+          </span>
+        )}
+        <span>
+          <kbd>Esc</kbd> {guidance.escapeHint}
+        </span>
+      </div>
+    </>
   )
 }
 

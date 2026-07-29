@@ -17,6 +17,15 @@ out
 .env.development
 .env.production
 
+# Local SQLite databases
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# Generated Prisma Client
+apps/server/src/generated/prisma/
+
 # Logs
 npm-debug.log*
 yarn-debug.log*

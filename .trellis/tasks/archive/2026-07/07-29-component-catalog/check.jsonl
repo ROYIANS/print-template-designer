@@ -1,0 +1,8 @@
+{"file": ".trellis/spec/monorepo/typescript-conventions.md", "reason": "严格类型、无 any/ignore 与公共类型导出检查"}
+{"file": ".trellis/spec/monorepo/styling-conventions.md", "reason": "CSS Modules、token、无内联静态样式检查"}
+{"file": ".trellis/spec/monorepo/quality-guidelines.md", "reason": "lint、tests、build、format 门禁"}
+{"file": ".trellis/spec/monorepo/ptd-ui-system.md", "reason": "高密度专业组件面板、Tool Dock 去重、可访问性与响应式检查"}
+{"file": ".trellis/spec/monorepo/react-designer-contract.md", "reason": "组件创建与拖放的 history/onChange 合同回归检查"}
+{"file": ".trellis/tasks/07-29-component-catalog/research/component-audit.md", "reason": "核对 11 个可创建组件、RoyGroup 内部化、五组顺序与缺失/冗余边界"}
+{"file": ".trellis/tasks/07-29-component-catalog/prd.md", "reason": "核对 planned 项不可创建、形状 persistent tool、绘制几何、单次 history 与快捷键验收"}
+{"file": ".trellis/tasks/07-29-component-catalog/research/sidebar-benchmark.md", "reason": "核对 grouped Shape tool、Dock 语义分区、任务型组件面板、规划项收纳与 Context Bar"}

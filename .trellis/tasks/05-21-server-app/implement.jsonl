@@ -1,4 +1,0 @@
-{"file": ".trellis/spec/monorepo/directory-structure.md", "reason": "apps/server 目录结构，NestJS + Prisma 布局规范"}
-{"file": ".trellis/spec/monorepo/typescript-conventions.md", "reason": "strict TS（NestJS 需额外开启 experimentalDecorators/emitDecoratorMetadata）"}
-{"file": ".trellis/spec/monorepo/quality-guidelines.md", "reason": "ESLint/Prettier/Node >=20 约定"}
-{"file": ".trellis/spec/monorepo/package-conventions.md", "reason": "monorepo 构建脚本约定，apps/server 与 packages/ 的依赖关系"}

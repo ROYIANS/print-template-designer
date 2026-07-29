@@ -1,0 +1,6 @@
+{"file": ".trellis/spec/monorepo/quality-guidelines.md", "reason": "ESLint/Prettier 规范，检查代码风格合规性"}
+{"file": ".trellis/spec/monorepo/typescript-conventions.md", "reason": "strict TS 合规检查，NestJS decorator 配置验证"}
+{"file": ".trellis/spec/monorepo/directory-structure.md", "reason": "apps/server 目录结构规范验证"}
+{"file": ".trellis/tasks/05-21-server-app/research/prisma-nest-baseline.md", "reason": "核对 Prisma 版本、SQLite schema、乐观并发、迁移和 HTTP 集成测试合同"}
+{"file": ".trellis/tasks/05-21-server-app/research/prisma-7-stack.md", "reason": "核对实际解析为 NestJS 11 / Prisma 7 / Vitest 4，Prisma 7 adapter/config/generated client 与 SQLite 原生 Json 实现"}
+{"file": ".trellis/spec/monorepo/server-architecture.md", "reason": "核对 Server 的 Prisma 7、SQLite、HTTP 边界、乐观并发和 clean-clone 门禁规范"}

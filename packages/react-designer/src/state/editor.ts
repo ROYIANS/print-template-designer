@@ -9,6 +9,7 @@ import {
 } from '@ptd/core'
 import { getComponentRotatedStyle } from '../utils'
 import { createGroupMetrics, getAbsoluteGroupChildren } from '../utils/groupGeometry'
+import type { DrawingComponentType } from '../catalog'
 
 const HISTORY_LIMIT = 20
 const PASTE_OFFSET = 12
@@ -18,6 +19,7 @@ export type Distribution = 'horizontal' | 'vertical'
 export type LayerAction = 'forward' | 'backward' | 'front' | 'back'
 export type GuideAxis = 'x' | 'y'
 export type GuideColor = 'cobalt' | 'vermilion' | 'emerald' | 'amber'
+export type EditorTool = 'select' | 'hand' | 'RoySimpleText' | DrawingComponentType
 
 export interface CanvasGuide {
   id: string
@@ -55,6 +57,10 @@ function randomId(): string {
 
 function number(value: unknown): number {
   return typeof value === 'number' && Number.isFinite(value) ? value : 0
+}
+
+function isShapeDrawingTool(tool: EditorTool): tool is DrawingComponentType {
+  return tool === 'RoyLine' || tool === 'RoyRect' || tool === 'RoyCircle' || tool === 'RoyStar'
 }
 
 function clamp(value: number, min: number, max: number): number {
@@ -101,6 +107,9 @@ export class EditorStore {
   readonly isSelectingArea = signal(false)
   readonly clipboard = signal<ClipboardData | null>(null)
   readonly componentToReveal = signal<string | null>(null)
+  readonly activeTool = signal<EditorTool>('select')
+  readonly temporaryHand = signal(false)
+  readonly lastDrawingTool = signal<DrawingComponentType>('RoyRect')
   readonly history = signal<TemplateSchema[]>([])
   readonly historyIndex = signal(0)
 
@@ -115,6 +124,9 @@ export class EditorStore {
     const id = this.selectedIds.value.at(-1)
     return id ? (this.components.value.find((component) => component.id === id) ?? null) : null
   })
+  readonly effectiveTool = computed<EditorTool>(() =>
+    this.temporaryHand.value ? 'hand' : this.activeTool.value,
+  )
   readonly canUndo = computed(() => this.historyIndex.value > 0)
   readonly canRedo = computed(() => this.historyIndex.value < this.history.value.length - 1)
 
@@ -144,6 +156,7 @@ export class EditorStore {
     )
     this.selectedIds.value = []
     this.componentToReveal.value = null
+    this.temporaryHand.value = false
     this.guides.value = []
     this.selectedGuideId.value = null
     this.history.value = [template]
@@ -183,9 +196,7 @@ export class EditorStore {
     const activePageId = this.currentPage.value?.id
     const next = pages.filter((_, pageIndex) => pageIndex !== index)
     const preferredPageId =
-      activePageId === pages[index]?.id
-        ? next[Math.min(index, next.length - 1)]?.id
-        : activePageId
+      activePageId === pages[index]?.id ? next[Math.min(index, next.length - 1)]?.id : activePageId
     this.commit({ ...this.template.value, pages: next }, false, preferredPageId)
   }
 
@@ -230,6 +241,19 @@ export class EditorStore {
   clearSelection(): void {
     this.selectedIds.value = []
     this.selectedGuideId.value = null
+  }
+
+  setActiveTool(tool: EditorTool): void {
+    if (isShapeDrawingTool(tool)) this.lastDrawingTool.value = tool
+    if (this.activeTool.value === tool) return
+    this.activeTool.value = tool
+    this.cancelAreaSelection()
+  }
+
+  setTemporaryHand(active: boolean): void {
+    if (this.temporaryHand.value === active) return
+    this.temporaryHand.value = active
+    this.cancelAreaSelection()
   }
 
   addGuide(axis: GuideAxis, positionMm: number): string | null {
@@ -712,11 +736,7 @@ export class EditorStore {
     this.updateCurrentPage(() => components)
   }
 
-  private commit(
-    template: TemplateSchema,
-    transient = false,
-    preferredPageId?: string,
-  ): void {
+  private commit(template: TemplateSchema, transient = false, preferredPageId?: string): void {
     if (template === this.template.value) return
     const previousPageId = this.currentPage.value?.id
     this.template.value = template

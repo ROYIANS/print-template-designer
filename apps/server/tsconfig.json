@@ -1,13 +1,14 @@
 {
   "compilerOptions": {
-    "module": "CommonJS",
-    "target": "ES2021",
-    "lib": ["ES2021"],
-    "moduleResolution": "Node",
+    "module": "NodeNext",
+    "target": "ES2023",
+    "lib": ["ES2023"],
+    "moduleResolution": "NodeNext",
     "declaration": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
+    "strictPropertyInitialization": false,
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
     "outDir": "./dist",
@@ -19,6 +20,6 @@
     "noUnusedParameters": false,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "test/**/*", "prisma.config.ts", "vitest.config.ts"],
   "exclude": ["node_modules", "dist"]
 }

@@ -18,6 +18,26 @@ export function isEditableTarget(target: EventTarget | null): boolean {
   )
 }
 
+export function isSelectToolShortcut(
+  key: string,
+  modifiers: { command?: boolean; alt?: boolean } = {},
+): boolean {
+  if (modifiers.command || modifiers.alt) return false
+  const normalized = key.toLowerCase()
+  return normalized === 'v' || normalized === 'escape'
+}
+
+export function isHandToolShortcut(
+  key: string,
+  modifiers: { command?: boolean; alt?: boolean } = {},
+): boolean {
+  return !modifiers.command && !modifiers.alt && key.toLowerCase() === 'h'
+}
+
+export function isTemporaryHandKey(key: string, code = ''): boolean {
+  return key === ' ' || key === 'Space' || key === 'Spacebar' || code === 'Space'
+}
+
 export function useEditorKeyboard(
   store: EditorStore,
   rootRef: RefObject<HTMLElement | null>,
@@ -56,6 +76,21 @@ export function useEditorKeyboard(
         store.paste()
         return
       }
+      if (!command && !event.altKey && isTemporaryHandKey(event.key, event.code)) {
+        event.preventDefault()
+        store.setTemporaryHand(true)
+        return
+      }
+      if (isHandToolShortcut(key, { command, alt: event.altKey })) {
+        event.preventDefault()
+        store.setActiveTool('hand')
+        return
+      }
+      if (isSelectToolShortcut(key, { command, alt: event.altKey })) {
+        event.preventDefault()
+        store.setActiveTool('select')
+        return
+      }
       if (key === 'delete' || key === 'backspace') {
         event.preventDefault()
         if (store.selectedGuideId.value) store.removeSelectedGuide()
@@ -89,7 +124,20 @@ export function useEditorKeyboard(
         store.moveSelection(delta[0], delta[1])
       }
     }
+    const handleKeyUp = (event: KeyboardEvent) => {
+      if (!store.temporaryHand.value || !isTemporaryHandKey(event.key, event.code)) return
+      event.preventDefault()
+      store.setTemporaryHand(false)
+    }
+    const handleBlur = () => store.setTemporaryHand(false)
     document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
+    document.addEventListener('keyup', handleKeyUp)
+    window.addEventListener('blur', handleBlur)
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+      document.removeEventListener('keyup', handleKeyUp)
+      window.removeEventListener('blur', handleBlur)
+      store.setTemporaryHand(false)
+    }
   }, [rootRef, store])
 }
