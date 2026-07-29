@@ -52,12 +52,18 @@ apps/web/
 
 apps/server/
   src/
-    main.ts           NestJS bootstrap (port 3000)
+    main.ts           NestJS ESM bootstrap (port 3000)
     app.module.ts
-    app.controller.ts
-    app.service.ts
+    generated/prisma/ Ignored Prisma 7 generated Client
+    health/           Health endpoint
+    prisma/           Driver adapter, URL and lifecycle service
+    templates/        HTTP contracts, controller and versioned persistence service
   prisma/
-    schema.prisma     SQLite datasource + Template model
+    migrations/       Committed SQLite migration history
+    schema.prisma     Template + immutable TemplateVersion models
+  test/               Real Nest HTTP integration tests
+  prisma.config.ts    Prisma 7 schema/migration/datasource configuration
+  vitest.config.ts    Node integration test configuration
   tsconfig.json
   tsconfig.build.json
 ```
