@@ -111,7 +111,7 @@
 
 .overlayScrim {
   position: absolute;
-  z-index: var(--ptd-layer-selection);
+  z-index: var(--ptd-layer-scrim);
   inset: 0 0 0 var(--ptd-tool-dock-width);
   padding: 0;
   border: 0;

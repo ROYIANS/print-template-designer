@@ -39,15 +39,18 @@
 
 * 导出 `<Designer value={TemplateSchema} onChange={fn} />` 受控组件
 * **布局**：顶部 header + 左侧 sidebar（图标菜单 + 可折叠面板）+ 中间画布 + 右侧属性面板
-* **左侧 sidebar**（5 个面板，图标切换）：
-  * 组件面板：按 category 分组，可拖拽到画布
-  * 结构面板（TOC）：组件树，可选中/排序
-  * 属性面板（左侧版）：同右侧属性面板（备用入口）
-  * 数据源面板：展示 `dataSource` 字段列表（绑定逻辑由 `05-21-datasource-refactor` 完成，此处做 UI 骨架）
-  * 全局设置面板：`PageConfig` 编辑（纸张大小、方向、边距、字体等）
+* **左侧 Tool Dock / Resource Panel**：
+  * Components：按 category 分组，支持拖拽与点击创建
+  * Pages：展示真实页面状态并可切换；增删、复制与排序由 `05-21-multi-page-support` 完成
+  * Layers：展示真实组件结构并可选择对象；结构编辑复用统一 Store 命令
+  * Data：展示真实 `dataSource` 摘要；编辑、导入与预览由 `05-21-datasource-refactor` 完成
+  * Assets：展示可创建资产入口，不维护重复的组件属性表单
+* 页面/全局属性统一由无选择时的 Page Inspector 承担；组件属性统一由 Single/Multi Inspector
+  承担，不再复制一套左侧属性或全局设置表单
 * **顶部工具栏**：标尺开关、参考线颜色/显隐/锁定/清空、组件锁定/解锁、对齐/分布（8 种）、组合/拆分、层级（上移/下移/置顶/置底）、复制/粘贴/删除、撤销/重做、缩放比例
 * **画布**：真实毫米标尺与多色参考线、ComponentAdjuster（选中/移动/8 点缩放/旋转）、Area 框选、辅助线（EditorLine）、上下边距线、右键菜单
-* **属性面板**：抛弃 `vxe-table`/`vxe-form`，用通用 React 表单（原生 input/select/color picker）渲染 `ComponentStyle` 字段，所有组件共用一套面板
+* **属性面板**：抛弃 `vxe-table`/`vxe-form`，由 Page/Single/Multi Inspector 按语义使用紧凑
+  步进器、数值拖动热区、segmented control、Select 与色板编辑，避免退化成大量原始输入框
 * **UI 组件库**：全面采用 `@radix-ui` Primitives，自定义样式。具体用到：
   * `@radix-ui/react-context-menu` — 右键菜单
   * `@radix-ui/react-tooltip` — 工具栏按钮 tooltip
@@ -81,12 +84,13 @@
 
 * [x] `<Designer>` 可在 `apps/web` 中渲染，不报 TypeScript 错误
 * [ ] 拖拽组件到画布后，`onChange` 被调用，`TemplateSchema` 中新增对应 `ComponentSchema`
+  （标准 HTML5 drag/drop 已接线；浏览器助手无法产生完整 `DataTransfer` 链路，保留人工浏览器验收）
 * [x] 选中组件后，属性面板显示该组件的 style 属性，修改后画布实时更新
 * [x] 撤销/重做功能正常工作
 * [x] 对齐/分布、层级操作正常工作
 * [x] 组合/拆分正常工作
 * [x] 框选多组件正常工作
-* [ ] 右键菜单正常弹出并执行操作
+* [x] 右键菜单正常弹出并执行操作；支持空白/单选/多选/锁定上下文与鼠标位置粘贴
 * [x] 真实毫米标尺正常显示并可开关；页面方向、50%/100%/150% 缩放与 A4 终点通过验收
 * [x] 多色参考线可创建、拖动、选择、换色、显隐、锁定和删除，并始终限制在纸张物理边界内
 * [x] 完整工作区在 1600×1000 与 1366×768 下具有清晰层级，画布保持主视觉
@@ -133,9 +137,11 @@
 - [x] PR3：工具栏操作（对齐/分布/层级/组合/拆分/撤销重做）+ 属性面板
 - [x] PR4-A：PTD UI tokens + 完整工作区外壳 + 左侧 Rail/组件面板 + 创建入口 + 图标工具栏
 - [x] PR4-A.1：移除菱形/重复工作区外框 + 真实毫米标尺 + 多色参考线
-- [ ] PR4-B：结构/属性/数据源/全局面板内容
-- [ ] PR4-C：右键菜单 + 响应式面板 + 浏览器交互验收
-- [ ] PR5：`apps/web` 全量浏览器验收（受控示例已接入）
+- [x] PR4-B：工作区信息架构收口——Pages/Layers/Data/Assets 展示真实状态，Page/Global 归
+  Page Inspector，组件属性归 Single/Multi Inspector；页面结构命令和数据编辑分别移交后续任务
+- [x] PR4-C：右键菜单 + 响应式面板 + 浏览器交互验收
+- [x] PR5：`apps/web` 受控示例、三档响应式与核心编辑交互验收（原生 HTML5 drag 的自动化限制
+  单独记录，不把浏览器助手限制转化为非标准产品实现）
 
 * `packages/react-designer/src/index.ts` 已导出 `<Designer>` 及相关公共类型
 * `@ptd/components` 的组件是 Vanilla JS class，需要在 React 中通过 `useRef` + `useEffect` 桥接

@@ -3,11 +3,17 @@
   min-height: 0;
   display: grid;
   grid-template-rows: auto auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    'header'
+    'tools'
+    'body'
+    'footer';
   color: var(--ptd-text);
   background: var(--ptd-surface-panel);
 }
 
 .header {
+  grid-area: header;
   min-height: 40px;
   display: flex;
   align-items: center;
@@ -39,11 +45,13 @@
 }
 
 .tools {
+  grid-area: tools;
   padding: var(--ptd-space-2) var(--ptd-space-3);
   border-bottom: 1px solid var(--ptd-border-subtle);
 }
 
 .body {
+  grid-area: body;
   min-height: 0;
   overflow: auto;
   scrollbar-color: var(--ptd-border-strong) transparent;
@@ -51,6 +59,7 @@
 }
 
 .footer {
+  grid-area: footer;
   min-height: 36px;
   display: flex;
   align-items: center;

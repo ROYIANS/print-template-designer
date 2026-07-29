@@ -3,10 +3,16 @@ import { useSignals } from '@preact/signals-react/runtime'
 import { getPageDimensions, type ComponentCategory, type ComponentType } from '@ptd/core'
 import * as Tooltip from '@radix-ui/react-tooltip'
 import {
+  RiAddLine,
+  RiArrowDownLine,
+  RiArrowUpLine,
   RiCloseLine,
   RiCursorLine,
   RiDatabase2Line,
+  RiDeleteBinLine,
+  RiDraggable,
   RiFileList2Line,
+  RiFileCopyLine,
   RiFolderImageLine,
   RiLock2Line,
   RiPagesLine,
@@ -59,6 +65,8 @@ const CATEGORY_NAMES: Record<ComponentCategory, string> = {
   data: '数据',
   shape: '形状',
 }
+
+const PTD_PAGE_MIME = 'application/x-ptd-page'
 
 export function Sidebar({ mode, activePanel, open, onTogglePanel, onResizeStart }: SidebarProps) {
   useSignals()
@@ -113,20 +121,19 @@ export function Sidebar({ mode, activePanel, open, onTogglePanel, onResizeStart 
             </DockButton>
           ))}
         </nav>
+        <div className={styles.panelSlot} hidden={!open} data-ptd-region="resource-panel">
+          {activePanel === 'pages' && <PagesPanel onClose={() => onTogglePanel('pages')} />}
+          {activePanel === 'layers' && <LayersPanel onClose={() => onTogglePanel('layers')} />}
+          {activePanel === 'data' && <DataPanel onClose={() => onTogglePanel('data')} />}
+          {activePanel === 'assets' && <AssetsPanel onClose={() => onTogglePanel('assets')} />}
+          <button
+            type="button"
+            className={styles.resizeHandle}
+            aria-label="调整资源面板宽度"
+            onPointerDown={onResizeStart}
+          />
+        </div>
       </Tooltip.Provider>
-
-      <div className={styles.panelSlot} hidden={!open} data-ptd-region="resource-panel">
-        {activePanel === 'pages' && <PagesPanel onClose={() => onTogglePanel('pages')} />}
-        {activePanel === 'layers' && <LayersPanel onClose={() => onTogglePanel('layers')} />}
-        {activePanel === 'data' && <DataPanel onClose={() => onTogglePanel('data')} />}
-        {activePanel === 'assets' && <AssetsPanel onClose={() => onTogglePanel('assets')} />}
-        <button
-          type="button"
-          className={styles.resizeHandle}
-          aria-label="调整资源面板宽度"
-          onPointerDown={onResizeStart}
-        />
-      </div>
     </aside>
   )
 }
@@ -180,10 +187,70 @@ function PanelCloseButton({ label, onClick }: { label: string; onClick: () => vo
   )
 }
 
+function PageActionButton({
+  label,
+  disabled = false,
+  danger = false,
+  onClick,
+  children,
+}: {
+  label: string
+  disabled?: boolean
+  danger?: boolean
+  onClick: () => void
+  children: ReactNode
+}) {
+  return (
+    <Tooltip.Root>
+      <Tooltip.Trigger asChild>
+        <button
+          type="button"
+          className={styles.pageAction}
+          aria-label={label}
+          data-danger={danger || undefined}
+          disabled={disabled}
+          onClick={onClick}
+        >
+          {children}
+        </button>
+      </Tooltip.Trigger>
+      <Tooltip.Portal>
+        <Tooltip.Content
+          className={`${styles.tooltip} ${ptdThemeClass}`}
+          side="top"
+          sideOffset={8}
+        >
+          <span>{label}</span>
+          <Tooltip.Arrow className={styles.tooltipArrow} />
+        </Tooltip.Content>
+      </Tooltip.Portal>
+    </Tooltip.Root>
+  )
+}
+
 function PagesPanel({ onClose }: { onClose: () => void }) {
   useSignals()
   const store = useEditorStore()
   const pages = store.template.value.pages
+  const currentIndex = store.currentPageIndex.value
+  const [draggedPageId, setDraggedPageId] = useState<string | null>(null)
+  const [dropTargetIndex, setDropTargetIndex] = useState<number | null>(null)
+
+  const startPageDrag = (event: DragEvent<HTMLLIElement>, pageId: string) => {
+    event.dataTransfer.effectAllowed = 'move'
+    event.dataTransfer.setData(PTD_PAGE_MIME, pageId)
+    setDraggedPageId(pageId)
+  }
+
+  const dropPage = (event: DragEvent<HTMLLIElement>, targetIndex: number) => {
+    event.preventDefault()
+    const pageId = event.dataTransfer.getData(PTD_PAGE_MIME) || draggedPageId
+    const sourceIndex = pages.findIndex((page) => page.id === pageId)
+    if (sourceIndex >= 0) store.movePage(sourceIndex, targetIndex)
+    setDraggedPageId(null)
+    setDropTargetIndex(null)
+  }
+
   return (
     <PanelRoot data-ptd-region="pages-panel">
       <PanelHeader title="页面" meta={`${pages.length} 页`}>
@@ -192,13 +259,34 @@ function PagesPanel({ onClose }: { onClose: () => void }) {
       <PanelBody>
         <ol className={styles.pageList}>
           {pages.map((page, index) => (
-            <li key={page.id}>
+            <li
+              key={page.id}
+              className={styles.pageItem}
+              draggable
+              data-dragging={draggedPageId === page.id || undefined}
+              data-drop-target={dropTargetIndex === index || undefined}
+              onDragStart={(event) => startPageDrag(event, page.id)}
+              onDragEnd={() => {
+                setDraggedPageId(null)
+                setDropTargetIndex(null)
+              }}
+              onDragOver={(event) => {
+                event.preventDefault()
+                event.dataTransfer.dropEffect = 'move'
+                setDropTargetIndex(index)
+              }}
+              onDragLeave={() => {
+                if (dropTargetIndex === index) setDropTargetIndex(null)
+              }}
+              onDrop={(event) => dropPage(event, index)}
+            >
               <button
                 type="button"
                 className={styles.pageRow}
                 data-selected={store.currentPageIndex.value === index || undefined}
                 onClick={() => store.setCurrentPage(index)}
               >
+                <RiDraggable className={styles.pageDragIcon} aria-hidden="true" />
                 <span className={styles.pageNumber}>{String(index + 1).padStart(2, '0')}</span>
                 <span>
                   <strong>{`页面 ${index + 1}`}</strong>
@@ -209,7 +297,36 @@ function PagesPanel({ onClose }: { onClose: () => void }) {
           ))}
         </ol>
       </PanelBody>
-      <PanelFooter>页面结构命令将在多页阶段开放</PanelFooter>
+      <PanelFooter className={styles.pageActions} aria-label="页面结构操作">
+        <PageActionButton label="添加空白页" onClick={() => store.addPage()}>
+          <RiAddLine aria-hidden="true" />
+        </PageActionButton>
+        <PageActionButton label="复制当前页" onClick={() => store.duplicatePage()}>
+          <RiFileCopyLine aria-hidden="true" />
+        </PageActionButton>
+        <PageActionButton
+          label="当前页上移"
+          disabled={currentIndex <= 0}
+          onClick={() => store.movePage(currentIndex, currentIndex - 1)}
+        >
+          <RiArrowUpLine aria-hidden="true" />
+        </PageActionButton>
+        <PageActionButton
+          label="当前页下移"
+          disabled={currentIndex >= pages.length - 1}
+          onClick={() => store.movePage(currentIndex, currentIndex + 1)}
+        >
+          <RiArrowDownLine aria-hidden="true" />
+        </PageActionButton>
+        <PageActionButton
+          label="删除当前页"
+          danger
+          disabled={pages.length <= 1}
+          onClick={() => store.deletePage()}
+        >
+          <RiDeleteBinLine aria-hidden="true" />
+        </PageActionButton>
+      </PanelFooter>
     </PanelRoot>
   )
 }

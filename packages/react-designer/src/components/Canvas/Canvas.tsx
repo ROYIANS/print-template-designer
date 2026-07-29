@@ -4,6 +4,7 @@ import {
   useRef,
   type CSSProperties,
   type DragEvent,
+  type KeyboardEvent,
   type MouseEvent,
 } from 'react'
 import { useSignals } from '@preact/signals-react/runtime'
@@ -22,16 +23,18 @@ import { ComponentAdjuster } from './ComponentAdjuster'
 import { ComponentRenderer } from './ComponentRenderer'
 import { EditorLine, type EditorLineHandle } from './EditorLine'
 import { Ruler } from './Ruler'
+import { CanvasContextMenu } from './CanvasContextMenu'
 import styles from './Canvas.module.css'
 
 type CanvasVariables = CSSProperties & Record<`--${string}`, string>
 
-export function Canvas() {
+export function Canvas({ onOpenInspector }: { onOpenInspector: () => void }) {
   useSignals()
   const store = useEditorStore()
   const editorRef = useRef<HTMLDivElement>(null)
   const editorLineRef = useRef<EditorLineHandle>(null)
   const selectionCleanupRef = useRef<(() => void) | null>(null)
+  const contextPointRef = useRef<SelectionPoint>({ x: 0, y: 0 })
 
   const components = store.components.value
   const pageConfig = store.pageConfig.value
@@ -176,6 +179,43 @@ export function Canvas() {
     [pageHeightPx, pageWidthPx, scale, store],
   )
 
+  const handleContextMenu = useCallback(
+    (event: MouseEvent<HTMLDivElement>) => {
+      const editor = editorRef.current
+      if (!editor) return
+      contextPointRef.current = canvasPointFromClient(
+        editor.getBoundingClientRect(),
+        event.clientX,
+        event.clientY,
+        scale,
+        { width: pageWidthPx, height: pageHeightPx },
+      )
+      const target = (event.target as Element).closest<HTMLElement>('[data-ptd-component-id]')
+      const componentId = target?.dataset.ptdComponentId
+      if (!componentId) {
+        store.clearSelection()
+        return
+      }
+      if (!store.selectedIds.value.includes(componentId)) store.selectComponent(componentId)
+    },
+    [pageHeightPx, pageWidthPx, scale, store],
+  )
+
+  const handleContextMenuKeyDown = useCallback((event: KeyboardEvent<HTMLDivElement>) => {
+    if (!((event.shiftKey && event.key === 'F10') || event.key === 'ContextMenu')) return
+    event.preventDefault()
+    const target = event.target instanceof HTMLElement ? event.target : event.currentTarget
+    const rect = target.getBoundingClientRect()
+    target.dispatchEvent(
+      new globalThis.MouseEvent('contextmenu', {
+        bubbles: true,
+        cancelable: true,
+        clientX: rect.left + rect.width / 2,
+        clientY: rect.top + rect.height / 2,
+      }),
+    )
+  }, [])
+
   const handleMove = useCallback((isDownward: boolean, isRightward: boolean) => {
     editorLineRef.current?.showLines(isDownward, isRightward)
   }, [])
@@ -202,33 +242,44 @@ export function Canvas() {
         {store.showRuler.value && (
           <Ruler widthMm={pageWidthMm} heightMm={pageHeightMm} scale={scale} />
         )}
-        <div
-          ref={editorRef}
-          id="ptd-designer-canvas"
-          className={styles.canvas}
-          data-ptd-region="paper"
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-          onMouseDown={handleMouseDown}
+        <CanvasContextMenu
+          onOpenInspector={onOpenInspector}
+          onPasteAtContext={() =>
+            store.pasteAt(contextPointRef.current.x, contextPointRef.current.y)
+          }
         >
-          {components.map((schema) => (
-            <ComponentAdjuster
-              key={schema.id}
-              schema={schema}
-              isActive={selectedIds.includes(schema.id)}
-              editorRef={editorRef}
-              scale={scale}
-              onMove={handleMove}
-              onMoveEnd={() => editorLineRef.current?.hideLines()}
-            >
-              <ComponentRenderer schema={schema} />
-            </ComponentAdjuster>
-          ))}
-          {store.isSelectingArea.value && <Area {...area} />}
-          <EditorLine ref={editorLineRef} />
-          <div className={`${styles.marginLine} ${styles.marginTop}`} />
-          <div className={`${styles.marginLine} ${styles.marginBottom}`} />
-        </div>
+          <div
+            ref={editorRef}
+            id="ptd-designer-canvas"
+            className={styles.canvas}
+            data-ptd-region="paper"
+            aria-label="设计纸张"
+            tabIndex={0}
+            onContextMenu={handleContextMenu}
+            onKeyDown={handleContextMenuKeyDown}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+            onMouseDown={handleMouseDown}
+          >
+            {components.map((schema) => (
+              <ComponentAdjuster
+                key={schema.id}
+                schema={schema}
+                isActive={selectedIds.includes(schema.id)}
+                editorRef={editorRef}
+                scale={scale}
+                onMove={handleMove}
+                onMoveEnd={() => editorLineRef.current?.hideLines()}
+              >
+                <ComponentRenderer schema={schema} />
+              </ComponentAdjuster>
+            ))}
+            {store.isSelectingArea.value && <Area {...area} />}
+            <EditorLine ref={editorLineRef} />
+            <div className={`${styles.marginLine} ${styles.marginTop}`} />
+            <div className={`${styles.marginLine} ${styles.marginBottom}`} />
+          </div>
+        </CanvasContextMenu>
       </div>
     </div>
   )

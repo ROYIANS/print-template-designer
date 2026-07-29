@@ -189,3 +189,172 @@ Populated all six .trellis/spec/frontend/ files (directory-structure, component-
 
 ### Status
 [OK] **PR1 完成，进入 PR2（画布核心）**
+
+
+## Session 6: Frontend Docker deployment completed
+
+**Date**: 2026-07-29
+**Task**: Frontend Docker deployment completed
+**Branch**: `feature/refc`
+
+### Summary
+
+Completed the pull-only GHCR frontend deployment flow, fixed clean-runner workspace type resolution by interleaving upstream builds with typechecks, verified CI and target deployment, documented the contract, and archived 05-21-docker-finalize.
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `9c52002` | (see git log) |
+| `4cff359` | (see git log) |
+| `1ab8f7a` | (see git log) |
+| `1655df8` | (see git log) |
+| `f65a5f1` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
+
+
+## Session 7: Refine professional designer UI
+
+**Date**: 2026-07-29
+**Task**: Refine professional designer UI
+**Branch**: `feature/refc`
+
+### Summary
+
+Restyled the Tool Dock into a neutral structural surface, rebuilt Page/Single/Multi Inspector states on the shared Panel shell with typed compact controls, fixed Panel grid/class merging and compact scrim stacking, verified wide/standard/compact/locked/multi states, and passed typecheck, 36 tests, lint, package build and Web production build.
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `f462da0` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
+
+
+## Session 8: Refine Inspector scrubbing and disclosure hierarchy
+
+**Date**: 2026-07-29
+**Task**: Refine Inspector scrubbing and disclosure hierarchy
+**Branch**: `feature/refc`
+
+### Summary
+
+Added Photoshop-style numeric label scrubbing with Shift/Alt/Escape and cancellable editor gestures; kept frequent Inspector sections visible, reserved disclosure for advanced appearance, hid irrelevant controls by component capability, updated specs, and verified package/Web builds plus responsive browser states.
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `21847a3` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
+
+
+## Session 9: React Designer functional completion
+
+**Date**: 2026-07-29
+**Task**: React Designer functional completion
+**Branch**: `feature/refc`
+
+### Summary
+
+Completed selection-aware canvas context menu, positioned multi-selection paste, keyboard access, responsive browser QA, contract updates, and closed the React Designer parent task; multi-page support is next.
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `d0e20cf` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
+
+
+## Session 10: Multi-page visual management
+
+**Date**: 2026-07-29
+**Task**: Multi-page visual management
+**Branch**: `feature/refc`
+
+### Summary
+
+Added manual page creation, recursive-id-safe duplication, final-page-protected deletion, id-preserving reorder and Pages panel controls; confirmed manual design pages plus derived automatic render pages, with 44 tests and responsive browser QA passing.
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `6671c38` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete

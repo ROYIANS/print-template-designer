@@ -163,3 +163,40 @@ layers remain valid outside the root DOM subtree.
 - Browser evidence: `ptd-real-rulers-final-1600x1000.png`, `ptd-real-rulers-hidden-1600x1000.png`,
   `ptd-ruler-guides-final-1600x1000.png`, `ptd-ruler-component-selection-1600x1000.png`,
   `ptd-ruler-guides-final-1024x768-v3.png` and `ptd-ruler-guides-final-landscape-150-v2.png`.
+
+## PR4-B architecture reconciliation
+
+- The current canvas-first workspace supersedes the old duplicate-panel wording. Pages, Layers,
+  Data and Assets expose real editor state from the Resource Panel; Page/Global properties live in
+  Page Inspector, while component properties live in Single/Multi Inspector.
+- Page add/delete/duplicate/reorder remains owned by `05-21-multi-page-support`. Data-source editing,
+  import and preview remains owned by `05-21-datasource-refactor`. Neither concern is represented by
+  a second placeholder form inside this package-completion slice.
+- The Inspector uses semantic controls: label scrubbing and steppers for editable numbers, segmented
+  controls for small enums, compact selects for constrained choices, and palette/value pairs for
+  colors. High-frequency sections stay expanded; Disclosure is reserved for advanced options.
+
+## PR4-C / package functional completion
+
+- Added a Radix canvas Context Menu with target-aware selection. Blank paper, unselected components,
+  members of an existing multi-selection and locked selections expose the correct command set.
+- Added positioned clipboard paste. Multi-selection geometry is preserved, nested ids are regenerated,
+  the resulting set is selected and clamped into the physical page when possible, and the complete
+  insertion is one host change/history entry with one-step Undo.
+- The menu reuses EditorStore commands for Properties, copy/cut, lock/unlock, group/ungroup, four
+  layer actions and delete. Locked destructive/structural commands are unavailable and guarded again
+  in the Store.
+- The paper is focusable and supports native pointer context input, `Shift+F10` and the Context Menu
+  key. Radix provides Arrow navigation, Enter activation and Escape dismissal. Portal content shares
+  PTD theme tokens and the context layer remains above compact Scrim/Inspector surfaces.
+- Actual browser checks covered 1600×1000, 1366×768 and 1024×768; component selection, multi-selection,
+  copy + paste-at-position + one-step Undo, lock/unlock, layer submenu, compact Inspector and keyboard
+  operation all passed. The console buffer only contained two earlier Vite HMR failures from rebuilding
+  package `dist`; no application runtime warning/error was produced by the verified interactions.
+- The browser helper could not synthesize a complete native HTML5 `dragstart`/`DataTransfer`/`drop`
+  chain. The product retains the standards-based implementation; click creation was verified in the
+  browser and Catalog/Factory geometry, selection, one `onChange`, one history entry and Undo are unit
+  covered. A final manual native-drag check remains explicitly recorded rather than simulated.
+- Final gates: React Designer typecheck, 8 Vitest files / 40 tests, frontend ESLint, React Designer
+  ESM/CJS/DTS/CSS build, Web typecheck and Web production build all pass. The existing `bwip-js`
+  chunk-size warning remains non-blocking.

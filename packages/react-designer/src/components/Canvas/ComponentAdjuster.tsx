@@ -277,6 +277,7 @@ export function ComponentAdjuster({
 
   const handleMouseDownOnShape = useCallback(
     (event: MouseEvent) => {
+      if (event.button !== 0) return
       event.stopPropagation()
       store.selectComponent(schema.id, event.shiftKey || event.metaKey || event.ctrlKey)
     },
@@ -428,6 +429,7 @@ export function ComponentAdjuster({
     <>
       <div
         ref={adjusterRef}
+        data-ptd-component-id={schema.id}
         style={variables}
         className={`${styles.adjuster} ${isActive ? styles.active : ''} ${isLocked ? styles.locked : ''}`}
         onMouseDown={handleMouseDownOnShape}

@@ -1,0 +1,4 @@
+{"file": ".trellis/spec/monorepo/ptd-ui-system.md", "reason": "Verify visual contract, state coverage, accessibility, stable regions and required browser sizes"}
+{"file": ".trellis/spec/monorepo/styling-conventions.md", "reason": "Verify CSS Modules, token and inline-style constraints"}
+{"file": ".trellis/spec/monorepo/quality-guidelines.md", "reason": "Verify the complete frontend quality gate"}
+{"file": ".trellis/tasks/07-29-designer-ui-refinement/prd.md", "reason": "Verify the agreed Adobe-inspired refinement acceptance criteria goal-backward"}

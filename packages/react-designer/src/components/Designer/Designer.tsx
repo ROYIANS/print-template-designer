@@ -72,7 +72,7 @@ export function Designer({ value, onChange, onSave, onLoad }: DesignerProps) {
           />
           <div className={styles.canvasArea}>
             <div className={styles.screens} data-ptd-region="canvas-viewport">
-              <Canvas />
+              <Canvas onOpenInspector={layout.openInspector} />
             </div>
           </div>
           <div className={styles.inspectorRegion} hidden={!layout.inspectorOpen}>

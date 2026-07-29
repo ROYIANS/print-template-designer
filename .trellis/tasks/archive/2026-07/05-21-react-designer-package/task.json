@@ -1,0 +1,40 @@
+{
+  "id": "react-designer-package",
+  "name": "react-designer-package",
+  "title": "@ptd/react-designer 设计器 React 包",
+  "description": "将 legacy Vue2 打印模板设计器完整迁移为 React 包 @ptd/react-designer，功能对齐 legacy 版本。包含画布核心（ComponentAdjuster/拖拽/缩放/旋转）、工具栏（对齐/层级/组合/撤销重做）、左侧 sidebar（5 面板）、右侧属性面板、SketchRuler 标尺、右键菜单。使用 @preact/signals-react 状态管理、@radix-ui Primitives UI、tsup 构建。",
+  "status": "completed",
+  "dev_type": "feature",
+  "scope": "packages/react-designer",
+  "package": "@ptd/react-designer",
+  "priority": "P2",
+  "creator": "ROYIANS",
+  "assignee": "ROYIANS",
+  "createdAt": "2026-05-21",
+  "completedAt": "2026-07-29",
+  "branch": "feature/refc",
+  "base_branch": "feature/refc",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [
+    "07-29-canvas-first-ui-finalize",
+    "07-29-designer-ui-refinement",
+    "07-29-inspector-scrub-refinement",
+    "07-29-react-designer-functional-completion"
+  ],
+  "parent": null,
+  "relatedFiles": [
+    "packages/react-designer/src/",
+    "packages/react-designer/tsup.config.ts",
+    "packages/react-designer/package.json",
+    "packages/core/src/types/component-schema.ts",
+    "apps/web/src/App.tsx"
+  ],
+  "notes": "PR1+PR2 已提交（dec3f3a），PR3 已完成；CSS Module 映射修复已提交（146196c），PR4-A 工作台与规范基线已提交（7c00cfd/0900a35）。基线包含 48px App Bar、44px 双 Deck Command Bar、五入口 Panel、Catalog/Factory、冷纸白工作台与独立 Selection Quick Bar。后续视觉复核删除纯装饰节点和重复工作区外框，将固定刻线替换为真实毫米标尺，并加入 UI-only 多色参考线。07-29 UI refinement 把 Dock 改为与纸张面板一致的中性结构色，Page/Single/Multi Inspector 统一为固定 Header、单滚动 Body 和固定 Footer，并以单位步进器、segmented control、紧凑 Select、色板 + HEX 取代大批原始输入框；compact Scrim 层级和 Panel Grid/ClassName 合同一并修正。功能收尾已补齐选择感知右键菜单、锁定安全态、鼠标位置粘贴和 Shift+F10 键盘入口；wide/standard/compact 与核心命令浏览器验收完成，当前 40 个测试通过。页面结构命令移交 05-21-multi-page-support，数据编辑移交 05-21-datasource-refactor。原生 HTML5 drag/drop 保持标准实现，浏览器助手无法生成完整 DataTransfer 链路，需保留一次人工浏览器验收。",
+  "meta": {
+    "pr1_commit": "dec3f3a",
+    "progress": "PR1+PR2+PR3+PR4-A+PR4-B+PR4-C+PR5 complete; multi-page next"
+  }
+}

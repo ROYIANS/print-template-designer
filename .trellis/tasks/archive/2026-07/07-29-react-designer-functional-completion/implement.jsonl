@@ -1,0 +1,4 @@
+{"file":".trellis/spec/monorepo/react-designer-contract.md","reason":"Editor ownership, immutable command, history and package integration contracts."}
+{"file":".trellis/spec/monorepo/ptd-ui-system.md","reason":"Context-menu, portal, command, responsive and accessibility contracts."}
+{"file":".trellis/spec/monorepo/styling-conventions.md","reason":"CSS Module, token, portal and dynamic-style constraints."}
+{"file":".trellis/tasks/07-29-react-designer-functional-completion/research/context-menu-contract.md","reason":"Legacy behavior and current architecture reconciliation for the implementation."}

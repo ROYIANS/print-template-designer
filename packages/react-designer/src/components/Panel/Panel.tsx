@@ -25,14 +25,14 @@ export function PanelHeader({
   )
 }
 
-export function PanelTools(props: HTMLAttributes<HTMLDivElement>) {
-  return <div className={styles.tools} {...props} />
+export function PanelTools({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
+  return <div className={[styles.tools, className].filter(Boolean).join(' ')} {...props} />
 }
 
-export function PanelBody(props: HTMLAttributes<HTMLDivElement>) {
-  return <div className={styles.body} {...props} />
+export function PanelBody({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
+  return <div className={[styles.body, className].filter(Boolean).join(' ')} {...props} />
 }
 
-export function PanelFooter(props: HTMLAttributes<HTMLDivElement>) {
-  return <footer className={styles.footer} {...props} />
+export function PanelFooter({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
+  return <footer className={[styles.footer, className].filter(Boolean).join(' ')} {...props} />
 }

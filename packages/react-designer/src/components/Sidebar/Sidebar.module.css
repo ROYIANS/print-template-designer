@@ -22,8 +22,8 @@
   align-items: center;
   gap: 1px;
   padding: 4px 0;
-  border-right: 1px solid var(--ptd-graphite-700);
-  background: var(--ptd-graphite-900);
+  border-right: 1px solid var(--ptd-border);
+  background: var(--ptd-surface-sunken);
 }
 
 .dockButton {
@@ -35,7 +35,7 @@
   padding: 0;
   border: 1px solid transparent;
   border-radius: var(--ptd-radius-1);
-  color: var(--ptd-graphite-400);
+  color: var(--ptd-text-muted);
   background: transparent;
   cursor: pointer;
   transition:
@@ -50,8 +50,9 @@
 }
 
 .dockButton:hover {
-  color: var(--ptd-paper-0);
-  background: var(--ptd-graphite-800);
+  color: var(--ptd-text-strong);
+  background: var(--ptd-surface-raised);
+  border-color: var(--ptd-border);
 }
 
 .dockButton:active {
@@ -59,8 +60,9 @@
 }
 
 .dockButton[aria-pressed='true'] {
-  color: var(--ptd-paper-0);
-  background: color-mix(in oklch, var(--ptd-selection) 42%, var(--ptd-graphite-900));
+  color: var(--ptd-selection-strong);
+  background: var(--ptd-selection-subtle);
+  border-color: color-mix(in oklch, var(--ptd-selection) 26%, var(--ptd-border));
   box-shadow: inset 2px 0 0 var(--ptd-selection);
 }
 
@@ -70,6 +72,7 @@
 .catalogItem:focus-visible,
 .layerRow:focus-visible,
 .pageRow:focus-visible,
+.pageAction:focus-visible,
 .emptyState button:focus-visible,
 .search input:focus-visible {
   outline: 2px solid var(--ptd-focus);
@@ -80,7 +83,7 @@
   width: 22px;
   height: 1px;
   margin: 3px 0;
-  background: var(--ptd-graphite-700);
+  background: var(--ptd-border);
 }
 
 .dockGrow {
@@ -281,10 +284,36 @@
 
 .pageRow {
   display: grid;
-  grid-template-columns: 32px minmax(0, 1fr);
+  grid-template-columns: 16px 28px minmax(0, 1fr);
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   padding: 6px var(--ptd-space-3);
+}
+
+.pageItem {
+  position: relative;
+}
+
+.pageItem[data-dragging='true'] {
+  opacity: 0.45;
+}
+
+.pageItem[data-drop-target='true']::before {
+  content: '';
+  position: absolute;
+  z-index: var(--ptd-layer-guide);
+  top: -1px;
+  right: var(--ptd-space-2);
+  left: var(--ptd-space-2);
+  height: 2px;
+  background: var(--ptd-action);
+  pointer-events: none;
+}
+
+.pageDragIcon {
+  width: 14px;
+  height: 14px;
+  color: var(--ptd-text-muted);
 }
 
 .pageRow > span:last-child {
@@ -315,6 +344,45 @@
   font-family: var(--ptd-font-metric);
   font-size: 10px;
   font-variant-numeric: tabular-nums;
+}
+
+.pageActions {
+  justify-content: space-between;
+  gap: var(--ptd-space-1);
+}
+
+.pageAction {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--ptd-radius-1);
+  color: var(--ptd-text-muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.pageAction:hover:not(:disabled) {
+  color: var(--ptd-text-strong);
+  border-color: var(--ptd-border);
+  background: var(--ptd-surface-raised);
+}
+
+.pageAction[data-danger]:hover:not(:disabled) {
+  color: var(--ptd-danger);
+  background: var(--ptd-proof-subtle);
+}
+
+.pageAction:disabled {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.pageAction svg {
+  width: 16px;
+  height: 16px;
 }
 
 .pageRow:hover,

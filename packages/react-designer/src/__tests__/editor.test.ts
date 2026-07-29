@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import type { ComponentSchema, TemplateSchema } from '@ptd/core'
+import { getPageDimensions, type ComponentSchema, type TemplateSchema } from '@ptd/core'
 import { EditorStore } from '../state/editor'
 
 function component(id: string, left: number, top = 0, width = 10, height = 10): ComponentSchema {
@@ -77,6 +77,24 @@ describe('EditorStore history and ownership', () => {
     expect(store.components.value[0]?.style.left).toBe(0)
   })
 
+  it('cancels a transient gesture without adding history', () => {
+    const initial = template()
+    const onChange = vi.fn()
+    const store = new EditorStore(initial, { onChange })
+    store.selectComponent('a')
+    store.beginGesture()
+    store.transformComponent('a', { left: 12 }, true)
+
+    store.cancelGesture()
+
+    expect(store.template.value).toBe(initial)
+    expect(store.components.value[0]?.style.left).toBe(0)
+    expect(store.history.value).toHaveLength(1)
+    expect(store.canUndo.value).toBe(false)
+    expect(store.selectedIds.value).toEqual(['a'])
+    expect(onChange).toHaveBeenCalledTimes(2)
+  })
+
   it('keeps instances isolated and does not mutate caller input', () => {
     const initial = template()
     const first = new EditorStore(initial)
@@ -104,6 +122,127 @@ describe('EditorStore commands', () => {
 
     store.setCurrentPage(99)
     expect(store.currentPageIndex.value).toBe(1)
+  })
+
+  it('adds a blank page as one controlled history mutation', () => {
+    let id = 0
+    const onChange = vi.fn()
+    const store = new EditorStore(template(), {
+      idFactory: () => `page-${++id}`,
+      onChange,
+    })
+    store.selectComponent('a')
+    store.addGuide('x', 24)
+
+    expect(store.addPage()).toBe('page-2')
+    expect(store.template.value.pages.map((page) => page.id)).toEqual(['page-1', 'page-2'])
+    expect(store.currentPageIndex.value).toBe(1)
+    expect(store.components.value).toEqual([])
+    expect(store.selectedIds.value).toEqual([])
+    expect(store.guides.value).toEqual([])
+    expect(store.history.value).toHaveLength(2)
+    expect(onChange).toHaveBeenCalledTimes(1)
+
+    store.undo()
+    expect(store.template.value.pages.map((page) => page.id)).toEqual(['page-1'])
+    expect(store.currentPageIndex.value).toBe(0)
+    store.redo()
+    expect(store.template.value.pages.map((page) => page.id)).toEqual(['page-1', 'page-2'])
+    expect(store.currentPage.value).toBeDefined()
+  })
+
+  it('duplicates a page with fresh nested component ids', () => {
+    let id = 0
+    const sourceChild = component('child-original', 4)
+    const group: ComponentSchema = {
+      id: 'group-original',
+      component: 'RoyGroup',
+      propValue: [sourceChild],
+      style: { left: 10, top: 12, width: 20, height: 20, rotate: 0, opacity: 1 },
+      groupStyle: {},
+      position: {},
+    }
+    const store = new EditorStore(template([group]), {
+      idFactory: () => `duplicate-${++id}`,
+    })
+
+    expect(store.duplicatePage()).toBe('duplicate-1')
+    const copiedPage = store.template.value.pages[1]
+    const copiedGroup = copiedPage?.componentData[0]
+    const copiedChild = Array.isArray(copiedGroup?.propValue)
+      ? (copiedGroup.propValue[0] as ComponentSchema | undefined)
+      : undefined
+    expect(copiedPage?.id).toBe('duplicate-1')
+    expect(copiedGroup?.id).toBe('duplicate-2')
+    expect(copiedChild?.id).toBe('duplicate-3')
+    expect(copiedGroup).not.toBe(group)
+    expect(copiedChild).not.toBe(sourceChild)
+    expect(store.currentPageIndex.value).toBe(1)
+    expect(store.history.value).toHaveLength(2)
+  })
+
+  it('deletes a page, selects the nearest survivor and protects the final page', () => {
+    const initial = template()
+    initial.pages.push(
+      { id: 'page-2', componentData: [component('c', 12)] },
+      { id: 'page-3', componentData: [component('d', 24)] },
+    )
+    const onChange = vi.fn()
+    const store = new EditorStore(initial, { onChange })
+    store.setCurrentPage(1)
+
+    store.deletePage()
+    expect(store.template.value.pages.map((page) => page.id)).toEqual(['page-1', 'page-3'])
+    expect(store.currentPage.value?.id).toBe('page-3')
+    expect(store.history.value).toHaveLength(2)
+    expect(onChange).toHaveBeenCalledTimes(1)
+
+    store.undo()
+    expect(store.template.value.pages.map((page) => page.id)).toEqual([
+      'page-1',
+      'page-2',
+      'page-3',
+    ])
+    expect(store.currentPage.value?.id).toBe('page-3')
+
+    const single = new EditorStore(template(), { onChange })
+    single.deletePage()
+    expect(single.template.value.pages).toHaveLength(1)
+    expect(single.history.value).toHaveLength(1)
+  })
+
+  it('reorders pages while preserving active page identity and selection', () => {
+    const initial = template()
+    initial.pages.push(
+      { id: 'page-2', componentData: [component('c', 12)] },
+      { id: 'page-3', componentData: [component('d', 24)] },
+    )
+    const onChange = vi.fn()
+    const store = new EditorStore(initial, { onChange })
+    store.setCurrentPage(1)
+    store.selectComponent('c')
+
+    store.movePage(1, 0)
+    expect(store.template.value.pages.map((page) => page.id)).toEqual([
+      'page-2',
+      'page-1',
+      'page-3',
+    ])
+    expect(store.currentPage.value?.id).toBe('page-2')
+    expect(store.currentPageIndex.value).toBe(0)
+    expect(store.selectedIds.value).toEqual(['c'])
+    expect(store.history.value).toHaveLength(2)
+    expect(onChange).toHaveBeenCalledTimes(1)
+
+    store.undo()
+    expect(store.template.value.pages.map((page) => page.id)).toEqual([
+      'page-1',
+      'page-2',
+      'page-3',
+    ])
+    expect(store.currentPage.value?.id).toBe('page-2')
+    expect(store.currentPageIndex.value).toBe(1)
+    expect(store.selectedIds.value).toEqual(['c'])
   })
 
   it('keeps colored guide state outside the template history', () => {
@@ -166,6 +305,50 @@ describe('EditorStore commands', () => {
     store.paste()
     expect(store.clipboard.value).toBeNull()
     expect(store.components.value.at(-1)?.id).toBe('new-2')
+  })
+
+  it('pastes a multi-selection at a paper position as one history entry', () => {
+    let id = 0
+    const onChange = vi.fn()
+    const store = new EditorStore(template(), {
+      idFactory: () => `pasted-${++id}`,
+      onChange,
+    })
+    store.selectComponents(['a', 'b'])
+    store.copy()
+
+    store.pasteAt(100, 80)
+
+    expect(
+      store.components.value.slice(-2).map((item) => [item.id, item.style.left, item.style.top]),
+    ).toEqual([
+      ['pasted-1', 100, 80],
+      ['pasted-2', 120, 80],
+    ])
+    expect(store.selectedIds.value).toEqual(['pasted-1', 'pasted-2'])
+    expect(store.history.value).toHaveLength(2)
+    expect(onChange).toHaveBeenCalledTimes(1)
+
+    store.undo()
+    expect(store.components.value.map((item) => item.id)).toEqual(['a', 'b'])
+  })
+
+  it('clamps a positioned paste into the physical paper bounds', () => {
+    let id = 0
+    const store = new EditorStore(template(), { idFactory: () => `pasted-${++id}` })
+    store.selectComponents(['a', 'b'])
+    store.copy()
+
+    store.pasteAt(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER)
+
+    const page = getPageDimensions(store.pageConfig.value)
+    const pasted = store.components.value.slice(-2)
+    expect(Math.max(...pasted.map((item) => Number(item.style.left) + item.style.width))).toBe(
+      page.width,
+    )
+    expect(Math.max(...pasted.map((item) => Number(item.style.top) + item.style.height))).toBe(
+      page.height,
+    )
   })
 
   it('tracks a one-shot component reveal request outside template history', () => {

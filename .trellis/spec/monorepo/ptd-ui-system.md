@@ -177,6 +177,7 @@ PTD 是一张数字化的制版工作台：**精密、轻快、可信，带有�
   --ptd-layer-canvas: 0;
   --ptd-layer-guide: 20;
   --ptd-layer-selection: 30;
+  --ptd-layer-scrim: 80;
   --ptd-layer-sticky: 100;
   --ptd-layer-floating: 1200;
   --ptd-layer-context: 1250;
@@ -279,8 +280,9 @@ PTD 是一张数字化的制版工作台：**精密、轻快、可信，带有�
 
 - Document Bar 只放文档身份和真实文档级动作；不存在的预览、云保存或同步状态不得占位。
 - Context Bar 依据页面、单选、多选和参考线选择切换命令；无关命令移除而不是永久禁用。
-- Tool Dock 固定展示高频创建工具和 Pages/Layers/Data/Assets 资源入口。它可使用深蓝石墨作为
-  工作区视觉脊柱；常态图标中性，Active 才引入钴蓝。
+- Tool Dock 固定展示高频创建工具和 Pages/Layers/Data/Assets 资源入口。它使用与面板相连的
+  中性纸灰/石墨 surface；常态图标中性，Active 与 Focus 才引入钴蓝。Document Bar 承担深色
+  视觉锚点，Dock 不应表现成与画布割裂的第二套导航产品。
 - Resource Panel 默认宽 220px、限制在 200–360px；Inspector 默认 304px、限制在 280–420px。
   两者均可折叠和拖动调整，最后宽度在当前 Designer 实例中保留。
 - 无组件选择时 Inspector 必须展示真实 Page Inspector，而不是空状态；只读信息不得伪装成输入框。
@@ -322,6 +324,22 @@ PanelRoot
 - 点击 Dock 或 Catalog 创建后，Canvas viewport 应把新组件平滑带回可见中心，并在完成后消费
   一次性 reveal 请求；该请求属于 UI state，不进入模板或历史。拖拽创建保留用户落点，不强制居中。
 
+### 7.1 Pages 资源面板
+
+- Pages 面板管理手动设计页，而不是展示数据溢出产生的运行时页。页面列表保持有序，显示页码、
+  对象数量和明确当前页；切页是 UI 导航，不触发模板 `onChange` 或撤销历史。
+- 固定 Footer 提供新增、复制、上移、下移和删除。图标动作必须有 `aria-label`、Tooltip、
+  focus-visible 与正确 disabled 状态；最后一页的删除始终禁用。
+- 拖动排序是效率入口，不是唯一入口；上移/下移按钮必须始终提供等价的鼠标和键盘路径。
+- 新增空白页与复制页插入当前页之后并切换到新页。复制页递归生成新的页面、组件和组合子项 id，
+  不能共享可变 Schema 引用。
+- 页面排序必须按 page id 保持当前页，不因位置索引变化跳到其他页面；删除当前页后选择同位置的
+  下一页，删除末页时选择新的末页。
+- 页面结构命令每次只创建一个历史节点并发出一次最终 `onChange`；Undo/Redo 后页码、App Bar、
+  Page Inspector 和 Status Bar 必须保持一致，不能出现越界 currentPageIndex。
+- Word 式自动分页属于数据预览/打印渲染：表格、列表或长文本以后可以生成只读派生页，但不得把
+  运行时页写回手动 Pages 列表，也不得因为测试数据变化污染模板历史。
+
 ## 8. 工具栏与图标
 
 - 图标系统统一为 Remix Icon line 风格；激活态可使用对应 fill 图标，但不得混用多套图标语言。
@@ -337,8 +355,19 @@ PanelRoot
 
 - Label 始终可见，Placeholder 只给示例，不能承担字段名称。
 - 常规输入高度 28px，关键 Select/Combobox 高度 32px，圆角 2px。
-- 几何属性优先组成 X/Y/W/H 二列网格，使用等宽数值和清晰单位后缀。
-- 内容、布局、文本、填充、边框和高级设置按分区组织；高级设置默认折叠。
+- Page、Single 与 Multi Inspector 复用固定 Header、单一滚动 Body 和可选固定 Footer；切换状态
+  不得改变主面板的滚动与定位合同。
+- 几何属性优先组成 X/Y/W/H 二列网格，使用带增减动作、等宽数值和清晰单位后缀的紧凑步进器。
+  合法的编辑中间态在焦点内保留，完成编辑时才提交一个历史手势。
+- 可编辑数值的 Label 同时作为水平拖动热区：每次拖动只提交一个历史手势，Shift 加速，
+  Alt/Option 精调，Escape 恢复拖动起点且不写入历史；触屏和键盘用户继续使用输入框与增减动作。
+- 混合数值在没有相对调整语义时禁用 Label 拖动和增减动作，仅保留明确录入；不能用拖动把多选值
+  意外压平成同一个绝对值。
+- 二至四项的小型枚举优先使用 segmented control；约束选项使用紧凑 Select；颜色同时提供可视
+  色板和可编辑值。只有真正的长内容使用 textarea，不能把 Inspector 退化成原始输入框列表。
+- 混合值、锁定、禁用与非法草稿必须同时通过文字、图标或控件状态表达，不能只改变颜色。
+- 高频且与当前组件相关的内容、几何、排版和基础外观分区保持展开和位置稳定；不适用的分区直接
+  隐藏。Disclosure 只用于低频高级属性（如描边与圆角），不能把所有主分区都做成折叠面板。
 - 混合值显示明确的“多值”状态，不能伪造默认颜色或数字。
 - 数字输入在提交前保留合法草稿；空值或非法值不能静默写成 0。
 - 锁定组件的字段禁用，并在面板顶部提供明确的“解锁组件”动作。
@@ -397,6 +426,21 @@ PanelRoot
   必须 clamp，不能被侧栏或滚动视口裁切。
 - Quick Bar 只改变编辑器 UI，不得写入 `TemplateSchema`、修改组件样式或出现在打印/导出结果中。
 
+### 10.2 画布右键菜单
+
+- 右击未选中的组件时，先把该组件设为当前单选；右击现有多选中的任一成员时，必须保留完整多选；
+  右击 Paper 空白时清空组件选择并进入页面上下文。仅打开菜单或属性 Inspector 不写模板历史。
+- 组件上下文复用现有编辑命令，提供属性、复制、剪切、锁定/解锁、适用时的组合/拆分、四种层级
+  操作和删除；不能出现无实现的装饰菜单项。层级使用子菜单披露，危险删除使用明确危险态。
+- 选择中包含锁定对象时，只允许属性、复制和明确解锁。剪切、删除、组合/拆分和层级调整在 UI 中
+  不可用，并由 Store 保留第二层 no-op 防护，不能出现点击后无反馈的伪可用命令。
+- 空白上下文提供页面属性和“粘贴到此处”。剪贴板为空时粘贴禁用；多选粘贴以所选对象的可视
+  包围盒左上角对齐点击位置，保持内部相对布局，并在整体可容纳时限制到纸张物理边界。
+- Paper 必须有可访问名称和可聚焦入口，同时支持鼠标右键、`Shift+F10` 与 Context Menu 键。
+  菜单交互沿用 Radix roving focus，支持方向键、Enter 和 Escape，焦点态不能只依赖颜色。
+- ContextMenu Portal 应用共享 `ptdTheme`，使用 `--ptd-layer-context`；在 compact Inspector/Resource
+  Scrim 上方可见可操作，但仍低于 Modal、Toast 与 Tooltip。
+
 ## 11. Portal 与主题合同
 
 Radix Tooltip、DropdownMenu、ContextMenu、Popover 和 Dialog 通过 Portal 离开 Designer DOM
@@ -449,6 +493,8 @@ PTD 是桌面优先的生产工具，但不能假设所有桌面设备都有精�
 - 从一个档位切到另一个档位时采用该档位的安全默认开合；用户仍可用 Context Bar 入口恢复面板。
 - compact overlay 打开一个必须关闭另一个；Scrim 或 Escape 可关闭当前 overlay。overlay 宽度以
   Designer 容器为边界，禁止使用 `100vw` 推算嵌入式设计器宽度。
+- compact Scrim 位于 Selection 与 Sticky Panel 两个语义层之间：它必须覆盖 Quick Bar、选框和
+  画布编辑 Chrome，但不能盖住当前打开的 Resource/Inspector overlay。
 - 不因窄屏删除关键功能；只改变入口和披露层级。
 - `pointer: coarse` 时控件命中区域至少 40px，并取消依赖 Hover 才可发现的操作。
 - 浏览器缩放到 200% 时，工具栏允许分组折叠，不能产生不可达的横向命令。
