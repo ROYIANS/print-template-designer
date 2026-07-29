@@ -358,3 +358,36 @@ Added manual page creation, recursive-id-safe duplication, final-page-protected 
 ### Next Steps
 
 - None - task complete
+
+
+## Session 11: Complete Prisma 7 Server template API
+
+**Date**: 2026-07-29
+**Task**: Complete Prisma 7 Server template API
+**Branch**: `feature/refc`
+
+### Summary
+
+Upgraded apps/server to NestJS 11 and Prisma 7.9 with SQLite driver adapter and native JSON; added health, template CRUD, immutable version snapshots, optimistic concurrency, committed migration, safe fresh-database preparation, 8 real HTTP integration tests, and Server architecture guidance. User chose to skip destructive test-db reset after fresh migrate deploy passed.
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `7a3c130` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
