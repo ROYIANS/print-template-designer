@@ -22,23 +22,24 @@ apps/
   web/            Full designer web app (React + Vite)
   server/         Backend API (NestJS + Prisma + SQLite)
 
-docker/           Docker Compose (single-container or web+server)
+docker/           Frontend image and Nginx configuration
+docker-compose.yml Pull-only frontend deployment entrypoint
 legacy/           Original Vue 2 source — preserved for reference
 ```
 
 ### Integration options
 
-| Scenario | How |
-|----------|-----|
-| Embed in React app | `npm install @ptd/react-designer` |
+| Scenario               | How                                                          |
+| ---------------------- | ------------------------------------------------------------ |
+| Embed in React app     | `npm install @ptd/react-designer`                            |
 | Embed in Vue / vanilla | `npm install @ptd/core @ptd/components` (framework-agnostic) |
-| Standalone deployment | Docker Compose — `docker compose up` |
+| Standalone deployment  | GHCR + Docker Compose — `./deploy.sh`                        |
 
 ---
 
 ## Getting Started
 
-**Prerequisites**: Node ≥ 20, pnpm ≥ 9
+**Prerequisites**: Node ≥ 20, pnpm 10.15.1 (via Corepack)
 
 ```bash
 # Install all workspace dependencies
@@ -59,14 +60,17 @@ pnpm build
 ## Packages
 
 ### `@ptd/core`
+
 Framework-agnostic rendering engine. Handles schema definition, serialization/deserialization, data binding, and auto-pagination logic.
 
 ### `@ptd/components`
+
 Canvas component implementations using pure TypeScript DOM + [Preact Signals](https://preactjs.com/guide/v10/signals/) for reactivity and CSS Custom Properties for dynamic styling. Zero framework runtime dependency.
 
 Components: Text, SimpleText, Table (Simple + Complex), Line, Rect, Circle, Star, Image, QRCode, BarCode, Group.
 
 ### `@ptd/react-designer`
+
 React wrapper for the full designer UI. Uses [Radix UI Primitives](https://www.radix-ui.com/) for accessible panels, dialogs and menus.
 
 ```tsx
@@ -85,6 +89,7 @@ function App() {
 ```
 
 ### `@ptd/export`
+
 Server-side and client-side export utilities. Puppeteer-based PDF (high quality) with html2canvas fallback. Word export support planned.
 
 ---
@@ -92,6 +97,7 @@ Server-side and client-side export utilities. Puppeteer-based PDF (high quality)
 ## Backend (`apps/server`)
 
 NestJS + Prisma backend. Responsibilities:
+
 - Template CRUD + version snapshots
 - Static asset upload
 - Server-side PDF export (Puppeteer)
@@ -104,19 +110,25 @@ Default database: SQLite (zero-config). Switch to PostgreSQL by changing one lin
 
 ## Docker
 
+The frontend image is built by GitHub Actions and published to GHCR. A deployment server only
+needs Git and Docker Compose v2; it does not need Node.js or pnpm.
+
 ```bash
-# Build and run (web + server)
-docker compose -f docker/docker-compose.yml up --build
+git clone https://github.com/ROYIANS/print-template-designer.git
+cd print-template-designer
+./deploy.sh
 ```
 
-Web app: `http://localhost:3000`  
-API: `http://localhost:3001`
+The default URL is `http://localhost:8080`. On Windows Server, use `./deploy.ps1` from
+PowerShell 7. See [DEPLOYMENT.md](./DEPLOYMENT.md) for branch previews, private GHCR packages,
+updates, immutable version pins and rollback.
 
 ---
 
 ## Roadmap
 
 **MVP (in progress)**
+
 - [x] Monorepo scaffold
 - [ ] `@ptd/core` rendering engine migration
 - [ ] `@ptd/components` canvas component migration
@@ -126,9 +138,10 @@ API: `http://localhost:3001`
 - [ ] Server-side Puppeteer PDF
 - [ ] Template CRUD + version management
 - [ ] Integration hooks (`onSave` / `onLoad` / `onExport` / `onDataSource`)
-- [ ] Docker Compose finalization
+- [x] Frontend Docker / GHCR deployment
 
 **Planned**
+
 - Batch print API
 - MySQL / database direct connect
 - Word export
