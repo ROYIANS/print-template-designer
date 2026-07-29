@@ -81,6 +81,7 @@ export class EditorStore {
   })
   readonly isSelectingArea = signal(false)
   readonly clipboard = signal<ClipboardData | null>(null)
+  readonly componentToReveal = signal<string | null>(null)
   readonly history = signal<TemplateSchema[]>([])
   readonly historyIndex = signal(0)
 
@@ -123,11 +124,23 @@ export class EditorStore {
       Math.max(0, template.pages.length - 1),
     )
     this.selectedIds.value = []
+    this.componentToReveal.value = null
     this.guides.value = []
     this.selectedGuideId.value = null
     this.history.value = [template]
     this.historyIndex.value = 0
     this.gestureStart = null
+  }
+
+  setCurrentPage(index: number): void {
+    if (!Number.isInteger(index) || index < 0 || index >= this.template.value.pages.length) return
+    if (this.currentPageIndex.value === index) return
+    this.currentPageIndex.value = index
+    this.selectedIds.value = []
+    this.componentToReveal.value = null
+    this.guides.value = []
+    this.selectedGuideId.value = null
+    this.cancelAreaSelection()
   }
 
   selectComponent(id: string, additive = false): void {
@@ -249,6 +262,15 @@ export class EditorStore {
   addComponent(component: ComponentSchema): void {
     this.updateCurrentPage((components) => [...components, clone(component)])
     this.selectComponent(component.id)
+  }
+
+  requestComponentReveal(id: string): void {
+    if (!this.components.value.some((component) => component.id === id)) return
+    this.componentToReveal.value = id
+  }
+
+  finishComponentReveal(id: string): void {
+    if (this.componentToReveal.value === id) this.componentToReveal.value = null
   }
 
   updateComponent(id: string, patch: Partial<ComponentSchema>, transient = false): void {

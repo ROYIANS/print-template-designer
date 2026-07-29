@@ -1,13 +1,15 @@
 .appBar {
   position: relative;
   z-index: var(--ptd-layer-sticky);
+  min-width: 0;
   min-height: var(--ptd-app-bar-height);
   display: grid;
-  grid-template-columns:
-    calc(var(--ptd-rail-width) + var(--ptd-left-panel-width)) minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  border-bottom: 1px solid var(--ptd-border);
-  background: var(--ptd-surface-raised);
+  color: var(--ptd-graphite-300);
+  background: var(--ptd-graphite-950);
+  border-bottom: 1px solid var(--ptd-graphite-800);
+  container-type: inline-size;
 }
 
 .brand,
@@ -19,69 +21,72 @@
 
 .brand {
   align-self: stretch;
-  gap: var(--ptd-space-2);
-  padding: 0 var(--ptd-space-3);
-  border-right: 1px solid var(--ptd-border-subtle);
+  gap: 7px;
+  padding: 0 var(--ptd-space-3) 0 9px;
+  border-right: 1px solid var(--ptd-graphite-800);
 }
 
 .legacyLogo {
-  width: 28px;
-  height: 28px;
+  width: 22px;
+  height: 22px;
   flex: 0 0 auto;
   background: url('./legacy-logo.png') center / contain no-repeat;
 }
 
 .wordmark {
-  color: var(--ptd-text-strong);
+  color: var(--ptd-paper-0);
   font-family: var(--ptd-font-metric);
-  font-size: 17px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-size: 14px;
+  font-weight: 750;
+  letter-spacing: 0.11em;
 }
 
 .productName {
-  color: var(--ptd-text-muted);
-  font-size: 11px;
+  color: var(--ptd-graphite-400);
+  font-size: 10px;
+  white-space: nowrap;
 }
 
 .document {
   min-width: 0;
   gap: var(--ptd-space-3);
-  padding: 0 var(--ptd-space-4);
+  padding: 0 var(--ptd-space-3);
 }
 
 .document strong {
   overflow: hidden;
-  color: var(--ptd-text-strong);
-  font-size: 13px;
+  color: var(--ptd-paper-0);
+  font-size: 11px;
+  font-weight: 650;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.document span {
+.documentMeta {
   flex: 0 0 auto;
-  color: var(--ptd-text-muted);
+  color: var(--ptd-graphite-400);
   font-family: var(--ptd-font-metric);
-  font-size: 10px;
+  font-size: 9px;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .actions {
-  gap: var(--ptd-space-1);
-  padding-right: var(--ptd-space-2);
+  gap: 2px;
+  padding-right: 4px;
 }
 
 .quietAction,
 .primaryAction {
-  height: var(--ptd-control-sm);
+  height: 28px;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 0 10px;
+  gap: 5px;
+  padding: 0 9px;
   border: 1px solid transparent;
   border-radius: var(--ptd-radius-1);
   font: inherit;
-  font-size: 11px;
+  font-size: 10px;
   cursor: pointer;
   transition:
     color var(--ptd-duration-instant) var(--ptd-ease-out),
@@ -91,23 +96,24 @@
 
 .quietAction svg,
 .primaryAction svg {
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
 }
 
 .quietAction {
-  color: var(--ptd-text);
+  color: var(--ptd-graphite-300);
   background: transparent;
 }
 
 .quietAction:hover:not(:disabled) {
-  background: var(--ptd-surface-sunken);
+  color: var(--ptd-paper-0);
+  background: var(--ptd-graphite-800);
 }
 
 .primaryAction {
   color: var(--ptd-paper-0);
   background: var(--ptd-action);
-  border-color: var(--ptd-action);
+  border-color: color-mix(in oklch, var(--ptd-action) 74%, var(--ptd-paper-0));
 }
 
 .primaryAction:hover:not(:disabled) {
@@ -117,21 +123,32 @@
 
 .quietAction:focus-visible,
 .primaryAction:focus-visible {
-  outline: 2px solid var(--ptd-focus);
-  outline-offset: 1px;
+  outline: 2px solid var(--ptd-paper-0);
+  outline-offset: -2px;
 }
 
 .quietAction:disabled,
 .primaryAction:disabled {
   opacity: 0.45;
+  cursor: default;
 }
 
-@media (max-width: 1080px) {
-  .appBar {
-    grid-template-columns: 190px minmax(0, 1fr) auto;
-  }
+@container (max-width: 880px) {
   .productName,
-  .document span {
+  .documentMeta {
     display: none;
+  }
+}
+
+@container (max-width: 650px) {
+  .actions button span {
+    display: none;
+  }
+
+  .quietAction,
+  .primaryAction {
+    width: 28px;
+    justify-content: center;
+    padding: 0;
   }
 }

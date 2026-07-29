@@ -1,7 +1,7 @@
 import { useEffect, useState, type ChangeEvent, type FocusEvent, type ReactNode } from 'react'
 import { useSignals } from '@preact/signals-react/runtime'
-import type { ComponentSchema, ComponentStyle } from '@ptd/core'
-import { RiFocus3Line } from '@remixicon/react'
+import { getPageDimensions, pxToMm, type ComponentSchema, type ComponentStyle } from '@ptd/core'
+import { RiLandscapeLine, RiRuler2Line } from '@remixicon/react'
 import { useEditorStore } from '../../state'
 import {
   isEditableTextPropValue,
@@ -46,25 +46,99 @@ export function PropertyInspector() {
   useSignals()
   const store = useEditorStore()
   const selected = store.selectedComponents.value
-  if (selected.length === 0) return <EmptyInspector />
+  if (selected.length === 0) return <PageInspector />
   if (selected.length > 1) return <BatchInspector components={selected} />
   return <SingleInspector component={selected[0]!} />
 }
 
-function EmptyInspector() {
+function PageInspector() {
+  const store = useEditorStore()
+  const page = store.pageConfig.value
+  const dimensions = getPageDimensions(page)
+
   return (
-    <aside className={styles.inspector} aria-label="属性面板" data-ptd-region="inspector">
+    <aside className={styles.inspector} aria-label="页面属性" data-ptd-region="page-inspector">
       <div className={styles.heading}>
-        <span className={styles.eyebrow}>INSPECTOR</span>
-        <h2>属性</h2>
+        <span className={styles.eyebrow}>
+          PAGE · {String(store.currentPageIndex.value + 1).padStart(2, '0')}
+        </span>
+        <h2>{page.title || '未命名模板'}</h2>
       </div>
-      <div className={styles.empty}>
-        <RiFocus3Line className={styles.emptyGlyph} aria-hidden="true" />
-        <h3>选择画布中的对象</h3>
-        <p>单击对象调整尺寸与样式；按住 Shift 可建立多选，进行对齐、分布或组合。</p>
-      </div>
+      <section className={styles.section}>
+        <h3>页面方向</h3>
+        <div className={styles.segmented} aria-label="页面方向">
+          <button
+            type="button"
+            aria-pressed={page.pageDirection === 'p'}
+            onClick={() => store.setPageDirection('p')}
+          >
+            <RiLandscapeLine className={styles.portraitIcon} aria-hidden="true" />
+            纵向
+          </button>
+          <button
+            type="button"
+            aria-pressed={page.pageDirection === 'l'}
+            onClick={() => store.setPageDirection('l')}
+          >
+            <RiLandscapeLine aria-hidden="true" />
+            横向
+          </button>
+        </div>
+      </section>
+      <section className={styles.section}>
+        <h3>页面规格</h3>
+        <dl className={styles.readoutGrid}>
+          <Readout label="规格" value={page.pageSize} />
+          <Readout label="布局" value={page.pageLayout === 'fixed' ? '固定页面' : '流式页面'} />
+          <Readout label="宽度" value={`${pxToMm(dimensions.width)} mm`} />
+          <Readout label="高度" value={`${pxToMm(dimensions.height)} mm`} />
+          <Readout label="上边距" value={`${page.pageMarginTop} mm`} />
+          <Readout label="下边距" value={`${page.pageMarginBottom} mm`} />
+        </dl>
+      </section>
+      <section className={styles.section}>
+        <h3>纸张与排版</h3>
+        <dl className={styles.readoutList}>
+          <Readout label="纸张颜色" value={page.background} swatch={page.background} />
+          <Readout label="默认文字" value={page.color} swatch={page.color} />
+          <Readout label="默认字体" value={primaryFontName(page.fontFamily)} />
+          <Readout label="字号 / 行高" value={`${page.fontSize}px / ${page.lineHeight}`} />
+        </dl>
+      </section>
+      <label className={styles.settingRow}>
+        <span className={styles.settingIcon} aria-hidden="true">
+          <RiRuler2Line />
+        </span>
+        <span>
+          <strong>页面标尺</strong>
+          <small>从标尺拖出可着色参考线</small>
+        </span>
+        <input
+          type="checkbox"
+          checked={store.showRuler.value}
+          onChange={() => store.toggleRuler()}
+        />
+      </label>
     </aside>
   )
+}
+
+function Readout({ label, value, swatch }: { label: string; value: string; swatch?: string }) {
+  return (
+    <div className={styles.readout}>
+      <dt>{label}</dt>
+      <dd>
+        {swatch && (
+          <span className={styles.swatch} style={{ background: swatch }} aria-hidden="true" />
+        )}
+        {value}
+      </dd>
+    </div>
+  )
+}
+
+function primaryFontName(fontFamily: string): string {
+  return (fontFamily.split(',')[0]?.trim() || fontFamily).replace(/^['"]|['"]$/g, '')
 }
 
 function SingleInspector({ component }: { component: ComponentSchema }) {
@@ -169,7 +243,7 @@ function SingleInspector({ component }: { component: ComponentSchema }) {
           />
           <ColorInput
             label="文字"
-                  value={color(component.style.color, '#1d2735')}
+            value={color(component.style.color, '#1d2735')}
             disabled={locked}
             onFocus={start}
             onBlur={finish}
@@ -177,7 +251,7 @@ function SingleInspector({ component }: { component: ComponentSchema }) {
           />
           <ColorInput
             label="背景"
-              value={color(component.style.background, '#f8fafc')}
+            value={color(component.style.background, '#f8fafc')}
             disabled={locked}
             onFocus={start}
             onBlur={finish}
@@ -185,7 +259,7 @@ function SingleInspector({ component }: { component: ComponentSchema }) {
           />
           <ColorInput
             label="边框色"
-                  value={color(component.style.borderColor, '#7d8999')}
+            value={color(component.style.borderColor, '#7d8999')}
             disabled={locked}
             onFocus={start}
             onBlur={finish}

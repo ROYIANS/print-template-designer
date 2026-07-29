@@ -88,6 +88,24 @@ describe('EditorStore history and ownership', () => {
 })
 
 describe('EditorStore commands', () => {
+  it('switches existing pages without changing template history', () => {
+    const initial = template()
+    const secondPage = { id: 'page-2', name: '第二页', componentData: [component('c', 12)] }
+    initial.pages.push(secondPage)
+    const store = new EditorStore(initial, { idFactory: () => 'guide-1' })
+    store.selectComponent('a')
+    store.addGuide('x', 24)
+
+    store.setCurrentPage(1)
+    expect(store.currentPage.value).toBe(secondPage)
+    expect(store.selectedIds.value).toEqual([])
+    expect(store.guides.value).toEqual([])
+    expect(store.history.value).toHaveLength(1)
+
+    store.setCurrentPage(99)
+    expect(store.currentPageIndex.value).toBe(1)
+  })
+
   it('keeps colored guide state outside the template history', () => {
     let id = 0
     const initial = template()
@@ -148,6 +166,22 @@ describe('EditorStore commands', () => {
     store.paste()
     expect(store.clipboard.value).toBeNull()
     expect(store.components.value.at(-1)?.id).toBe('new-2')
+  })
+
+  it('tracks a one-shot component reveal request outside template history', () => {
+    const store = new EditorStore(template())
+    const next = component('new-component', 20)
+    store.addComponent(next)
+    const historyLength = store.history.value.length
+
+    store.requestComponentReveal(next.id)
+    expect(store.componentToReveal.value).toBe(next.id)
+    expect(store.history.value).toHaveLength(historyLength)
+
+    store.finishComponentReveal('another-component')
+    expect(store.componentToReveal.value).toBe(next.id)
+    store.finishComponentReveal(next.id)
+    expect(store.componentToReveal.value).toBeNull()
   })
 
   it('preserves relative order for layer commands', () => {

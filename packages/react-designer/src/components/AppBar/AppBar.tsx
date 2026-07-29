@@ -35,8 +35,9 @@ export function AppBar({ onSave, onLoad }: AppBarProps) {
         <span className={styles.productName}>打印模板设计器</span>
       </div>
       <div className={styles.document}>
-        <strong>{pageConfig.title || '未命名模板'}</strong>
-        <span>
+        <strong title={pageConfig.title || '未命名模板'}>{pageConfig.title || '未命名模板'}</strong>
+        <span className={styles.documentMeta}>
+          {store.currentPageIndex.value + 1} / {store.template.value.pages.length} 页 ·{' '}
           {pageConfig.pageSize} · {pageConfig.pageDirection === 'p' ? '纵向' : '横向'} ·{' '}
           {pxToMm(page.width)} × {pxToMm(page.height)} mm
         </span>
@@ -45,7 +46,7 @@ export function AppBar({ onSave, onLoad }: AppBarProps) {
         {onLoad && (
           <button type="button" className={styles.quietAction} disabled={isLoading} onClick={load}>
             <RiDownload2Line aria-hidden="true" />
-            {isLoading ? '正在载入' : '载入模板'}
+            <span>{isLoading ? '正在载入' : '载入模板'}</span>
           </button>
         )}
         {onSave && (
@@ -55,7 +56,7 @@ export function AppBar({ onSave, onLoad }: AppBarProps) {
             onClick={() => onSave(store.template.value)}
           >
             <RiSave3Line aria-hidden="true" />
-            保存模板
+            <span>保存模板</span>
           </button>
         )}
       </div>

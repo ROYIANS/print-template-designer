@@ -246,6 +246,18 @@
   box-shadow: 0 0 0 1px color-mix(in oklch, currentColor 16%, transparent);
 }
 
+.guidePreview {
+  pointer-events: none;
+}
+
+.guidePreview .guideStroke {
+  opacity: 0.3;
+}
+
+.guidePreview .guideMarker {
+  opacity: 0.48;
+}
+
 .guideLabel {
   position: absolute;
   display: block;
@@ -259,7 +271,21 @@
   font-weight: 600;
   line-height: 1;
   white-space: nowrap;
+  opacity: 0;
   pointer-events: none;
+  transition: opacity var(--ptd-duration-instant) var(--ptd-ease-out);
+}
+
+.guide:hover .guideLabel,
+.guide[data-selected='true'] .guideLabel,
+.guidePreview .guideLabel {
+  opacity: 1;
+}
+
+.guidePreview .guideLabel {
+  color: var(--ptd-text);
+  background: color-mix(in oklch, var(--ptd-surface-raised) 90%, transparent);
+  box-shadow: none;
 }
 
 .guide[data-axis='x'] .guideLabel {

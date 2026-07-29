@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useRef, type CSSProperties, type PointerEvent } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type PointerEvent,
+} from 'react'
 import { useSignals } from '@preact/signals-react/runtime'
 import { mmToPx, pxToMm } from '@ptd/core'
 import type { GuideAxis } from '../../state'
@@ -14,12 +21,18 @@ interface RulerProps {
   scale: number
 }
 
+interface HoverGuide {
+  axis: GuideAxis
+  positionMm: number
+}
+
 export function Ruler({ widthMm, heightMm, scale }: RulerProps) {
   useSignals()
   const store = useEditorStore()
   const horizontalRef = useRef<HTMLButtonElement>(null)
   const verticalRef = useRef<HTMLButtonElement>(null)
   const cleanupRef = useRef<(() => void) | null>(null)
+  const [hoverGuide, setHoverGuide] = useState<HoverGuide | null>(null)
   const horizontalMarks = createRulerMarks(widthMm, scale)
   const verticalMarks = createRulerMarks(heightMm, scale)
 
@@ -42,6 +55,7 @@ export function Ruler({ widthMm, heightMm, scale }: RulerProps) {
       if (store.guidesLocked.value) return
       event.preventDefault()
       event.stopPropagation()
+      setHoverGuide(null)
       const initialPosition = positionFromPointer(axis, event.clientX, event.clientY)
       const guideId = existingId ?? store.addGuide(axis, initialPosition)
       if (!guideId) return
@@ -50,10 +64,7 @@ export function Ruler({ widthMm, heightMm, scale }: RulerProps) {
 
       cleanupRef.current?.()
       const move = (nextEvent: globalThis.PointerEvent) => {
-        store.moveGuide(
-          guideId,
-          positionFromPointer(axis, nextEvent.clientX, nextEvent.clientY),
-        )
+        store.moveGuide(guideId, positionFromPointer(axis, nextEvent.clientX, nextEvent.clientY))
       }
       const finish = () => {
         document.removeEventListener('pointermove', move)
@@ -74,6 +85,14 @@ export function Ruler({ widthMm, heightMm, scale }: RulerProps) {
     store.addGuide(axis, Math.round((total / 2) * 10) / 10)
   }
 
+  const previewGuide = (axis: GuideAxis, event: PointerEvent<HTMLElement>) => {
+    if (store.guidesLocked.value || cleanupRef.current) return
+    setHoverGuide({
+      axis,
+      positionMm: positionFromPointer(axis, event.clientX, event.clientY),
+    })
+  }
+
   return (
     <div
       className={styles.rulers}
@@ -89,6 +108,8 @@ export function Ruler({ widthMm, heightMm, scale }: RulerProps) {
         aria-label="从水平标尺添加垂直参考线"
         disabled={store.guidesLocked.value}
         onPointerDown={(event) => startGuideInteraction('x', event)}
+        onPointerMove={(event) => previewGuide('x', event)}
+        onPointerLeave={() => setHoverGuide(null)}
         onKeyDown={(event) => {
           if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault()
@@ -107,6 +128,8 @@ export function Ruler({ widthMm, heightMm, scale }: RulerProps) {
         aria-label="从垂直标尺添加水平参考线"
         disabled={store.guidesLocked.value}
         onPointerDown={(event) => startGuideInteraction('y', event)}
+        onPointerMove={(event) => previewGuide('y', event)}
+        onPointerLeave={() => setHoverGuide(null)}
         onKeyDown={(event) => {
           if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault()
@@ -118,6 +141,21 @@ export function Ruler({ widthMm, heightMm, scale }: RulerProps) {
           <RulerMarkView key={mark.value} mark={mark} axis="y" total={heightMm} />
         ))}
       </button>
+      {store.guidesVisible.value && hoverGuide && (
+        <span
+          className={`${styles.guide} ${styles.guidePreview}`}
+          data-axis={hoverGuide.axis}
+          data-color={store.activeGuideColor.value}
+          style={createGuidePosition(hoverGuide.positionMm, scale)}
+          aria-hidden="true"
+        >
+          <span className={styles.guideStroke} />
+          <span className={styles.guideMarker} />
+          <span className={styles.guideLabel}>
+            {hoverGuide.axis.toUpperCase()} {hoverGuide.positionMm.toFixed(1)} mm
+          </span>
+        </span>
+      )}
       {store.guidesVisible.value &&
         store.guides.value.map((guide) => {
           const position = createGuidePosition(guide.positionMm, scale)
@@ -141,11 +179,9 @@ export function Ruler({ widthMm, heightMm, scale }: RulerProps) {
             >
               <span className={styles.guideStroke} />
               <span className={styles.guideMarker} />
-              {selected && (
-                <span className={styles.guideLabel}>
-                  {guide.axis.toUpperCase()} {guide.positionMm.toFixed(1)} mm
-                </span>
-              )}
+              <span className={styles.guideLabel}>
+                {guide.axis.toUpperCase()} {guide.positionMm.toFixed(1)} mm
+              </span>
             </button>
           )
         })}

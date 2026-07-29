@@ -1,9 +1,10 @@
 .status {
-  min-height: 26px;
+  min-width: 0;
+  min-height: var(--ptd-status-bar-height);
   display: flex;
   align-items: center;
   gap: var(--ptd-space-2);
-  padding: 0 var(--ptd-space-3);
+  padding: 0 var(--ptd-space-2) 0 var(--ptd-space-3);
   border-top: 1px solid var(--ptd-border);
   color: var(--ptd-text-muted);
   background: var(--ptd-surface-panel);
@@ -11,17 +12,142 @@
   font-size: 10px;
   font-variant-numeric: tabular-nums;
 }
+
+.statusGroup,
+.pageStatus,
+.guideStatus,
+.zoom {
+  display: flex;
+  align-items: center;
+}
+
+.statusGroup {
+  min-width: 0;
+  gap: var(--ptd-space-2);
+}
+
+.pageStatus {
+  gap: 5px;
+  color: var(--ptd-text);
+}
+
+.pageStatus svg,
+.guideStatus svg {
+  width: 13px;
+  height: 13px;
+}
+
 .divider {
   width: 1px;
-  height: 12px;
+  height: 11px;
+  flex: 0 0 auto;
   background: var(--ptd-border);
 }
+
+.pageMetric {
+  white-space: nowrap;
+}
+
+.guideStatus {
+  height: 20px;
+  gap: 5px;
+  padding: 0 5px;
+  border: 0;
+  border-radius: var(--ptd-radius-1);
+  color: var(--ptd-text-muted);
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+.guideStatus:hover {
+  color: var(--ptd-text-strong);
+  background: var(--ptd-surface-sunken);
+}
+
+.lockIcon {
+  color: var(--ptd-proof);
+}
+
 .grow {
   flex: 1;
 }
-.signal {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--ptd-success);
+
+.zoom {
+  height: 20px;
+  flex: 0 0 auto;
+  overflow: hidden;
+  border: 1px solid var(--ptd-border);
+  border-radius: var(--ptd-radius-1);
+  background: var(--ptd-surface-raised);
+}
+
+.zoom button {
+  width: 24px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  color: var(--ptd-text-muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.zoom button:hover:not(:disabled) {
+  color: var(--ptd-text-strong);
+  background: var(--ptd-surface-sunken);
+}
+
+.zoom button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.zoom button svg {
+  width: 13px;
+  height: 13px;
+}
+
+.zoom label {
+  height: 20px;
+  border-right: 1px solid var(--ptd-border);
+  border-left: 1px solid var(--ptd-border);
+}
+
+.zoom select {
+  width: 58px;
+  height: 20px;
+  padding: 0 2px 0 7px;
+  border: 0;
+  color: var(--ptd-text-strong);
+  background: transparent;
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+}
+
+.guideStatus:focus-visible,
+.zoom button:focus-visible,
+.zoom select:focus-visible {
+  position: relative;
+  z-index: var(--ptd-layer-stage);
+  outline: 2px solid var(--ptd-focus);
+  outline-offset: -2px;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+@container (max-width: 760px) {
+  .pageMetric,
+  .statusGroup:nth-of-type(2),
+  .divider:nth-of-type(2) {
+    display: none;
+  }
 }

@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react'
 import { useSignals } from '@preact/signals-react/runtime'
-import * as Separator from '@radix-ui/react-separator'
 import * as Tooltip from '@radix-ui/react-tooltip'
 import {
   RiAlignItemBottomLine,
@@ -12,30 +11,32 @@ import {
   RiArrowGoBackLine,
   RiArrowGoForwardLine,
   RiBringForward,
-  RiBringToFront,
   RiClipboardLine,
   RiContractLeftRightLine,
   RiContractUpDownLine,
   RiDeleteBinLine,
-  RiEyeLine,
-  RiEyeOffLine,
   RiFileCopyLine,
   RiGroupLine,
   RiLandscapeLine,
+  RiLayoutLeftLine,
+  RiLayoutRightLine,
   RiLockLine,
   RiLockUnlockLine,
   RiRuler2Line,
-  RiScissorsLine,
   RiSendBackward,
-  RiSendToBack,
   RiSplitCellsHorizontal,
-  RiZoomInLine,
-  RiZoomOutLine,
 } from '@remixicon/react'
-import type { Alignment, Distribution, GuideColor, LayerAction } from '../../state'
+import type { Alignment, Distribution, GuideColor } from '../../state'
 import { useEditorStore } from '../../state'
 import { ptdThemeClass } from '../Theme'
 import styles from './Toolbar.module.css'
+
+interface ToolbarProps {
+  resourcesOpen: boolean
+  inspectorOpen: boolean
+  onToggleResource: () => void
+  onToggleInspector: () => void
+}
 
 interface ToolButtonProps {
   label: string
@@ -44,6 +45,8 @@ interface ToolButtonProps {
   onClick: () => void
   disabled?: boolean
   pressed?: boolean
+  danger?: boolean
+  secondary?: boolean
 }
 
 const GUIDE_COLORS: Array<{ value: GuideColor; label: string }> = [
@@ -60,15 +63,18 @@ function ToolButton({
   onClick,
   disabled = false,
   pressed,
+  danger,
+  secondary,
 }: ToolButtonProps) {
   return (
     <Tooltip.Root>
       <Tooltip.Trigger asChild>
         <button
           type="button"
-          className={styles.toolButton}
+          className={`${styles.toolButton} ${secondary ? styles.secondaryAction : ''}`}
           aria-label={label}
           aria-pressed={pressed}
+          data-danger={danger || undefined}
           disabled={disabled}
           onClick={onClick}
         >
@@ -86,21 +92,16 @@ function ToolButton({
   )
 }
 
-function ToolSeparator() {
-  return <Separator.Root className={styles.separator} orientation="vertical" decorative />
-}
-
 function GuideColorButton({
   color,
   label,
   active,
-  onClick,
 }: {
   color: GuideColor
   label: string
   active: boolean
-  onClick: () => void
 }) {
+  const store = useEditorStore()
   return (
     <Tooltip.Root>
       <Tooltip.Trigger asChild>
@@ -111,14 +112,14 @@ function GuideColorButton({
           data-active={active || undefined}
           aria-label={label}
           aria-pressed={active}
-          onClick={onClick}
+          onClick={() => store.setGuideColor(color)}
         >
           <span />
         </button>
       </Tooltip.Trigger>
       <Tooltip.Portal>
         <Tooltip.Content className={`${styles.tooltip} ${ptdThemeClass}`} sideOffset={7}>
-          <span>{label}</span>
+          {label}
           <Tooltip.Arrow className={styles.tooltipArrow} />
         </Tooltip.Content>
       </Tooltip.Portal>
@@ -126,247 +127,295 @@ function GuideColorButton({
   )
 }
 
-export function Toolbar() {
+export function Toolbar({
+  resourcesOpen,
+  inspectorOpen,
+  onToggleResource,
+  onToggleInspector,
+}: ToolbarProps) {
   useSignals()
   const store = useEditorStore()
   const selected = store.selectedComponents.value
-  const selectedCount = selected.length
-  const hasLocked = selected.some((component) => component.isLock)
-  const canModify = selectedCount > 0 && !hasLocked
-  const canAlign = selectedCount >= 2 && !hasLocked
-  const canDistribute = selectedCount >= 3 && !hasLocked
-  const canUngroup = Boolean(store.primaryComponent.value?.component === 'RoyGroup') && !hasLocked
-  const hasGuides = store.guides.value.length > 0
-  const align = (value: Alignment) => () => store.align(value)
-  const distribute = (value: Distribution) => () => store.distribute(value)
-  const layer = (value: LayerAction) => () => store.moveLayer(value)
+  const selectedGuide = store.guides.value.find((guide) => guide.id === store.selectedGuideId.value)
 
   return (
-    <Tooltip.Provider delayDuration={450} skipDelayDuration={150}>
-      <nav className={styles.toolbar} aria-label="模板编辑命令" data-ptd-region="command-bar">
-        <div className={styles.commands}>
-          <div className={styles.group} aria-label="历史">
-            <ToolButton
-              label="撤销"
-              shortcut="Ctrl Z"
-              onClick={() => store.undo()}
-              disabled={!store.canUndo.value}
-            >
-              <RiArrowGoBackLine />
-            </ToolButton>
-            <ToolButton
-              label="重做"
-              shortcut="Ctrl Y"
-              onClick={() => store.redo()}
-              disabled={!store.canRedo.value}
-            >
-              <RiArrowGoForwardLine />
-            </ToolButton>
-          </div>
-          <ToolSeparator />
-          <div className={styles.group} aria-label="剪贴板">
-            <ToolButton
-              label="复制"
-              shortcut="Ctrl C"
-              onClick={() => store.copy()}
-              disabled={selectedCount === 0}
-            >
-              <RiFileCopyLine />
-            </ToolButton>
-            <ToolButton
-              label="剪切"
-              shortcut="Ctrl X"
-              onClick={() => store.cut()}
-              disabled={!canModify}
-            >
-              <RiScissorsLine />
-            </ToolButton>
-            <ToolButton
-              label="粘贴"
-              shortcut="Ctrl V"
-              onClick={() => store.paste()}
-              disabled={!store.clipboard.value}
-            >
-              <RiClipboardLine />
-            </ToolButton>
-            <ToolButton
-              label={`删除${selectedCount > 1 ? ` ${selectedCount} 个组件` : '组件'}`}
-              shortcut="Delete"
-              onClick={() => store.deleteSelected()}
-              disabled={!canModify}
-            >
-              <RiDeleteBinLine />
-            </ToolButton>
-          </div>
-          <ToolSeparator />
-          <div className={styles.group} aria-label="层级与锁定">
-            <ToolButton
-              label={hasLocked ? '解锁所选组件' : '锁定所选组件'}
-              onClick={() => store.setLock(!hasLocked)}
-              disabled={selectedCount === 0}
-              pressed={hasLocked}
-            >
-              {hasLocked ? <RiLockUnlockLine /> : <RiLockLine />}
-            </ToolButton>
-            <ToolButton label="下移一层" onClick={layer('backward')} disabled={!canModify}>
-              <RiSendBackward />
-            </ToolButton>
-            <ToolButton label="上移一层" onClick={layer('forward')} disabled={!canModify}>
-              <RiBringForward />
-            </ToolButton>
-            <ToolButton label="置于底层" onClick={layer('back')} disabled={!canModify}>
-              <RiSendToBack />
-            </ToolButton>
-            <ToolButton label="置于顶层" onClick={layer('front')} disabled={!canModify}>
-              <RiBringToFront />
-            </ToolButton>
-          </div>
-          <ToolSeparator />
-          <div className={styles.group} aria-label="对齐与分布">
-            <ToolButton label="左对齐" onClick={align('left')} disabled={!canAlign}>
-              <RiAlignItemLeftLine />
-            </ToolButton>
-            <ToolButton label="水平居中" onClick={align('center')} disabled={!canAlign}>
-              <RiAlignItemHorizontalCenterLine />
-            </ToolButton>
-            <ToolButton label="右对齐" onClick={align('right')} disabled={!canAlign}>
-              <RiAlignItemRightLine />
-            </ToolButton>
-            <ToolButton label="顶部对齐" onClick={align('top')} disabled={!canAlign}>
-              <RiAlignItemTopLine />
-            </ToolButton>
-            <ToolButton label="垂直居中" onClick={align('middle')} disabled={!canAlign}>
-              <RiAlignItemVerticalCenterLine />
-            </ToolButton>
-            <ToolButton label="底部对齐" onClick={align('bottom')} disabled={!canAlign}>
-              <RiAlignItemBottomLine />
-            </ToolButton>
-            <ToolButton
-              label="水平等距分布"
-              onClick={distribute('horizontal')}
-              disabled={!canDistribute}
-            >
-              <RiContractLeftRightLine />
-            </ToolButton>
-            <ToolButton
-              label="垂直等距分布"
-              onClick={distribute('vertical')}
-              disabled={!canDistribute}
-            >
-              <RiContractUpDownLine />
-            </ToolButton>
-          </div>
-          <ToolSeparator />
-          <div className={styles.group} aria-label="组合">
-            <ToolButton
-              label="组合所选组件"
-              shortcut="Ctrl G"
-              onClick={() => store.group()}
-              disabled={!canAlign}
-            >
-              <RiGroupLine />
-            </ToolButton>
-            <ToolButton
-              label="拆分组合"
-              shortcut="Ctrl Shift G"
-              onClick={() => store.ungroup()}
-              disabled={!canUngroup}
-            >
-              <RiSplitCellsHorizontal />
-            </ToolButton>
-          </div>
+    <Tooltip.Provider delayDuration={400} skipDelayDuration={120}>
+      <nav className={styles.toolbar} aria-label="当前上下文命令" data-ptd-region="command-bar">
+        <div className={styles.history} aria-label="历史">
+          <ToolButton
+            label="撤销"
+            shortcut="Ctrl Z"
+            onClick={() => store.undo()}
+            disabled={!store.canUndo.value}
+          >
+            <RiArrowGoBackLine />
+          </ToolButton>
+          <ToolButton
+            label="重做"
+            shortcut="Ctrl Y"
+            onClick={() => store.redo()}
+            disabled={!store.canRedo.value}
+          >
+            <RiArrowGoForwardLine />
+          </ToolButton>
         </div>
 
-        <div className={styles.viewStrip}>
-          <div className={styles.direction} aria-label="页面方向">
-            <ToolButton
-              label="纵向页面"
-              onClick={() => store.setPageDirection('p')}
-              pressed={store.pageConfig.value.pageDirection === 'p'}
-            >
-              <RiLandscapeLine className={styles.portraitIcon} />
-            </ToolButton>
-            <ToolButton
-              label="横向页面"
-              onClick={() => store.setPageDirection('l')}
-              pressed={store.pageConfig.value.pageDirection === 'l'}
-            >
-              <RiLandscapeLine />
-            </ToolButton>
-          </div>
+        <div className={styles.context}>
+          {selectedGuide ? (
+            <GuideContext />
+          ) : selected.length > 1 ? (
+            <MultiContext />
+          ) : selected.length === 1 ? (
+            <SingleContext />
+          ) : (
+            <PageContext />
+          )}
+        </div>
+
+        <div className={styles.layoutTools} aria-label="工作区面板">
           <ToolButton
-            label="显示或隐藏标尺"
-            onClick={() => store.toggleRuler()}
-            pressed={store.showRuler.value}
+            label={resourcesOpen ? '收起资源面板' : '打开资源面板'}
+            pressed={resourcesOpen}
+            onClick={onToggleResource}
           >
-            <RiRuler2Line />
+            <RiLayoutLeftLine />
           </ToolButton>
-          <div className={styles.guideTools} aria-label="参考线设置">
-            <div className={styles.guideColors} aria-label="参考线颜色">
-              {GUIDE_COLORS.map((item) => (
-                <GuideColorButton
-                  key={item.value}
-                  color={item.value}
-                  label={item.label}
-                  active={store.activeGuideColor.value === item.value}
-                  onClick={() => store.setGuideColor(item.value)}
-                />
-              ))}
-            </div>
-            <ToolButton
-              label={store.guidesVisible.value ? '隐藏参考线' : '显示参考线'}
-              onClick={() => store.toggleGuidesVisible()}
-              disabled={!hasGuides}
-              pressed={store.guidesVisible.value && hasGuides}
-            >
-              {store.guidesVisible.value ? <RiEyeLine /> : <RiEyeOffLine />}
-            </ToolButton>
-            <ToolButton
-              label={store.guidesLocked.value ? '解锁参考线' : '锁定参考线'}
-              onClick={() => store.toggleGuidesLocked()}
-              disabled={!hasGuides}
-              pressed={store.guidesLocked.value}
-            >
-              {store.guidesLocked.value ? <RiLockUnlockLine /> : <RiLockLine />}
-            </ToolButton>
-            <ToolButton
-              label="清空参考线"
-              onClick={() => store.clearGuides()}
-              disabled={!hasGuides || store.guidesLocked.value}
-            >
-              <RiDeleteBinLine />
-            </ToolButton>
-          </div>
           <ToolButton
-            label="缩小画布"
-            shortcut="Ctrl -"
-            onClick={() => store.setZoom(store.scale.value - 0.25)}
+            label={inspectorOpen ? '收起属性面板' : '打开属性面板'}
+            pressed={inspectorOpen}
+            onClick={onToggleInspector}
           >
-            <RiZoomOutLine />
-          </ToolButton>
-          <label className={styles.zoomLabel}>
-            <span className={styles.visuallyHidden}>画布缩放</span>
-            <select
-              value={store.scale.value}
-              onChange={(event) => store.setZoom(Number(event.target.value))}
-            >
-              <option value={0.5}>50%</option>
-              <option value={0.75}>75%</option>
-              <option value={1}>100%</option>
-              <option value={1.25}>125%</option>
-              <option value={1.5}>150%</option>
-              <option value={2}>200%</option>
-            </select>
-          </label>
-          <ToolButton
-            label="放大画布"
-            shortcut="Ctrl +"
-            onClick={() => store.setZoom(store.scale.value + 0.25)}
-          >
-            <RiZoomInLine />
+            <RiLayoutRightLine />
           </ToolButton>
         </div>
       </nav>
     </Tooltip.Provider>
+  )
+}
+
+function ContextIdentity({ kind, name }: { kind: string; name: string }) {
+  return (
+    <div className={styles.contextIdentity}>
+      <span>{kind}</span>
+      <strong className={styles.contextName}>{name}</strong>
+    </div>
+  )
+}
+
+function PageContext() {
+  const store = useEditorStore()
+  const page = store.pageConfig.value
+  return (
+    <>
+      <ContextIdentity kind="PAGE" name={page.title || '未命名模板'} />
+      <span className={styles.rule} />
+      <div className={styles.group} aria-label="页面方向">
+        <ToolButton
+          label="纵向页面"
+          pressed={page.pageDirection === 'p'}
+          onClick={() => store.setPageDirection('p')}
+        >
+          <RiLandscapeLine className={styles.portraitIcon} />
+        </ToolButton>
+        <ToolButton
+          label="横向页面"
+          pressed={page.pageDirection === 'l'}
+          onClick={() => store.setPageDirection('l')}
+        >
+          <RiLandscapeLine />
+        </ToolButton>
+      </div>
+      <ToolButton
+        label="显示或隐藏标尺"
+        pressed={store.showRuler.value}
+        onClick={() => store.toggleRuler()}
+      >
+        <RiRuler2Line />
+      </ToolButton>
+      {store.clipboard.value && (
+        <ToolButton label="粘贴组件" shortcut="Ctrl V" onClick={() => store.paste()} secondary>
+          <RiClipboardLine />
+        </ToolButton>
+      )}
+      <span className={styles.pageMetric}>
+        {page.pageDirection === 'p' ? page.pageWidth : page.pageHeight} ×{' '}
+        {page.pageDirection === 'p' ? page.pageHeight : page.pageWidth} mm
+      </span>
+    </>
+  )
+}
+
+function SingleContext() {
+  const store = useEditorStore()
+  const component = store.primaryComponent.value!
+  const locked = Boolean(component.isLock)
+  const style = component.style
+  return (
+    <>
+      <ContextIdentity kind={component.component} name={component.name || '未命名组件'} />
+      <div className={styles.metrics} aria-label="组件几何">
+        <Metric label="X" value={style.left} />
+        <Metric label="Y" value={style.top} />
+        <Metric label="W" value={style.width} />
+        <Metric label="H" value={style.height} />
+      </div>
+      <span className={styles.rule} />
+      <ToolButton label="复制组件" shortcut="Ctrl C" onClick={() => store.copy()}>
+        <RiFileCopyLine />
+      </ToolButton>
+      <ToolButton
+        label={locked ? '解锁组件' : '锁定组件'}
+        pressed={locked}
+        onClick={() => store.setLock(!locked)}
+      >
+        {locked ? <RiLockUnlockLine /> : <RiLockLine />}
+      </ToolButton>
+      <ToolButton
+        label="下移一层"
+        disabled={locked}
+        onClick={() => store.moveLayer('backward')}
+        secondary
+      >
+        <RiSendBackward />
+      </ToolButton>
+      <ToolButton
+        label="上移一层"
+        disabled={locked}
+        onClick={() => store.moveLayer('forward')}
+        secondary
+      >
+        <RiBringForward />
+      </ToolButton>
+      {component.component === 'RoyGroup' && (
+        <ToolButton label="拆分组合" disabled={locked} onClick={() => store.ungroup()}>
+          <RiSplitCellsHorizontal />
+        </ToolButton>
+      )}
+      <ToolButton
+        label="删除组件"
+        shortcut="Delete"
+        danger
+        disabled={locked}
+        onClick={() => store.deleteSelected()}
+      >
+        <RiDeleteBinLine />
+      </ToolButton>
+    </>
+  )
+}
+
+function Metric({ label, value }: { label: string; value: unknown }) {
+  const shown =
+    typeof value === 'number' && Number.isFinite(value) ? Math.round(value * 10) / 10 : 0
+  return (
+    <span className={styles.metric}>
+      <small>{label}</small>
+      {shown}
+    </span>
+  )
+}
+
+function MultiContext() {
+  const store = useEditorStore()
+  const selected = store.selectedComponents.value
+  const locked = selected.some((component) => component.isLock)
+  const alignments: Array<[Alignment, string, ReactNode]> = [
+    ['left', '左对齐', <RiAlignItemLeftLine key="left" />],
+    ['center', '水平居中', <RiAlignItemHorizontalCenterLine key="center" />],
+    ['right', '右对齐', <RiAlignItemRightLine key="right" />],
+    ['top', '顶部对齐', <RiAlignItemTopLine key="top" />],
+    ['middle', '垂直居中', <RiAlignItemVerticalCenterLine key="middle" />],
+    ['bottom', '底部对齐', <RiAlignItemBottomLine key="bottom" />],
+  ]
+  const distributions: Array<[Distribution, string, ReactNode]> = [
+    ['horizontal', '水平等距分布', <RiContractLeftRightLine key="horizontal" />],
+    ['vertical', '垂直等距分布', <RiContractUpDownLine key="vertical" />],
+  ]
+  return (
+    <>
+      <ContextIdentity kind="MULTI" name={`${selected.length} 个对象`} />
+      <span className={styles.rule} />
+      <div className={styles.group} aria-label="对齐">
+        {alignments.map(([alignment, label, icon]) => (
+          <ToolButton
+            key={alignment}
+            label={label}
+            disabled={locked}
+            onClick={() => store.align(alignment)}
+          >
+            {icon}
+          </ToolButton>
+        ))}
+      </div>
+      <div className={styles.group} aria-label="分布">
+        {distributions.map(([direction, label, icon]) => (
+          <ToolButton
+            key={direction}
+            label={label}
+            disabled={locked || selected.length < 3}
+            onClick={() => store.distribute(direction)}
+            secondary
+          >
+            {icon}
+          </ToolButton>
+        ))}
+      </div>
+      <ToolButton
+        label="组合所选对象"
+        shortcut="Ctrl G"
+        disabled={locked}
+        onClick={() => store.group()}
+      >
+        <RiGroupLine />
+      </ToolButton>
+      <ToolButton
+        label={`删除 ${selected.length} 个组件`}
+        danger
+        disabled={locked}
+        onClick={() => store.deleteSelected()}
+      >
+        <RiDeleteBinLine />
+      </ToolButton>
+    </>
+  )
+}
+
+function GuideContext() {
+  const store = useEditorStore()
+  const guide = store.guides.value.find((item) => item.id === store.selectedGuideId.value)!
+  return (
+    <>
+      <ContextIdentity
+        kind="GUIDE"
+        name={`${guide.axis.toUpperCase()} ${guide.positionMm.toFixed(1)} mm`}
+      />
+      <div className={styles.guideColors} aria-label="参考线颜色">
+        {GUIDE_COLORS.map((item) => (
+          <GuideColorButton
+            key={item.value}
+            color={item.value}
+            label={item.label}
+            active={guide.color === item.value}
+          />
+        ))}
+      </div>
+      <span className={styles.rule} />
+      <ToolButton
+        label={store.guidesLocked.value ? '解锁参考线' : '锁定参考线'}
+        pressed={store.guidesLocked.value}
+        onClick={() => store.toggleGuidesLocked()}
+      >
+        {store.guidesLocked.value ? <RiLockUnlockLine /> : <RiLockLine />}
+      </ToolButton>
+      <ToolButton
+        label="删除参考线"
+        shortcut="Delete"
+        danger
+        disabled={store.guidesLocked.value}
+        onClick={() => store.removeSelectedGuide()}
+      >
+        <RiDeleteBinLine />
+      </ToolButton>
+    </>
   )
 }

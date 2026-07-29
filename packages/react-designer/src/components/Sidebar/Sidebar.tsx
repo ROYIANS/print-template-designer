@@ -1,15 +1,16 @@
-import { useMemo, useState, type DragEvent } from 'react'
+import { useMemo, useState, type DragEvent, type PointerEvent, type ReactNode } from 'react'
 import { useSignals } from '@preact/signals-react/runtime'
-import { getPageDimensions, type ComponentCategory } from '@ptd/core'
-import * as Tabs from '@radix-ui/react-tabs'
+import { getPageDimensions, type ComponentCategory, type ComponentType } from '@ptd/core'
+import * as Tooltip from '@radix-ui/react-tooltip'
 import {
+  RiCloseLine,
+  RiCursorLine,
   RiDatabase2Line,
-  RiDragDropLine,
   RiFileList2Line,
+  RiFolderImageLine,
   RiLock2Line,
-  RiPaletteLine,
+  RiPagesLine,
   RiSearchLine,
-  RiSettings4Line,
   RiStackLine,
 } from '@remixicon/react'
 import {
@@ -18,19 +19,40 @@ import {
   PTD_COMPONENT_MIME,
   type CatalogItem,
 } from '../../catalog'
+import type { ResourcePanelId, WorkspaceMode } from '../../hooks/useWorkspaceLayout'
 import { useEditorStore } from '../../state'
 import { PanelBody, PanelFooter, PanelHeader, PanelRoot, PanelTools } from '../Panel'
+import { ptdThemeClass } from '../Theme'
 import styles from './Sidebar.module.css'
 
-type SidebarTab = 'components' | 'structure' | 'properties' | 'data' | 'global'
+interface SidebarProps {
+  mode: WorkspaceMode
+  activePanel: ResourcePanelId
+  open: boolean
+  onTogglePanel: (panel: ResourcePanelId) => void
+  onResizeStart: (event: PointerEvent<HTMLElement>) => void
+}
 
-const TABS = [
-  { value: 'components', label: '组件', icon: RiDragDropLine },
-  { value: 'structure', label: '结构', icon: RiStackLine },
-  { value: 'properties', label: '属性', icon: RiPaletteLine },
-  { value: 'data', label: '数据源', icon: RiDatabase2Line },
-  { value: 'global', label: '全局设置', icon: RiSettings4Line },
-] satisfies Array<{ value: SidebarTab; label: string; icon: typeof RiDragDropLine }>
+const RESOURCE_PANELS = [
+  { value: 'pages', label: '页面', icon: RiPagesLine },
+  { value: 'layers', label: '图层', icon: RiStackLine },
+  { value: 'data', label: '数据', icon: RiDatabase2Line },
+  { value: 'assets', label: '资产与组件', icon: RiFolderImageLine },
+] satisfies Array<{
+  value: ResourcePanelId
+  label: string
+  icon: typeof RiPagesLine
+}>
+
+const CREATE_TYPES = [
+  'RoySimpleText',
+  'RoyImage',
+  'RoySimpleTable',
+  'RoyQRCode',
+  'RoyBarCode',
+  'RoyRect',
+  'RoyLine',
+] satisfies Array<Exclude<ComponentType, 'RoyGroup'>>
 
 const CATEGORY_NAMES: Record<ComponentCategory, string> = {
   common: '通用',
@@ -38,47 +60,231 @@ const CATEGORY_NAMES: Record<ComponentCategory, string> = {
   shape: '形状',
 }
 
-export function Sidebar() {
-  const [tab, setTab] = useState<SidebarTab>('components')
+export function Sidebar({ mode, activePanel, open, onTogglePanel, onResizeStart }: SidebarProps) {
+  useSignals()
+  const store = useEditorStore()
+  const page = getPageDimensions(store.pageConfig.value)
+  const createTools = CREATE_TYPES.map((type) =>
+    componentCatalog.find((item) => item.type === type),
+  ).filter((item): item is CatalogItem => Boolean(item))
+
+  const create = (item: CatalogItem) => {
+    const offset = (store.components.value.length % 6) * 12
+    const component = createComponentSchema(
+      item.type,
+      { x: page.width / 2 + offset, y: page.height / 2 + offset },
+      page,
+    )
+    store.addComponent(component)
+    store.requestComponentReveal(component.id)
+  }
 
   return (
-    <Tabs.Root
+    <aside
       className={styles.sidebar}
-      value={tab}
-      onValueChange={(value) => setTab(value as SidebarTab)}
-      orientation="vertical"
+      data-mode={mode}
+      data-open={open}
       data-ptd-region="left-sidebar"
     >
-      <Tabs.List className={styles.rail} aria-label="工作区面板">
-        {TABS.map(({ value, label, icon: Icon }) => (
-          <Tabs.Trigger key={value} className={styles.railButton} value={value} title={label}>
-            <Icon aria-hidden="true" />
-            <span>{label}</span>
-          </Tabs.Trigger>
-        ))}
-      </Tabs.List>
-      <div className={styles.panelSlot}>
-        <Tabs.Content className={styles.tabContent} value="components">
-          <ComponentPanel />
-        </Tabs.Content>
-        <Tabs.Content className={styles.tabContent} value="structure">
-          <StructurePanel />
-        </Tabs.Content>
-        <Tabs.Content className={styles.tabContent} value="properties">
-          <SelectionPanel />
-        </Tabs.Content>
-        <Tabs.Content className={styles.tabContent} value="data">
-          <DataPanel />
-        </Tabs.Content>
-        <Tabs.Content className={styles.tabContent} value="global">
-          <GlobalPanel />
-        </Tabs.Content>
+      <Tooltip.Provider delayDuration={400} skipDelayDuration={120}>
+        <nav className={styles.toolDock} aria-label="画布工具">
+          <DockButton label="选择工具" shortcut="V" pressed onClick={() => store.clearSelection()}>
+            <RiCursorLine />
+          </DockButton>
+          <span className={styles.dockRule} />
+          {createTools.map((item) => {
+            const Icon = item.icon
+            return (
+              <DockButton key={item.type} label={`添加${item.name}`} onClick={() => create(item)}>
+                <Icon />
+              </DockButton>
+            )
+          })}
+          <span className={styles.dockGrow} />
+          <span className={styles.dockRule} />
+          {RESOURCE_PANELS.map(({ value, label, icon: Icon }) => (
+            <DockButton
+              key={value}
+              label={`${open && activePanel === value ? '关闭' : '打开'}${label}面板`}
+              pressed={open && activePanel === value}
+              onClick={() => onTogglePanel(value)}
+            >
+              <Icon />
+            </DockButton>
+          ))}
+        </nav>
+      </Tooltip.Provider>
+
+      <div className={styles.panelSlot} hidden={!open} data-ptd-region="resource-panel">
+        {activePanel === 'pages' && <PagesPanel onClose={() => onTogglePanel('pages')} />}
+        {activePanel === 'layers' && <LayersPanel onClose={() => onTogglePanel('layers')} />}
+        {activePanel === 'data' && <DataPanel onClose={() => onTogglePanel('data')} />}
+        {activePanel === 'assets' && <AssetsPanel onClose={() => onTogglePanel('assets')} />}
+        <button
+          type="button"
+          className={styles.resizeHandle}
+          aria-label="调整资源面板宽度"
+          onPointerDown={onResizeStart}
+        />
       </div>
-    </Tabs.Root>
+    </aside>
   )
 }
 
-function ComponentPanel() {
+function DockButton({
+  label,
+  shortcut,
+  pressed,
+  children,
+  onClick,
+}: {
+  label: string
+  shortcut?: string
+  pressed?: boolean
+  children: ReactNode
+  onClick: () => void
+}) {
+  return (
+    <Tooltip.Root>
+      <Tooltip.Trigger asChild>
+        <button
+          type="button"
+          className={styles.dockButton}
+          aria-label={label}
+          aria-pressed={pressed}
+          onClick={onClick}
+        >
+          {children}
+        </button>
+      </Tooltip.Trigger>
+      <Tooltip.Portal>
+        <Tooltip.Content
+          className={`${styles.tooltip} ${ptdThemeClass}`}
+          side="right"
+          sideOffset={8}
+        >
+          <span>{label}</span>
+          {shortcut && <kbd>{shortcut}</kbd>}
+          <Tooltip.Arrow className={styles.tooltipArrow} />
+        </Tooltip.Content>
+      </Tooltip.Portal>
+    </Tooltip.Root>
+  )
+}
+
+function PanelCloseButton({ label, onClick }: { label: string; onClick: () => void }) {
+  return (
+    <button type="button" className={styles.closePanel} aria-label={label} onClick={onClick}>
+      <RiCloseLine aria-hidden="true" />
+    </button>
+  )
+}
+
+function PagesPanel({ onClose }: { onClose: () => void }) {
+  useSignals()
+  const store = useEditorStore()
+  const pages = store.template.value.pages
+  return (
+    <PanelRoot data-ptd-region="pages-panel">
+      <PanelHeader title="页面" meta={`${pages.length} 页`}>
+        <PanelCloseButton label="关闭页面面板" onClick={onClose} />
+      </PanelHeader>
+      <PanelBody>
+        <ol className={styles.pageList}>
+          {pages.map((page, index) => (
+            <li key={page.id}>
+              <button
+                type="button"
+                className={styles.pageRow}
+                data-selected={store.currentPageIndex.value === index || undefined}
+                onClick={() => store.setCurrentPage(index)}
+              >
+                <span className={styles.pageNumber}>{String(index + 1).padStart(2, '0')}</span>
+                <span>
+                  <strong>{`页面 ${index + 1}`}</strong>
+                  <small>{page.componentData.length} 个对象</small>
+                </span>
+              </button>
+            </li>
+          ))}
+        </ol>
+      </PanelBody>
+      <PanelFooter>页面结构命令将在多页阶段开放</PanelFooter>
+    </PanelRoot>
+  )
+}
+
+function LayersPanel({ onClose }: { onClose: () => void }) {
+  useSignals()
+  const store = useEditorStore()
+  const components = store.components.value
+  const selected = new Set(store.selectedIds.value)
+  return (
+    <PanelRoot data-ptd-region="structure-panel">
+      <PanelHeader title="图层" meta={`${components.length} 层`}>
+        <PanelCloseButton label="关闭图层面板" onClick={onClose} />
+      </PanelHeader>
+      <PanelBody>
+        {components.length > 0 ? (
+          <ol className={styles.layerList}>
+            {[...components].reverse().map((component, reverseIndex) => (
+              <li key={component.id}>
+                <button
+                  type="button"
+                  className={styles.layerRow}
+                  data-selected={selected.has(component.id) || undefined}
+                  onClick={(event) => store.selectComponent(component.id, event.shiftKey)}
+                >
+                  <span className={styles.layerIndex}>{components.length - reverseIndex}</span>
+                  <RiFileList2Line aria-hidden="true" />
+                  <span className={styles.layerName}>{component.name || component.component}</span>
+                  {component.isLock && (
+                    <RiLock2Line className={styles.lockIcon} aria-label="已锁定" />
+                  )}
+                </button>
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <PanelEmpty title="画布中还没有对象" detail="使用左侧创建工具，或从资产面板添加组件。" />
+        )}
+      </PanelBody>
+      <PanelFooter>列表顶部对应纸张最上层</PanelFooter>
+    </PanelRoot>
+  )
+}
+
+function DataPanel({ onClose }: { onClose: () => void }) {
+  useSignals()
+  const fields = useEditorStore().template.value.dataSource
+  return (
+    <PanelRoot data-ptd-region="data-panel">
+      <PanelHeader title="数据" meta={`${fields.length} 个字段`}>
+        <PanelCloseButton label="关闭数据面板" onClick={onClose} />
+      </PanelHeader>
+      <PanelTools>
+        <div className={styles.panelHint}>字段将在数据阶段支持拖拽绑定与表达式校样</div>
+      </PanelTools>
+      <PanelBody>
+        {fields.length ? (
+          <dl className={styles.dataList}>
+            {fields.map((field) => (
+              <div key={field.id}>
+                <dt>{field.title}</dt>
+                <dd>{field.field}</dd>
+                <span>{field.typeName}</span>
+              </div>
+            ))}
+          </dl>
+        ) : (
+          <PanelEmpty title="还没有数据字段" detail="数据字段将连接业务数据、文本、条码与表格。" />
+        )}
+      </PanelBody>
+    </PanelRoot>
+  )
+}
+
+function AssetsPanel({ onClose }: { onClose: () => void }) {
   useSignals()
   const store = useEditorStore()
   const [query, setQuery] = useState('')
@@ -94,15 +300,14 @@ function ComponentPanel() {
 
   const create = (item: CatalogItem) => {
     const offset = (store.components.value.length % 6) * 12
-    store.addComponent(
-      createComponentSchema(
-        item.type,
-        { x: page.width / 2 + offset, y: page.height / 2 + offset },
-        page,
-      ),
+    const component = createComponentSchema(
+      item.type,
+      { x: page.width / 2 + offset, y: page.height / 2 + offset },
+      page,
     )
+    store.addComponent(component)
+    store.requestComponentReveal(component.id)
   }
-
   const drag = (item: CatalogItem) => (event: DragEvent<HTMLButtonElement>) => {
     event.dataTransfer.effectAllowed = 'copy'
     event.dataTransfer.setData(PTD_COMPONENT_MIME, item.type)
@@ -112,7 +317,9 @@ function ComponentPanel() {
 
   return (
     <PanelRoot data-ptd-region="component-panel">
-      <PanelHeader title="组件" meta={`${filtered.length} 项`} />
+      <PanelHeader title="资产与组件" meta={`${filtered.length} 项`}>
+        <PanelCloseButton label="关闭资产面板" onClick={onClose} />
+      </PanelHeader>
       <PanelTools>
         <label className={styles.search}>
           <RiSearchLine aria-hidden="true" />
@@ -132,7 +339,7 @@ function ComponentPanel() {
           return (
             <section key={category} className={styles.catalogSection}>
               <h3>{CATEGORY_NAMES[category]}</h3>
-              <div className={styles.catalogGrid}>
+              <div className={styles.catalogList}>
                 {items.map((item) => {
                   const Icon = item.icon
                   return (
@@ -166,145 +373,6 @@ function ComponentPanel() {
         )}
       </PanelBody>
       <PanelFooter>点击添加到纸张中央，也可拖入画布定位</PanelFooter>
-    </PanelRoot>
-  )
-}
-
-function StructurePanel() {
-  useSignals()
-  const store = useEditorStore()
-  const components = store.components.value
-  const selected = new Set(store.selectedIds.value)
-  return (
-    <PanelRoot data-ptd-region="structure-panel">
-      <PanelHeader title="结构" meta={`${components.length} 层`} />
-      <PanelBody>
-        {components.length > 0 ? (
-          <ol className={styles.layerList}>
-            {[...components].reverse().map((component, reverseIndex) => (
-              <li key={component.id}>
-                <button
-                  type="button"
-                  className={styles.layerRow}
-                  data-selected={selected.has(component.id)}
-                  onClick={(event) => store.selectComponent(component.id, event.shiftKey)}
-                >
-                  <span className={styles.layerIndex}>{components.length - reverseIndex}</span>
-                  <RiFileList2Line aria-hidden="true" />
-                  <span className={styles.layerName}>{component.name || component.component}</span>
-                  {component.isLock && (
-                    <RiLock2Line className={styles.lockIcon} aria-label="已锁定" />
-                  )}
-                </button>
-              </li>
-            ))}
-          </ol>
-        ) : (
-          <PanelEmpty title="画布中还没有组件" detail="从“组件”面板添加一个对象开始制版。" />
-        )}
-      </PanelBody>
-      <PanelFooter>列表顶部对应纸张最上层</PanelFooter>
-    </PanelRoot>
-  )
-}
-
-function SelectionPanel() {
-  useSignals()
-  const store = useEditorStore()
-  const selected = store.selectedComponents.value
-  return (
-    <PanelRoot data-ptd-region="selection-panel">
-      <PanelHeader
-        title="属性摘要"
-        meta={selected.length ? `${selected.length} 个对象` : '未选择'}
-      />
-      <PanelBody>
-        {selected.length ? (
-          <div className={styles.summaryList}>
-            {selected.map((component) => (
-              <button
-                key={component.id}
-                type="button"
-                onClick={() => store.selectComponent(component.id)}
-              >
-                <span>{component.name || component.component}</span>
-                <small>
-                  {Math.round(component.style.width)} × {Math.round(component.style.height)} px
-                </small>
-              </button>
-            ))}
-            <p>完整内容、几何与外观编辑位于右侧属性检查器。</p>
-          </div>
-        ) : (
-          <PanelEmpty title="尚未选择对象" detail="在画布或结构列表中选择组件以查看属性。" />
-        )}
-      </PanelBody>
-    </PanelRoot>
-  )
-}
-
-function DataPanel() {
-  useSignals()
-  const fields = useEditorStore().template.value.dataSource
-  return (
-    <PanelRoot data-ptd-region="data-panel">
-      <PanelHeader title="数据源" meta={`${fields.length} 个字段`} />
-      <PanelBody>
-        {fields.length ? (
-          <dl className={styles.dataList}>
-            {fields.map((field) => (
-              <div key={field.id}>
-                <dt>{field.title}</dt>
-                <dd>{field.field}</dd>
-                <span>{field.typeName}</span>
-              </div>
-            ))}
-          </dl>
-        ) : (
-          <PanelEmpty
-            title="还没有数据字段"
-            detail="数据字段连接业务数据，并供文本、条码与表格绑定。"
-          />
-        )}
-      </PanelBody>
-      <PanelFooter>数据源编辑将在后续切片开放</PanelFooter>
-    </PanelRoot>
-  )
-}
-
-function GlobalPanel() {
-  useSignals()
-  const page = useEditorStore().pageConfig.value
-  return (
-    <PanelRoot data-ptd-region="global-panel">
-      <PanelHeader title="全局设置" meta={page.pageSize} />
-      <PanelBody>
-        <dl className={styles.globalList}>
-          <div>
-            <dt>页面方向</dt>
-            <dd>{page.pageDirection === 'p' ? '纵向' : '横向'}</dd>
-          </div>
-          <div>
-            <dt>纸张尺寸</dt>
-            <dd>
-              {page.pageWidth} × {page.pageHeight} mm
-            </dd>
-          </div>
-          <div>
-            <dt>上边距</dt>
-            <dd>{page.pageMarginTop} mm</dd>
-          </div>
-          <div>
-            <dt>下边距</dt>
-            <dd>{page.pageMarginBottom} mm</dd>
-          </div>
-          <div>
-            <dt>布局模式</dt>
-            <dd>{page.pageLayout === 'fixed' ? '固定页面' : '连续页面'}</dd>
-          </div>
-        </dl>
-      </PanelBody>
-      <PanelFooter>页面方向可在上方命令栏快速切换</PanelFooter>
     </PanelRoot>
   )
 }

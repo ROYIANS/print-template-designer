@@ -32,6 +32,162 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
+
+.segmented {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2px;
+  padding: 2px;
+  background: var(--ptd-surface-sunken);
+  border: 1px solid var(--ptd-border-subtle);
+  border-radius: var(--ptd-radius-1);
+}
+
+.segmented button {
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: var(--ptd-radius-1);
+  color: var(--ptd-text-muted);
+  background: transparent;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.segmented button:hover {
+  color: var(--ptd-text-strong);
+  background: color-mix(in oklch, var(--ptd-surface-raised) 60%, transparent);
+}
+
+.segmented button[aria-pressed='true'] {
+  color: var(--ptd-selection-strong);
+  background: var(--ptd-surface-raised);
+  border-color: var(--ptd-border);
+  box-shadow: var(--ptd-shadow-deck);
+}
+
+.segmented button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.portraitIcon {
+  transform: rotate(90deg);
+}
+
+.readoutGrid,
+.readoutList {
+  margin: 0;
+}
+
+.readoutGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 12px;
+}
+
+.readoutList {
+  display: grid;
+  gap: 8px;
+}
+
+.readout {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.readoutList .readout {
+  grid-template-columns: minmax(76px, auto) minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+}
+
+.readout dt {
+  color: var(--ptd-text-muted);
+  font-size: 9px;
+}
+
+.readout dd {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  overflow: hidden;
+  color: var(--ptd-text-strong);
+  font-family: var(--ptd-font-metric);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.swatch {
+  width: 12px;
+  height: 12px;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  border: 1px solid var(--ptd-border-strong);
+  border-radius: 50%;
+}
+
+.settingRow {
+  min-height: 56px;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 16px;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.settingRow > span:nth-child(2) {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.settingRow strong {
+  color: var(--ptd-text-strong);
+  font-size: 11px;
+}
+
+.settingRow small {
+  color: var(--ptd-text-muted);
+  font-size: 9px;
+}
+
+.settingIcon {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  color: var(--ptd-text-muted);
+  background: var(--ptd-surface-sunken);
+  border-radius: var(--ptd-radius-1);
+}
+
+.settingIcon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.settingRow input {
+  accent-color: var(--ptd-selection);
+}
+
+.segmented button:focus-visible,
+.settingRow input:focus-visible {
+  outline: 2px solid var(--ptd-focus);
+  outline-offset: 1px;
+}
 .structuredNotice {
   display: grid;
   gap: 4px;

@@ -1,6 +1,6 @@
 .area {
   border: 1px solid var(--ptd-selection);
-  background: var(--ptd-selection-subtle);
+  background: color-mix(in oklch, var(--ptd-selection) 6%, transparent);
   position: absolute;
   pointer-events: none;
   z-index: var(--ptd-layer-selection);

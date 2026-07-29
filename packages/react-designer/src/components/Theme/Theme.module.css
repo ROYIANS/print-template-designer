@@ -64,12 +64,12 @@
   --ptd-shadow-deck:
     0 1px 2px oklch(21% 0.02 258 / 10%), inset 0 1px 0 oklch(99.2% 0.004 255 / 88%);
   --ptd-shadow-floating: 0 8px 24px oklch(21% 0.02 258 / 16%);
-  --ptd-app-bar-height: 48px;
-  --ptd-command-bar-height: 44px;
-  --ptd-status-bar-height: 26px;
-  --ptd-rail-width: 48px;
-  --ptd-left-panel-width: 252px;
-  --ptd-inspector-width: 288px;
+  --ptd-app-bar-height: 36px;
+  --ptd-command-bar-height: 40px;
+  --ptd-status-bar-height: 24px;
+  --ptd-tool-dock-width: 44px;
+  --ptd-resource-panel-width: 220px;
+  --ptd-inspector-width: 304px;
   --ptd-layer-base: 0;
   --ptd-layer-stage: 1;
   --ptd-layer-canvas: 10;
@@ -79,10 +79,11 @@
   --ptd-layer-floating: 1200;
   --ptd-layer-tooltip: 1700;
   --ptd-font-ui:
-    'Outfit Variable', 'Sarasa UI SC', 'Sarasa Gothic SC', 'Microsoft YaHei UI', 'PingFang SC',
-    sans-serif;
+    'Outfit', 'Outfit Variable', 'Sarasa UI SC', 'Sarasa Gothic SC', 'Microsoft YaHei UI',
+    'PingFang SC', sans-serif;
   --ptd-font-metric:
-    'Outfit Variable', 'Sarasa UI SC', 'Sarasa Gothic SC', 'Microsoft YaHei UI', sans-serif;
+    'Outfit', 'Outfit Variable', 'Sarasa UI SC', 'Sarasa Gothic SC', 'Microsoft YaHei UI',
+    sans-serif;
   --ptd-font-serif: 'Noto Serif SC', 'Noto Serif CJK SC', 'Source Han Serif SC', 'Songti SC', serif;
   --ptd-duration-instant: 120ms;
   --ptd-duration-state: 180ms;

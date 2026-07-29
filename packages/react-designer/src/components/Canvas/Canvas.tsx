@@ -11,6 +11,12 @@ import { getPageDimensions, mmToPx } from '@ptd/core'
 import { componentCatalog, createComponentSchema, PTD_COMPONENT_MIME } from '../../catalog'
 import { useEditorStore } from '../../state'
 import { getComponentRotatedStyle } from '../../utils'
+import {
+  areaAutoScrollDelta,
+  canvasPointFromClient,
+  selectionAreaBetween,
+  type SelectionPoint,
+} from '../../utils/areaSelection'
 import { Area } from './Area'
 import { ComponentAdjuster } from './ComponentAdjuster'
 import { ComponentRenderer } from './ComponentRenderer'
@@ -75,32 +81,71 @@ export function Canvas() {
 
   const handleMouseDown = useCallback(
     (event: MouseEvent<HTMLDivElement>) => {
-      if (event.target !== event.currentTarget) return
+      if (event.button !== 0 || event.target !== event.currentTarget) return
       const editor = editorRef.current
       if (!editor) return
+      event.preventDefault()
+      selectionCleanupRef.current?.()
       store.clearSelection()
-      const rect = editor.getBoundingClientRect()
-      const startX = event.clientX
-      const startY = event.clientY
-      const startLeft = (startX - rect.left) / scale
-      const startTop = (startY - rect.top) / scale
-      store.startAreaSelection(startLeft, startTop)
+      const viewport = editor.closest<HTMLElement>('[data-ptd-region="canvas-viewport"]')
+      const canvasBounds = { width: pageWidthPx, height: pageHeightPx }
+      const startPoint = canvasPointFromClient(
+        editor.getBoundingClientRect(),
+        event.clientX,
+        event.clientY,
+        scale,
+        canvasBounds,
+      )
+      let lastPointer: SelectionPoint = { x: event.clientX, y: event.clientY }
+      let hasMoved = false
+      let frame = 0
+      store.startAreaSelection(startPoint.x, startPoint.y)
+
+      const updateArea = () => {
+        const currentPoint = canvasPointFromClient(
+          editor.getBoundingClientRect(),
+          lastPointer.x,
+          lastPointer.y,
+          scale,
+          canvasBounds,
+        )
+        store.updateAreaSelection(selectionAreaBetween(startPoint, currentPoint))
+      }
+
+      const scrollViewport = () => {
+        if (!viewport || !hasMoved) return
+        const delta = areaAutoScrollDelta(lastPointer, viewport.getBoundingClientRect())
+        const maxScrollLeft = Math.max(0, viewport.scrollWidth - viewport.clientWidth)
+        const maxScrollTop = Math.max(0, viewport.scrollHeight - viewport.clientHeight)
+        const nextScrollLeft = Math.min(maxScrollLeft, Math.max(0, viewport.scrollLeft + delta.x))
+        const nextScrollTop = Math.min(maxScrollTop, Math.max(0, viewport.scrollTop + delta.y))
+        if (nextScrollLeft === viewport.scrollLeft && nextScrollTop === viewport.scrollTop) return
+        viewport.scrollLeft = nextScrollLeft
+        viewport.scrollTop = nextScrollTop
+        updateArea()
+      }
+
+      const tick = () => {
+        scrollViewport()
+        frame = requestAnimationFrame(tick)
+      }
 
       const cleanup = () => {
+        cancelAnimationFrame(frame)
         document.removeEventListener('mousemove', move)
         document.removeEventListener('mouseup', up)
         window.removeEventListener('blur', cancel)
         selectionCleanupRef.current = null
       }
       const move = (nextEvent: globalThis.MouseEvent) => {
-        const width = Math.abs((nextEvent.clientX - startX) / scale)
-        const height = Math.abs((nextEvent.clientY - startY) / scale)
-        const left =
-          nextEvent.clientX < startX ? (nextEvent.clientX - rect.left) / scale : startLeft
-        const top = nextEvent.clientY < startY ? (nextEvent.clientY - rect.top) / scale : startTop
-        store.updateAreaSelection({ left, top, width, height })
+        nextEvent.preventDefault()
+        hasMoved = true
+        lastPointer = { x: nextEvent.clientX, y: nextEvent.clientY }
+        updateArea()
       }
-      const up = () => {
+      const up = (nextEvent: globalThis.MouseEvent) => {
+        lastPointer = { x: nextEvent.clientX, y: nextEvent.clientY }
+        updateArea()
         cleanup()
         const area = store.areaSelection.value.style
         const ids = store.components.value
@@ -126,8 +171,9 @@ export function Canvas() {
       document.addEventListener('mousemove', move)
       document.addEventListener('mouseup', up)
       window.addEventListener('blur', cancel)
+      frame = requestAnimationFrame(tick)
     },
-    [scale, store],
+    [pageHeightPx, pageWidthPx, scale, store],
   )
 
   const handleMove = useCallback((isDownward: boolean, isRightward: boolean) => {

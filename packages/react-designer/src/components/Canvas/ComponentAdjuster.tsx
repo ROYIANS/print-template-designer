@@ -152,6 +152,7 @@ export function ComponentAdjuster({
   const hasLockedSelection = store.selectedComponents.value.some((component) => component.isLock)
   const showHandles = isActive && !isLocked && !hasLockedSelection
   const showQuickBar = isActive && store.selectedIds.value.length === 1
+  const revealRequested = store.componentToReveal.value === schema.id
   const pointList = useMemo(() => getPointList(schema.component), [schema.component])
   const cursors = useMemo(
     () =>
@@ -167,6 +168,19 @@ export function ComponentAdjuster({
     },
     [],
   )
+
+  useLayoutEffect(() => {
+    if (!revealRequested) return
+    const frame = requestAnimationFrame(() => {
+      adjusterRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'center',
+      })
+      store.finishComponentReveal(schema.id)
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [revealRequested, schema.id, store])
 
   useLayoutEffect(() => {
     if (!showQuickBar) return
@@ -451,46 +465,46 @@ export function ComponentAdjuster({
       {showQuickBar &&
         typeof document !== 'undefined' &&
         createPortal(
-        <Tooltip.Provider delayDuration={350} skipDelayDuration={120}>
-          <div
-            ref={quickBarRef}
-            className={`${styles.quickBar} ${ptdThemeClass}`}
-            data-ready={
-              (quickBarPosition.ready && quickBarPosition.componentId === schema.id) || undefined
-            }
-            style={quickBarVariables}
-            onMouseDown={(event) => event.stopPropagation()}
-          >
-            <span className={styles.quickLabel}>{schema.name || schema.component}</span>
-            <QuickAction label="拖动组件" disabled={isLocked} onMouseDown={handleMove}>
-              <RiDragMove2Line />
-            </QuickAction>
-            <QuickAction
-              label={isLocked ? '解锁组件' : '锁定组件'}
-              onClick={() => store.setLock(!isLocked)}
+          <Tooltip.Provider delayDuration={350} skipDelayDuration={120}>
+            <div
+              ref={quickBarRef}
+              className={`${styles.quickBar} ${ptdThemeClass}`}
+              data-ready={
+                (quickBarPosition.ready && quickBarPosition.componentId === schema.id) || undefined
+              }
+              style={quickBarVariables}
+              onMouseDown={(event) => event.stopPropagation()}
             >
-              {isLocked ? <RiLockUnlockLine /> : <RiLockLine />}
-            </QuickAction>
-            <QuickAction label="复制组件" disabled={isLocked} onClick={duplicate}>
-              <RiFileCopyLine />
-            </QuickAction>
-            <QuickAction
-              label="上移一层"
-              disabled={isLocked}
-              onClick={() => store.moveLayer('forward')}
-            >
-              <RiBringForward />
-            </QuickAction>
-            <QuickAction
-              label="删除组件"
-              danger
-              disabled={isLocked}
-              onClick={() => store.deleteSelected()}
-            >
-              <RiDeleteBinLine />
-            </QuickAction>
-          </div>
-        </Tooltip.Provider>,
+              <span className={styles.quickLabel}>{schema.name || schema.component}</span>
+              <QuickAction label="拖动组件" disabled={isLocked} onMouseDown={handleMove}>
+                <RiDragMove2Line />
+              </QuickAction>
+              <QuickAction
+                label={isLocked ? '解锁组件' : '锁定组件'}
+                onClick={() => store.setLock(!isLocked)}
+              >
+                {isLocked ? <RiLockUnlockLine /> : <RiLockLine />}
+              </QuickAction>
+              <QuickAction label="复制组件" disabled={isLocked} onClick={duplicate}>
+                <RiFileCopyLine />
+              </QuickAction>
+              <QuickAction
+                label="上移一层"
+                disabled={isLocked}
+                onClick={() => store.moveLayer('forward')}
+              >
+                <RiBringForward />
+              </QuickAction>
+              <QuickAction
+                label="删除组件"
+                danger
+                disabled={isLocked}
+                onClick={() => store.deleteSelected()}
+              >
+                <RiDeleteBinLine />
+              </QuickAction>
+            </div>
+          </Tooltip.Provider>,
           document.body,
         )}
     </>
