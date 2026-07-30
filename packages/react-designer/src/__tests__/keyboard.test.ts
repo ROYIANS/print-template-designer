@@ -5,6 +5,7 @@ import {
   isHandToolShortcut,
   isSelectToolShortcut,
   isTemporaryHandKey,
+  getHostCommandShortcut,
 } from '../hooks/useEditorKeyboard'
 
 describe('keyboard target guard', () => {
@@ -60,5 +61,16 @@ describe('tool keyboard shortcuts', () => {
     expect(isTemporaryHandKey('Space')).toBe(true)
     expect(isTemporaryHandKey('Spacebar')).toBe(true)
     expect(isTemporaryHandKey('Enter', 'Enter')).toBe(false)
+  })
+})
+
+describe('host application shortcuts', () => {
+  it('maps only declared application chord shapes to stable host commands', () => {
+    expect(getHostCommandShortcut('s', { command: true })).toBe('save')
+    expect(getHostCommandShortcut('S', { command: true, shift: true })).toBe('saveAs')
+    expect(getHostCommandShortcut('n', { command: true })).toBe('new')
+    expect(getHostCommandShortcut('o', { command: true })).toBe('open')
+    expect(getHostCommandShortcut('n', { command: true, shift: true })).toBeNull()
+    expect(getHostCommandShortcut('s')).toBeNull()
   })
 })

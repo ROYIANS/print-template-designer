@@ -3,10 +3,11 @@
 import { act, createElement, type ComponentProps } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import type { TemplateSchema } from '@ptd/core'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AppBar } from '../components/AppBar/AppBar'
+import type { DesignerHostCommandController } from '../host'
 import { isEditorInteractiveTarget } from '../hooks/useEditorKeyboard'
-import { createEditorStore, EditorStoreProvider } from '../state'
+import { createEditorStore, EditorStoreProvider, type EditorStore } from '../state'
 
 const template: TemplateSchema = {
   _version: 1,
@@ -43,6 +44,7 @@ function pointerEvent(type: string): Event {
 describe('AppBar application menu', () => {
   let container: HTMLDivElement
   let root: Root
+  let store: EditorStore
 
   const trigger = (label: string): HTMLButtonElement => {
     const button = Array.from(
@@ -58,21 +60,33 @@ describe('AppBar application menu', () => {
     return element
   }
 
-  beforeEach(() => {
-    ;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
-    container = document.createElement('div')
-    document.body.append(container)
-    root = createRoot(container)
-    const store = createEditorStore(template)
+  const command = (label: string): HTMLButtonElement => {
+    const button = Array.from(
+      panel().querySelectorAll<HTMLButtonElement>('.commandGrid button, button'),
+    ).find((candidate) => candidate.querySelector('strong')?.textContent === label)
+    if (!button) throw new Error(`Missing ${label} command`)
+    return button
+  }
+
+  const renderAppBar = (props: ComponentProps<typeof AppBar> = {}) => {
     act(() => {
       root.render(
         createElement(
           EditorStoreProvider,
           { store } as ComponentProps<typeof EditorStoreProvider>,
-          createElement(AppBar),
+          createElement(AppBar, props),
         ),
       )
     })
+  }
+
+  beforeEach(() => {
+    ;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
+    container = document.createElement('div')
+    document.body.append(container)
+    root = createRoot(container)
+    store = createEditorStore(template)
+    renderAppBar()
   })
 
   afterEach(() => {
@@ -152,5 +166,60 @@ describe('AppBar application menu', () => {
     expect(panel().getAttribute('aria-hidden')).toBe('true')
 
     outside.remove()
+  })
+
+  it('executes real EditorStore commands and disables unavailable ones', async () => {
+    act(() => store.addPage())
+    expect(store.template.value.pages).toHaveLength(2)
+
+    act(() => trigger('编辑').click())
+    expect(command('撤销').disabled).toBe(false)
+    expect(command('剪切').disabled).toBe(true)
+
+    await act(async () => command('撤销').click())
+    expect(store.template.value.pages).toHaveLength(1)
+    expect(panel().getAttribute('aria-hidden')).toBe('true')
+  })
+
+  it('dispatches declared Host commands and exposes pending state', async () => {
+    const execute = vi.fn(async () => true)
+    const hostCommands: DesignerHostCommandController = {
+      configured: true,
+      document: { id: 'template-1', status: 'dirty' },
+      getState: (id) =>
+        id === 'save'
+          ? { enabled: true, pending: false }
+          : { enabled: false, pending: id === 'open', reason: '功能待接入' },
+      execute,
+    }
+    renderAppBar({ hostCommands })
+
+    act(() => trigger('文件').click())
+    expect(command('打开模板').disabled).toBe(true)
+    expect(command('打开模板').getAttribute('aria-busy')).toBe('true')
+
+    await act(async () => command('保存模板').click())
+    expect(execute).toHaveBeenCalledWith('save')
+    expect(panel().getAttribute('aria-hidden')).toBe('true')
+  })
+
+  it('opens real workspace panels and leaves planned commands disabled', async () => {
+    const openResource = vi.fn()
+    renderAppBar({
+      workspace: {
+        resourcesOpen: false,
+        inspectorOpen: false,
+        openResource,
+        toggleInspector: vi.fn(),
+      },
+    })
+
+    act(() => trigger('窗口').click())
+    await act(async () => command('页面面板').click())
+    expect(openResource).toHaveBeenCalledWith('pages')
+
+    act(() => trigger('视图').click())
+    expect(command('适合页面').disabled).toBe(true)
+    expect(command('适合页面').getAttribute('aria-label')).toContain('等待画布可视区域测量合同')
   })
 })

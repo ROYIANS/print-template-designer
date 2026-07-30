@@ -5,3 +5,4 @@
 {"file":".trellis/spec/monorepo/styling-conventions.md","reason":"CSS Modules and Portal theme rules for command UI state"}
 {"file":".trellis/spec/monorepo/quality-guidelines.md","reason":"required lint, tests, builds and package artifact checks"}
 {"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"keep host lifecycle concerns outside the reusable designer package"}
+{"file": ".trellis/tasks/05-21-integration-hooks/research/better-auth-public-deployment.md", "reason": "preserve the boundary between Designer Host contracts and downstream authentication/server authorization"}

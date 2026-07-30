@@ -93,6 +93,13 @@ export function useWorkspaceLayout(rootRef: RefObject<HTMLElement | null>) {
     })
   }, [])
 
+  const openResource = useCallback((panel: ResourcePanelId) => {
+    activeResourceRef.current = panel
+    setActiveResource(panel)
+    setResourcesOpen(true)
+    if (modeRef.current === 'compact') setInspectorOpen(false)
+  }, [])
+
   const toggleInspector = useCallback(() => {
     setInspectorOpen((open) => {
       const next = !open
@@ -147,6 +154,7 @@ export function useWorkspaceLayout(rootRef: RefObject<HTMLElement | null>) {
     resourceWidth,
     inspectorWidth,
     toggleResource,
+    openResource,
     toggleInspector,
     openInspector,
     closeOverlay,

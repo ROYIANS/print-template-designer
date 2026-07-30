@@ -14,6 +14,7 @@
 }
 
 .statusGroup,
+.documentGroup,
 .pageStatus,
 .guideStatus,
 .unitSwitch,
@@ -25,6 +26,56 @@
 .statusGroup {
   min-width: 0;
   gap: var(--ptd-space-2);
+}
+
+.documentGroup {
+  min-width: 0;
+  max-width: 260px;
+  gap: 6px;
+}
+
+.documentTitle {
+  overflow: hidden;
+  color: var(--ptd-text-strong);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.documentVersion {
+  flex: 0 0 auto;
+  color: var(--ptd-text-muted);
+}
+
+.documentState {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 4px;
+  color: var(--ptd-text-muted);
+  white-space: nowrap;
+}
+
+.documentState > span {
+  width: 5px;
+  height: 5px;
+  border-radius: var(--ptd-radius-round);
+  background: currentColor;
+}
+
+.documentState[data-status='dirty'],
+.documentState[data-status='saving'],
+.documentState[data-status='loading'] {
+  color: var(--ptd-warning);
+}
+
+.documentState[data-status='error'],
+.documentState[data-status='conflict'] {
+  color: var(--ptd-danger);
+}
+
+.documentState[data-status='clean'] {
+  color: var(--ptd-success);
 }
 
 .pageStatus {
@@ -183,6 +234,8 @@
 }
 
 @container (max-width: 760px) {
+  .documentTitle,
+  .documentVersion,
   .pageMetric,
   .statusGroup:nth-of-type(2),
   .divider:nth-of-type(2) {

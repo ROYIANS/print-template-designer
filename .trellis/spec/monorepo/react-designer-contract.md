@@ -18,8 +18,17 @@ Public component:
 interface DesignerProps {
   value: TemplateSchema
   onChange?: (value: TemplateSchema) => void
-  onSave?: (value: TemplateSchema) => void
-  onLoad?: () => TemplateSchema | Promise<TemplateSchema>
+  host?: DesignerHost
+}
+
+interface DesignerHost {
+  document?: DesignerDocumentState
+  commands?: Partial<Record<DesignerHostCommandId, DesignerHostCommandState>>
+  onCommand?: (
+    command: DesignerHostCommandId,
+    context: { template: TemplateSchema; document?: DesignerDocumentState },
+  ) => void | Promise<void>
+  onCommandError?: (command: DesignerHostCommandId, error: unknown) => void
 }
 ```
 
@@ -79,6 +88,29 @@ import '@ptd/react-designer/styles.css'
 - Commands produce a new immutable `TemplateSchema` and call the latest `onChange` callback.
 - When the host returns the exact emitted object as `value`, history is preserved.
 - A genuinely external template object creates a new history baseline and clears invalid selection.
+
+#### Host application commands and document state
+
+- `host` is the single application integration surface. Do not add top-level `onSave`, `onLoad`,
+  `onExport`, HTTP client, router or authentication props back to Designer.
+- New/Open/Save/Save As, template browser, version history/restore, template import/export,
+  preview/print/document export and Help intents use stable `DesignerHostCommandId` values.
+- A command is a declared capability only when its key exists in `host.commands` and
+  `host.onCommand` exists. Undeclared future commands remain visible where appropriate but are
+  disabled and explicitly described as unavailable.
+- `enabled` defaults true. Host `pending` and Designer's local Promise pending both reject duplicate
+  execution; local pending is instance-only and cannot leak between two Designers.
+- Command context contains the exact current `TemplateSchema` plus optional read-only Host document
+  metadata. It must never contain API records, cookies, Session/JWT values or database types.
+- New/Open are Host-owned. After confirmations, routes or API work complete, the Host updates the
+  controlled `value`; a command handler does not return a Template to mutate internally.
+- `Ctrl/Cmd+S/N/O` and `Ctrl/Cmd+Shift+S` execute only a currently enabled, non-pending declared
+  Host command and yield to rich text, table cells, form controls and Portal menus.
+- `DesignerDocumentState` exposes optional id/title/version plus
+  `clean | dirty | saving | loading | error | conflict`. Chrome renders text as well as color for
+  every state; `message` may provide Host-owned detail without creating a package Toast system.
+- Existing editor and workspace menu items call the same EditorStore/layout commands as Toolbar,
+  keyboard and panels. A menu must not duplicate template mutations or close as a fake execution.
 
 #### History and gestures
 
@@ -274,46 +306,51 @@ import '@ptd/react-designer/styles.css'
 
 ### 4. Validation & Error Matrix
 
-| Condition                                 | Required behavior                                                  |
-| ----------------------------------------- | ------------------------------------------------------------------ |
-| `value` is the exact last-emitted object  | No history reset                                                   |
-| `value` is a new external object          | Replace template; reset history baseline and selection             |
-| First user mutation then undo             | Restore initial `value`                                            |
-| Gesture emits many transient updates      | One final history entry                                            |
-| Gesture is cancelled                      | Restore the exact gesture-start value; add no history entry        |
-| Switch `mm` / `px`                        | Update all display consumers; no Schema, Host or history mutation  |
-| Page config draft is invalid              | Keep it local; do not emit or create history                       |
-| Page resize makes objects out of bounds   | Preserve geometry; derive warning count and Canvas marker          |
-| Select/Text/Shape + Space keydown         | `effectiveTool=hand`; persistent tool/history/selection unchanged  |
-| Space keyup, blur or cleanup              | Clear temporary Hand; restore exact persistent tool                |
-| Hand pointer drag                         | Change viewport scroll only; no host/history/selection mutation    |
-| Text/Shape tool activation                | UI state only; do not create a component                           |
-| Valid Text/Shape pointer-up               | One component, one host emission and one history entry             |
-| Short/cancelled/lost-capture draw         | Clear preview; no component/emission/history                       |
-| Shape menu Escape                         | Close menu; preserve active Shape tool                             |
-| Selection contains a locked component     | Destructive/structural command is a no-op                          |
-| Context click targets unselected object   | Select that object before rendering component commands             |
-| Context click targets selected group item | Preserve the existing multi-selection                              |
-| Context click targets blank paper         | Clear selection; expose page properties and positioned paste       |
-| Pointer enters a context submenu          | Preserve Radix focus; allow submenu item click and keyboard select |
-| Newly drawn rich text has empty HTML      | Focus full-frame editor; type without Inspector/source workaround  |
-| New QR or barcode frame                   | Persist a valid visible default; expose dedicated Inspector fields |
-| Image content is a legacy string          | Render unchanged; first edit may normalize as one undoable gesture |
-| Image source uses `blob:`/unsafe data     | Show field/frame error; never commit it as a stable source         |
-| QR/barcode content is invalid             | Show format-specific error; never leave a silent blank frame       |
-| Async code render resolves after update   | Ignore stale result through the instance render token              |
-| `pasteAt` receives a multi-selection      | Preserve relative geometry; regenerate every id; one history       |
-| Switch an existing page                   | Change UI page only; clear local selection; no host/history        |
-| Add or duplicate a page                   | Insert after source; select new page; one host/history             |
-| Duplicate a page with groups              | Regenerate page, component and recursive child ids                 |
-| Delete the only page                      | No-op; template always retains at least one manual page            |
-| Reorder around the active page            | Preserve active `page.id` and valid component selection            |
-| History removes the active page           | Select nearest valid page; never expose an invalid index           |
-| Unsupported structured `propValue`        | Inspector is read-only; never coerce to string                     |
-| Host omits `styles.css` import            | Integration is invalid; UI styling is not guaranteed               |
-| Built CSS Module default export is `{}`   | Invalid package build; host elements receive no class names        |
-| Host omits a peer dependency              | Workspace/install validation must fail before release              |
-| App build overlaps package `clean`        | Invalid verification order; rerun sequentially                     |
+| Condition                                 | Required behavior                                                   |
+| ----------------------------------------- | ------------------------------------------------------------------- |
+| `value` is the exact last-emitted object  | No history reset                                                    |
+| `value` is a new external object          | Replace template; reset history baseline and selection              |
+| Host command key is absent                | Keep command disabled and label it as not integrated                |
+| Host command is pending                   | Reject duplicate menu, App Bar and shortcut execution               |
+| Save handler executes                     | Receive exact current template and optional document metadata       |
+| New/Open handler completes                | Wait for Host to replace controlled `value`; do not sync internally |
+| Document status is conflict/error         | Render explicit text status; never rely on color alone              |
+| First user mutation then undo             | Restore initial `value`                                             |
+| Gesture emits many transient updates      | One final history entry                                             |
+| Gesture is cancelled                      | Restore the exact gesture-start value; add no history entry         |
+| Switch `mm` / `px`                        | Update all display consumers; no Schema, Host or history mutation   |
+| Page config draft is invalid              | Keep it local; do not emit or create history                        |
+| Page resize makes objects out of bounds   | Preserve geometry; derive warning count and Canvas marker           |
+| Select/Text/Shape + Space keydown         | `effectiveTool=hand`; persistent tool/history/selection unchanged   |
+| Space keyup, blur or cleanup              | Clear temporary Hand; restore exact persistent tool                 |
+| Hand pointer drag                         | Change viewport scroll only; no host/history/selection mutation     |
+| Text/Shape tool activation                | UI state only; do not create a component                            |
+| Valid Text/Shape pointer-up               | One component, one host emission and one history entry              |
+| Short/cancelled/lost-capture draw         | Clear preview; no component/emission/history                        |
+| Shape menu Escape                         | Close menu; preserve active Shape tool                              |
+| Selection contains a locked component     | Destructive/structural command is a no-op                           |
+| Context click targets unselected object   | Select that object before rendering component commands              |
+| Context click targets selected group item | Preserve the existing multi-selection                               |
+| Context click targets blank paper         | Clear selection; expose page properties and positioned paste        |
+| Pointer enters a context submenu          | Preserve Radix focus; allow submenu item click and keyboard select  |
+| Newly drawn rich text has empty HTML      | Focus full-frame editor; type without Inspector/source workaround   |
+| New QR or barcode frame                   | Persist a valid visible default; expose dedicated Inspector fields  |
+| Image content is a legacy string          | Render unchanged; first edit may normalize as one undoable gesture  |
+| Image source uses `blob:`/unsafe data     | Show field/frame error; never commit it as a stable source          |
+| QR/barcode content is invalid             | Show format-specific error; never leave a silent blank frame        |
+| Async code render resolves after update   | Ignore stale result through the instance render token               |
+| `pasteAt` receives a multi-selection      | Preserve relative geometry; regenerate every id; one history        |
+| Switch an existing page                   | Change UI page only; clear local selection; no host/history         |
+| Add or duplicate a page                   | Insert after source; select new page; one host/history              |
+| Duplicate a page with groups              | Regenerate page, component and recursive child ids                  |
+| Delete the only page                      | No-op; template always retains at least one manual page             |
+| Reorder around the active page            | Preserve active `page.id` and valid component selection             |
+| History removes the active page           | Select nearest valid page; never expose an invalid index            |
+| Unsupported structured `propValue`        | Inspector is read-only; never coerce to string                      |
+| Host omits `styles.css` import            | Integration is invalid; UI styling is not guaranteed                |
+| Built CSS Module default export is `{}`   | Invalid package build; host elements receive no class names         |
+| Host omits a peer dependency              | Workspace/install validation must fail before release               |
+| App build overlaps package `clean`        | Invalid verification order; rerun sequentially                      |
 
 ### 5. Good / Base / Bad Cases
 
@@ -330,6 +367,10 @@ import '@ptd/react-designer/styles.css'
 ### 6. Tests Required
 
 - Store unit test: two stores do not share template, selection, clipboard or history.
+- Host contract tests: undeclared/disabled/pending capability resolution, exact command context,
+  local Promise duplicate prevention and two-Designer pending isolation.
+- App Bar/keyboard tests: real EditorStore/workspace execution, Host Save/New/Open shortcuts,
+  planned command disabled state and document title/version/status Chrome.
 - Store/Core unit tests: measurement preferences are instance-local and history-free; conversion,
   formatting, parsing, precision and stepping preserve canonical Canvas geometry.
 - Core/Store tests: legacy page config gains left/right margins; invalid content areas are rejected;

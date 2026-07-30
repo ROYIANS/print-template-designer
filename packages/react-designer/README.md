@@ -13,13 +13,37 @@ import '@ptd/react-designer/styles.css'
 
 export function Editor({ initialValue }: { initialValue: TemplateSchema }) {
   const [value, setValue] = useState(initialValue)
+  const [saving, setSaving] = useState(false)
 
   return (
     <Designer
       value={value}
       onChange={setValue}
-      onSave={(next) => saveTemplate(next)}
-      onLoad={async () => loadTemplate()}
+      host={{
+        document: {
+          id: 'template-42',
+          title: '出库交接单',
+          version: 3,
+          status: saving ? 'saving' : 'dirty',
+        },
+        commands: {
+          new: {},
+          open: {},
+          save: { pending: saving },
+          saveAs: {},
+        },
+        onCommand: async (command, context) => {
+          if (command === 'save') {
+            setSaving(true)
+            try {
+              await saveTemplate(context.template)
+            } finally {
+              setSaving(false)
+            }
+          }
+          // New/Open 由 Host 完成确认、路由或 API，然后更新受控 value。
+        },
+      }}
     />
   )
 }
@@ -33,19 +57,49 @@ Host 需要为设计器提供一个具有明确高度的容器，并显式加载
 export interface DesignerProps {
   value: TemplateSchema
   onChange?: (value: TemplateSchema) => void
-  onSave?: (value: TemplateSchema) => void
-  onLoad?: () => TemplateSchema | Promise<TemplateSchema>
+  host?: DesignerHost
 }
 ```
 
-| 属性       | 约定                                                 |
-| ---------- | ---------------------------------------------------- |
-| `value`    | 必填。Host 持有的模板真值；外部替换时编辑器会同步。  |
-| `onChange` | 每次被提交到编辑历史的模板变更后通知 Host。          |
-| `onSave`   | App Bar 保存动作的集成点；编辑器本身不发 HTTP 请求。 |
-| `onLoad`   | App Bar 载入动作的集成点，可同步或异步返回完整模板。 |
+| 属性       | 约定                                                               |
+| ---------- | ------------------------------------------------------------------ |
+| `value`    | 必填。Host 持有的模板真值；外部替换时编辑器会同步。                |
+| `onChange` | 模板命令产生新值时通知 Host；交互 UI 状态不会触发。                |
+| `host`     | 可选。统一承载文档元数据、应用命令能力、异步状态和应用命令处理器。 |
 
-当前没有 `onExport` 或 `onDataSource`。导出与数据源集成仍属于后续任务。
+旧的 `onSave` / `onLoad` 已被统一 Host 合同替代，也不会继续增加 `onExport` 或
+`onDataSource` 顶层回调。打开或新建完成后，Host 更新受控 `value`；Designer 不直接载入 API 记录。
+
+### Host 应用命令
+
+```ts
+interface DesignerHost {
+  document?: {
+    id?: string
+    title?: string
+    version?: string | number
+    status: 'clean' | 'dirty' | 'saving' | 'loading' | 'error' | 'conflict'
+    message?: string
+  }
+  commands?: Partial<
+    Record<DesignerHostCommandId, { enabled?: boolean; pending?: boolean; reason?: string }>
+  >
+  onCommand?: (
+    command: DesignerHostCommandId,
+    context: { template: TemplateSchema; document?: DesignerDocumentState },
+  ) => void | Promise<void>
+  onCommandError?: (command: DesignerHostCommandId, error: unknown) => void
+}
+```
+
+- `commands` 中出现某个 ID 表示 Host 声明该能力；未出现的命令显示为“功能待接入”并禁用。
+- `enabled` 默认为 `true`；`pending` 会禁用重复触发；`reason` 用于说明只读、冲突等不可用原因。
+- Promise 执行期间 Designer 还会维护实例级 Pending，避免 Host 状态更新前的连续双击。
+- `Ctrl/Cmd+S/N/O` 与 `Ctrl/Cmd+Shift+S` 只在相应 Host 命令当前可执行时拦截。
+- `onCommand` 收到的是执行时的最新 `TemplateSchema`，不是网络记录、Session 或 Token。
+- New/Open/Save/Save As 的确认、API、错误提示、冲突处理和路由均由 Host 负责。
+- 当前公共 Host ID 还覆盖模板浏览器、版本历史/恢复、模板导入导出、预览、打印、文档导出与帮助入口；
+  `DESIGNER_HOST_COMMAND_IDS` 可用于建立穷尽映射。
 
 ## 已实现交互
 
@@ -88,10 +142,11 @@ Host value ──► Designer store ──► 用户命令
     ▲                              │
     └──────── onChange ────────────┘
 
-onSave / onLoad ──► Host integration
+Host document + commands ──► Designer intent ──► Host application
 ```
 
 - Host 负责 API、保存状态、错误提示、冲突处理和身份信息。
+- Designer 的 Host 合同不包含 HTTP、Cookie、Better Auth、数据库记录或路由类型。
 - Designer 不应直接 import `apps/web` 或 `apps/server`。
 - 外部 `value` 同步必须避免把纯 Host 回显制造成新的用户历史。
 - `TemplateSchema.pages` 是持久化的手工页面；自动溢出页是未来导出层的派生数据。

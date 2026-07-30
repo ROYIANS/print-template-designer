@@ -1,5 +1,14 @@
-import { useEffect, useRef, useState, type CSSProperties, type PointerEvent } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type PointerEvent,
+} from 'react'
 import type { TemplateSchema } from '@ptd/core'
+import { useDesignerHostCommands, type DesignerHost } from '../../host'
 import { createEditorStore, EditorStoreProvider } from '../../state'
 import { isEditorInteractiveTarget, useEditorKeyboard } from '../../hooks/useEditorKeyboard'
 import { useWorkspaceLayout } from '../../hooks/useWorkspaceLayout'
@@ -17,15 +26,24 @@ type WorkspaceVariables = CSSProperties & Record<`--${string}`, string>
 export interface DesignerProps {
   value: TemplateSchema
   onChange?: (value: TemplateSchema) => void
-  onSave?: (value: TemplateSchema) => void
-  onLoad?: () => TemplateSchema | Promise<TemplateSchema>
+  host?: DesignerHost
 }
 
-export function Designer({ value, onChange, onSave, onLoad }: DesignerProps) {
+export function Designer({ value, onChange, host }: DesignerProps) {
   const [store] = useState(() => createEditorStore(value, { onChange }))
   const rootRef = useRef<HTMLDivElement>(null)
   const layout = useWorkspaceLayout(rootRef)
-  useEditorKeyboard(store, rootRef)
+  const getTemplate = useCallback(() => store.template.value, [store])
+  const hostCommands = useDesignerHostCommands(host, getTemplate)
+  const keyboardActions = useMemo(
+    () => ({
+      hostCommands,
+      openResource: layout.openResource,
+      toggleInspector: layout.toggleInspector,
+    }),
+    [hostCommands, layout.openResource, layout.toggleInspector],
+  )
+  useEditorKeyboard(store, rootRef, keyboardActions)
 
   useEffect(() => {
     store.setOnChange(onChange)
@@ -51,7 +69,15 @@ export function Designer({ value, onChange, onSave, onLoad }: DesignerProps) {
           }
         }}
       >
-        <AppBar onSave={onSave} onLoad={onLoad} />
+        <AppBar
+          hostCommands={hostCommands}
+          workspace={{
+            resourcesOpen: layout.resourcesOpen,
+            inspectorOpen: layout.inspectorOpen,
+            openResource: layout.openResource,
+            toggleInspector: layout.toggleInspector,
+          }}
+        />
         <Toolbar
           resourcesOpen={layout.resourcesOpen}
           inspectorOpen={layout.inspectorOpen}
@@ -95,7 +121,7 @@ export function Designer({ value, onChange, onSave, onLoad }: DesignerProps) {
             />
           )}
         </div>
-        <StatusBar />
+        <StatusBar document={hostCommands.document} />
       </div>
     </EditorStoreProvider>
   )

@@ -1,5 +1,7 @@
 import { useEffect, type RefObject } from 'react'
+import type { DesignerHostCommandController, DesignerHostCommandId } from '../host'
 import type { EditorStore } from '../state'
+import type { ResourcePanelId } from './useWorkspaceLayout'
 
 const EDITOR_INTERACTIVE_SELECTOR = [
   '[data-ptd-editor-interactive]',
@@ -52,9 +54,28 @@ export function isTemporaryHandKey(key: string, code = ''): boolean {
   return key === ' ' || key === 'Space' || key === 'Spacebar' || code === 'Space'
 }
 
+export function getHostCommandShortcut(
+  key: string,
+  modifiers: { command?: boolean; shift?: boolean } = {},
+): DesignerHostCommandId | null {
+  if (!modifiers.command) return null
+  const normalized = key.toLowerCase()
+  if (normalized === 's') return modifiers.shift ? 'saveAs' : 'save'
+  if (!modifiers.shift && normalized === 'n') return 'new'
+  if (!modifiers.shift && normalized === 'o') return 'open'
+  return null
+}
+
+interface EditorKeyboardActions {
+  hostCommands?: DesignerHostCommandController
+  openResource?: (panel: ResourcePanelId) => void
+  toggleInspector?: () => void
+}
+
 export function useEditorKeyboard(
   store: EditorStore,
   rootRef: RefObject<HTMLElement | null>,
+  actions: EditorKeyboardActions = {},
 ): void {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -63,6 +84,16 @@ export function useEditorKeyboard(
       if (!root || !root.contains(document.activeElement)) return
       const command = event.metaKey || event.ctrlKey
       const key = event.key.toLowerCase()
+
+      const hostCommand = getHostCommandShortcut(key, { command, shift: event.shiftKey })
+      if (hostCommand && actions.hostCommands) {
+        const state = actions.hostCommands.getState(hostCommand)
+        if (state.enabled && !state.pending) {
+          event.preventDefault()
+          void actions.hostCommands.execute(hostCommand)
+        }
+        return
+      }
 
       if (command && key === 'z') {
         event.preventDefault()
@@ -89,6 +120,65 @@ export function useEditorKeyboard(
         event.preventDefault()
         store.paste()
         return
+      }
+      if (command && key === 'g') {
+        event.preventDefault()
+        if (event.shiftKey) store.ungroup()
+        else store.group()
+        return
+      }
+      if (command && key === 'l') {
+        event.preventDefault()
+        store.toggleLock()
+        return
+      }
+      if (command && key === ']') {
+        event.preventDefault()
+        store.moveLayer('forward')
+        return
+      }
+      if (command && key === '[') {
+        event.preventDefault()
+        store.moveLayer('backward')
+        return
+      }
+      if (command && key === 'r') {
+        event.preventDefault()
+        store.toggleRuler()
+        return
+      }
+      if (command && key === ';') {
+        event.preventDefault()
+        store.toggleGuidesVisible()
+        return
+      }
+      if (command && (key === '+' || key === '=')) {
+        event.preventDefault()
+        store.setZoom(store.scale.value + 0.25)
+        return
+      }
+      if (command && key === '-') {
+        event.preventDefault()
+        store.setZoom(store.scale.value - 0.25)
+        return
+      }
+      if (!command && !event.altKey && !event.shiftKey) {
+        const panelByKey: Partial<Record<string, ResourcePanelId>> = {
+          f6: 'assets',
+          f7: 'pages',
+          f8: 'layers',
+        }
+        const panel = panelByKey[key]
+        if (panel && actions.openResource) {
+          event.preventDefault()
+          actions.openResource(panel)
+          return
+        }
+        if (key === 'f9' && actions.toggleInspector) {
+          event.preventDefault()
+          actions.toggleInspector()
+          return
+        }
       }
       if (!command && !event.altKey && isTemporaryHandKey(event.key, event.code)) {
         event.preventDefault()
@@ -153,5 +243,5 @@ export function useEditorKeyboard(
       window.removeEventListener('blur', handleBlur)
       store.setTemporaryHand(false)
     }
-  }, [rootRef, store])
+  }, [actions, rootRef, store])
 }

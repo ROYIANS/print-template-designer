@@ -9,11 +9,25 @@ import {
   RiZoomOutLine,
 } from '@remixicon/react'
 import { useEditorStore } from '../../state'
+import type { DesignerDocumentState, DesignerDocumentStatus } from '../../host'
 import styles from './StatusBar.module.css'
 
 const ZOOM_LEVELS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2]
 
-export function StatusBar() {
+const DOCUMENT_STATUS_LABELS: Record<DesignerDocumentStatus, string> = {
+  clean: '已保存',
+  dirty: '未保存',
+  saving: '正在保存',
+  loading: '正在载入',
+  error: '操作失败',
+  conflict: '版本冲突',
+}
+
+interface StatusBarProps {
+  document?: DesignerDocumentState
+}
+
+export function StatusBar({ document }: StatusBarProps) {
   useSignals()
   const store = useEditorStore()
   const page = getPageDimensions(store.pageConfig.value)
@@ -26,6 +40,23 @@ export function StatusBar() {
 
   return (
     <footer className={styles.status} aria-label="设计器状态" data-ptd-region="status-bar">
+      {document && (
+        <div className={styles.documentGroup} aria-label="宿主文档状态">
+          {document.title && <strong className={styles.documentTitle}>{document.title}</strong>}
+          {document.version !== undefined && (
+            <span className={styles.documentVersion}>v{document.version}</span>
+          )}
+          <span
+            className={styles.documentState}
+            data-status={document.status}
+            role="status"
+            title={document.message}
+          >
+            <span aria-hidden="true" />
+            {DOCUMENT_STATUS_LABELS[document.status]}
+          </span>
+        </div>
+      )}
       <div className={styles.statusGroup} aria-label="文档状态">
         <span className={styles.pageStatus}>
           <RiPagesLine aria-hidden="true" />
