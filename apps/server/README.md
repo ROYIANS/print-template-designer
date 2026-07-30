@@ -1,16 +1,19 @@
 # `apps/server`
 
-NestJS 11 + Prisma 7 + SQLite 的模板持久化服务。它提供模板 CRUD、不可变版本历史、历史恢复和基于 `expectedVersion` 的乐观并发控制。
+NestJS 11 + Prisma 7 + PostgreSQL 的多用户模板服务。它通过 Better Auth GitHub OAuth 和服务端
+Allowlist 保护模板 CRUD、不可变版本历史、历史恢复与乐观并发控制。
 
 ## 技术基线
 
 - NestJS 11，ESM / NodeNext。
-- Prisma `7.9.1` 与 `@prisma/adapter-better-sqlite3`。
-- 默认 SQLite；连接地址由 `DATABASE_URL` 提供。
+- Prisma `7.9.1` 与 `@prisma/adapter-pg`。
+- PostgreSQL 是开发、测试和生产的唯一数据库；`DATABASE_URL` 必填。
+- Better Auth 只启用 GitHub OAuth；浏览器使用 HttpOnly Cookie，不保存 Token。
+- `PTD_ALLOWED_EMAILS` 在服务端控制准入，`Template.ownerId` 隔离所有模板和版本操作。
 - 默认监听 `PORT=3000`。
 - 复用 `@ptd/core` 的 `TemplateSchema` 和序列化逻辑。
 
-完整工作区推荐 Node 22.12+。Windows + Node 20 的原生依赖问题见 [开发指南](../../DEVELOPMENT.md#windowsbetter-sqlite3-安装失败)。
+完整工作区推荐 Node 22.12+。
 
 ## 首次运行
 
@@ -21,12 +24,14 @@ corepack pnpm --filter server prisma:migrate:deploy
 corepack pnpm --filter server start:dev
 ```
 
-默认配置等价于：
+复制 `.env.example` 为 `.env`，并设置 PostgreSQL、GitHub OAuth App 与至少 32 字节随机 Secret。
+开发环境 GitHub callback URL 为：
 
-```dotenv
-DATABASE_URL=file:./dev.db
-PORT=3000
+```text
+http://localhost:3000/api/auth/callback/github
 ```
+
+本地 PostgreSQL 可用 `postgres:17-alpine` 容器启动；测试和 CI 也必须使用 PostgreSQL，不能回退到 SQLite。
 
 验证服务：
 
@@ -40,17 +45,19 @@ curl http://localhost:3000/healthz
 
 ## HTTP API
 
-| 方法 | 路径 | 成功语义 |
-| --- | --- | --- |
-| `GET` | `/healthz` | 服务健康状态 |
-| `GET` | `/api/templates` | 按更新时间倒序返回模板摘要 |
-| `POST` | `/api/templates` | 创建模板及 version 1 快照 |
-| `GET` | `/api/templates/:id` | 读取当前模板及内容 |
-| `PUT` | `/api/templates/:id` | 校验当前版本后更新并追加快照 |
-| `DELETE` | `/api/templates/:id` | 删除模板及级联历史 |
-| `GET` | `/api/templates/:id/versions` | 按版本倒序返回历史摘要 |
-| `GET` | `/api/templates/:id/versions/:version` | 读取指定不可变快照 |
-| `POST` | `/api/templates/:id/versions/:version/restore` | 把快照内容写成一个新的当前版本 |
+| 方法     | 路径                                           | 成功语义                       |
+| -------- | ---------------------------------------------- | ------------------------------ |
+| `GET`    | `/healthz`                                     | 服务健康状态                   |
+| `*`      | `/api/auth/*`                                  | Better Auth GitHub OAuth/会话  |
+| `GET`    | `/api/account/me`                              | 当前获准访问的账户             |
+| `GET`    | `/api/templates`                               | 按更新时间倒序返回模板摘要     |
+| `POST`   | `/api/templates`                               | 创建模板及 version 1 快照      |
+| `GET`    | `/api/templates/:id`                           | 读取当前模板及内容             |
+| `PUT`    | `/api/templates/:id`                           | 校验当前版本后更新并追加快照   |
+| `DELETE` | `/api/templates/:id`                           | 删除模板及级联历史             |
+| `GET`    | `/api/templates/:id/versions`                  | 按版本倒序返回历史摘要         |
+| `GET`    | `/api/templates/:id/versions/:version`         | 读取指定不可变快照             |
+| `POST`   | `/api/templates/:id/versions/:version/restore` | 把快照内容写成一个新的当前版本 |
 
 ### 创建模板
 
@@ -124,11 +131,12 @@ Content-Type: application/json
 
 ## 错误语义
 
-| HTTP 状态 | 场景 |
-| --- | --- |
-| `400 Bad Request` | 非法 ID、请求体、标题、Schema 外形或 `expectedVersion` |
-| `404 Not Found` | 模板或指定历史版本不存在 |
-| `409 Conflict` | `expectedVersion` 已过期，或并发写入抢先完成 |
+| HTTP 状态          | 场景                                                   |
+| ------------------ | ------------------------------------------------------ |
+| `400 Bad Request`  | 非法 ID、请求体、标题、Schema 外形或 `expectedVersion` |
+| `401 Unauthorized` | 未登录或邮箱已不在 Allowlist                           |
+| `404 Not Found`    | 模板、指定历史版本不存在，或资源属于其他用户           |
+| `409 Conflict`     | `expectedVersion` 已过期，或并发写入抢先完成           |
 
 创建、更新和恢复通过事务保持当前模板与版本快照一致。`TemplateVersion` 只追加，不原地更新。
 
@@ -142,7 +150,8 @@ corepack pnpm --filter server prisma:migrate:deploy
 
 Schema 位于 `prisma/schema.prisma`，已提交的 migration 位于 `prisma/migrations/`。生成的 Client 位于 `src/generated/prisma/` 且不入库。
 
-当前 datasource 明确使用 SQLite。切换到 PostgreSQL 不只是改一行 provider：还需要选择并配置对应 driver adapter、连接 URL、迁移历史、运行依赖和部署策略。
+当前 datasource 明确使用 PostgreSQL。migration 是面向全新数据库的基线，不包含 SQLite 数据搬迁或
+匿名模板 owner 回填。
 
 ## 验证
 
@@ -153,15 +162,22 @@ corepack pnpm --filter server test
 corepack pnpm --filter server build
 ```
 
-测试会使用独立的 `file:./test.db`，应用 migration、生成 Client，再运行 Nest HTTP 集成测试。
+测试必须显式提供一个隔离的 PostgreSQL `DATABASE_URL`。测试会先部署已提交的 migration、生成 Client，
+再运行 Nest HTTP 集成测试；集成用例会清理该数据库中的认证、模板和版本数据，因此不能指向共享或生产数据库。
 
 ## 当前不包含
 
-- 身份认证与授权。
-- CORS 配置或 Web 开发代理。
+- 邮箱登录、开放注册、邀请管理后台和角色权限系统。
+- Server CORS 配置；当前 Web 开发环境通过 Vite `/api` 同源代理访问 Server。
 - 静态资源上传与管理。
 - 数据源代理。
 - PDF/打印/Word 导出。
-- Server Docker 镜像、数据库卷和完整 Compose 部署。
+- 自动备份上传、数据库高可用和容器编排平台配置。
 
 这些能力需要单独设计，不属于现有 API 的隐含保证。架构约束见 [Server Architecture](../../.trellis/spec/monorepo/server-architecture.md)。
+
+## 容器部署
+
+根 `docker-compose.yml` 使用 PostgreSQL 17 named volume、一次性 `migrate` 服务和 Server 健康检查。
+Server 不直接暴露宿主机端口，由 Web Nginx 通过 Compose 网络代理同源 `/api/*`。部署与 GitHub OAuth
+callback、升级、回滚、fresh 清库和备份说明见 [DEPLOYMENT.md](../../DEPLOYMENT.md)。

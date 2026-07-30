@@ -12,7 +12,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/print-template-designer-web
+  IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}/print-template-designer
 
 jobs:
   quality:
@@ -79,11 +79,83 @@ jobs:
       - name: Build web
         run: pnpm --filter web build
 
-  publish-web-image:
-    name: Publish web image
-    if: github.event_name != 'pull_request'
-    needs: quality
+  server-quality:
+    name: Server quality (PostgreSQL)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: ptd
+          POSTGRES_PASSWORD: ptd_test
+          POSTGRES_DB: ptd_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ptd -d ptd_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://ptd:ptd_test@127.0.0.1:5432/ptd_test?schema=public
+      BETTER_AUTH_URL: http://localhost:3000
+      BETTER_AUTH_SECRET: ci-only-better-auth-secret-32-bytes
+      PTD_WEB_ORIGIN: http://localhost:5173
+      PTD_ALLOWED_EMAILS: owner-a@example.com,owner-b@example.com
+      GITHUB_CLIENT_ID: ci-placeholder
+      GITHUB_CLIENT_SECRET: ci-placeholder
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build core dependency
+        run: pnpm --filter @ptd/core build
+      - name: Validate and deploy PostgreSQL migration
+        run: |
+          pnpm --filter server prisma:validate
+          pnpm --filter server prisma:migrate:deploy
+          pnpm --filter server prisma:generate
+      - name: Check and test Server
+        run: |
+          pnpm --filter server lint
+          pnpm --filter server typecheck
+          pnpm --filter server test
+          pnpm --filter server build
+
+  container-quality:
+    name: Container build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build complete self-hosted images
+        run: docker compose --env-file .env.example build server web
+
+  publish-images:
+    name: Publish ${{ matrix.image }} image
+    if: github.event_name != 'pull_request'
+    needs: [quality, server-quality, container-quality]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: web
+            dockerfile: docker/Dockerfile.web
+          - image: server
+            dockerfile: docker/Dockerfile.server
     permissions:
       contents: read
       packages: write
@@ -94,7 +166,7 @@ jobs:
       - name: Normalize image name
         id: image
         shell: bash
-        run: echo "name=$(echo '${{ env.IMAGE_NAME }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
+        run: echo "name=$(echo '${{ env.IMAGE_PREFIX }}-${{ matrix.image }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -117,14 +189,14 @@ jobs:
             type=ref,event=tag
             type=sha,format=long
 
-      - name: Build and push web image
+      - name: Build and push image
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: docker/Dockerfile.web
+          file: ${{ matrix.dockerfile }}
           platforms: linux/amd64
           push: true
           tags: ${{ steps.metadata.outputs.tags }}
           labels: ${{ steps.metadata.outputs.labels }}
-          cache-from: type=gha,scope=web
-          cache-to: type=gha,mode=max,scope=web
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}

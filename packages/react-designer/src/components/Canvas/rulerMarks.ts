@@ -1,4 +1,11 @@
-import { mmToPx } from '@ptd/core'
+import {
+  MEASUREMENT_UNIT_DEFINITIONS,
+  formatMeasurement,
+  fromDisplayMeasurement,
+  mmToPx,
+  toDisplayMeasurement,
+  type MeasurementUnit,
+} from '@ptd/core'
 
 export type RulerMarkKind = 'minor' | 'major' | 'endpoint'
 
@@ -9,29 +16,31 @@ export interface RulerMark {
   label?: string
 }
 
-const MINOR_STEP_MM = 5
-const MAJOR_STEP_MM = 10
-const LABEL_STEP_MM = 20
-
-export function createRulerMarks(totalMm: number, scale: number): RulerMark[] {
+export function createRulerMarks(
+  totalMm: number,
+  scale: number,
+  unit: MeasurementUnit = 'mm',
+): RulerMark[] {
   if (!Number.isFinite(totalMm) || totalMm <= 0 || !Number.isFinite(scale) || scale <= 0) return []
 
+  const definition = MEASUREMENT_UNIT_DEFINITIONS[unit]
+  const total = toDisplayMeasurement(mmToPx(totalMm), unit)
   const values: number[] = []
-  for (let value = 0; value < totalMm; value += MINOR_STEP_MM) values.push(value)
-  if (values.at(-1) !== totalMm) values.push(totalMm)
+  for (let value = 0; value < total; value += definition.rulerMinorStep) values.push(value)
+  if (values.at(-1) !== total) values.push(total)
 
   return values.map((value) => {
-    const endpoint = value === 0 || value === totalMm
-    const major = endpoint || value % MAJOR_STEP_MM === 0
+    const endpoint = value === 0 || value === total
+    const major = endpoint || value % definition.rulerMajorStep === 0
+    const canvasPosition = fromDisplayMeasurement(value, unit)
     return {
       value,
-      position: mmToPx(value) * scale,
+      position: canvasPosition * scale,
       kind: endpoint ? 'endpoint' : major ? 'major' : 'minor',
-      label: endpoint || value % LABEL_STEP_MM === 0 ? formatMillimetres(value) : undefined,
+      label:
+        endpoint || value % definition.rulerLabelStep === 0
+          ? formatMeasurement(canvasPosition, unit)
+          : undefined,
     }
   })
-}
-
-function formatMillimetres(value: number): string {
-  return Number.isInteger(value) ? String(value) : value.toFixed(1).replace(/\.0$/, '')
 }

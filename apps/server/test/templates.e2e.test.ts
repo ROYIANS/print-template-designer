@@ -1,9 +1,17 @@
-import type { INestApplication } from '@nestjs/common'
+import {
+  Injectable,
+  UnauthorizedException,
+  type CanActivate,
+  type ExecutionContext,
+  type INestApplication,
+} from '@nestjs/common'
 import { Test } from '@nestjs/testing'
 import { DEFAULT_PAGE_CONFIG, type TemplateSchema } from '@ptd/core'
 import request from 'supertest'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { AppModule } from '../src/app.module.js'
+import { AuthGuard } from '../src/auth/auth.guard.js'
+import type { AuthenticatedRequest } from '../src/auth/authenticated-request.js'
 import { PrismaService } from '../src/prisma/prisma.service.js'
 
 const initialContent: TemplateSchema = {
@@ -26,12 +34,32 @@ const updatedContent: TemplateSchema = {
   dataSet: { invoiceNumber: 'INV-002' },
 }
 
+@Injectable()
+class TestAuthGuard implements CanActivate {
+  canActivate(context: ExecutionContext): boolean {
+    const request = context.switchToHttp().getRequest<AuthenticatedRequest>()
+    const requestedUser = request.header('x-test-user') ?? 'owner-a'
+    if (requestedUser === 'anonymous') throw new UnauthorizedException('Not authenticated')
+    request.user = {
+      id: requestedUser,
+      name: requestedUser,
+      email: `${requestedUser}@example.com`,
+      emailVerified: true,
+      image: null,
+    }
+    return true
+  }
+}
+
 describe('template API', () => {
   let app: INestApplication
   let prisma: PrismaService
 
   beforeAll(async () => {
-    const testingModule = await Test.createTestingModule({ imports: [AppModule] }).compile()
+    const testingModule = await Test.createTestingModule({ imports: [AppModule] })
+      .overrideGuard(AuthGuard)
+      .useClass(TestAuthGuard)
+      .compile()
     app = testingModule.createNestApplication()
     await app.init()
     prisma = app.get(PrismaService)
@@ -40,6 +68,16 @@ describe('template API', () => {
   beforeEach(async () => {
     await prisma.templateVersion.deleteMany()
     await prisma.template.deleteMany()
+    await prisma.session.deleteMany()
+    await prisma.account.deleteMany()
+    await prisma.verification.deleteMany()
+    await prisma.user.deleteMany()
+    await prisma.user.createMany({
+      data: [
+        { id: 'owner-a', name: 'Owner A', email: 'owner-a@example.com', emailVerified: true },
+        { id: 'owner-b', name: 'Owner B', email: 'owner-b@example.com', emailVerified: true },
+      ],
+    })
   })
 
   afterAll(async () => {
@@ -49,6 +87,20 @@ describe('template API', () => {
   it('reports health through the real Nest application', async () => {
     const response = await request(app.getHttpServer()).get('/healthz').expect(200)
     expect(response.body).toEqual({ status: 'ok' })
+  })
+
+  it('requires authentication and exposes the current allowed account', async () => {
+    await request(app.getHttpServer())
+      .get('/api/templates')
+      .set('x-test-user', 'anonymous')
+      .expect(401)
+
+    const account = await request(app.getHttpServer()).get('/api/account/me').expect(200)
+    expect(account.body).toMatchObject({
+      id: 'owner-a',
+      email: 'owner-a@example.com',
+      emailVerified: true,
+    })
   })
 
   it('creates, lists and reads a template with its first snapshot', async () => {
@@ -119,6 +171,35 @@ describe('template API', () => {
       .get(`/api/templates/${created.id}`)
       .expect(200)
     expect(current.body).toMatchObject({ title: 'Updated invoice', version: 2 })
+  })
+
+  it('hides templates and version history from every other owner', async () => {
+    const created = await createTemplate(app, 'Private invoice', initialContent)
+
+    await request(app.getHttpServer())
+      .get(`/api/templates/${created.id}`)
+      .set('x-test-user', 'owner-b')
+      .expect(404)
+    await request(app.getHttpServer())
+      .put(`/api/templates/${created.id}`)
+      .set('x-test-user', 'owner-b')
+      .send({ title: 'Stolen', content: updatedContent, expectedVersion: 1 })
+      .expect(404)
+    await request(app.getHttpServer())
+      .get(`/api/templates/${created.id}/versions`)
+      .set('x-test-user', 'owner-b')
+      .expect(404)
+    await request(app.getHttpServer())
+      .post(`/api/templates/${created.id}/versions/1/restore`)
+      .set('x-test-user', 'owner-b')
+      .send({ expectedVersion: 1 })
+      .expect(404)
+    await request(app.getHttpServer())
+      .delete(`/api/templates/${created.id}`)
+      .set('x-test-user', 'owner-b')
+      .expect(404)
+
+    expect(await prisma.template.count({ where: { id: created.id, ownerId: 'owner-a' } })).toBe(1)
   })
 
   it('allows exactly one concurrent update for the same expected version', async () => {

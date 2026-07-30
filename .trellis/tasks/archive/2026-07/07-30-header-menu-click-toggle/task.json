@@ -1,0 +1,30 @@
+{
+  "id": "header-menu-click-toggle",
+  "name": "header-menu-click-toggle",
+  "title": "Header 菜单改为点击切换",
+  "description": "Replace hover/focus-driven AppBar expansion with explicit click-to-toggle behavior while preserving keyboard, outside-dismiss and mobile contracts.",
+  "status": "completed",
+  "dev_type": "frontend",
+  "scope": "react-designer AppBar menu interaction and regression tests",
+  "package": "@ptd/react-designer",
+  "priority": "P2",
+  "creator": "ROYIANS",
+  "assignee": "ROYIANS",
+  "createdAt": "2026-07-30",
+  "completedAt": "2026-07-30",
+  "branch": "feature/refc",
+  "base_branch": "feature/refc",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": null,
+  "relatedFiles": [
+    "packages/react-designer/src/components/AppBar/AppBar.tsx",
+    "packages/react-designer/src/__tests__/app-bar.test.ts",
+    ".trellis/spec/monorepo/ptd-ui-system.md"
+  ],
+  "notes": "Desktop AppBar menus now ignore hover/focus and use explicit click toggling. The AppBar is an editor-interactive boundary so Designer root focus capture cannot close then reopen a menu during the same click. Outside pointer, focus leave, Escape, keyboard category navigation and mobile behavior are preserved. React Designer passes 111 tests, typecheck, focused ESLint and package build; real-browser QA covers desktop hover/open/close/switch/outside/Escape plus 480px mobile open/switch/close.",
+  "meta": {}
+}

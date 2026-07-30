@@ -13,9 +13,9 @@
 | [TypeScript Conventions](./typescript-conventions.md)   | Strict TS, shared base config                                                | Done   |
 | [Styling Conventions](./styling-conventions.md)         | CSS Modules vs CSS Variables                                                 | Done   |
 | [PTD UI System](./ptd-ui-system.md)                     | Product visual language, tokens, workspace, panels and interaction contracts | Done   |
-| [Quality Guidelines](./quality-guidelines.md)           | ESLint flat config, Prettier, Node 22 workspace baseline                      | Done   |
+| [Quality Guidelines](./quality-guidelines.md)           | ESLint flat config, Prettier, Node 22 workspace baseline                     | Done   |
 | [React Designer Contract](./react-designer-contract.md) | Controlled state, commands, history and host integration                     | Done   |
-| [Server Architecture](./server-architecture.md)         | NestJS 11, Prisma 7, SQLite, HTTP and concurrency contracts                  | Done   |
+| [Server Architecture](./server-architecture.md)         | NestJS 11, Prisma 7, PostgreSQL, auth and concurrency contracts              | Done   |
 
 ---
 
@@ -37,13 +37,13 @@ Before writing any code for a task in this monorepo, **always read these files**
 
 The public documentation is part of the implementation contract, not a historical task summary:
 
-| Document | Authority |
-| --- | --- |
-| [`README.md`](../../../README.md) | Product position, current maturity, fastest valid setup and roadmap |
-| [`DEVELOPMENT.md`](../../../DEVELOPMENT.md) | Runtime baseline, workspace commands and dependency troubleshooting |
-| [`DEPLOYMENT.md`](../../../DEPLOYMENT.md) | Current Web-only GHCR/Compose operations and deployment boundary |
-| [`apps/server/README.md`](../../../apps/server/README.md) | Current Server setup and HTTP API |
-| [`packages/react-designer/README.md`](../../../packages/react-designer/README.md) | Public controlled component API |
+| Document                                                                          | Authority                                                           |
+| --------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| [`README.md`](../../../README.md)                                                 | Product position, current maturity, fastest valid setup and roadmap |
+| [`DEVELOPMENT.md`](../../../DEVELOPMENT.md)                                       | Runtime baseline, workspace commands and dependency troubleshooting |
+| [`DEPLOYMENT.md`](../../../DEPLOYMENT.md)                                         | Full PostgreSQL/migration/Server/Web GHCR and Compose operations    |
+| [`apps/server/README.md`](../../../apps/server/README.md)                         | Current Server setup and HTTP API                                   |
+| [`packages/react-designer/README.md`](../../../packages/react-designer/README.md) | Public controlled component API                                     |
 
 When code and public documentation disagree, verify the live implementation first, then update both
 the nearest README and the relevant spec. Archived task documents are historical evidence and must

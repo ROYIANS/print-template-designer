@@ -1,0 +1,5 @@
+{"file":".trellis/spec/monorepo/directory-structure.md","reason":"Deployment file placement, pull-only baseline and Bash/PowerShell parity conventions."}
+{"file":".trellis/spec/monorepo/server-architecture.md","reason":"PostgreSQL, Prisma migration, Better Auth proxy and runtime verification constraints."}
+{"file":".trellis/spec/monorepo/quality-guidelines.md","reason":"Repository-wide validation and clean deployment artifact expectations."}
+{"file":".trellis/spec/monorepo/package-conventions.md","reason":"Node, pnpm and workspace package build/runtime version contract."}
+{"file":".trellis/tasks/07-31-deploy-postgres-auth/research/easylife-deployment-reference.md","reason":"Concrete comparison with the requested easylife-os deployment implementation."}

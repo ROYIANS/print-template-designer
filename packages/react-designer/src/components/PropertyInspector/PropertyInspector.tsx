@@ -1,37 +1,28 @@
-import {
-  useEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-  type KeyboardEvent as ReactKeyboardEvent,
-  type PointerEvent as ReactPointerEvent,
-  type ReactNode,
-} from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { useSignals } from '@preact/signals-react/runtime'
 import {
   BAR_CODE_FORMATS,
+  DEFAULT_PAGE_CONFIG,
+  PAGE_SIZES,
   barCodeContentError,
+  formatMeasurement,
   getPageDimensions,
   imageSourceError,
+  mmToPx,
   normalizeBarCodeProps,
   normalizeImageProps,
   normalizeQRCodeProps,
-  pxToMm,
   qrCodeContentError,
+  pxToMm,
   type BarCodeProps,
   type ComponentSchema,
   type ComponentStyle,
   type ImageProps,
+  type PageConfig,
+  type PageSize,
   type QRCodeProps,
 } from '@ptd/core'
-import {
-  RiAddLine,
-  RiDeleteBinLine,
-  RiLandscapeLine,
-  RiRuler2Line,
-  RiSubtractLine,
-  RiUpload2Line,
-} from '@remixicon/react'
+import { RiDeleteBinLine, RiLandscapeLine, RiRuler2Line, RiUpload2Line } from '@remixicon/react'
 import {
   CJK_FONT_FAMILY_OPTIONS,
   composeFontFamily,
@@ -42,32 +33,18 @@ import {
 import { useEditorStore } from '../../state'
 import { PanelBody, PanelFooter, PanelHeader, PanelRoot } from '../Panel'
 import {
-  isEditableTextPropValue,
-  isHexColor,
-  parseFiniteNumber,
-  parseTextPropValue,
-  scrubNumberValue,
-} from './propertyValue'
+  InspectorColorControl as ColorInput,
+  InspectorFileAction,
+  InspectorMetricInput as MetricInput,
+  InspectorNumberInput as NumberInput,
+  InspectorSegmentedInput as SegmentedInput,
+  InspectorSelectInput as SelectInput,
+  InspectorTextArea,
+  InspectorTextInput,
+} from './InspectorControls'
+import { isEditableTextPropValue, isHexColor, parseTextPropValue } from './propertyValue'
 import styles from './PropertyInspector.module.css'
 import { TableContentFields } from './TableContentFields'
-
-type ColorVariables = CSSProperties & { '--field-color': string }
-
-interface FieldProps {
-  label: string
-  labelControl?: ReactNode
-  wide?: boolean
-  children: ReactNode
-}
-
-function Field({ label, labelControl, wide = false, children }: FieldProps) {
-  return (
-    <div className={styles.field} data-wide={wide || undefined}>
-      {labelControl ?? <span className={styles.fieldLabel}>{label}</span>}
-      {children}
-    </div>
-  )
-}
 
 function SectionHeading({ title, meta }: { title: string; meta?: string }) {
   return (
@@ -148,33 +125,14 @@ function InspectorShell({
   )
 }
 
-const NUMBER_FIELDS: Array<{
+const GEOMETRY_FIELDS: Array<{
   key: keyof ComponentStyle
   label: string
-  unit?: string
-  step?: number
-  scrubStep?: number
-  min?: number
-  max?: number
-  scale?: number
 }> = [
-  { key: 'left', label: 'X', unit: 'px' },
-  { key: 'top', label: 'Y', unit: 'px' },
-  { key: 'width', label: '宽度', unit: 'px', min: 1 },
-  { key: 'height', label: '高度', unit: 'px', min: 1 },
-  { key: 'rotate', label: '旋转', unit: '°' },
-  {
-    key: 'opacity',
-    label: '透明度',
-    unit: '%',
-    step: 5,
-    scrubStep: 1,
-    min: 0,
-    max: 100,
-    scale: 100,
-  },
-  { key: 'fontSize', label: '字号', unit: 'px', min: 1 },
-  { key: 'borderWidth', label: '边框', unit: 'px', min: 0 },
+  { key: 'left', label: 'X' },
+  { key: 'top', label: 'Y' },
+  { key: 'width', label: '宽度' },
+  { key: 'height', label: '高度' },
 ]
 
 const CONTENT_COMPONENTS = new Set<ComponentSchema['component']>([
@@ -185,7 +143,6 @@ const CONTENT_COMPONENTS = new Set<ComponentSchema['component']>([
   'RoyImage',
   'RoyQRCode',
   'RoyBarCode',
-  'RoyGroup',
 ])
 const TYPOGRAPHY_COMPONENTS = new Set<ComponentSchema['component']>([
   'RoySimpleText',
@@ -202,6 +159,7 @@ const BACKGROUND_COMPONENTS = new Set<ComponentSchema['component']>([
   'RoyCircle',
   'RoyStar',
   'RoyImage',
+  'RoyBarCode',
 ])
 const BORDER_COMPONENTS = new Set<ComponentSchema['component']>([
   'RoySimpleText',
@@ -248,12 +206,70 @@ function PageInspector() {
   const store = useEditorStore()
   const page = store.pageConfig.value
   const dimensions = getPageDimensions(page)
+  const unit = store.measurementUnit.value
+  const [titleDraft, setTitleDraft] = useState<string | null>(null)
+  const [marginsLinked, setMarginsLinked] = useState(true)
+  const start = () => store.beginGesture()
+  const finish = () => store.commitGesture()
+  const cancel = () => store.cancelGesture()
+  const update = (patch: Partial<PageConfig>) => store.updatePageConfig(patch, true)
+  const updateDiscrete = (patch: Partial<PageConfig>) => {
+    start()
+    update(patch)
+    finish()
+  }
+  const pageWidthMm = page.pageDirection === 'l' ? page.pageHeight : page.pageWidth
+  const pageHeightMm = page.pageDirection === 'l' ? page.pageWidth : page.pageHeight
+  const pageMetric = `${formatMeasurement(dimensions.width, unit)} × ${formatMeasurement(dimensions.height, unit)} ${unit}`
+
+  useEffect(() => () => store.commitGesture(), [store])
+
+  const updatePageSize = (pageSize: PageSize) => {
+    const preset = PAGE_SIZES[pageSize]
+    updateDiscrete(
+      preset
+        ? {
+            pageSize,
+            pageWidth: preset.w,
+            pageHeight: preset.h,
+            pageCurHeight: preset.h,
+          }
+        : { pageSize: 'custom' },
+    )
+  }
+
+  const updateMargin = (
+    key: 'pageMarginTop' | 'pageMarginRight' | 'pageMarginBottom' | 'pageMarginLeft',
+    canvasValue: number,
+  ) => {
+    const value = pxToMm(canvasValue)
+    update(
+      marginsLinked
+        ? {
+            pageMarginTop: value,
+            pageMarginRight: value,
+            pageMarginBottom: value,
+            pageMarginLeft: value,
+          }
+        : { [key]: value },
+    )
+  }
+
+  const marginMax = (
+    key: 'pageMarginTop' | 'pageMarginRight' | 'pageMarginBottom' | 'pageMarginLeft',
+  ): number => {
+    if (marginsLinked) return Math.min(pageWidthMm, pageHeightMm) / 2 - 0.01
+    if (key === 'pageMarginLeft') return pageWidthMm - page.pageMarginRight - 0.01
+    if (key === 'pageMarginRight') return pageWidthMm - page.pageMarginLeft - 0.01
+    if (key === 'pageMarginTop') return pageHeightMm - page.pageMarginBottom - 0.01
+    return pageHeightMm - page.pageMarginTop - 0.01
+  }
 
   return (
     <InspectorShell
-      label="页面属性"
-      title={page.title || '未命名模板'}
-      meta={`PAGE ${String(store.currentPageIndex.value + 1).padStart(2, '0')}`}
+      label="文档页面设置"
+      title="文档页面设置"
+      meta={page.title || '未命名模板'}
       page
       footer={
         <FooterSetting
@@ -265,6 +281,37 @@ function PageInspector() {
         />
       }
     >
+      {store.outOfBoundsComponents.value.length > 0 && (
+        <div className={styles.pageWarning} role="status">
+          <strong>{store.outOfBoundsComponents.value.length} 个组件超出页面</strong>
+          <span>组件位置和尺寸已保留；可在画布中逐一调整。</span>
+        </div>
+      )}
+      <InspectorSection title="文档" meta="所有页面共用">
+        <InspectorTextInput
+          label="模板标题"
+          wide
+          value={titleDraft ?? page.title}
+          disabled={false}
+          onStart={() => {
+            setTitleDraft(page.title)
+            start()
+          }}
+          onValue={(title) => {
+            setTitleDraft(title)
+            update({ title })
+          }}
+          onFinish={() => {
+            setTitleDraft(null)
+            finish()
+          }}
+          onCancel={() => {
+            setTitleDraft(null)
+            cancel()
+          }}
+        />
+      </InspectorSection>
+
       <InspectorSection title="页面方向" meta={page.pageDirection === 'p' ? '纵向' : '横向'}>
         <SegmentedInput
           label="页面方向"
@@ -281,42 +328,148 @@ function PageInspector() {
         />
       </InspectorSection>
 
-      <InspectorSection
-        title="页面规格"
-        meta={`${pxToMm(dimensions.width)} × ${pxToMm(dimensions.height)} mm`}
-      >
-        <dl className={styles.readoutGrid}>
-          <Readout label="规格" value={page.pageSize} />
-          <Readout label="布局" value={page.pageLayout === 'fixed' ? '固定页面' : '流式页面'} />
-          <Readout label="宽度" value={`${pxToMm(dimensions.width)} mm`} />
-          <Readout label="高度" value={`${pxToMm(dimensions.height)} mm`} />
-          <Readout label="上边距" value={`${page.pageMarginTop} mm`} />
-          <Readout label="下边距" value={`${page.pageMarginBottom} mm`} />
-        </dl>
+      <InspectorSection title="页面规格" meta={pageMetric}>
+        <div className={styles.fieldGrid}>
+          <SelectInput
+            label="纸张规格"
+            wide
+            value={page.pageSize}
+            disabled={false}
+            options={[
+              ...Object.values(PAGE_SIZES).map(
+                (size) =>
+                  [size.name, `${size.name} · ${size.w} × ${size.h} mm`] as [string, string],
+              ),
+              ['custom', '自定义尺寸'],
+            ]}
+            onStart={start}
+            onFinish={finish}
+            onValue={(value) => updatePageSize(value as PageSize)}
+          />
+          {page.pageSize === 'custom' && (
+            <>
+              <MetricInput
+                label="页面宽度"
+                canvasValue={mmToPx(page.pageWidth)}
+                unit={unit}
+                minCanvasPx={1}
+                disabled={false}
+                onStart={start}
+                onFinish={finish}
+                onCancel={cancel}
+                onCanvasValue={(value) => update({ pageWidth: pxToMm(value) })}
+              />
+              <MetricInput
+                label="页面高度"
+                canvasValue={mmToPx(page.pageHeight)}
+                unit={unit}
+                minCanvasPx={1}
+                disabled={false}
+                onStart={start}
+                onFinish={finish}
+                onCancel={cancel}
+                onCanvasValue={(value) =>
+                  update({ pageHeight: pxToMm(value), pageCurHeight: pxToMm(value) })
+                }
+              />
+            </>
+          )}
+        </div>
+      </InspectorSection>
+
+      <InspectorSection title="内容安全区" meta={marginsLinked ? '四边联动' : '独立设置'}>
+        <div className={styles.fieldGrid}>
+          <SegmentedInput
+            label="边距模式"
+            value={marginsLinked ? 'linked' : 'separate'}
+            wide
+            options={[
+              { value: 'linked', label: '四边联动' },
+              { value: 'separate', label: '独立设置' },
+            ]}
+            onValue={(value) => setMarginsLinked(value === 'linked')}
+          />
+          {(
+            [
+              ['pageMarginTop', '上边距'],
+              ['pageMarginRight', '右边距'],
+              ['pageMarginBottom', '下边距'],
+              ['pageMarginLeft', '左边距'],
+            ] as const
+          ).map(([key, label]) => (
+            <MetricInput
+              key={key}
+              label={label}
+              canvasValue={mmToPx(page[key])}
+              unit={unit}
+              minCanvasPx={0}
+              maxCanvasPx={mmToPx(marginMax(key))}
+              disabled={false}
+              onStart={start}
+              onFinish={finish}
+              onCancel={cancel}
+              onCanvasValue={(value) => updateMargin(key, value)}
+            />
+          ))}
+        </div>
       </InspectorSection>
 
       <InspectorSection title="纸张与排版" meta={primaryFontName(page.fontFamily)}>
-        <dl className={styles.readoutList}>
-          <Readout label="纸张颜色" value={page.background} swatch={page.background} />
-          <Readout label="默认文字" value={page.color} swatch={page.color} />
-          <Readout label="默认字体" value={primaryFontName(page.fontFamily)} />
-          <Readout label="字号 / 行高" value={`${page.fontSize}px / ${page.lineHeight}`} />
-        </dl>
+        <div className={styles.fieldGrid}>
+          <ColorInput
+            label="纸张颜色"
+            value={page.background}
+            defaultValue={DEFAULT_PAGE_CONFIG.background}
+            disabled={false}
+            onStart={start}
+            onFinish={finish}
+            onCancel={cancel}
+            onValue={(background) => update({ background })}
+          />
+          <ColorInput
+            label="默认文字"
+            value={page.color}
+            defaultValue={DEFAULT_PAGE_CONFIG.color}
+            disabled={false}
+            onStart={start}
+            onFinish={finish}
+            onCancel={cancel}
+            onValue={(color) => update({ color })}
+          />
+          <SelectInput
+            label="默认字体"
+            value={page.fontFamily}
+            disabled={false}
+            options={CJK_FONT_FAMILY_OPTIONS}
+            onStart={start}
+            onFinish={finish}
+            onValue={(fontFamily) => update({ fontFamily })}
+          />
+          <NumberInput
+            label="默认字号"
+            value={page.fontSize}
+            unit="pt"
+            min={1}
+            disabled={false}
+            onStart={start}
+            onFinish={finish}
+            onCancel={cancel}
+            onValue={(fontSize) => update({ fontSize })}
+          />
+          <NumberInput
+            label="默认行高"
+            value={page.lineHeight}
+            step={0.1}
+            min={0.1}
+            disabled={false}
+            onStart={start}
+            onFinish={finish}
+            onCancel={cancel}
+            onValue={(lineHeight) => update({ lineHeight })}
+          />
+        </div>
       </InspectorSection>
     </InspectorShell>
-  )
-}
-
-function Readout({ label, value, swatch }: { label: string; value: string; swatch?: string }) {
-  const swatchStyle: ColorVariables | undefined = swatch ? { '--field-color': swatch } : undefined
-  return (
-    <div className={styles.readout}>
-      <dt>{label}</dt>
-      <dd>
-        {swatch && <span className={styles.swatch} style={swatchStyle} aria-hidden="true" />}
-        <span>{value}</span>
-      </dd>
-    </div>
   )
 }
 
@@ -326,6 +479,7 @@ function primaryFontName(fontFamily: string): string {
 
 function SingleInspector({ component }: { component: ComponentSchema }) {
   const store = useEditorStore()
+  const measurementUnit = store.measurementUnit.value
   const locked = Boolean(component.isLock)
   const [textDraft, setTextDraft] = useState<string | null>(null)
   const start = () => store.beginGesture()
@@ -382,17 +536,28 @@ function SingleInspector({ component }: { component: ComponentSchema }) {
         />
       }
     >
+      {component.component === 'RoyGroup' && (
+        <div className={styles.summary} role="note">
+          <strong>组合对象</strong>
+          <span>
+            包含 {Array.isArray(component.propValue) ? component.propValue.length : 0}{' '}
+            个子对象；此处只修改组合框的安全属性。
+          </span>
+        </div>
+      )}
       {showsContent && (
         <InspectorSection
           title="内容"
           meta={
-            editableText
-              ? '可编辑'
-              : component.component === 'RoySimpleTable'
-                ? '单元格编辑'
-                : configurableContent
-                  ? '实时预览'
-                  : '专用编辑器'
+            component.component === 'RoyText'
+              ? '画布富文本编辑'
+              : editableText
+                ? '可编辑'
+                : component.component === 'RoySimpleTable'
+                  ? '单元格编辑'
+                  : configurableContent
+                    ? '实时预览'
+                    : '专用编辑器'
           }
         >
           {configurableContent ? (
@@ -406,55 +571,40 @@ function SingleInspector({ component }: { component: ComponentSchema }) {
               onValue={updateContent}
               onDiscreteValue={updateDiscreteContent}
             />
+          ) : component.component === 'RoyText' ? (
+            <div className={styles.structuredNotice} role="note">
+              <strong>在画布中编辑富文本</strong>
+              <span>双击内容进入排版工具栏；属性面板负责组件级默认排版与外观。</span>
+            </div>
           ) : editableText ? (
-            <Field label={component.component === 'RoyText' ? '内容源码' : '文本值'} wide>
-              {component.component === 'RoyText' ? (
-                <textarea
-                  className={styles.textArea}
-                  aria-label="内容源码"
-                  value={textDraft ?? printable(component.propValue)}
-                  disabled={locked}
-                  onFocus={(event) => {
-                    setTextDraft(event.currentTarget.value)
-                    start()
-                  }}
-                  onBlur={() => {
-                    setTextDraft(null)
-                    finish()
-                  }}
-                  onChange={(event) => {
-                    const draft = event.target.value
-                    setTextDraft(draft)
-                    const value = parseTextPropValue(component.propValue, draft)
-                    if (value !== null)
-                      store.updateComponent(component.id, { propValue: value }, true)
-                  }}
-                />
-              ) : (
-                <input
-                  className={styles.textControl}
-                  type="text"
-                  aria-label="文本值"
-                  value={textDraft ?? printable(component.propValue)}
-                  disabled={locked}
-                  onFocus={(event) => {
-                    setTextDraft(event.currentTarget.value)
-                    start()
-                  }}
-                  onBlur={() => {
-                    setTextDraft(null)
-                    finish()
-                  }}
-                  onChange={(event) => {
-                    const draft = event.target.value
-                    setTextDraft(draft)
-                    const value = parseTextPropValue(component.propValue, draft)
-                    if (value !== null)
-                      store.updateComponent(component.id, { propValue: value }, true)
-                  }}
-                />
-              )}
-            </Field>
+            <InspectorTextInput
+              label="文本值"
+              wide
+              value={textDraft ?? printable(component.propValue)}
+              disabled={locked}
+              onStart={() => {
+                setTextDraft(printable(component.propValue))
+                start()
+              }}
+              onValue={(draft) => {
+                setTextDraft(draft)
+                const value = parseTextPropValue(component.propValue, draft)
+                if (value !== null) store.updateComponent(component.id, { propValue: value }, true)
+              }}
+              onFinish={() => {
+                setTextDraft(null)
+                finish()
+              }}
+              onCancel={() => {
+                setTextDraft(null)
+                cancel()
+              }}
+            />
+          ) : component.component === 'RoyComplexTable' ? (
+            <div className={styles.structuredNotice} role="note">
+              <strong>兼容表格为只读内容</strong>
+              <span>当前版本保留渲染与几何调整，不提供尚未闭环的数据区编辑入口。</span>
+            </div>
           ) : (
             <div className={styles.structuredNotice} role="note">
               <strong>结构化内容由专用编辑器维护</strong>
@@ -466,19 +616,50 @@ function SingleInspector({ component }: { component: ComponentSchema }) {
 
       <InspectorSection title="几何" meta="位置与尺寸">
         <div className={styles.fieldGrid}>
-          {NUMBER_FIELDS.slice(0, 6).map(({ key, label, scale = 1, ...attributes }) => (
-            <NumberInput
+          {GEOMETRY_FIELDS.map(({ key, label }) => (
+            <MetricInput
               key={key}
-              label={label}
-              value={numeric(component.style[key]) * scale}
+              label={
+                component.component === 'RoyLine' && key === 'width'
+                  ? '线条长度'
+                  : component.component === 'RoyLine' && key === 'height'
+                    ? '线条厚度'
+                    : label
+              }
+              canvasValue={numeric(component.style[key])}
+              unit={measurementUnit}
+              minCanvasPx={key === 'width' || key === 'height' ? 1 : undefined}
               disabled={locked}
               onStart={start}
               onFinish={finish}
               onCancel={cancel}
-              onValue={(value) => updateStyle(key, value / scale)}
-              {...attributes}
+              onCanvasValue={(value) => updateStyle(key, value)}
             />
           ))}
+          <NumberInput
+            label="旋转"
+            value={numeric(component.style.rotate)}
+            unit="°"
+            disabled={locked}
+            onStart={start}
+            onFinish={finish}
+            onCancel={cancel}
+            onValue={(value) => updateStyle('rotate', value)}
+          />
+          <NumberInput
+            label="透明度"
+            value={numeric(component.style.opacity) * 100}
+            unit="%"
+            step={5}
+            scrubStep={1}
+            min={0}
+            max={100}
+            disabled={locked}
+            onStart={start}
+            onFinish={finish}
+            onCancel={cancel}
+            onValue={(value) => updateStyle('opacity', value / 100)}
+          />
         </div>
       </InspectorSection>
 
@@ -517,6 +698,78 @@ function SingleInspector({ component }: { component: ComponentSchema }) {
               onValue={(value) =>
                 updateStyle('fontFamily', composeFontFamily(fontSelection.cjk, value))
               }
+            />
+            <SegmentedInput
+              label="字重"
+              value={text(component.style.fontWeight, 'normal')}
+              disabled={locked}
+              options={[
+                { value: 'normal', label: '常规' },
+                { value: 'bold', label: '粗体' },
+              ]}
+              onValue={(value) => updateDiscreteStyle('fontWeight', value)}
+            />
+            <SegmentedInput
+              label="字形"
+              value={text(component.style.fontStyle, 'normal')}
+              disabled={locked}
+              options={[
+                { value: 'normal', label: '常规' },
+                { value: 'italic', label: '斜体' },
+              ]}
+              onValue={(value) => updateDiscreteStyle('fontStyle', value)}
+            />
+            <SegmentedInput
+              label="下划线"
+              value={component.style.isUnderLine ? 'show' : 'hide'}
+              disabled={locked}
+              options={[
+                { value: 'hide', label: '无' },
+                { value: 'show', label: '启用' },
+              ]}
+              onValue={(value) => updateDiscreteStyle('isUnderLine', value === 'show')}
+            />
+            <SegmentedInput
+              label="删除线"
+              value={component.style.isDelLine ? 'show' : 'hide'}
+              disabled={locked}
+              options={[
+                { value: 'hide', label: '无' },
+                { value: 'show', label: '启用' },
+              ]}
+              onValue={(value) => updateDiscreteStyle('isDelLine', value === 'show')}
+            />
+            <NumberInput
+              label="行高"
+              value={cssNumber(component.style.lineHeight) || 1}
+              step={0.1}
+              min={0.1}
+              disabled={locked}
+              onStart={start}
+              onFinish={finish}
+              onCancel={cancel}
+              onValue={(value) => updateStyle('lineHeight', String(value))}
+            />
+            <MetricInput
+              label="字距"
+              canvasValue={cssNumber(component.style.letterSpacing)}
+              unit={measurementUnit}
+              disabled={locked}
+              onStart={start}
+              onFinish={finish}
+              onCancel={cancel}
+              onCanvasValue={(value) => updateStyle('letterSpacing', String(value))}
+            />
+            <MetricInput
+              label="内边距"
+              canvasValue={cssNumber(component.style.padding)}
+              unit={measurementUnit}
+              minCanvasPx={0}
+              disabled={locked}
+              onStart={start}
+              onFinish={finish}
+              onCancel={cancel}
+              onCanvasValue={(value) => updateStyle('padding', String(value))}
             />
             {showsAlignment && (
               <>
@@ -557,19 +810,24 @@ function SingleInspector({ component }: { component: ComponentSchema }) {
               <ColorInput
                 label="文字"
                 value={color(component.style.color, '#1d2735')}
+                defaultValue="#1d2735"
                 disabled={locked}
                 onStart={start}
                 onFinish={finish}
+                onCancel={cancel}
                 onValue={(value) => updateStyle('color', value)}
               />
             )}
             {showsBackground && (
               <ColorInput
                 label={component.component === 'RoyLine' ? '线条' : '背景'}
-                value={color(component.style.background, '#f8fafc')}
+                value={paint(component.style.background, '#f8fafc')}
+                defaultValue="#f8fafc"
+                allowTransparent
                 disabled={locked}
                 onStart={start}
                 onFinish={finish}
+                onCancel={cancel}
                 onValue={(value) => updateStyle('background', value)}
               />
             )}
@@ -580,33 +838,35 @@ function SingleInspector({ component }: { component: ComponentSchema }) {
                     <ColorInput
                       label="边框色"
                       value={color(component.style.borderColor, '#7d8999')}
-                      disabled={locked}
-                      onStart={start}
-                      onFinish={finish}
-                      onValue={(value) => updateStyle('borderColor', value)}
-                    />
-                    <NumberInput
-                      label="边框宽"
-                      value={numeric(component.style.borderWidth)}
-                      unit="px"
-                      min={0}
+                      defaultValue="#7d8999"
                       disabled={locked}
                       onStart={start}
                       onFinish={finish}
                       onCancel={cancel}
-                      onValue={(value) => updateStyle('borderWidth', value)}
+                      onValue={(value) => updateStyle('borderColor', value)}
+                    />
+                    <MetricInput
+                      label="边框宽"
+                      canvasValue={numeric(component.style.borderWidth)}
+                      unit={measurementUnit}
+                      minCanvasPx={0}
+                      disabled={locked}
+                      onStart={start}
+                      onFinish={finish}
+                      onCancel={cancel}
+                      onCanvasValue={(value) => updateStyle('borderWidth', value)}
                     />
                     {showsRadius && (
-                      <NumberInput
+                      <MetricInput
                         label="圆角"
-                        value={cssNumber(component.style.borderRadius)}
-                        unit="px"
-                        min={0}
+                        canvasValue={cssNumber(component.style.borderRadius)}
+                        unit={measurementUnit}
+                        minCanvasPx={0}
                         disabled={locked}
                         onStart={start}
                         onFinish={finish}
                         onCancel={cancel}
-                        onValue={(value) => updateStyle('borderRadius', `${value}px`)}
+                        onCanvasValue={(value) => updateStyle('borderRadius', `${value}px`)}
                       />
                     )}
                     {showsBorderStyle && (
@@ -675,6 +935,7 @@ function ImageContentFields({
   disabled,
   onStart,
   onFinish,
+  onCancel,
   onValue,
   onDiscreteValue,
 }: ConfigurableContentFieldsProps) {
@@ -711,46 +972,44 @@ function ImageContentFields({
   return (
     <div className={styles.contentEditor}>
       <div className={styles.fieldGrid}>
-        <Field label="图片地址" wide>
-          <input
-            className={styles.textControl}
-            type="text"
-            spellCheck={false}
-            aria-label="图片地址"
-            aria-invalid={Boolean(sourceError) || undefined}
-            value={shownSource}
-            placeholder="https://… 或 data:image/…"
-            disabled={disabled}
-            onFocus={(event) => {
-              setSourceStart(value.src)
-              setSourceDraft(event.currentTarget.value)
-              onStart()
-            }}
-            onChange={(event) => {
-              const next = event.target.value
-              setSourceDraft(next)
-              if (!imageSourceError(next)) patch({ src: next })
-            }}
-            onBlur={() => {
-              if (sourceError) patch({ src: sourceStart })
-              setSourceDraft(null)
-              onFinish()
-            }}
-          />
-        </Field>
-        <Field label="替代文本" wide>
-          <input
-            className={styles.textControl}
-            type="text"
-            aria-label="图片替代文本"
-            value={value.alt}
-            placeholder="例如：公司 Logo"
-            disabled={disabled}
-            onFocus={onStart}
-            onBlur={onFinish}
-            onChange={(event) => patch({ alt: event.target.value })}
-          />
-        </Field>
+        <InspectorTextInput
+          label="图片地址"
+          wide
+          spellCheck={false}
+          value={shownSource}
+          placeholder="https://… 或 data:image/…"
+          error={sourceError}
+          disabled={disabled}
+          onStart={() => {
+            setSourceStart(value.src)
+            setSourceDraft(value.src)
+            onStart()
+          }}
+          onValue={(next) => {
+            setSourceDraft(next)
+            if (!imageSourceError(next)) patch({ src: next })
+          }}
+          onFinish={() => {
+            if (sourceError) patch({ src: sourceStart })
+            setSourceDraft(null)
+            onFinish()
+          }}
+          onCancel={() => {
+            setSourceDraft(null)
+            onCancel()
+          }}
+        />
+        <InspectorTextInput
+          label="图片替代文本"
+          wide
+          value={value.alt}
+          placeholder="例如：公司 Logo"
+          disabled={disabled}
+          onStart={onStart}
+          onFinish={onFinish}
+          onCancel={onCancel}
+          onValue={(alt) => patch({ alt })}
+        />
         <SelectInput
           label="适配方式"
           value={value.fit}
@@ -781,20 +1040,13 @@ function ImageContentFields({
         />
       </div>
       <div className={styles.assetActions}>
-        <label className={styles.assetAction} data-disabled={disabled || undefined}>
-          <RiUpload2Line aria-hidden="true" />
-          <span>选择本地图片</span>
-          <input
-            className={styles.visuallyHidden}
-            type="file"
-            accept="image/*"
-            disabled={disabled}
-            onChange={(event) => {
-              loadFile(event.currentTarget.files?.[0])
-              event.currentTarget.value = ''
-            }}
-          />
-        </label>
+        <InspectorFileAction
+          label="选择本地图片"
+          icon={<RiUpload2Line aria-hidden="true" />}
+          accept="image/*"
+          disabled={disabled}
+          onFile={loadFile}
+        />
         <button
           type="button"
           className={styles.assetAction}
@@ -829,18 +1081,16 @@ function QRCodeContentFields({
   return (
     <div className={styles.contentEditor}>
       <div className={styles.fieldGrid}>
-        <Field label="编码内容" wide>
-          <textarea
-            className={styles.textArea}
-            aria-label="二维码内容"
-            aria-invalid={Boolean(error) || undefined}
-            value={value.text}
-            disabled={disabled}
-            onFocus={onStart}
-            onBlur={onFinish}
-            onChange={(event) => patch({ text: event.target.value })}
-          />
-        </Field>
+        <InspectorTextArea
+          label="二维码内容"
+          value={value.text}
+          error={error}
+          disabled={disabled}
+          onStart={onStart}
+          onFinish={onFinish}
+          onCancel={onCancel}
+          onValue={(text) => patch({ text })}
+        />
         <SelectInput
           label="纠错等级"
           value={value.correctLevel}
@@ -860,7 +1110,6 @@ function QRCodeContentFields({
         <NumberInput
           label="静区"
           value={value.margin}
-          unit="px"
           min={0}
           max={32}
           disabled={disabled}
@@ -872,17 +1121,21 @@ function QRCodeContentFields({
         <ColorInput
           label="前景"
           value={value.colorDark}
+          defaultValue="#1d2735"
           disabled={disabled}
           onStart={onStart}
           onFinish={onFinish}
+          onCancel={onCancel}
           onValue={(colorDark) => patch({ colorDark })}
         />
         <ColorInput
           label="背景"
           value={value.colorLight}
+          defaultValue="#ffffff"
           disabled={disabled}
           onStart={onStart}
           onFinish={onFinish}
+          onCancel={onCancel}
           onValue={(colorLight) => patch({ colorLight })}
         />
       </div>
@@ -896,6 +1149,7 @@ function BarCodeContentFields({
   disabled,
   onStart,
   onFinish,
+  onCancel,
   onValue,
   onDiscreteValue,
 }: ConfigurableContentFieldsProps) {
@@ -905,20 +1159,18 @@ function BarCodeContentFields({
   return (
     <div className={styles.contentEditor}>
       <div className={styles.fieldGrid}>
-        <Field label="编码内容" wide>
-          <input
-            className={styles.textControl}
-            type="text"
-            spellCheck={false}
-            aria-label="条形码内容"
-            aria-invalid={Boolean(error) || undefined}
-            value={value.text}
-            disabled={disabled}
-            onFocus={onStart}
-            onBlur={onFinish}
-            onChange={(event) => patch({ text: event.target.value })}
-          />
-        </Field>
+        <InspectorTextInput
+          label="条形码内容"
+          wide
+          spellCheck={false}
+          value={value.text}
+          error={error}
+          disabled={disabled}
+          onStart={onStart}
+          onFinish={onFinish}
+          onCancel={onCancel}
+          onValue={(text) => patch({ text })}
+        />
         <SelectInput
           label="码制"
           value={value.bcid}
@@ -933,9 +1185,11 @@ function BarCodeContentFields({
         <ColorInput
           label="前景"
           value={value.colorDark}
+          defaultValue="#1d2735"
           disabled={disabled}
           onStart={onStart}
           onFinish={onFinish}
+          onCancel={onCancel}
           onValue={(colorDark) => patch({ colorDark })}
         />
         <SegmentedInput
@@ -1064,6 +1318,7 @@ function BatchInspector({ components }: { components: ComponentSchema[] }) {
                 disabled={locked}
                 onStart={start}
                 onFinish={finish}
+                onCancel={cancel}
                 onValue={(value) => store.updateSelectedStyles({ color: value }, true)}
               />
             </>
@@ -1071,350 +1326,6 @@ function BatchInspector({ components }: { components: ComponentSchema[] }) {
         </div>
       </InspectorSection>
     </InspectorShell>
-  )
-}
-
-interface NumberInputProps {
-  label: string
-  value: number | null
-  disabled: boolean
-  placeholder?: string
-  unit?: string
-  step?: number
-  scrubStep?: number
-  min?: number
-  max?: number
-  onStart: () => void
-  onFinish: () => void
-  onCancel: () => void
-  onValue: (value: number) => void
-}
-
-interface ScrubSession {
-  pointerId: number
-  startX: number
-  startValue: number
-  lastValue: number
-  moved: boolean
-}
-
-function NumberInput({
-  label,
-  value,
-  disabled,
-  placeholder,
-  unit,
-  step = 1,
-  scrubStep = step,
-  min,
-  max,
-  onStart,
-  onFinish,
-  onCancel,
-  onValue,
-}: NumberInputProps) {
-  const [editing, setEditing] = useState(false)
-  const [draft, setDraft] = useState('')
-  const [scrubbing, setScrubbing] = useState(false)
-  const inputRef = useRef<HTMLInputElement>(null)
-  const scrubRef = useRef<ScrubSession | null>(null)
-  const shownValue = editing ? draft : value === null ? '' : formatNumber(value)
-  const parsedDraft = parseFiniteNumber(draft, { min, max })
-  const invalid = editing && draft.trim() !== '' && parsedDraft === null
-  const scrubbable = !disabled && value !== null
-
-  const apply = (nextDraft: string) => {
-    const parsed = parseFiniteNumber(nextDraft, { min, max })
-    if (parsed !== null) onValue(parsed)
-  }
-  const nudge = (direction: -1 | 1) => {
-    if (value === null) return
-    const next = clamp(roundForStep(value + direction * step, step), min, max)
-    onStart()
-    onValue(next)
-    onFinish()
-  }
-
-  const clearPointerCapture = (target: HTMLButtonElement, pointerId: number) => {
-    scrubRef.current = null
-    if (target.hasPointerCapture(pointerId)) target.releasePointerCapture(pointerId)
-  }
-
-  const cancelScrub = (target: HTMLButtonElement, pointerId: number) => {
-    const session = scrubRef.current
-    if (!session || session.pointerId !== pointerId) return
-    clearPointerCapture(target, pointerId)
-    if (!session.moved) return
-    setScrubbing(false)
-    onCancel()
-  }
-
-  const handleScrubPointerDown = (event: ReactPointerEvent<HTMLButtonElement>) => {
-    if (!scrubbable || value === null || event.button !== 0 || event.pointerType === 'touch') return
-    event.preventDefault()
-    event.currentTarget.focus({ preventScroll: true })
-    event.currentTarget.setPointerCapture(event.pointerId)
-    scrubRef.current = {
-      pointerId: event.pointerId,
-      startX: event.clientX,
-      startValue: value,
-      lastValue: value,
-      moved: false,
-    }
-  }
-
-  const handleScrubPointerMove = (event: ReactPointerEvent<HTMLButtonElement>) => {
-    const session = scrubRef.current
-    if (!session || session.pointerId !== event.pointerId) return
-    const deltaX = event.clientX - session.startX
-    if (!session.moved) {
-      if (Math.abs(deltaX) < 3) return
-      session.moved = true
-      setScrubbing(true)
-      onStart()
-    }
-    const next = scrubNumberValue(session.startValue, deltaX, {
-      step: scrubStep,
-      min,
-      max,
-      shiftKey: event.shiftKey,
-      altKey: event.altKey,
-    })
-    if (next === session.lastValue) return
-    session.lastValue = next
-    onValue(next)
-  }
-
-  const handleScrubPointerUp = (event: ReactPointerEvent<HTMLButtonElement>) => {
-    const session = scrubRef.current
-    if (!session || session.pointerId !== event.pointerId) return
-    const moved = session.moved
-    clearPointerCapture(event.currentTarget, event.pointerId)
-    if (moved) {
-      setScrubbing(false)
-      onFinish()
-      return
-    }
-    inputRef.current?.focus({ preventScroll: true })
-  }
-
-  const handleScrubKeyDown = (event: ReactKeyboardEvent<HTMLButtonElement>) => {
-    const session = scrubRef.current
-    if (event.key !== 'Escape' || !session) return
-    event.preventDefault()
-    cancelScrub(event.currentTarget, session.pointerId)
-  }
-
-  return (
-    <Field
-      label={label}
-      labelControl={
-        <button
-          type="button"
-          className={styles.scrubLabel}
-          tabIndex={-1}
-          aria-label={`${label}，左右拖动调整数值`}
-          title={scrubbable ? '左右拖动调整；Shift 加速，Alt 精调' : undefined}
-          disabled={!scrubbable}
-          data-active={scrubbing || undefined}
-          onPointerDown={handleScrubPointerDown}
-          onPointerMove={handleScrubPointerMove}
-          onPointerUp={handleScrubPointerUp}
-          onPointerCancel={(event) => cancelScrub(event.currentTarget, event.pointerId)}
-          onLostPointerCapture={(event) => cancelScrub(event.currentTarget, event.pointerId)}
-          onKeyDown={handleScrubKeyDown}
-        >
-          {label}
-        </button>
-      }
-    >
-      <div className={styles.numberControl} data-disabled={disabled || undefined}>
-        <button
-          type="button"
-          aria-label={`${label}减少${step}`}
-          disabled={disabled || value === null}
-          onClick={() => nudge(-1)}
-        >
-          <RiSubtractLine aria-hidden="true" />
-        </button>
-        <input
-          ref={inputRef}
-          type="text"
-          inputMode="decimal"
-          aria-label={label}
-          aria-invalid={invalid || undefined}
-          value={shownValue}
-          placeholder={placeholder}
-          disabled={disabled}
-          onFocus={(event) => {
-            setEditing(true)
-            setDraft(event.currentTarget.value)
-            onStart()
-          }}
-          onChange={(event) => {
-            setDraft(event.target.value)
-            apply(event.target.value)
-          }}
-          onBlur={(event) => {
-            apply(event.currentTarget.value)
-            setEditing(false)
-            onFinish()
-          }}
-        />
-        {unit && <span className={styles.unit}>{unit}</span>}
-        <button
-          type="button"
-          aria-label={`${label}增加${step}`}
-          disabled={disabled || value === null}
-          onClick={() => nudge(1)}
-        >
-          <RiAddLine aria-hidden="true" />
-        </button>
-      </div>
-    </Field>
-  )
-}
-
-function SegmentedInput({
-  label,
-  value,
-  options,
-  disabled = false,
-  wide = false,
-  onValue,
-}: {
-  label: string
-  value: string
-  options: Array<{ value: string; label: string; icon?: ReactNode }>
-  disabled?: boolean
-  wide?: boolean
-  onValue: (value: string) => void
-}) {
-  return (
-    <Field label={label} wide={wide}>
-      <div className={styles.segmented} role="group" aria-label={label} data-count={options.length}>
-        {options.map((option) => (
-          <button
-            key={option.value}
-            type="button"
-            aria-pressed={option.value === value}
-            disabled={disabled}
-            onClick={() => onValue(option.value)}
-          >
-            {option.icon}
-            <span>{option.label}</span>
-          </button>
-        ))}
-      </div>
-    </Field>
-  )
-}
-
-function SelectInput({
-  label,
-  value,
-  options,
-  disabled,
-  onStart,
-  onFinish,
-  onValue,
-}: {
-  label: string
-  value: string
-  options: Array<[string, string]>
-  disabled: boolean
-  onStart: () => void
-  onFinish: () => void
-  onValue: (value: string) => void
-}) {
-  return (
-    <Field label={label}>
-      <select
-        className={styles.selectControl}
-        aria-label={label}
-        value={value}
-        disabled={disabled}
-        onFocus={onStart}
-        onBlur={onFinish}
-        onChange={(event) => onValue(event.target.value)}
-      >
-        {options.map(([optionValue, optionLabel]) => (
-          <option key={optionValue} value={optionValue}>
-            {optionLabel}
-          </option>
-        ))}
-      </select>
-    </Field>
-  )
-}
-
-function ColorInput({
-  label,
-  value,
-  placeholder,
-  disabled,
-  onStart,
-  onFinish,
-  onValue,
-}: {
-  label: string
-  value: string | null
-  placeholder?: string
-  disabled: boolean
-  onStart: () => void
-  onFinish: () => void
-  onValue: (value: string) => void
-}) {
-  const fallback = value ?? '#ffffff'
-  const [editing, setEditing] = useState(false)
-  const [draft, setDraft] = useState('')
-  const shownValue = editing ? draft : (value ?? '')
-  const valid = isHexColor(shownValue)
-  const swatchStyle: ColorVariables = { '--field-color': valid ? shownValue : fallback }
-  const apply = (next: string) => {
-    if (isHexColor(next)) onValue(next)
-  }
-
-  return (
-    <Field label={label}>
-      <div className={styles.colorControl} data-disabled={disabled || undefined}>
-        <label className={styles.colorWell} style={swatchStyle}>
-          <span className={styles.visuallyHidden}>{label}色板</span>
-          <input
-            type="color"
-            aria-label={`${label}色板`}
-            value={fallback}
-            disabled={disabled}
-            onFocus={onStart}
-            onBlur={onFinish}
-            onChange={(event) => onValue(event.target.value)}
-          />
-        </label>
-        <input
-          type="text"
-          spellCheck={false}
-          aria-label={`${label}颜色值`}
-          aria-invalid={(editing && shownValue !== '' && !valid) || undefined}
-          value={shownValue}
-          placeholder={placeholder ?? '#RRGGBB'}
-          disabled={disabled}
-          onFocus={(event) => {
-            setEditing(true)
-            setDraft(event.currentTarget.value)
-            onStart()
-          }}
-          onChange={(event) => {
-            setDraft(event.target.value)
-            apply(event.target.value)
-          }}
-          onBlur={(event) => {
-            apply(event.currentTarget.value)
-            setEditing(false)
-            onFinish()
-          }}
-        />
-      </div>
-    </Field>
   )
 }
 
@@ -1475,15 +1386,6 @@ function color(value: unknown, fallback: string): string {
   return isHexColor(value) ? value : fallback
 }
 
-function formatNumber(value: number): string {
-  return String(Math.round(value * 100) / 100)
-}
-
-function roundForStep(value: number, step: number): number {
-  const decimals = String(step).split('.')[1]?.length ?? 0
-  return Number(value.toFixed(decimals))
-}
-
-function clamp(value: number, min?: number, max?: number): number {
-  return Math.min(max ?? Number.POSITIVE_INFINITY, Math.max(min ?? Number.NEGATIVE_INFINITY, value))
+function paint(value: unknown, fallback: string): string {
+  return value === 'transparent' ? value : color(value, fallback)
 }

@@ -14,8 +14,10 @@
 }
 
 .statusGroup,
+.documentGroup,
 .pageStatus,
 .guideStatus,
+.unitSwitch,
 .zoom {
   display: flex;
   align-items: center;
@@ -24,6 +26,56 @@
 .statusGroup {
   min-width: 0;
   gap: var(--ptd-space-2);
+}
+
+.documentGroup {
+  min-width: 0;
+  max-width: 260px;
+  gap: 6px;
+}
+
+.documentTitle {
+  overflow: hidden;
+  color: var(--ptd-text-strong);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.documentVersion {
+  flex: 0 0 auto;
+  color: var(--ptd-text-muted);
+}
+
+.documentState {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 4px;
+  color: var(--ptd-text-muted);
+  white-space: nowrap;
+}
+
+.documentState > span {
+  width: 5px;
+  height: 5px;
+  border-radius: var(--ptd-radius-round);
+  background: currentColor;
+}
+
+.documentState[data-status='dirty'],
+.documentState[data-status='saving'],
+.documentState[data-status='loading'] {
+  color: var(--ptd-warning);
+}
+
+.documentState[data-status='error'],
+.documentState[data-status='conflict'] {
+  color: var(--ptd-danger);
+}
+
+.documentState[data-status='clean'] {
+  color: var(--ptd-success);
 }
 
 .pageStatus {
@@ -71,6 +123,40 @@
 
 .grow {
   flex: 1;
+}
+
+.unitSwitch {
+  height: 20px;
+  flex: 0 0 auto;
+  gap: 1px;
+  padding: 1px;
+  border: 1px solid var(--ptd-border-subtle);
+  border-radius: var(--ptd-radius-1);
+  background: var(--ptd-surface-sunken);
+}
+
+.unitSwitch button {
+  min-width: 28px;
+  height: 16px;
+  padding: 0 5px;
+  border: 0;
+  border-radius: 1px;
+  color: var(--ptd-text-muted);
+  background: transparent;
+  font: inherit;
+  font-size: 9px;
+  cursor: pointer;
+}
+
+.unitSwitch button:hover {
+  color: var(--ptd-text-strong);
+  background: var(--ptd-surface-raised);
+}
+
+.unitSwitch button[aria-pressed='true'] {
+  color: var(--ptd-selection-strong);
+  background: var(--ptd-surface-raised);
+  box-shadow: inset 0 -1px 0 var(--ptd-selection);
 }
 
 .zoom {
@@ -130,6 +216,7 @@
 }
 
 .guideStatus:focus-visible,
+.unitSwitch button:focus-visible,
 .zoom button:focus-visible,
 .zoom select:focus-visible {
   position: relative;
@@ -147,9 +234,17 @@
 }
 
 @container (max-width: 760px) {
+  .documentTitle,
+  .documentVersion,
   .pageMetric,
   .statusGroup:nth-of-type(2),
   .divider:nth-of-type(2) {
     display: none;
+  }
+}
+
+@container (max-width: 480px) {
+  .unitSwitch button {
+    min-width: 26px;
   }
 }

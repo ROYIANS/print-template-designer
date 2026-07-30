@@ -45,7 +45,6 @@
       "@nestjs/core",
       "@prisma/client",
       "@prisma/engines",
-      "better-sqlite3",
       "esbuild",
       "prisma"
     ]

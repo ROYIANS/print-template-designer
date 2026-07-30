@@ -26,6 +26,22 @@ describe('ruler marks', () => {
     expect(mark).toMatchObject({ value: 100, position: mmToPx(100) * 0.5, label: '100' })
   })
 
+  it('switches to PTD canvas pixel labels without changing physical mark positions', () => {
+    const marks = createRulerMarks(210, 0.5, 'px')
+
+    expect(marks.find((mark) => mark.value === 100)).toMatchObject({
+      position: 100 * 0.5,
+      kind: 'major',
+      label: '100',
+    })
+    expect(marks.at(-1)).toMatchObject({
+      value: 1050,
+      position: mmToPx(210) * 0.5,
+      kind: 'endpoint',
+      label: '1050',
+    })
+  })
+
   it('rejects invalid dimensions and scales', () => {
     expect(createRulerMarks(0, 1)).toEqual([])
     expect(createRulerMarks(210, 0)).toEqual([])

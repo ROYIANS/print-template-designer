@@ -1,10 +1,22 @@
 import 'dotenv/config'
 import 'reflect-metadata'
 import { NestFactory } from '@nestjs/core'
+import { toNodeHandler } from 'better-auth/node'
+import express from 'express'
 import { AppModule } from './app.module.js'
+import { createAuth, setAuth } from './auth/auth.js'
+import { PrismaService } from './prisma/prisma.service.js'
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule)
+  const app = await NestFactory.create(AppModule, { bodyParser: false })
+  const expressApp = app.getHttpAdapter().getInstance() as express.Express
+  if (process.env.PTD_TRUST_PROXY === 'true') expressApp.set('trust proxy', 1)
+
+  const auth = createAuth(app.get(PrismaService))
+  setAuth(auth)
+  expressApp.all('/api/auth/*splat', toNodeHandler(auth))
+  expressApp.use(express.json())
+
   app.enableShutdownHooks()
   const port = process.env.PORT ?? 3000
   await app.listen(port)

@@ -306,6 +306,16 @@
   transform: translateY(-1px);
 }
 
+.commandItem:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.commandItem:disabled:hover {
+  background: transparent;
+  transform: none;
+}
+
 .commandItem > svg {
   width: 17px;
   height: 17px;
@@ -352,6 +362,16 @@
   font-variant-numeric: tabular-nums;
   line-height: 1.25;
   white-space: nowrap;
+}
+
+.pendingIcon {
+  animation: ptd-app-command-spin 800ms linear infinite;
+}
+
+@keyframes ptd-app-command-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @container (max-width: 880px) {
@@ -567,5 +587,9 @@
   .menuPanelInner,
   .commandItem:hover {
     transform: none;
+  }
+
+  .pendingIcon {
+    animation: none;
   }
 }

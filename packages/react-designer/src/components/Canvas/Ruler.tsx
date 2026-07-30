@@ -7,7 +7,14 @@ import {
   type PointerEvent,
 } from 'react'
 import { useSignals } from '@preact/signals-react/runtime'
-import { mmToPx, pxToMm } from '@ptd/core'
+import {
+  MEASUREMENT_UNIT_DEFINITIONS,
+  formatMeasurement,
+  mmToPx,
+  pxToMm,
+  snapMeasurement,
+  toDisplayMeasurement,
+} from '@ptd/core'
 import type { GuideAxis } from '../../state'
 import { useEditorStore } from '../../state'
 import { createRulerMarks, type RulerMark } from './rulerMarks'
@@ -33,8 +40,12 @@ export function Ruler({ widthMm, heightMm, scale }: RulerProps) {
   const verticalRef = useRef<HTMLButtonElement>(null)
   const cleanupRef = useRef<(() => void) | null>(null)
   const [hoverGuide, setHoverGuide] = useState<HoverGuide | null>(null)
-  const horizontalMarks = createRulerMarks(widthMm, scale)
-  const verticalMarks = createRulerMarks(heightMm, scale)
+  const measurementUnit = store.measurementUnit.value
+  const unitDefinition = MEASUREMENT_UNIT_DEFINITIONS[measurementUnit]
+  const horizontalMarks = createRulerMarks(widthMm, scale, measurementUnit)
+  const verticalMarks = createRulerMarks(heightMm, scale, measurementUnit)
+  const horizontalTotal = toDisplayMeasurement(mmToPx(widthMm), measurementUnit)
+  const verticalTotal = toDisplayMeasurement(mmToPx(heightMm), measurementUnit)
 
   useEffect(() => () => cleanupRef.current?.(), [])
 
@@ -44,10 +55,11 @@ export function Ruler({ widthMm, heightMm, scale }: RulerProps) {
       if (!ruler) return 0
       const rect = ruler.getBoundingClientRect()
       const screenPosition = axis === 'x' ? clientX - rect.left : clientY - rect.top
-      const total = axis === 'x' ? widthMm : heightMm
-      return Math.min(total, Math.max(0, Math.round(pxToMm(screenPosition / scale) * 10) / 10))
+      const totalCanvasPx = mmToPx(axis === 'x' ? widthMm : heightMm)
+      const canvasPosition = Math.min(totalCanvasPx, Math.max(0, screenPosition / scale))
+      return pxToMm(snapMeasurement(canvasPosition, measurementUnit))
     },
-    [heightMm, scale, widthMm],
+    [heightMm, measurementUnit, scale, widthMm],
   )
 
   const startGuideInteraction = useCallback(
@@ -82,7 +94,7 @@ export function Ruler({ widthMm, heightMm, scale }: RulerProps) {
 
   const addGuideAtCenter = (axis: GuideAxis) => {
     const total = axis === 'x' ? widthMm : heightMm
-    store.addGuide(axis, Math.round((total / 2) * 10) / 10)
+    store.addGuide(axis, pxToMm(snapMeasurement(mmToPx(total / 2), measurementUnit)))
   }
 
   const previewGuide = (axis: GuideAxis, event: PointerEvent<HTMLElement>) => {
@@ -97,10 +109,10 @@ export function Ruler({ widthMm, heightMm, scale }: RulerProps) {
     <div
       className={styles.rulers}
       role="group"
-      aria-label="毫米标尺与参考线"
-      data-ptd-ruler="millimetres"
+      aria-label={`${unitDefinition.accessibleLabel}标尺与参考线`}
+      data-ptd-ruler={measurementUnit}
     >
-      <span className={styles.unit}>mm</span>
+      <span className={styles.unit}>{unitDefinition.label}</span>
       <button
         ref={horizontalRef}
         type="button"
@@ -118,7 +130,7 @@ export function Ruler({ widthMm, heightMm, scale }: RulerProps) {
         }}
       >
         {horizontalMarks.map((mark) => (
-          <RulerMarkView key={mark.value} mark={mark} axis="x" total={widthMm} />
+          <RulerMarkView key={mark.value} mark={mark} axis="x" total={horizontalTotal} />
         ))}
       </button>
       <button
@@ -138,7 +150,7 @@ export function Ruler({ widthMm, heightMm, scale }: RulerProps) {
         }}
       >
         {verticalMarks.map((mark) => (
-          <RulerMarkView key={mark.value} mark={mark} axis="y" total={heightMm} />
+          <RulerMarkView key={mark.value} mark={mark} axis="y" total={verticalTotal} />
         ))}
       </button>
       {store.guidesVisible.value && hoverGuide && (
@@ -152,7 +164,7 @@ export function Ruler({ widthMm, heightMm, scale }: RulerProps) {
           <span className={styles.guideStroke} />
           <span className={styles.guideMarker} />
           <span className={styles.guideLabel}>
-            {hoverGuide.axis.toUpperCase()} {hoverGuide.positionMm.toFixed(1)} mm
+            {formatGuideLabel(hoverGuide.axis, hoverGuide.positionMm, measurementUnit)}
           </span>
         </span>
       )}
@@ -168,7 +180,7 @@ export function Ruler({ widthMm, heightMm, scale }: RulerProps) {
               data-axis={guide.axis}
               data-color={guide.color}
               data-selected={selected || undefined}
-              aria-label={`${guide.axis.toUpperCase()} 轴参考线 ${guide.positionMm.toFixed(1)} 毫米`}
+              aria-label={`${guide.axis.toUpperCase()} 轴参考线 ${formatMeasurement(mmToPx(guide.positionMm), measurementUnit)} ${unitDefinition.accessibleLabel}`}
               style={position}
               onClick={(event) => {
                 event.stopPropagation()
@@ -180,13 +192,17 @@ export function Ruler({ widthMm, heightMm, scale }: RulerProps) {
               <span className={styles.guideStroke} />
               <span className={styles.guideMarker} />
               <span className={styles.guideLabel}>
-                {guide.axis.toUpperCase()} {guide.positionMm.toFixed(1)} mm
+                {formatGuideLabel(guide.axis, guide.positionMm, measurementUnit)}
               </span>
             </button>
           )
         })}
     </div>
   )
+}
+
+function formatGuideLabel(axis: GuideAxis, positionMm: number, unit: 'mm' | 'px'): string {
+  return `${axis.toUpperCase()} ${formatMeasurement(mmToPx(positionMm), unit)} ${unit}`
 }
 
 function createGuidePosition(positionMm: number, scale: number): RulerVariables {

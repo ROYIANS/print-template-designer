@@ -424,3 +424,169 @@ Built the five-group component catalog with planned placeholders, a two-level ne
 ### Next Steps
 
 - None - task complete
+
+
+## Session 13: 完善页面与组件属性配置面板
+
+**Date**: 2026-07-30
+**Task**: 完善页面与组件属性配置面板
+**Branch**: `feature/refc`
+
+### Summary
+
+完成统一 mm/px 度量合同、模板级页面设置、共享 Inspector Controls、十类组件属性面板、完整颜色控制、兼容归一化与越界提示；199 项测试、各包类型检查、前端 ESLint、顺序构建、Prettier 和 diff 检查均通过，并记录当前浏览器环境未覆盖的响应式及 Multi/Group 实机验收边界。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `4a789b7` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
+
+
+## Session 14: Header 菜单改为点击切换
+
+**Date**: 2026-07-30
+**Task**: Header 菜单改为点击切换
+**Branch**: `feature/refc`
+
+### Summary
+
+将 App Bar 从 hover/focus 自动展开改为显式 click-to-toggle，修复 Designer 根节点焦点捕获导致同一菜单二次点击先关闭又重开的竞态；新增桌面与移动端交互回归验证，111 项 React Designer 测试、TypeScript、ESLint、构建、Prettier 和 diff 检查通过。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `a4d3b26` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
+
+
+## Session 15: Designer Host 应用命令与文档状态合同
+
+**Date**: 2026-07-30
+**Task**: Designer Host 应用命令与文档状态合同
+**Branch**: `feature/refc`
+
+### Summary
+
+以统一 DesignerHost 能力表替代 onSave/onLoad，接通 App Bar、快捷键、工作区命令与文档状态栏；补齐 Pending 隔离、禁用原因、窄屏和可访问性合同，完成浏览器验收、120 项测试及全量生产构建，并记录 PostgreSQL + Better Auth 公网部署边界。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `657ceee` | (see git log) |
+| `c6b5a4d` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
+
+
+## Session 16: PostgreSQL and GitHub authentication
+
+**Date**: 2026-07-31
+**Task**: PostgreSQL and GitHub authentication
+**Branch**: `feature/refc`
+
+### Summary
+
+Replaced the SQLite baseline with PostgreSQL, added Better Auth GitHub-only OAuth with a fail-closed email allowlist, protected and owner-scoped all template/version APIs, added the Web login shell and PostgreSQL CI coverage, verified migrations and 12 Server tests against an isolated PostgreSQL database, and smoke-tested the compiled auth/HTTP runtime.
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `006bc46` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
+
+
+## Session 17: Complete self-hosted deployment stack
+
+**Date**: 2026-07-31
+**Task**: Complete self-hosted deployment stack
+**Branch**: `feature/refc`
+
+### Summary
+
+Added PostgreSQL, migration, Server and Web Compose lifecycle; hardened Bash/PowerShell deployment; published Web and Server images through CI; documented GitHub OAuth and safe operations; verified clean image builds, repeated force-recreate deployment, migrations, health and same-origin auth smoke flows.
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `c8fb221` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete

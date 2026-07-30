@@ -74,6 +74,29 @@ Template Record。
 - 在 Designer 中加入身份认证、路由、Toast 系统或 Server 类型。
 - 将应用菜单整体迁出 Designer；是否提供隐藏 App Bar 的嵌入模式可在实现前评估。
 
+## 身份与公网部署边界
+
+公网 Web 连接 Server 前必须增加真实的身份认证与模板授权，但该能力不进入
+`@ptd/react-designer`。Designer 只把 New/Open/Save 等意图交给 Host，不感知 Better Auth、Cookie、
+HTTP 或当前用户。
+
+认证采用独立 Web/Server 任务规划，参考
+[`research/better-auth-public-deployment.md`](research/better-auth-public-deployment.md)：
+
+- 在认证和用户数据进入系统前，先把 Server 从 SQLite 迁移到 PostgreSQL；
+- Better Auth + Prisma adapter；
+- GitHub OAuth App；
+- 服务端环境变量 `PTD_ALLOWED_EMAILS` 准入名单；
+- Cookie 会话与 Nest 服务端 Guard；
+- `Template.ownerId` 及所有模板/版本路由的资源授权；
+- HTTPS、可信 Origin、反向代理和登录/发码限流。
+
+PostgreSQL 是已确认的目标数据库，开发、测试和生产统一使用同一 provider；不维护 SQLite 与 PostgreSQL
+生产双轨。数据库迁移属于后续 Server/Auth 任务，不改变本任务的 Designer 公共合同范围。
+
+Host 文档元数据可以包含服务端文档 ID、版本和所有权相关的只读结果，但不能接受或传递 Session Token。
+认证失败、权限失败和版本冲突由 Host/API 层转换为文档状态或应用反馈，Designer 不自行刷新会话或重定向登录。
+
 ## 验收标准
 
 - 所有现有应用菜单项被分类为真实内部命令、Host 命令或明确 Disabled 的规划命令。
@@ -91,8 +114,28 @@ Template Record。
           ↓
 05-21-integration-hooks（本任务）
           ↓
+SQLite → PostgreSQL
+          ↓
+Better Auth + Server authorization（独立任务）
+          ↓
 05-21-web-app
 ```
 
 本任务不应先于核心内容编辑会话完成，因为快捷键所有权、Dirty 语义和保存边界需要以真实的富文本与
 表格编辑行为验证。
+
+核心内容编辑会话现已完成。本任务完成后，Web 可以实现 Host 合同；但 Web 在公网连接真实 Server 前，
+认证与资源授权任务必须先完成。
+
+## 待确认
+
+- 无。
+
+## 已确认的公网账户策略
+
+- 账户采用 Allowlist/邀请制，不开放任意 GitHub 用户自助注册。
+- 首版 Allowlist 使用 Server 环境变量 `PTD_ALLOWED_EMAILS`，不开发邀请表或管理界面。
+- 首版只实现 GitHub OAuth；邮箱 OTP、SMTP、验证码 UI 和 Passkey 明确延后。
+- GitHub OAuth 只负责身份验证，最终准入由 Server 强制执行，不能只由登录页判断。
+- 保留完整多用户模型，模板按 `ownerId` 隔离；不采用单一 Owner 特例数据结构。
+- 当前为全新开发，不保留 SQLite 业务数据；PostgreSQL 使用新库和新 migration 基线，不开发数据搬迁工具。

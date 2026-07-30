@@ -1,13 +1,13 @@
 import 'dotenv/config'
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common'
-import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3'
+import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient } from '../generated/prisma/client.js'
 import { getDatabaseUrl } from './database-url.js'
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
   constructor() {
-    const adapter = new PrismaBetterSqlite3({ url: getDatabaseUrl() })
+    const adapter = new PrismaPg({ connectionString: getDatabaseUrl() })
     super({ adapter })
   }
 

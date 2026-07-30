@@ -23,7 +23,7 @@ Print Template Designer 的框架无关核心包。它只包含 TypeScript 数�
 | ------------------ | ----------------------------------------------------------------------------------------------------- |
 | Schema             | `TemplateSchema`、`TemplatePage`、`PageConfig`、`ComponentSchema`、`ComponentStyle`、数据源与目录类型 |
 | Defaults/constants | `DEFAULT_PAGE_CONFIG`、`PAGE_SIZES`、`COMMON_SCALE`、`AUTO_PAGE_COMPONENTS`                           |
-| Units              | `mmToPx`、`pxToMm`、`getPageDimensions`、`getPageSizeDimensions`                                      |
+| Units              | `MeasurementUnit`、集中式格式化/解析/步进/吸附、`mmToPx`、`pxToMm`、页面尺寸工具                      |
 | Data binding       | `DataBindingEngine`、`convertByType`                                                                  |
 | Registry           | `ComponentRegistry`、`defaultRegistry` 及组件定义类型                                                 |
 | Component content  | `ImageProps`、`QRCodeProps`、`BarCodeProps`，对应默认值、守卫、规范化与校验函数                       |
@@ -42,6 +42,13 @@ const tenMillimeters = mmToPx(10)
 ```
 
 `serialize` / `deserialize` 是模板跨应用、Server 与存储层传递时的规范化入口，不应由各 Host 自行维护另一套 Schema 转换。
+
+PTD 的几何真值使用既有 Canvas 坐标，固定为 `1 mm = 5 PTD Canvas px`。`formatMeasurement`、
+`parseMeasurement`、`toDisplayMeasurement`、`fromDisplayMeasurement` 和 `getMeasurementStep`
+负责编辑器边界上的 `mm / px` 显示切换；它们不表示浏览器 96dpi 或导出 DPI/PPI。
+
+`PageConfig` 的上、右、下、左边距表示整个模板共用的内容安全区。`normalizePageConfig` 会为旧模板
+补齐左右边距，`pageConfigError` 用于拒绝负尺寸、负边距和没有合法内容区的配置。
 
 自由表格使用 `grid` 中重复的 Cell ID 表达矩形合并区域，`cells` 保存唯一内容与样式；因此每个可见或
 被合并覆盖的坐标都可寻址。`normalizeSimpleTableProps` 兼容旧 `tableConfig` / `tableData` 输入，并把

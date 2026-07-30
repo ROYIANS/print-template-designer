@@ -54,6 +54,32 @@
   opacity: 1;
 }
 
+.adjuster[data-out-of-bounds='true']::after {
+  border-style: double;
+  border-color: var(--ptd-danger);
+  opacity: 1;
+}
+
+.outOfBoundsMarker {
+  position: absolute;
+  z-index: var(--ptd-layer-selection);
+  top: 2px;
+  right: 2px;
+  width: 14px;
+  height: 14px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--ptd-danger);
+  border-radius: var(--ptd-radius-round);
+  color: var(--ptd-surface-raised);
+  background: var(--ptd-danger);
+  font-family: var(--ptd-font-metric);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  pointer-events: none;
+}
+
 .rotate {
   position: absolute;
   top: calc(100% + 18px);

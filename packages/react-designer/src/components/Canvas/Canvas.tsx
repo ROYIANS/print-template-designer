@@ -69,6 +69,7 @@ export function Canvas({ onOpenInspector }: { onOpenInspector: () => void }) {
   const [isPanning, setIsPanning] = useState(false)
 
   const components = store.components.value
+  const outOfBoundsIds = new Set(store.outOfBoundsComponents.value.map((component) => component.id))
   const pageConfig = store.pageConfig.value
   const scale = store.scale.value
   const selectedIds = store.selectedIds.value
@@ -387,7 +388,9 @@ export function Canvas({ onOpenInspector }: { onOpenInspector: () => void }) {
     '--canvas-font-size': `${pageConfig.fontSize}px`,
     '--canvas-line-height': String(pageConfig.lineHeight),
     '--margin-top': `${mmToPx(pageConfig.pageMarginTop)}px`,
+    '--margin-right': `${mmToPx(pageConfig.pageMarginRight)}px`,
     '--margin-bottom': `${mmToPx(pageConfig.pageMarginBottom)}px`,
+    '--margin-left': `${mmToPx(pageConfig.pageMarginLeft)}px`,
   }
   const area = store.areaSelection.value.style
   const previewGeometry: ShapeDrawGeometry | null = drawSession
@@ -458,6 +461,7 @@ export function Canvas({ onOpenInspector }: { onOpenInspector: () => void }) {
                   store.editingComponentId.value === schema.id ||
                   store.editingTableCell.value?.componentId === schema.id
                 }
+                outOfBounds={outOfBoundsIds.has(schema.id)}
                 editorRef={editorRef}
                 scale={scale}
                 onMove={handleMove}
@@ -476,8 +480,7 @@ export function Canvas({ onOpenInspector }: { onOpenInspector: () => void }) {
             )}
             {store.isSelectingArea.value && <Area {...area} />}
             <EditorLine ref={editorLineRef} />
-            <div className={`${styles.marginLine} ${styles.marginTop}`} />
-            <div className={`${styles.marginLine} ${styles.marginBottom}`} />
+            <div className={styles.safeArea} data-ptd-page-safe-area aria-hidden="true" />
           </div>
         </CanvasContextMenu>
       </div>

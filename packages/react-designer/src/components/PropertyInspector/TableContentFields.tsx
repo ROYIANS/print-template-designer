@@ -26,6 +26,14 @@ import {
   resolveFontFamily,
 } from '../../config/typography'
 import { useEditorStore } from '../../state'
+import {
+  InspectorColorControl as ColorField,
+  InspectorMetricInput as MetricField,
+  InspectorNumberInput as NumberField,
+  InspectorSegmentedInput as SegmentedField,
+  InspectorSelectInput as SelectField,
+  InspectorTextArea,
+} from './InspectorControls'
 import styles from './PropertyInspector.module.css'
 
 export interface TableContentFieldsProps {
@@ -49,6 +57,7 @@ export function TableContentFields({
 }: TableContentFieldsProps) {
   useSignals()
   const store = useEditorStore()
+  const measurementUnit = store.measurementUnit.value
   const value = useMemo(() => normalizeSimpleTableProps(component.propValue), [component.propValue])
   const selection =
     store.tableCellSelection.value?.componentId === component.id
@@ -167,108 +176,84 @@ export function TableContentFields({
             <small>{cells.length > 1 ? '混合值 · 修改将应用到所选区域' : primary.id}</small>
           </div>
           {cells.length === 1 && (
-            <label className={styles.tableWideField}>
-              <span>内容</span>
-              <textarea
-                className={styles.textArea}
-                value={primary.text}
-                disabled={disabled}
-                aria-label="单元格内容"
-                onFocus={onStart}
-                onBlur={onFinish}
-                onChange={(event) =>
-                  onValue(updateTableCellText(value, primary.id, event.target.value))
-                }
-                onKeyDown={(event) => {
-                  if (event.key === 'Escape') {
-                    event.preventDefault()
-                    onCancel()
-                    event.currentTarget.blur()
-                  }
-                }}
-              />
-            </label>
+            <InspectorTextArea
+              label="单元格内容"
+              value={primary.text}
+              disabled={disabled}
+              onStart={onStart}
+              onFinish={onFinish}
+              onCancel={onCancel}
+              onValue={(text) => onValue(updateTableCellText(value, primary.id, text))}
+            />
           )}
 
           <div className={styles.tableFieldGrid}>
-            <NumberField
+            <MetricField
               label="当前行高"
-              value={round(value.rowHeights[rowIndex] ?? 0)}
-              min={8}
+              canvasValue={value.rowHeights[rowIndex] ?? 0}
+              unit={measurementUnit}
+              minCanvasPx={8}
               disabled={disabled}
               onStart={onStart}
               onFinish={onFinish}
-              onValue={(next) => onValue(resizeTableRow(value, rowIndex, next))}
+              onCancel={onCancel}
+              onCanvasValue={(next) => onValue(resizeTableRow(value, rowIndex, next))}
             />
-            <NumberField
+            <MetricField
               label="当前列宽"
-              value={round(value.columnWidths[columnIndex] ?? 0)}
-              min={8}
+              canvasValue={value.columnWidths[columnIndex] ?? 0}
+              unit={measurementUnit}
+              minCanvasPx={8}
               disabled={disabled}
               onStart={onStart}
               onFinish={onFinish}
-              onValue={(next) => onValue(resizeTableColumn(value, columnIndex, next))}
+              onCancel={onCancel}
+              onCanvasValue={(next) => onValue(resizeTableColumn(value, columnIndex, next))}
             />
             <NumberField
               label="字号"
               value={primaryStyle?.fontSize ?? 10}
+              unit="pt"
               min={1}
               disabled={disabled}
               onStart={onStart}
               onFinish={onFinish}
+              onCancel={onCancel}
               onValue={(next) => patchCells({ fontSize: next }, false)}
             />
-            <NumberField
+            <MetricField
               label="内边距"
-              value={primaryStyle?.padding ?? 4}
-              min={0}
+              canvasValue={primaryStyle?.padding ?? 4}
+              unit={measurementUnit}
+              minCanvasPx={0}
               disabled={disabled}
               onStart={onStart}
               onFinish={onFinish}
-              onValue={(next) => patchCells({ padding: next }, false)}
+              onCancel={onCancel}
+              onCanvasValue={(next) => patchCells({ padding: next }, false)}
             />
-            <label>
-              <span>中文字体</span>
-              <select
-                value={fontSelection.cjk}
-                disabled={disabled}
-                onFocus={onStart}
-                onBlur={onFinish}
-                onChange={(event) =>
-                  patchCells(
-                    { fontFamily: composeFontFamily(event.target.value, fontSelection.latin) },
-                    false,
-                  )
-                }
-              >
-                {CJK_FONT_FAMILY_OPTIONS.map(([font, label]) => (
-                  <option key={font} value={font}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              <span>西文字体</span>
-              <select
-                value={fontSelection.latin}
-                disabled={disabled}
-                onFocus={onStart}
-                onBlur={onFinish}
-                onChange={(event) =>
-                  patchCells(
-                    { fontFamily: composeFontFamily(fontSelection.cjk, event.target.value) },
-                    false,
-                  )
-                }
-              >
-                {LATIN_FONT_FAMILY_OPTIONS.map(([font, label]) => (
-                  <option key={font || 'follow-cjk'} value={font}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <SelectField
+              label="中文字体"
+              value={fontSelection.cjk}
+              options={CJK_FONT_FAMILY_OPTIONS}
+              disabled={disabled}
+              onStart={onStart}
+              onFinish={onFinish}
+              onValue={(font) =>
+                patchCells({ fontFamily: composeFontFamily(font, fontSelection.latin) }, false)
+              }
+            />
+            <SelectField
+              label="西文字体"
+              value={fontSelection.latin}
+              options={LATIN_FONT_FAMILY_OPTIONS}
+              disabled={disabled}
+              onStart={onStart}
+              onFinish={onFinish}
+              onValue={(font) =>
+                patchCells({ fontFamily: composeFontFamily(fontSelection.cjk, font) }, false)
+              }
+            />
           </div>
 
           <div className={styles.tableSegmented} aria-label="字形样式">
@@ -303,30 +288,43 @@ export function TableContentFields({
                 })
               }
             />
+            <ToggleButton
+              label="删除线"
+              active={primaryStyle?.textDecoration === 'line-through'}
+              disabled={disabled}
+              onClick={() =>
+                patchCells({
+                  textDecoration:
+                    primaryStyle?.textDecoration === 'line-through' ? 'none' : 'line-through',
+                })
+              }
+            />
           </div>
 
           <div className={styles.tableFieldGrid}>
-            <SelectField
+            <SegmentedField
               label="水平对齐"
               value={primaryStyle?.horizontalAlign ?? 'left'}
               disabled={disabled}
+              wide
               options={[
-                ['left', '左对齐'],
-                ['center', '居中'],
-                ['right', '右对齐'],
+                { value: 'left', label: '左' },
+                { value: 'center', label: '中' },
+                { value: 'right', label: '右' },
               ]}
               onValue={(next) =>
                 patchCells({ horizontalAlign: next as TableCellStyle['horizontalAlign'] })
               }
             />
-            <SelectField
+            <SegmentedField
               label="垂直对齐"
               value={primaryStyle?.verticalAlign ?? 'middle'}
               disabled={disabled}
+              wide
               options={[
-                ['top', '顶部'],
-                ['middle', '居中'],
-                ['bottom', '底部'],
+                { value: 'top', label: '上' },
+                { value: 'middle', label: '中' },
+                { value: 'bottom', label: '下' },
               ]}
               onValue={(next) =>
                 patchCells({ verticalAlign: next as TableCellStyle['verticalAlign'] })
@@ -335,36 +333,56 @@ export function TableContentFields({
             <ColorField
               label="文字颜色"
               value={primaryStyle?.color ?? '#1d2735'}
+              defaultValue="#1d2735"
               disabled={disabled}
               onStart={onStart}
               onFinish={onFinish}
+              onCancel={onCancel}
               onValue={(next) => patchCells({ color: next }, false)}
             />
             <ColorField
               label="背景颜色"
               value={primaryStyle?.background ?? '#ffffff'}
+              defaultValue="#ffffff"
               disabled={disabled}
               onStart={onStart}
               onFinish={onFinish}
+              onCancel={onCancel}
               onValue={(next) => patchCells({ background: next }, false)}
             />
             <ColorField
               label="边框颜色"
               value={primaryStyle?.borderColor ?? '#8d99a8'}
+              defaultValue="#8d99a8"
               disabled={disabled}
               onStart={onStart}
               onFinish={onFinish}
+              onCancel={onCancel}
               onValue={(next) => patchCells({ borderColor: next }, false)}
             />
-            <NumberField
+            <MetricField
               label="边框宽度"
-              value={primaryStyle?.borderWidth ?? 1}
-              min={0}
-              step={0.5}
+              canvasValue={primaryStyle?.borderWidth ?? 1}
+              unit={measurementUnit}
+              minCanvasPx={0}
               disabled={disabled}
               onStart={onStart}
               onFinish={onFinish}
-              onValue={(next) => patchCells({ borderWidth: next }, false)}
+              onCancel={onCancel}
+              onCanvasValue={(next) => patchCells({ borderWidth: next }, false)}
+            />
+            <SegmentedField
+              label="边框样式"
+              value={primaryStyle?.borderStyle ?? 'solid'}
+              disabled={disabled}
+              wide
+              options={[
+                { value: 'solid', label: '实线' },
+                { value: 'dashed', label: '虚线' },
+                { value: 'dotted', label: '点线' },
+                { value: 'none', label: '无' },
+              ]}
+              onValue={(next) => patchCells({ borderStyle: next as TableCellStyle['borderStyle'] })}
             />
           </div>
         </>
@@ -375,99 +393,6 @@ export function TableContentFields({
         </div>
       )}
     </div>
-  )
-}
-
-function NumberField({
-  label,
-  value,
-  min,
-  step = 1,
-  disabled,
-  onStart,
-  onFinish,
-  onValue,
-}: {
-  label: string
-  value: number
-  min: number
-  step?: number
-  disabled: boolean
-  onStart: () => void
-  onFinish: () => void
-  onValue: (value: number) => void
-}) {
-  return (
-    <label>
-      <span>{label}</span>
-      <input
-        type="number"
-        min={min}
-        step={step}
-        value={value}
-        disabled={disabled}
-        onFocus={onStart}
-        onBlur={onFinish}
-        onChange={(event) => onValue(Number(event.target.value))}
-      />
-    </label>
-  )
-}
-
-function SelectField({
-  label,
-  value,
-  options,
-  disabled,
-  onValue,
-}: {
-  label: string
-  value: string
-  options: Array<[string, string]>
-  disabled: boolean
-  onValue: (value: string) => void
-}) {
-  return (
-    <label>
-      <span>{label}</span>
-      <select value={value} disabled={disabled} onChange={(event) => onValue(event.target.value)}>
-        {options.map(([option, text]) => (
-          <option key={option} value={option}>
-            {text}
-          </option>
-        ))}
-      </select>
-    </label>
-  )
-}
-
-function ColorField({
-  label,
-  value,
-  disabled,
-  onStart,
-  onFinish,
-  onValue,
-}: {
-  label: string
-  value: string
-  disabled: boolean
-  onStart: () => void
-  onFinish: () => void
-  onValue: (value: string) => void
-}) {
-  return (
-    <label>
-      <span>{label}</span>
-      <input
-        type="color"
-        value={value}
-        disabled={disabled}
-        onFocus={onStart}
-        onBlur={onFinish}
-        onChange={(event) => onValue(event.target.value)}
-      />
-    </label>
   )
 }
 
@@ -487,10 +412,6 @@ function ToggleButton({
       {label}
     </button>
   )
-}
-
-function round(value: number): number {
-  return Math.round(value * 10) / 10
 }
 
 function clamp(value: number, minimum: number, maximum: number): number {

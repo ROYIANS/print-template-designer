@@ -1,0 +1,5 @@
+{"file":".trellis/spec/monorepo/typescript-conventions.md","reason":"验证 strict TypeScript、类型边界与公共导出。"}
+{"file":".trellis/spec/monorepo/styling-conventions.md","reason":"验证 Inspector CSS Modules 与 Canvas CSS Custom Properties 分层。"}
+{"file":".trellis/spec/monorepo/quality-guidelines.md","reason":"验证测试、格式、Lint、构建和禁用模式。"}
+{"file":".trellis/spec/monorepo/ptd-ui-system.md","reason":"验证控件视觉、交互、可访问性、响应式与度量一致性。"}
+{"file":".trellis/spec/monorepo/react-designer-contract.md","reason":"验证实例隔离、Host change、历史与 Gesture 行为。"}

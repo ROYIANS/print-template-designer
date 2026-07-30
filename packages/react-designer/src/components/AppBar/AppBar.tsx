@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { useSignals } from '@preact/signals-react/runtime'
-import type { TemplateSchema } from '@ptd/core'
 import {
   RiArrowDownSLine,
   RiArrowGoBackLine,
@@ -18,6 +17,7 @@ import {
   RiInformationLine,
   RiKeyboardBoxLine,
   RiLayoutLine,
+  RiLoader4Line,
   RiLock2Line,
   RiMenuLine,
   RiPagesLine,
@@ -31,38 +31,102 @@ import {
   RiUser3Line,
   RiZoomInLine,
   RiZoomOutLine,
+  type RemixiconComponentType,
 } from '@remixicon/react'
+import type { DesignerHostCommandController, DesignerHostCommandId } from '../../host'
+import type { EditorStore } from '../../state'
 import { useEditorStore } from '../../state'
+import type { ResourcePanelId } from '../../hooks/useWorkspaceLayout'
 import styles from './AppBar.module.css'
 
-interface AppBarProps {
-  onSave?: (value: TemplateSchema) => void
-  onLoad?: () => TemplateSchema | Promise<TemplateSchema>
+type EditorCommandId =
+  | 'undo'
+  | 'redo'
+  | 'cut'
+  | 'copy'
+  | 'paste'
+  | 'group'
+  | 'ungroup'
+  | 'toggleLock'
+  | 'moveForward'
+  | 'moveBackward'
+  | 'toggleRuler'
+  | 'toggleGuides'
+  | 'zoomIn'
+  | 'zoomOut'
+
+type WorkspaceCommandId = ResourcePanelId | 'inspector'
+
+interface AppMenuItemBase {
+  icon: RemixiconComponentType
+  label: string
+  description: string
+  shortcut?: string
 }
 
-const APP_MENUS = [
+type AppMenuItem = AppMenuItemBase &
+  (
+    | { kind: 'host'; command: DesignerHostCommandId }
+    | { kind: 'editor'; command: EditorCommandId }
+    | { kind: 'workspace'; command: WorkspaceCommandId }
+    | { kind: 'planned'; reason: string }
+  )
+
+interface AppMenu {
+  id: 'file' | 'edit' | 'object' | 'view' | 'window' | 'help'
+  label: string
+  mnemonic: string
+  items: readonly AppMenuItem[]
+}
+
+interface AppBarWorkspaceCommands {
+  resourcesOpen: boolean
+  inspectorOpen: boolean
+  openResource: (panel: ResourcePanelId) => void
+  toggleInspector: () => void
+}
+
+interface AppBarProps {
+  hostCommands?: DesignerHostCommandController
+  workspace?: AppBarWorkspaceCommands
+}
+
+const APP_MENUS: readonly AppMenu[] = [
   {
     id: 'file',
     label: '文件',
     mnemonic: 'F',
     items: [
       {
+        kind: 'host',
+        command: 'new',
         icon: RiFileLine,
         label: '新建模板',
         description: '创建一个空白打印模板',
         shortcut: 'Ctrl+N',
       },
       {
+        kind: 'host',
+        command: 'open',
         icon: RiFolderOpenLine,
         label: '打开模板',
-        description: '从本地载入模板文件',
+        description: '从模板库或文件打开模板',
         shortcut: 'Ctrl+O',
       },
-      { icon: RiSave3Line, label: '保存模板', description: '保存当前模板内容', shortcut: 'Ctrl+S' },
       {
+        kind: 'host',
+        command: 'save',
+        icon: RiSave3Line,
+        label: '保存模板',
+        description: '保存当前模板内容',
+        shortcut: 'Ctrl+S',
+      },
+      {
+        kind: 'host',
+        command: 'saveAs',
         icon: RiSave2Line,
         label: '另存为',
-        description: '以新名称保存模板副本',
+        description: '以新文档保存模板副本',
         shortcut: 'Ctrl+Shift+S',
       },
     ],
@@ -72,16 +136,46 @@ const APP_MENUS = [
     label: '编辑',
     mnemonic: 'E',
     items: [
-      { icon: RiArrowGoBackLine, label: '撤销', description: '撤销上一步编辑', shortcut: 'Ctrl+Z' },
       {
+        kind: 'editor',
+        command: 'undo',
+        icon: RiArrowGoBackLine,
+        label: '撤销',
+        description: '撤销上一步编辑',
+        shortcut: 'Ctrl+Z',
+      },
+      {
+        kind: 'editor',
+        command: 'redo',
         icon: RiArrowGoForwardLine,
         label: '重做',
         description: '恢复刚刚撤销的编辑',
         shortcut: 'Ctrl+Shift+Z',
       },
-      { icon: RiScissorsCutLine, label: '剪切', description: '剪切当前选择', shortcut: 'Ctrl+X' },
-      { icon: RiFileCopyLine, label: '复制', description: '复制当前选择', shortcut: 'Ctrl+C' },
-      { icon: RiClipboardLine, label: '粘贴', description: '粘贴剪贴板内容', shortcut: 'Ctrl+V' },
+      {
+        kind: 'editor',
+        command: 'cut',
+        icon: RiScissorsCutLine,
+        label: '剪切',
+        description: '剪切当前选择',
+        shortcut: 'Ctrl+X',
+      },
+      {
+        kind: 'editor',
+        command: 'copy',
+        icon: RiFileCopyLine,
+        label: '复制',
+        description: '复制当前选择',
+        shortcut: 'Ctrl+C',
+      },
+      {
+        kind: 'editor',
+        command: 'paste',
+        icon: RiClipboardLine,
+        label: '粘贴',
+        description: '粘贴剪贴板内容',
+        shortcut: 'Ctrl+V',
+      },
     ],
   },
   {
@@ -89,21 +183,41 @@ const APP_MENUS = [
     label: '对象',
     mnemonic: 'O',
     items: [
-      { icon: RiGroupLine, label: '组合', description: '将多个组件组合编辑', shortcut: 'Ctrl+G' },
       {
+        kind: 'editor',
+        command: 'group',
+        icon: RiGroupLine,
+        label: '组合',
+        description: '将多个组件组合编辑',
+        shortcut: 'Ctrl+G',
+      },
+      {
+        kind: 'editor',
+        command: 'ungroup',
         icon: RiLayoutLine,
         label: '拆分',
         description: '拆分当前组件组合',
         shortcut: 'Ctrl+Shift+G',
       },
-      { icon: RiLock2Line, label: '锁定', description: '锁定当前选择', shortcut: 'Ctrl+L' },
       {
+        kind: 'editor',
+        command: 'toggleLock',
+        icon: RiLock2Line,
+        label: '锁定 / 解锁',
+        description: '切换当前选择的锁定状态',
+        shortcut: 'Ctrl+L',
+      },
+      {
+        kind: 'editor',
+        command: 'moveForward',
         icon: RiBringToFront,
         label: '上移一层',
         description: '调整对象堆叠顺序',
         shortcut: 'Ctrl+]',
       },
       {
+        kind: 'editor',
+        command: 'moveBackward',
         icon: RiSendToBack,
         label: '下移一层',
         description: '调整对象堆叠顺序',
@@ -116,11 +230,41 @@ const APP_MENUS = [
     label: '视图',
     mnemonic: 'V',
     items: [
-      { icon: RiRulerLine, label: '显示标尺', description: '切换页面标尺显示', shortcut: 'Ctrl+R' },
-      { icon: RiGuideLine, label: '显示参考线', description: '切换参考线显示', shortcut: 'Ctrl+;' },
-      { icon: RiZoomInLine, label: '放大', description: '放大当前画布', shortcut: 'Ctrl++' },
-      { icon: RiZoomOutLine, label: '缩小', description: '缩小当前画布', shortcut: 'Ctrl+-' },
       {
+        kind: 'editor',
+        command: 'toggleRuler',
+        icon: RiRulerLine,
+        label: '显示标尺',
+        description: '切换页面标尺显示',
+        shortcut: 'Ctrl+R',
+      },
+      {
+        kind: 'editor',
+        command: 'toggleGuides',
+        icon: RiGuideLine,
+        label: '显示参考线',
+        description: '切换参考线显示',
+        shortcut: 'Ctrl+;',
+      },
+      {
+        kind: 'editor',
+        command: 'zoomIn',
+        icon: RiZoomInLine,
+        label: '放大',
+        description: '放大当前画布',
+        shortcut: 'Ctrl++',
+      },
+      {
+        kind: 'editor',
+        command: 'zoomOut',
+        icon: RiZoomOutLine,
+        label: '缩小',
+        description: '缩小当前画布',
+        shortcut: 'Ctrl+-',
+      },
+      {
+        kind: 'planned',
+        reason: '等待画布可视区域测量合同',
         icon: RiFullscreenLine,
         label: '适合页面',
         description: '让页面适配工作区',
@@ -133,10 +277,38 @@ const APP_MENUS = [
     label: '窗口',
     mnemonic: 'W',
     items: [
-      { icon: RiLayoutLine, label: '组件面板', description: '浏览可用模板组件', shortcut: 'F6' },
-      { icon: RiPagesLine, label: '页面面板', description: '管理模板页面', shortcut: 'F7' },
-      { icon: RiStackLine, label: '图层面板', description: '查看对象与层级', shortcut: 'F8' },
-      { icon: RiSideBarLine, label: '属性面板', description: '编辑页面与组件属性', shortcut: 'F9' },
+      {
+        kind: 'workspace',
+        command: 'assets',
+        icon: RiLayoutLine,
+        label: '素材面板',
+        description: '浏览图片与组件素材',
+        shortcut: 'F6',
+      },
+      {
+        kind: 'workspace',
+        command: 'pages',
+        icon: RiPagesLine,
+        label: '页面面板',
+        description: '管理模板页面',
+        shortcut: 'F7',
+      },
+      {
+        kind: 'workspace',
+        command: 'layers',
+        icon: RiStackLine,
+        label: '图层面板',
+        description: '查看对象与层级',
+        shortcut: 'F8',
+      },
+      {
+        kind: 'workspace',
+        command: 'inspector',
+        icon: RiSideBarLine,
+        label: '属性面板',
+        description: '打开或收起属性面板',
+        shortcut: 'F9',
+      },
     ],
   },
   {
@@ -145,109 +317,174 @@ const APP_MENUS = [
     mnemonic: 'H',
     items: [
       {
+        kind: 'host',
+        command: 'keyboardShortcuts',
         icon: RiKeyboardBoxLine,
         label: '快捷键',
         description: '查看完整快捷键表',
         shortcut: 'Ctrl+/',
       },
-      { icon: RiBookOpenLine, label: '使用文档', description: '打开 PTD 使用指南', shortcut: 'F1' },
-      { icon: RiInformationLine, label: '关于 PTD', description: '版本、许可与项目信息' },
+      {
+        kind: 'host',
+        command: 'documentation',
+        icon: RiBookOpenLine,
+        label: '使用文档',
+        description: '打开 PTD 使用指南',
+        shortcut: 'F1',
+      },
+      {
+        kind: 'host',
+        command: 'about',
+        icon: RiInformationLine,
+        label: '关于 PTD',
+        description: '版本、许可与项目信息',
+      },
     ],
   },
-] as const
+]
 
-type AppMenuId = (typeof APP_MENUS)[number]['id']
-type InputModality = 'mouse' | 'touch' | 'keyboard'
+type AppMenuId = AppMenu['id']
 
-const CLOSE_DELAY = 120
+interface CommandState {
+  enabled: boolean
+  pending: boolean
+  reason?: string
+}
 
-export function AppBar({ onSave, onLoad }: AppBarProps) {
+const UNAVAILABLE: CommandState = { enabled: false, pending: false, reason: '功能待接入' }
+
+function hasLockedSelection(store: EditorStore): boolean {
+  return store.selectedComponents.value.some((component) => component.isLock)
+}
+
+function getEditorCommandState(store: EditorStore, command: EditorCommandId): CommandState {
+  const selected = store.selectedComponents.value
+  const locked = hasLockedSelection(store)
+  let enabled = true
+
+  if (command === 'undo') enabled = store.canUndo.value
+  if (command === 'redo') enabled = store.canRedo.value
+  if (command === 'copy') enabled = selected.length > 0
+  if (command === 'cut') enabled = selected.length > 0 && !locked
+  if (command === 'paste') enabled = Boolean(store.clipboard.value)
+  if (command === 'group') enabled = selected.length > 1 && !locked
+  if (command === 'ungroup') {
+    enabled = !locked && selected.some((component) => component.component === 'RoyGroup')
+  }
+  if (command === 'toggleLock') enabled = selected.length > 0
+  if (command === 'moveForward' || command === 'moveBackward') {
+    enabled = selected.length > 0 && !locked
+  }
+  if (command === 'zoomIn') enabled = store.scale.value < 2
+  if (command === 'zoomOut') enabled = store.scale.value > 0.25
+
+  return enabled
+    ? { enabled: true, pending: false }
+    : { enabled: false, pending: false, reason: '当前状态不可用' }
+}
+
+function runEditorCommand(store: EditorStore, command: EditorCommandId): void {
+  if (command === 'undo') store.undo()
+  if (command === 'redo') store.redo()
+  if (command === 'cut') store.cut()
+  if (command === 'copy') store.copy()
+  if (command === 'paste') store.paste()
+  if (command === 'group') store.group()
+  if (command === 'ungroup') store.ungroup()
+  if (command === 'toggleLock') store.toggleLock()
+  if (command === 'moveForward') store.moveLayer('forward')
+  if (command === 'moveBackward') store.moveLayer('backward')
+  if (command === 'toggleRuler') store.toggleRuler()
+  if (command === 'toggleGuides') store.toggleGuidesVisible()
+  if (command === 'zoomIn') store.setZoom(store.scale.value + 0.25)
+  if (command === 'zoomOut') store.setZoom(store.scale.value - 0.25)
+}
+
+export function AppBar({ hostCommands, workspace }: AppBarProps) {
   useSignals()
   const store = useEditorStore()
-  const [isLoading, setIsLoading] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
   const [activeMenuId, setActiveMenuId] = useState<AppMenuId>('file')
-  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const appBarRef = useRef<HTMLElement>(null)
   const menuButtonRefs = useRef<Array<HTMLButtonElement | null>>([])
-  const inputModalityRef = useRef<InputModality>('keyboard')
-  const activeMenu = APP_MENUS.find((menu) => menu.id === activeMenuId) ?? APP_MENUS[0]
-
-  const cancelScheduledClose = () => {
-    if (!closeTimerRef.current) return
-    clearTimeout(closeTimerRef.current)
-    closeTimerRef.current = null
-  }
+  const activeMenu = APP_MENUS.find((menu) => menu.id === activeMenuId) ?? APP_MENUS[0]!
 
   const openMenu = (menuId?: AppMenuId) => {
-    cancelScheduledClose()
     if (menuId) setActiveMenuId(menuId)
     setIsExpanded(true)
   }
 
-  const closeMenu = () => {
-    cancelScheduledClose()
-    setIsExpanded(false)
-  }
+  const closeMenu = () => setIsExpanded(false)
 
-  const scheduleClose = () => {
-    cancelScheduledClose()
-    closeTimerRef.current = setTimeout(() => setIsExpanded(false), CLOSE_DELAY)
-  }
-
-  const handleMousePointer = (pointerType: string, action: () => void) => {
-    if (pointerType === 'mouse') action()
+  const toggleMenu = (menuId: AppMenuId) => {
+    if (isExpanded && activeMenuId === menuId) closeMenu()
+    else openMenu(menuId)
   }
 
   useEffect(() => {
-    return () => cancelScheduledClose()
-  }, [])
-
-  const load = async () => {
-    if (!onLoad || isLoading) return
-    setIsLoading(true)
-    try {
-      store.syncExternal(await onLoad())
-    } finally {
-      setIsLoading(false)
+    if (!isExpanded) return
+    const handleOutsidePointerDown = (event: PointerEvent) => {
+      if (event.target instanceof Node && !appBarRef.current?.contains(event.target)) closeMenu()
     }
+    document.addEventListener('pointerdown', handleOutsidePointerDown)
+    return () => document.removeEventListener('pointerdown', handleOutsidePointerDown)
+  }, [isExpanded])
+
+  const getCommandState = (item: AppMenuItem): CommandState => {
+    if (item.kind === 'host') return hostCommands?.getState(item.command) ?? UNAVAILABLE
+    if (item.kind === 'editor') return getEditorCommandState(store, item.command)
+    if (item.kind === 'workspace') {
+      return workspace
+        ? { enabled: true, pending: false }
+        : { enabled: false, pending: false, reason: '工作区控制器未接入' }
+    }
+    return { enabled: false, pending: false, reason: item.reason }
+  }
+
+  const executeCommand = async (item: AppMenuItem): Promise<boolean> => {
+    const state = getCommandState(item)
+    if (!state.enabled || state.pending) return false
+    if (item.kind === 'host') return (await hostCommands?.execute(item.command)) ?? false
+    if (item.kind === 'editor') runEditorCommand(store, item.command)
+    if (item.kind === 'workspace' && workspace) {
+      if (item.command === 'inspector') workspace.toggleInspector()
+      else workspace.openResource(item.command)
+    }
+    return item.kind !== 'planned'
+  }
+
+  const executeAndClose = (item: AppMenuItem) => {
+    void executeCommand(item).then((executed) => {
+      if (executed) closeMenu()
+    })
   }
 
   const moveMenuFocus = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
     let nextIndex: number | undefined
-
     if (event.key === 'ArrowRight') nextIndex = (index + 1) % APP_MENUS.length
     if (event.key === 'ArrowLeft') nextIndex = (index - 1 + APP_MENUS.length) % APP_MENUS.length
     if (event.key === 'Home') nextIndex = 0
     if (event.key === 'End') nextIndex = APP_MENUS.length - 1
     if (nextIndex === undefined) return
-
     event.preventDefault()
     const nextMenu = APP_MENUS[nextIndex]
     if (!nextMenu) return
-    openMenu(nextMenu.id)
+    if (isExpanded) openMenu(nextMenu.id)
     menuButtonRefs.current[nextIndex]?.focus()
   }
 
+  const openState = hostCommands?.getState('open') ?? UNAVAILABLE
+  const saveState = hostCommands?.getState('save') ?? UNAVAILABLE
+
   return (
     <header
+      ref={appBarRef}
       className={styles.appBar}
       data-expanded={isExpanded}
+      data-ptd-editor-interactive
       data-ptd-region="app-bar"
-      onPointerDownCapture={(event) => {
-        inputModalityRef.current = event.pointerType === 'mouse' ? 'mouse' : 'touch'
-      }}
-      onPointerEnter={(event) => handleMousePointer(event.pointerType, cancelScheduledClose)}
-      onPointerLeave={(event) => handleMousePointer(event.pointerType, scheduleClose)}
       onBlurCapture={(event) => {
-        if (
-          inputModalityRef.current !== 'touch' &&
-          !event.currentTarget.contains(event.relatedTarget as Node | null)
-        ) {
-          scheduleClose()
-        }
-      }}
-      onKeyDownCapture={() => {
-        inputModalityRef.current = 'keyboard'
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) closeMenu()
       }}
       onKeyDown={(event) => {
         if (event.key !== 'Escape') return
@@ -258,11 +495,7 @@ export function AppBar({ onSave, onLoad }: AppBarProps) {
       }}
     >
       <div className={styles.topBar}>
-        <div
-          className={styles.brand}
-          aria-label="Print Template Designer"
-          onPointerEnter={(event) => handleMousePointer(event.pointerType, closeMenu)}
-        >
+        <div className={styles.brand} aria-label="Print Template Designer">
           <span className={styles.legacyLogo} aria-hidden="true" />
           <span className={styles.wordmark}>PTD</span>
           <span className={styles.productName}>打印模板设计器</span>
@@ -282,11 +515,7 @@ export function AppBar({ onSave, onLoad }: AppBarProps) {
               aria-expanded={isExpanded && activeMenuId === menu.id}
               aria-keyshortcuts={`Alt+${menu.mnemonic}`}
               accessKey={menu.mnemonic.toLowerCase()}
-              onPointerEnter={(event) =>
-                handleMousePointer(event.pointerType, () => openMenu(menu.id))
-              }
-              onFocus={() => openMenu(menu.id)}
-              onClick={() => openMenu(menu.id)}
+              onClick={() => toggleMenu(menu.id)}
               onKeyDown={(event) => moveMenuFocus(event, index)}
             >
               <span>
@@ -309,37 +538,47 @@ export function AppBar({ onSave, onLoad }: AppBarProps) {
           {isExpanded ? <RiCloseLine aria-hidden="true" /> : <RiMenuLine aria-hidden="true" />}
         </button>
 
-        <div
-          className={styles.actions}
-          onPointerEnter={(event) => handleMousePointer(event.pointerType, closeMenu)}
-        >
-          {onLoad && (
-            <button
-              type="button"
-              className={styles.quietAction}
-              disabled={isLoading}
-              onClick={load}
-            >
-              <RiFolderOpenLine aria-hidden="true" />
-              <span>{isLoading ? '正在载入' : '载入模板'}</span>
-            </button>
-          )}
-          {onSave && (
-            <button
-              type="button"
-              className={styles.primaryAction}
-              onClick={() => onSave(store.template.value)}
-            >
-              <RiSave3Line aria-hidden="true" />
-              <span>保存模板</span>
-            </button>
+        <div className={styles.actions}>
+          {hostCommands?.configured && (
+            <>
+              <button
+                type="button"
+                className={styles.quietAction}
+                disabled={!openState.enabled || openState.pending}
+                aria-busy={openState.pending}
+                title={openState.reason}
+                onClick={() => void hostCommands.execute('open')}
+              >
+                {openState.pending ? (
+                  <RiLoader4Line className={styles.pendingIcon} aria-hidden="true" />
+                ) : (
+                  <RiFolderOpenLine aria-hidden="true" />
+                )}
+                <span>{openState.pending ? '正在打开' : '打开模板'}</span>
+              </button>
+              <button
+                type="button"
+                className={styles.primaryAction}
+                disabled={!saveState.enabled || saveState.pending}
+                aria-busy={saveState.pending}
+                title={saveState.reason}
+                onClick={() => void hostCommands.execute('save')}
+              >
+                {saveState.pending ? (
+                  <RiLoader4Line className={styles.pendingIcon} aria-hidden="true" />
+                ) : (
+                  <RiSave3Line aria-hidden="true" />
+                )}
+                <span>{saveState.pending ? '正在保存' : '保存模板'}</span>
+              </button>
+            </>
           )}
           <button
             type="button"
             className={styles.userPlaceholder}
             aria-disabled="true"
-            aria-label="用户账户（待接入）"
-            title="用户账户 · 即将支持"
+            aria-label="用户账户（由宿主应用提供）"
+            title="用户账户由宿主应用提供"
             onClick={(event) => event.preventDefault()}
           >
             <RiUser3Line aria-hidden="true" />
@@ -372,23 +611,31 @@ export function AppBar({ onSave, onLoad }: AppBarProps) {
             </nav>
             <div className={styles.commandGrid} aria-label={`${activeMenu.label}菜单命令`}>
               {activeMenu.items.map((item) => {
-                const Icon = item.icon
+                const state = getCommandState(item)
+                const Icon = state.pending ? RiLoader4Line : item.icon
+                const disabled = !state.enabled || state.pending
+                const stateText = state.pending ? '正在执行' : state.reason
                 return (
                   <button
                     key={item.label}
                     type="button"
                     className={styles.commandItem}
                     tabIndex={isExpanded ? 0 : -1}
-                    aria-label={`${item.label}（功能待接入，关闭菜单）`}
-                    title={`${item.label} · 功能待接入 · 点击关闭菜单`}
-                    onClick={closeMenu}
+                    disabled={disabled}
+                    aria-busy={state.pending}
+                    aria-label={stateText ? `${item.label}（${stateText}）` : item.label}
+                    title={stateText ? `${item.label} · ${stateText}` : item.label}
+                    onClick={() => executeAndClose(item)}
                   >
-                    <Icon aria-hidden="true" />
+                    <Icon
+                      className={state.pending ? styles.pendingIcon : undefined}
+                      aria-hidden="true"
+                    />
                     <span className={styles.commandCopy}>
                       <strong>{item.label}</strong>
-                      <span>{item.description}</span>
+                      <span>{stateText ?? item.description}</span>
                     </span>
-                    {'shortcut' in item && item.shortcut && <kbd>{item.shortcut}</kbd>}
+                    {item.shortcut && <kbd>{item.shortcut}</kbd>}
                   </button>
                 )
               })}

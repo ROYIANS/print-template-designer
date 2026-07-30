@@ -31,6 +31,8 @@ function template(components = [component('a', 0), component('b', 20)]): Templat
       pageCurHeight: 297,
       pageMarginBottom: 8,
       pageMarginTop: 8,
+      pageMarginLeft: 8,
+      pageMarginRight: 8,
       title: 'test',
       scale: 1,
       background: '#fff',
@@ -74,6 +76,26 @@ function tableComponent(id: string, locked = false): ComponentSchema {
 }
 
 describe('EditorStore history and ownership', () => {
+  it('keeps a bounded, unique recent-color list as instance-only UI state', () => {
+    const first = new EditorStore(template())
+    const second = new EditorStore(template())
+
+    first.recordRecentColor('#ABCDEF')
+    first.recordRecentColor('#123456')
+    first.recordRecentColor('#abcdef')
+    for (let index = 0; index < 9; index += 1) {
+      first.recordRecentColor(`#00000${index}`)
+    }
+    first.recordRecentColor('transparent')
+
+    expect(first.recentColors.value).toHaveLength(8)
+    expect(first.recentColors.value[0]).toBe('#000008')
+    expect(first.recentColors.value.filter((color) => color === '#abcdef')).toHaveLength(0)
+    expect(second.recentColors.value).toEqual([])
+    expect(first.history.value).toHaveLength(1)
+    expect(first.template.value).not.toBe(second.template.value)
+  })
+
   it('commits one direct content-edit session as one document history step', () => {
     const onChange = vi.fn()
     const store = new EditorStore(template([textComponent('text')]), { onChange })
@@ -269,9 +291,68 @@ describe('EditorStore history and ownership', () => {
     expect(second.components.value[0]?.style.left).toBe(0)
     expect(initial.pages[0]?.componentData[0]?.style.left).toBe(0)
   })
+
+  it('keeps the display unit instance-local and outside template history', () => {
+    const initial = template()
+    const onChange = vi.fn()
+    const first = new EditorStore(initial, { onChange })
+    const second = new EditorStore(initial)
+
+    first.setMeasurementUnit('px')
+
+    expect(first.measurementUnit.value).toBe('px')
+    expect(second.measurementUnit.value).toBe('mm')
+    expect(first.template.value).toBe(initial)
+    expect(first.history.value).toEqual([initial])
+    expect(first.canUndo.value).toBe(false)
+    expect(onChange).not.toHaveBeenCalled()
+
+    first.syncExternal(template())
+    expect(first.measurementUnit.value).toBe('px')
+  })
 })
 
 describe('EditorStore commands', () => {
+  it('updates valid page configuration as one gesture and rejects invalid margins', () => {
+    const initial = template()
+    const onChange = vi.fn()
+    const store = new EditorStore(initial, { onChange })
+
+    store.beginGesture()
+    expect(store.updatePageConfig({ pageMarginLeft: 12 }, true)).toBe(true)
+    expect(store.updatePageConfig({ pageMarginLeft: 14 }, true)).toBe(true)
+    store.commitGesture()
+
+    expect(store.pageConfig.value.pageMarginLeft).toBe(14)
+    expect(store.history.value).toHaveLength(2)
+    expect(onChange).toHaveBeenCalledTimes(2)
+
+    expect(store.updatePageConfig({ pageMarginRight: 210 })).toBe(false)
+    expect(store.pageConfig.value.pageMarginRight).toBe(8)
+    expect(store.history.value).toHaveLength(2)
+    expect(onChange).toHaveBeenCalledTimes(2)
+  })
+
+  it('derives out-of-bounds components after page resize without changing their geometry', () => {
+    const initial = template([component('inside', 20), component('outside', 520)])
+    const store = new EditorStore(initial)
+    const originalStyle = store.components.value[1]!.style
+
+    expect(store.outOfBoundsComponents.value).toEqual([])
+    expect(
+      store.updatePageConfig({
+        pageSize: 'custom',
+        pageWidth: 100,
+        pageHeight: 100,
+        pageCurHeight: 100,
+      }),
+    ).toBe(true)
+
+    expect(store.outOfBoundsComponents.value.map((item) => item.id)).toEqual(['outside'])
+    expect(store.components.value[1]!.style).toBe(originalStyle)
+    expect(store.components.value[1]!.style.left).toBe(520)
+  })
+
   it('switches existing pages without changing template history', () => {
     const initial = template()
     const secondPage = { id: 'page-2', name: '第二页', componentData: [component('c', 12)] }

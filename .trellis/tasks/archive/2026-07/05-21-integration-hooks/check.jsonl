@@ -4,3 +4,4 @@
 {"file":".trellis/spec/monorepo/typescript-conventions.md","reason":"verify strict, extensible public command and document-state types"}
 {"file":".trellis/spec/monorepo/quality-guidelines.md","reason":"verify lint, tests, builds, formatting and artifacts"}
 {"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"verify application lifecycle remains Host-owned"}
+{"file": ".trellis/tasks/05-21-integration-hooks/research/better-auth-public-deployment.md", "reason": "verify Better Auth, HTTP, session and database concerns do not leak into the Designer package"}

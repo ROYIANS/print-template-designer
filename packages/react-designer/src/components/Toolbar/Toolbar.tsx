@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { useSignals } from '@preact/signals-react/runtime'
 import * as Tooltip from '@radix-ui/react-tooltip'
+import { formatMeasurement, getPageDimensions, mmToPx } from '@ptd/core'
 import {
   RiAlignItemBottomLine,
   RiAlignItemHorizontalCenterLine,
@@ -239,6 +240,8 @@ function ContextIdentity({ kind, name }: { kind: string; name: string }) {
 function PageContext() {
   const store = useEditorStore()
   const page = store.pageConfig.value
+  const dimensions = getPageDimensions(page)
+  const unit = store.measurementUnit.value
   return (
     <>
       <ContextIdentity kind="PAGE" name={page.title || '未命名模板'} />
@@ -272,8 +275,8 @@ function PageContext() {
         </ToolButton>
       )}
       <span className={styles.pageMetric}>
-        {page.pageDirection === 'p' ? page.pageWidth : page.pageHeight} ×{' '}
-        {page.pageDirection === 'p' ? page.pageHeight : page.pageWidth} mm
+        {formatMeasurement(dimensions.width, unit)} × {formatMeasurement(dimensions.height, unit)}{' '}
+        {unit}
       </span>
     </>
   )
@@ -339,12 +342,12 @@ function SingleContext() {
 }
 
 function Metric({ label, value }: { label: string; value: unknown }) {
-  const shown =
-    typeof value === 'number' && Number.isFinite(value) ? Math.round(value * 10) / 10 : 0
+  const store = useEditorStore()
+  const shown = typeof value === 'number' && Number.isFinite(value) ? value : 0
   return (
     <span className={styles.metric}>
       <small>{label}</small>
-      {shown}
+      {formatMeasurement(shown, store.measurementUnit.value)}
     </span>
   )
 }
@@ -417,11 +420,12 @@ function MultiContext() {
 function GuideContext() {
   const store = useEditorStore()
   const guide = store.guides.value.find((item) => item.id === store.selectedGuideId.value)!
+  const unit = store.measurementUnit.value
   return (
     <>
       <ContextIdentity
         kind="GUIDE"
-        name={`${guide.axis.toUpperCase()} ${guide.positionMm.toFixed(1)} mm`}
+        name={`${guide.axis.toUpperCase()} ${formatMeasurement(mmToPx(guide.positionMm), unit)} ${unit}`}
       />
       <div className={styles.guideColors} aria-label="参考线颜色">
         {GUIDE_COLORS.map((item) => (

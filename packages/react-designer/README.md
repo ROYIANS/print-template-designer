@@ -13,13 +13,37 @@ import '@ptd/react-designer/styles.css'
 
 export function Editor({ initialValue }: { initialValue: TemplateSchema }) {
   const [value, setValue] = useState(initialValue)
+  const [saving, setSaving] = useState(false)
 
   return (
     <Designer
       value={value}
       onChange={setValue}
-      onSave={(next) => saveTemplate(next)}
-      onLoad={async () => loadTemplate()}
+      host={{
+        document: {
+          id: 'template-42',
+          title: '出库交接单',
+          version: 3,
+          status: saving ? 'saving' : 'dirty',
+        },
+        commands: {
+          new: {},
+          open: {},
+          save: { pending: saving },
+          saveAs: {},
+        },
+        onCommand: async (command, context) => {
+          if (command === 'save') {
+            setSaving(true)
+            try {
+              await saveTemplate(context.template)
+            } finally {
+              setSaving(false)
+            }
+          }
+          // New/Open 由 Host 完成确认、路由或 API，然后更新受控 value。
+        },
+      }}
     />
   )
 }
@@ -33,19 +57,49 @@ Host 需要为设计器提供一个具有明确高度的容器，并显式加载
 export interface DesignerProps {
   value: TemplateSchema
   onChange?: (value: TemplateSchema) => void
-  onSave?: (value: TemplateSchema) => void
-  onLoad?: () => TemplateSchema | Promise<TemplateSchema>
+  host?: DesignerHost
 }
 ```
 
-| 属性       | 约定                                                 |
-| ---------- | ---------------------------------------------------- |
-| `value`    | 必填。Host 持有的模板真值；外部替换时编辑器会同步。  |
-| `onChange` | 每次被提交到编辑历史的模板变更后通知 Host。          |
-| `onSave`   | App Bar 保存动作的集成点；编辑器本身不发 HTTP 请求。 |
-| `onLoad`   | App Bar 载入动作的集成点，可同步或异步返回完整模板。 |
+| 属性       | 约定                                                               |
+| ---------- | ------------------------------------------------------------------ |
+| `value`    | 必填。Host 持有的模板真值；外部替换时编辑器会同步。                |
+| `onChange` | 模板命令产生新值时通知 Host；交互 UI 状态不会触发。                |
+| `host`     | 可选。统一承载文档元数据、应用命令能力、异步状态和应用命令处理器。 |
 
-当前没有 `onExport` 或 `onDataSource`。导出与数据源集成仍属于后续任务。
+旧的 `onSave` / `onLoad` 已被统一 Host 合同替代，也不会继续增加 `onExport` 或
+`onDataSource` 顶层回调。打开或新建完成后，Host 更新受控 `value`；Designer 不直接载入 API 记录。
+
+### Host 应用命令
+
+```ts
+interface DesignerHost {
+  document?: {
+    id?: string
+    title?: string
+    version?: string | number
+    status: 'clean' | 'dirty' | 'saving' | 'loading' | 'error' | 'conflict'
+    message?: string
+  }
+  commands?: Partial<
+    Record<DesignerHostCommandId, { enabled?: boolean; pending?: boolean; reason?: string }>
+  >
+  onCommand?: (
+    command: DesignerHostCommandId,
+    context: { template: TemplateSchema; document?: DesignerDocumentState },
+  ) => void | Promise<void>
+  onCommandError?: (command: DesignerHostCommandId, error: unknown) => void
+}
+```
+
+- `commands` 中出现某个 ID 表示 Host 声明该能力；未出现的命令显示为“功能待接入”并禁用。
+- `enabled` 默认为 `true`；`pending` 会禁用重复触发；`reason` 用于说明只读、冲突等不可用原因。
+- Promise 执行期间 Designer 还会维护实例级 Pending，避免 Host 状态更新前的连续双击。
+- `Ctrl/Cmd+S/N/O` 与 `Ctrl/Cmd+Shift+S` 只在相应 Host 命令当前可执行时拦截。
+- `onCommand` 收到的是执行时的最新 `TemplateSchema`，不是网络记录、Session 或 Token。
+- New/Open/Save/Save As 的确认、API、错误提示、冲突处理和路由均由 Host 负责。
+- 当前公共 Host ID 还覆盖模板浏览器、版本历史/恢复、模板导入导出、预览、打印、文档导出与帮助入口；
+  `DESIGNER_HOST_COMMAND_IDS` 可用于建立穷尽映射。
 
 ## 已实现交互
 
@@ -53,10 +107,21 @@ export interface DesignerProps {
 - 锁定、组合、图层、复制、剪切和定位粘贴。
 - Undo/Redo、右键菜单和键盘菜单。
 - 标尺 hover 预览、点击固定、彩色参考线和距离 badge。
+- 默认毫米、可切换 PTD Canvas px 的实例级显示单位；Inspector、标尺、参考线与状态读数同步切换。
 - Typed Inspector、mixed value 和数值 label scrub。
+- Page、Single 与 Table 业务面板统一组合 `InspectorControls`，原生 input/select/textarea/color 仅作为
+  控件内部实现细节；数值、度量、文本、长文本、小枚举、长枚举、文件和颜色使用各自适合的交互。
+- 颜色控件支持三位/六位 HEX 精确输入、透明色、恢复默认、实例级最近颜色和模板派生文档颜色；
+  色板临时状态与最近颜色不会写入模板或历史。
+- 越界或不完整数值草稿保持在控件本地并显示可访问错误，不会静默夹紧或写入 Schema；Escape
+  恢复本次编辑的精确起点。
+- 模板级页面标题、纸张预设/自定义尺寸、方向、四边内容安全区、纸张颜色和默认排版设置。
+- 页面缩小后保留组件几何，并以派生警告与画布标记提示越界对象。
 - 多页面新增、复制、删除与排序。
 - 文本、富文本、图片、编码、自由表格和基础图形的工具式拖框创建。
 - 普通文本与富文本画布内编辑；图片、二维码和条形码专用内容 Inspector。
+- 富文本 Inspector 不暴露 HTML 源码输入框；选区级内容与格式在画布内工具栏维护，Inspector 只处理
+  组件框级默认样式。
 - 自由表格单元格拖选、双击纯文本编辑、键盘导航、行列增删与尺寸拖动、合并拆分和单元格排版。
 - Hand Tool 与按住 Space 的临时抓手。
 - 位置稳定的高频 Tool Dock、文本/图形工具组，以及带搜索、最近使用和键盘导航的完整组件 Picker。
@@ -77,10 +142,11 @@ Host value ──► Designer store ──► 用户命令
     ▲                              │
     └──────── onChange ────────────┘
 
-onSave / onLoad ──► Host integration
+Host document + commands ──► Designer intent ──► Host application
 ```
 
 - Host 负责 API、保存状态、错误提示、冲突处理和身份信息。
+- Designer 的 Host 合同不包含 HTTP、Cookie、Better Auth、数据库记录或路由类型。
 - Designer 不应直接 import `apps/web` 或 `apps/server`。
 - 外部 `value` 同步必须避免把纯 Host 回显制造成新的用户历史。
 - `TemplateSchema.pages` 是持久化的手工页面；自动溢出页是未来导出层的派生数据。

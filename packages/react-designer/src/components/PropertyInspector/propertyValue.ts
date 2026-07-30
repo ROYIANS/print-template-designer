@@ -31,7 +31,9 @@ export function parseFiniteNumber(
   if (draft.trim() === '') return null
   const parsed = Number(draft)
   if (!Number.isFinite(parsed)) return null
-  return Math.min(limits.max ?? Number.POSITIVE_INFINITY, Math.max(limits.min ?? -Infinity, parsed))
+  if (limits.min !== undefined && parsed < limits.min) return null
+  if (limits.max !== undefined && parsed > limits.max) return null
+  return parsed
 }
 
 export function scrubNumberValue(
@@ -58,4 +60,12 @@ export function scrubNumberValue(
 
 export function isHexColor(value: unknown): value is string {
   return typeof value === 'string' && /^#[0-9a-f]{6}$/i.test(value)
+}
+
+export function normalizeHexColor(value: unknown): string | null {
+  if (typeof value !== 'string') return null
+  const normalized = value.trim().toLowerCase()
+  if (/^#[0-9a-f]{6}$/.test(normalized)) return normalized
+  const short = /^#([0-9a-f])([0-9a-f])([0-9a-f])$/.exec(normalized)
+  return short ? `#${short[1]}${short[1]}${short[2]}${short[2]}${short[3]}${short[3]}` : null
 }

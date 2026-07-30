@@ -7,10 +7,10 @@
 The repository currently has two package modes. Conventions must describe the live package rather
 than pretending every directory has already reached the same maturity.
 
-| Packages | Current build/test mode |
-| --- | --- |
-| `@ptd/core`, `@ptd/components`, `@ptd/react-designer` | tsup ESM+CJS+d.ts, Vitest |
-| `@ptd/export` | `tsc`-only empty scaffold, no test script |
+| Packages                                              | Current build/test mode                   |
+| ----------------------------------------------------- | ----------------------------------------- |
+| `@ptd/core`, `@ptd/components`, `@ptd/react-designer` | tsup ESM+CJS+d.ts, Vitest                 |
+| `@ptd/export`                                         | `tsc`-only empty scaffold, no test script |
 
 New implemented library packages should use **tsup** for ESM + CJS + `.d.ts` unless an approved
 task establishes a different output contract. A reserved scaffold does not need fake build or test
@@ -67,8 +67,8 @@ Every implemented tsup package under `packages/` should have:
 ```
 
 Individual package engine ranges may remain broader when their runtime permits it. The complete
-workspace development baseline is Node 22.12+ because CI/Docker use Node 22 and the Server includes
-`better-sqlite3`; public setup documentation must recommend Node 22.12+.
+workspace development baseline is Node 22.12+ because CI, Docker builds and the production Server
+runtime are standardized on Node 22; public setup documentation must recommend Node 22.12+.
 
 > **Warning**: In `exports`, `"types"` must come **before** `"import"` and `"require"`. Putting it after causes a tsup/esbuild warning: "The condition 'types' here will never be used."
 

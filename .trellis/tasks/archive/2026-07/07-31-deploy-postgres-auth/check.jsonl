@@ -1,0 +1,6 @@
+{"file":".trellis/spec/monorepo/directory-structure.md","reason":"Verify Compose, image publication and cross-platform operator entrypoints remain coherent."}
+{"file":".trellis/spec/monorepo/server-architecture.md","reason":"Verify migration lifecycle, PostgreSQL persistence and auth proxy boundaries."}
+{"file":".trellis/spec/monorepo/quality-guidelines.md","reason":"Run required static, build and deployment configuration checks."}
+{"file":".trellis/spec/monorepo/package-conventions.md","reason":"Verify Docker uses pinned workspace Node/pnpm baselines."}
+{"file":".trellis/tasks/07-31-deploy-postgres-auth/prd.md","reason":"Check implementation against the agreed full-stack deployment acceptance criteria."}
+{"file":".trellis/tasks/07-31-deploy-postgres-auth/research/easylife-deployment-reference.md","reason":"Ensure the reference patterns and identified safety improvements are covered."}

@@ -1,50 +1,60 @@
-# Stage 1: Build
-FROM node:20-alpine AS builder
+# syntax=docker/dockerfile:1.7
+
+FROM node:22-alpine AS base
+
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+
+RUN corepack enable && corepack prepare pnpm@10.15.1 --activate
 
 WORKDIR /app
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+FROM base AS dependencies
 
-# Copy workspace config files
-COPY package.json pnpm-workspace.yaml pnpm-lock.yaml* ./
-COPY tsconfig.base.json ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json .npmrc ./
+COPY packages/core/package.json packages/core/
+COPY apps/server/package.json apps/server/
 
-# Copy server source
-COPY apps/server/ ./apps/server/
+RUN pnpm install --frozen-lockfile --filter server...
 
-# Install dependencies
-RUN pnpm install --frozen-lockfile
+FROM dependencies AS build
 
-# Generate Prisma client
-RUN cd apps/server && pnpm exec prisma generate
+COPY packages/core packages/core
+COPY apps/server apps/server
 
-# Build server
-RUN pnpm --filter server build
+RUN export DATABASE_URL="postgresql://prisma:prisma@localhost:5432/prisma" \
+    && pnpm --filter @ptd/core build \
+    && pnpm --filter server build
 
-# Stage 2: Run
-FROM node:20-alpine AS runner
+FROM base AS production-dependencies
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
+COPY packages/core/package.json packages/core/
+COPY apps/server/package.json apps/server/
+
+RUN pnpm install --prod --frozen-lockfile --filter server...
+
+FROM node:22-alpine AS runtime
+
+ENV NODE_ENV="production"
+ENV PORT="3000"
 
 WORKDIR /app
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
-
-# Copy package files for production install
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/pnpm-workspace.yaml ./
-COPY --from=builder /app/apps/server/package.json ./apps/server/
-
-# Install production dependencies only
-RUN pnpm install --prod --frozen-lockfile --filter server
-
-# Copy built files and prisma
-COPY --from=builder /app/apps/server/dist ./apps/server/dist
-COPY --from=builder /app/apps/server/prisma ./apps/server/prisma
-COPY --from=builder /app/apps/server/node_modules/.prisma ./apps/server/node_modules/.prisma
+COPY --from=production-dependencies /app/node_modules ./node_modules
+COPY --from=production-dependencies /app/apps/server/node_modules ./apps/server/node_modules
+COPY --from=build /app/packages/core/package.json ./packages/core/package.json
+COPY --from=build /app/packages/core/dist ./packages/core/dist
+COPY --from=build /app/apps/server/package.json ./apps/server/package.json
+COPY --from=build /app/apps/server/dist ./apps/server/dist
+COPY --from=build /app/apps/server/prisma ./apps/server/prisma
+COPY --from=build /app/apps/server/prisma.config.ts ./apps/server/prisma.config.ts
 
 WORKDIR /app/apps/server
 
-EXPOSE 3001
+EXPOSE 3000
+
+HEALTHCHECK --interval=15s --timeout=5s --start-period=30s --retries=8 \
+  CMD node -e "fetch('http://127.0.0.1:3000/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 
 CMD ["node", "dist/main.js"]
