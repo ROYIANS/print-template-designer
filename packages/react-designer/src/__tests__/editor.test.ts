@@ -50,6 +50,14 @@ function textComponent(
   }
 }
 
+function imageComponent(id: string): ComponentSchema {
+  return {
+    ...component(id, 0, 0, 200, 150),
+    component: 'RoyImage',
+    propValue: '/legacy/logo.png',
+  }
+}
+
 describe('EditorStore history and ownership', () => {
   it('commits one direct content-edit session as one document history step', () => {
     const onChange = vi.fn()
@@ -123,6 +131,47 @@ describe('EditorStore history and ownership', () => {
     expect(onChange).toHaveBeenCalledTimes(2)
     store.undo()
     expect(store.components.value[0]?.style.left).toBe(0)
+  })
+
+  it('migrates legacy image content through one inspector gesture and undoes atomically', () => {
+    const onChange = vi.fn()
+    const store = new EditorStore(template([imageComponent('image')]), { onChange })
+
+    store.beginGesture()
+    store.updateComponent(
+      'image',
+      {
+        propValue: {
+          src: '/assets/logo.png',
+          alt: '公司 Logo',
+          fit: 'contain',
+          position: 'center',
+        },
+      },
+      true,
+    )
+    store.updateComponent(
+      'image',
+      {
+        propValue: {
+          src: '/assets/logo.png',
+          alt: '企业标识',
+          fit: 'cover',
+          position: 'center',
+        },
+      },
+      true,
+    )
+    store.commitGesture()
+
+    expect(store.components.value[0]?.propValue).toMatchObject({
+      alt: '企业标识',
+      fit: 'cover',
+    })
+    expect(store.history.value).toHaveLength(2)
+    store.undo()
+    expect(store.components.value[0]?.propValue).toBe('/legacy/logo.png')
+    expect(onChange).toHaveBeenCalledTimes(3)
   })
 
   it('cancels a transient gesture without adding history', () => {

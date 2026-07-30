@@ -7,6 +7,11 @@ import type {
   ComponentType,
   CreatableComponentType,
 } from '../types/component-schema'
+import {
+  DEFAULT_BAR_CODE_PROPS,
+  DEFAULT_IMAGE_PROPS,
+  DEFAULT_QR_CODE_PROPS,
+} from '../types/component-content'
 
 export interface ComponentCatalogMetadata {
   id: string
@@ -117,7 +122,7 @@ const BUILT_IN_COMPONENTS = [
       creationMode: 'draw',
     },
     defaultStyle: { width: 200, height: 150, rotate: 0, opacity: 1 },
-    defaultProps: null,
+    defaultProps: DEFAULT_IMAGE_PROPS,
   },
   {
     type: 'RoyQRCode',
@@ -133,7 +138,7 @@ const BUILT_IN_COMPONENTS = [
       creationMode: 'draw',
     },
     defaultStyle: { width: 100, height: 100, rotate: 0, opacity: 1 },
-    defaultProps: null,
+    defaultProps: DEFAULT_QR_CODE_PROPS,
   },
   {
     type: 'RoyBarCode',
@@ -149,7 +154,7 @@ const BUILT_IN_COMPONENTS = [
       creationMode: 'draw',
     },
     defaultStyle: { width: 200, height: 80, rotate: 0, opacity: 1 },
-    defaultProps: null,
+    defaultProps: DEFAULT_BAR_CODE_PROPS,
   },
   {
     type: 'RoyLine',

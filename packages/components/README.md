@@ -6,14 +6,14 @@
 
 ## 公开渲染器
 
-| 类别 | 导出 |
-| --- | --- |
-| 文本 | `RoySimpleText`、`RoyText` |
-| 表格 | `RoySimpleTable`、`RoyComplexTable` |
-| 图像 | `RoyImage` |
-| 编码 | `RoyQRCode`、`RoyBarCode` |
+| 类别 | 导出                                         |
+| ---- | -------------------------------------------- |
+| 文本 | `RoySimpleText`、`RoyText`                   |
+| 表格 | `RoySimpleTable`、`RoyComplexTable`          |
+| 图像 | `RoyImage`                                   |
+| 编码 | `RoyQRCode`、`RoyBarCode`                    |
 | 图形 | `RoyLine`、`RoyRect`、`RoyCircle`、`RoyStar` |
-| 结构 | `RoyGroup` |
+| 结构 | `RoyGroup`                                   |
 
 `RoyGroup` 用于组合结构与内部渲染，不应作为普通组件目录 Tile 向用户宣传。
 
@@ -42,6 +42,10 @@ component.destroy()
 - `destroy()` 移除 DOM；Host 必须在卸载时调用。
 
 组件只负责把 Schema 渲染成 DOM，不拥有选区、拖拽、历史、工具栏或页面管理；这些属于 `@ptd/react-designer`。
+
+图片 Renderer 兼容旧字符串 URL 与结构化图片内容，并显示未设置、载入中和载入失败状态。二维码和
+条形码 Renderer 使用 `@ptd/core` 的统一规范化/校验，在动态渲染模块尚未完成、内容非法或模块失败时
+显示明确状态；异步结果通过实例 render token 防止旧 Promise 覆盖新内容。
 
 ## 数据与安全
 

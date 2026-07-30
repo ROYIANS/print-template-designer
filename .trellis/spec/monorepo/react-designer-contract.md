@@ -153,6 +153,25 @@ import '@ptd/react-designer/styles.css'
 - ProseMirror's trailing `<br>` in an empty paragraph must still expose the visual placeholder. The
   placeholder disappears after input without changing the persisted HTML on its own.
 
+#### Media and code content
+
+- `@ptd/core` owns public image, QR and barcode content types, usable defaults, exact runtime guards,
+  compatibility normalizers and format-specific validation. Renderer and Inspector must consume the
+  same functions instead of maintaining unchecked casts or divergent fallback values.
+- New images persist structured `{ src, alt, fit, position }` content while legacy string sources remain
+  readable. The first content edit may lazily upgrade a legacy string, and the complete focused edit is
+  one transient gesture that Undo restores to the exact legacy value.
+- Image file selection reads `image/*` through `FileReader` and persists its Data URL directly. A
+  `blob:` URL, script URL or non-image Data URL is never committed as a stable template source.
+- New QR and barcode frames have non-empty valid defaults and render immediately. QR exposes content,
+  correction level, quiet-zone margin and dark/light colors. Barcode exposes content, supported symbology,
+  foreground color and human-readable-text visibility, with symbology-specific validation.
+- Framework-independent renderers expose explicit empty, loading, ready and error states where applicable.
+  Dynamic QR/barcode imports use a per-instance render token so stale promises cannot overwrite newer
+  content or a destroyed component; load/generation errors must never be swallowed into a blank frame.
+- Inspector text/select/color changes use the existing begin/transient/commit gesture boundary. Discrete
+  file, clear and segmented commands are one history entry each; locked components disable every path.
+
 #### Manual pages and derived pagination
 
 - `TemplateSchema.pages` is the ordered list of manually designed physical pages. Page switching is
@@ -206,6 +225,11 @@ import '@ptd/react-designer/styles.css'
 | Context click targets blank paper         | Clear selection; expose page properties and positioned paste       |
 | Pointer enters a context submenu          | Preserve Radix focus; allow submenu item click and keyboard select |
 | Newly drawn rich text has empty HTML      | Focus full-frame editor; type without Inspector/source workaround  |
+| New QR or barcode frame                   | Persist a valid visible default; expose dedicated Inspector fields |
+| Image content is a legacy string          | Render unchanged; first edit may normalize as one undoable gesture |
+| Image source uses `blob:`/unsafe data     | Show field/frame error; never commit it as a stable source         |
+| QR/barcode content is invalid             | Show format-specific error; never leave a silent blank frame       |
+| Async code render resolves after update   | Ignore stale result through the instance render token              |
 | `pasteAt` receives a multi-selection      | Preserve relative geometry; regenerate every id; one history       |
 | Switch an existing page                   | Change UI page only; clear local selection; no host/history        |
 | Add or duplicate a page                   | Insert after source; select new page; one host/history             |
@@ -213,7 +237,7 @@ import '@ptd/react-designer/styles.css'
 | Delete the only page                      | No-op; template always retains at least one manual page            |
 | Reorder around the active page            | Preserve active `page.id` and valid component selection            |
 | History removes the active page           | Select nearest valid page; never expose an invalid index           |
-| Structured `propValue` (array/object)     | Inspector is read-only; never coerce to string                     |
+| Unsupported structured `propValue`        | Inspector is read-only; never coerce to string                     |
 | Host omits `styles.css` import            | Integration is invalid; UI styling is not guaranteed               |
 | Built CSS Module default export is `{}`   | Invalid package build; host elements receive no class names        |
 | Host omits a peer dependency              | Workspace/install validation must fail before release              |
@@ -251,6 +275,12 @@ import '@ptd/react-designer/styles.css'
   protection, one host/history mutation, active-page identity and Undo/Redo index repair.
 - Geometry unit test: group → scale/rotate/move → ungroup preserves visual geometry.
 - Inspector helper test: structured values are read-only; numeric primitive values preserve type.
+- Core content tests: image/QR/barcode defaults, exact guards, legacy normalization, unsafe image
+  source rejection and every supported barcode format validation remain deterministic.
+- Renderer tests: empty/unsafe images and invalid QR/barcodes expose explicit frame states rather
+  than broken-image chrome or blank DOM; async code rendering cannot outlive its render token.
+- Store test: a focused Inspector gesture can upgrade a legacy image string to structured content as
+  one history entry, and Undo restores the exact legacy string.
 - Package build assertion: ESM, CJS, DTS and `dist/index.css` exist; ESM/CJS contain non-empty CSS
   Module class maps such as `Designer_designer`.
 - Host build assertion: peer dependencies resolve and `@ptd/react-designer/styles.css` imports.

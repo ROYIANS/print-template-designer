@@ -17,8 +17,30 @@ export type {
   DataSet,
   TemplateSchema,
   TemplatePage,
+  BarCodeFormat,
+  BarCodeProps,
+  ImageFit,
+  ImagePosition,
+  ImageProps,
+  QRCodeErrorCorrection,
+  QRCodeProps,
 } from './types'
-export { DEFAULT_PAGE_CONFIG } from './types'
+export {
+  BAR_CODE_FORMATS,
+  DEFAULT_BAR_CODE_PROPS,
+  DEFAULT_IMAGE_PROPS,
+  DEFAULT_PAGE_CONFIG,
+  DEFAULT_QR_CODE_PROPS,
+  barCodeContentError,
+  imageSourceError,
+  isBarCodeProps,
+  isImageProps,
+  isQRCodeProps,
+  normalizeBarCodeProps,
+  normalizeImageProps,
+  normalizeQRCodeProps,
+  qrCodeContentError,
+} from './types'
 
 export { PAGE_SIZES, COMMON_SCALE, AUTO_PAGE_COMPONENTS } from './constants'
 export type { PageSizeDefinition } from './constants'

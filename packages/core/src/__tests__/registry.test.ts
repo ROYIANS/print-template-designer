@@ -71,6 +71,22 @@ describe('ComponentRegistry', () => {
     expect(defaultRegistry.get('RoyText')?.defaultProps).toBe('<p></p>')
   })
 
+  it('gives media and code components usable structured defaults', () => {
+    expect(defaultRegistry.get('RoyImage')?.defaultProps).toMatchObject({
+      src: '',
+      fit: 'contain',
+    })
+    expect(defaultRegistry.get('RoyQRCode')?.defaultProps).toMatchObject({
+      text: 'PTD-QR-0001',
+      correctLevel: 'M',
+    })
+    expect(defaultRegistry.get('RoyBarCode')?.defaultProps).toMatchObject({
+      text: 'PTD-2026-0001',
+      bcid: 'code128',
+      includeText: true,
+    })
+  })
+
   it('get returns undefined for unknown type', () => {
     expect(defaultRegistry.get('Unknown' as never)).toBeUndefined()
   })

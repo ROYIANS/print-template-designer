@@ -120,16 +120,17 @@ const CSS = `
 
 .ptd-image {
   background: var(--ptd-background);
+  border: var(--ptd-border);
+  border-radius: var(--ptd-border-radius);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--ptd-border-width);
 }
 
 .ptd-image img {
+  width: 100%;
   height: 100%;
-  border-radius: var(--ptd-border-radius);
-  border: var(--ptd-border);
+  display: block;
 }
 
 .ptd-qrcode {
@@ -139,6 +140,12 @@ const CSS = `
 
 .ptd-qrcode canvas,
 .ptd-qrcode img {
+  width: 100%;
+  height: 100%;
+}
+
+.ptd-qrcode__inner,
+.ptd-barcode__inner {
   width: 100%;
   height: 100%;
 }
@@ -155,14 +162,24 @@ const CSS = `
   height: 100%;
 }
 
-.ptd-barcode__text {
+.ptd-render-state {
   width: 100%;
-  height: 14px;
-  font-size: 12px;
-  position: absolute;
-  bottom: 0;
-  left: 0;
+  height: 100%;
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  padding: 8px;
+  color: #647184;
+  background: rgb(231 236 243 / 46%);
+  font-family: system-ui, sans-serif;
+  font-size: 11px;
+  line-height: 1.35;
   text-align: center;
+}
+
+.ptd-render-state[data-state='error'] {
+  color: #9f3523;
+  background: rgb(207 77 52 / 8%);
 }
 
 .ptd-group {

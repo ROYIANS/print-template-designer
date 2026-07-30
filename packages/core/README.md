@@ -11,30 +11,26 @@ Print Template Designer 的框架无关核心包。它只包含 TypeScript 数�
 - 模板 JSON 序列化与反序列化。
 - 数据绑定解析与基础类型转换。
 - 组件定义注册表和组件目录元数据。
+- 图片、二维码与条形码的公开内容类型、默认值、运行时守卫、规范化和纯校验。
 
 ## 公共 API
 
 所有公共符号只从 `src/index.ts` 导出：
 
-| 分组 | 导出 |
-| --- | --- |
-| Schema | `TemplateSchema`、`TemplatePage`、`PageConfig`、`ComponentSchema`、`ComponentStyle`、数据源与目录类型 |
-| Defaults/constants | `DEFAULT_PAGE_CONFIG`、`PAGE_SIZES`、`COMMON_SCALE`、`AUTO_PAGE_COMPONENTS` |
-| Units | `mmToPx`、`pxToMm`、`getPageDimensions`、`getPageSizeDimensions` |
-| Data binding | `DataBindingEngine`、`convertByType` |
-| Registry | `ComponentRegistry`、`defaultRegistry` 及组件定义类型 |
-| Serialization | `serialize`、`deserialize` |
+| 分组               | 导出                                                                                                  |
+| ------------------ | ----------------------------------------------------------------------------------------------------- |
+| Schema             | `TemplateSchema`、`TemplatePage`、`PageConfig`、`ComponentSchema`、`ComponentStyle`、数据源与目录类型 |
+| Defaults/constants | `DEFAULT_PAGE_CONFIG`、`PAGE_SIZES`、`COMMON_SCALE`、`AUTO_PAGE_COMPONENTS`                           |
+| Units              | `mmToPx`、`pxToMm`、`getPageDimensions`、`getPageSizeDimensions`                                      |
+| Data binding       | `DataBindingEngine`、`convertByType`                                                                  |
+| Registry           | `ComponentRegistry`、`defaultRegistry` 及组件定义类型                                                 |
+| Component content  | `ImageProps`、`QRCodeProps`、`BarCodeProps`，对应默认值、守卫、规范化与校验函数                       |
+| Serialization      | `serialize`、`deserialize`                                                                            |
 
 示例：
 
 ```ts
-import {
-  deserialize,
-  getPageDimensions,
-  mmToPx,
-  serialize,
-  type TemplateSchema,
-} from '@ptd/core'
+import { deserialize, getPageDimensions, mmToPx, serialize, type TemplateSchema } from '@ptd/core'
 
 const json = serialize(template)
 const restored: TemplateSchema = deserialize(json)

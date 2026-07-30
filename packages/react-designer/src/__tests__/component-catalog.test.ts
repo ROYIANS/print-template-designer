@@ -232,6 +232,26 @@ describe('component catalog', () => {
     },
   )
 
+  it('creates media and code frames with independent structured content defaults', () => {
+    const image = createDrawnComponentSchema('RoyImage', { x: 20, y: 30 }, { x: 180, y: 90 }, PAGE)
+    const qr = createDrawnComponentSchema('RoyQRCode', { x: 20, y: 30 }, { x: 120, y: 130 }, PAGE)
+    const barcode = createDrawnComponentSchema(
+      'RoyBarCode',
+      { x: 20, y: 30 },
+      { x: 180, y: 90 },
+      PAGE,
+    )
+
+    expect(image?.propValue).toMatchObject({ src: '', fit: 'contain', position: 'center' })
+    expect(qr?.propValue).toMatchObject({ text: 'PTD-QR-0001', correctLevel: 'M', margin: 4 })
+    expect(barcode?.propValue).toMatchObject({
+      text: 'PTD-2026-0001',
+      bcid: 'code128',
+      includeText: true,
+    })
+    expect(image?.propValue).not.toBe(defaultRegistry.get('RoyImage')?.defaultProps)
+  })
+
   it('does not create or switch tools when draw completion no longer matches the active tool', () => {
     const onChange = vi.fn()
     const store = createEditorStore(template(), { onChange })
