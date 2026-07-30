@@ -157,9 +157,6 @@ const APP_MENUS = [
 ] as const
 
 type AppMenuId = (typeof APP_MENUS)[number]['id']
-type InputModality = 'mouse' | 'touch' | 'keyboard'
-
-const CLOSE_DELAY = 120
 
 export function AppBar({ onSave, onLoad }: AppBarProps) {
   useSignals()
@@ -167,40 +164,39 @@ export function AppBar({ onSave, onLoad }: AppBarProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
   const [activeMenuId, setActiveMenuId] = useState<AppMenuId>('file')
-  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const appBarRef = useRef<HTMLElement>(null)
   const menuButtonRefs = useRef<Array<HTMLButtonElement | null>>([])
-  const inputModalityRef = useRef<InputModality>('keyboard')
   const activeMenu = APP_MENUS.find((menu) => menu.id === activeMenuId) ?? APP_MENUS[0]
 
-  const cancelScheduledClose = () => {
-    if (!closeTimerRef.current) return
-    clearTimeout(closeTimerRef.current)
-    closeTimerRef.current = null
-  }
-
   const openMenu = (menuId?: AppMenuId) => {
-    cancelScheduledClose()
     if (menuId) setActiveMenuId(menuId)
     setIsExpanded(true)
   }
 
   const closeMenu = () => {
-    cancelScheduledClose()
     setIsExpanded(false)
   }
 
-  const scheduleClose = () => {
-    cancelScheduledClose()
-    closeTimerRef.current = setTimeout(() => setIsExpanded(false), CLOSE_DELAY)
-  }
-
-  const handleMousePointer = (pointerType: string, action: () => void) => {
-    if (pointerType === 'mouse') action()
+  const toggleMenu = (menuId: AppMenuId) => {
+    if (isExpanded && activeMenuId === menuId) {
+      closeMenu()
+      return
+    }
+    openMenu(menuId)
   }
 
   useEffect(() => {
-    return () => cancelScheduledClose()
-  }, [])
+    if (!isExpanded) return
+
+    const handleOutsidePointerDown = (event: PointerEvent) => {
+      if (event.target instanceof Node && !appBarRef.current?.contains(event.target)) {
+        setIsExpanded(false)
+      }
+    }
+
+    document.addEventListener('pointerdown', handleOutsidePointerDown)
+    return () => document.removeEventListener('pointerdown', handleOutsidePointerDown)
+  }, [isExpanded])
 
   const load = async () => {
     if (!onLoad || isLoading) return
@@ -224,30 +220,19 @@ export function AppBar({ onSave, onLoad }: AppBarProps) {
     event.preventDefault()
     const nextMenu = APP_MENUS[nextIndex]
     if (!nextMenu) return
-    openMenu(nextMenu.id)
+    if (isExpanded) openMenu(nextMenu.id)
     menuButtonRefs.current[nextIndex]?.focus()
   }
 
   return (
     <header
+      ref={appBarRef}
       className={styles.appBar}
       data-expanded={isExpanded}
+      data-ptd-editor-interactive
       data-ptd-region="app-bar"
-      onPointerDownCapture={(event) => {
-        inputModalityRef.current = event.pointerType === 'mouse' ? 'mouse' : 'touch'
-      }}
-      onPointerEnter={(event) => handleMousePointer(event.pointerType, cancelScheduledClose)}
-      onPointerLeave={(event) => handleMousePointer(event.pointerType, scheduleClose)}
       onBlurCapture={(event) => {
-        if (
-          inputModalityRef.current !== 'touch' &&
-          !event.currentTarget.contains(event.relatedTarget as Node | null)
-        ) {
-          scheduleClose()
-        }
-      }}
-      onKeyDownCapture={() => {
-        inputModalityRef.current = 'keyboard'
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) closeMenu()
       }}
       onKeyDown={(event) => {
         if (event.key !== 'Escape') return
@@ -258,11 +243,7 @@ export function AppBar({ onSave, onLoad }: AppBarProps) {
       }}
     >
       <div className={styles.topBar}>
-        <div
-          className={styles.brand}
-          aria-label="Print Template Designer"
-          onPointerEnter={(event) => handleMousePointer(event.pointerType, closeMenu)}
-        >
+        <div className={styles.brand} aria-label="Print Template Designer">
           <span className={styles.legacyLogo} aria-hidden="true" />
           <span className={styles.wordmark}>PTD</span>
           <span className={styles.productName}>打印模板设计器</span>
@@ -282,11 +263,7 @@ export function AppBar({ onSave, onLoad }: AppBarProps) {
               aria-expanded={isExpanded && activeMenuId === menu.id}
               aria-keyshortcuts={`Alt+${menu.mnemonic}`}
               accessKey={menu.mnemonic.toLowerCase()}
-              onPointerEnter={(event) =>
-                handleMousePointer(event.pointerType, () => openMenu(menu.id))
-              }
-              onFocus={() => openMenu(menu.id)}
-              onClick={() => openMenu(menu.id)}
+              onClick={() => toggleMenu(menu.id)}
               onKeyDown={(event) => moveMenuFocus(event, index)}
             >
               <span>
@@ -309,10 +286,7 @@ export function AppBar({ onSave, onLoad }: AppBarProps) {
           {isExpanded ? <RiCloseLine aria-hidden="true" /> : <RiMenuLine aria-hidden="true" />}
         </button>
 
-        <div
-          className={styles.actions}
-          onPointerEnter={(event) => handleMousePointer(event.pointerType, closeMenu)}
-        >
+        <div className={styles.actions}>
           {onLoad && (
             <button
               type="button"
