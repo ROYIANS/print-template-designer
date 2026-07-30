@@ -329,6 +329,23 @@
   }
 }
 
+/* Viewport fallback for phone-scale coarse-pointer hosts; specificity beats the 40px rule. */
+@media (pointer: coarse) and (max-width: 480px) {
+  .toolbar {
+    min-height: var(--ptd-command-bar-height-compact);
+  }
+
+  .toolbar .toolButton {
+    width: 32px;
+    height: 32px;
+  }
+
+  .toolbar .toolButton svg {
+    width: 15px;
+    height: 15px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .toolButton {
     transition: none;

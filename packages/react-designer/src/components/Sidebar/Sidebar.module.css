@@ -982,6 +982,31 @@
   }
 }
 
+/* Viewport fallback for phone-scale coarse-pointer hosts; specificity beats the 40px rule. */
+@media (pointer: coarse) and (max-width: 480px) {
+  .toolDock .dockButton,
+  .toolDock .shapeToolGroup,
+  .toolDock .shapePrimary {
+    width: 32px;
+    height: 32px;
+  }
+
+  .toolDock .dockButton svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .toolDock .shapeDisclosure {
+    width: 12px;
+    height: 12px;
+  }
+
+  .toolDock .shapeDisclosure svg {
+    width: 8px;
+    height: 8px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .dockButton,
   .catalogTile,

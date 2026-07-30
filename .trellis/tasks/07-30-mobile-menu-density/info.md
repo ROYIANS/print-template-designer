@@ -46,3 +46,16 @@
     open; command, hamburger, and Escape close it.
   - 1600×1000 fine-pointer: mouse Hover opens and mouse leave closes after the 120ms delay.
 - Visual captures were inspected for 390×844 closed/open, 480×900, 640×900, and 1600×1000 layouts.
+
+## Follow-up: coarse-pointer cascade hardening
+
+- A real-host DevTools capture showed the 40×40 coarse-pointer declaration still winning because the
+  phone-width container query did not enter the matched-rule set in that embedding/debug layout.
+- The compact contract now keeps the component-level `@container` behavior and adds a top-level phone
+  fallback: `(pointer: coarse) and (max-width: 480px)`.
+- Fallback control selectors include their owning region (`.toolbar .toolButton`, `.topBar ...`,
+  `.toolDock ...`), giving them higher specificity than the generic 40px coarse-pointer declaration.
+  The result does not depend on CSS bundler ordering and does not require `!important`.
+- Production CSS and a 378×762 emulated coarse-pointer viewport were rechecked: all three media
+  conditions matched, Toolbar buttons computed to 32×32px, the App Bar track to 38px with 32×32px
+  controls, and the Tool Dock to 36px with 32×32px controls.

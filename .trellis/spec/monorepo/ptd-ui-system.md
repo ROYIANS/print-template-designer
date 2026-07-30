@@ -563,8 +563,10 @@ PTD 是桌面优先的生产工具，但不能假设所有桌面设备都有精�
 - 不因窄屏删除关键功能；只改变入口和披露层级。
 - `pointer: coarse` 时取消依赖 Hover 才可发现的操作；正常宽度控件命中区域至少 40px。仅当 Designer
   容器 `<= 480px` 时，App Bar 高 38px、Context Bar 高 36px、Tool Dock 宽 36px，三者的主要
-  控件收紧为 32px、glyph 为 15–16px。小屏覆盖必须写在 coarse-pointer 规则之后，并使用容器宽度，
-  不能通过 UA、设备型号或全局 viewport 猜测。
+  控件收紧为 32px、glyph 为 15–16px。组件级响应以容器查询为主；顶层全屏 Web 宿主允许额外使用
+  `(pointer: coarse) and (max-width: 480px)` 作为手机 viewport fallback，但不能替代容器查询。
+  fallback 必须以更高选择器优先级明确覆盖 40px coarse 合同，不能依赖构建后的规则排序，也不能通过
+  UA 或设备型号猜测。
 - 浏览器缩放到 200% 时，工具栏允许分组折叠，不能产生不可达的横向命令。
 
 ## 15. 稳定定制入口
