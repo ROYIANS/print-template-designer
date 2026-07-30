@@ -490,3 +490,37 @@ Built the five-group component catalog with planned placeholders, a two-level ne
 ### Next Steps
 
 - None - task complete
+
+
+## Session 15: Designer Host 应用命令与文档状态合同
+
+**Date**: 2026-07-30
+**Task**: Designer Host 应用命令与文档状态合同
+**Branch**: `feature/refc`
+
+### Summary
+
+以统一 DesignerHost 能力表替代 onSave/onLoad，接通 App Bar、快捷键、工作区命令与文档状态栏；补齐 Pending 隔离、禁用原因、窄屏和可访问性合同，完成浏览器验收、120 项测试及全量生产构建，并记录 PostgreSQL + Better Auth 公网部署边界。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `657ceee` | (see git log) |
+| `c6b5a4d` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
