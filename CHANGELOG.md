@@ -1,3 +1,44 @@
+# Changelog
+
+本文件记录面向使用者和贡献者的重要变更。v2 尚未发布稳定版本；下方 0.1.x 为 Vue 2 Legacy 的历史记录。
+
+## [Unreleased] — v2 rewrite
+
+### Added
+
+- 建立 `@ptd/core`：Schema、单位换算、序列化、数据绑定和组件注册表。
+- 建立 `@ptd/components`：文本、表格、图像、二维码、条码与基础图形的 DOM 渲染器。
+- 建立 `@ptd/react-designer`：专业 Canvas-first 工作区、组件目录和属性面板。
+- 完成选择、多选、框选、几何调整、锁定、组合、图层、剪贴板、Undo/Redo 与上下文菜单。
+- 完成真实标尺、hover/fixed 参考线、彩色标记、绘图工具和 Hand Tool。
+- 完成多页面新增、复制、删除与排序，并明确手工页面和自动溢出页的边界。
+- 建立 NestJS 11 + Prisma 7 + SQLite 模板服务，支持 CRUD、不可变版本历史、恢复与乐观并发。
+- 建立 GitHub Actions → GHCR → pull-only Docker Compose 的 Web-only 发布链路。
+- 建立中文项目、开发、部署、App 与 Package 文档体系。
+
+### Changed
+
+- 从 Vue 2 单体组件重写为 pnpm Monorepo，不再让 v2 运行时代码依赖 `legacy/`。
+- 产品边界调整为“框架无关 Core/Renderer + React Designer + 可演进的 Web/Server 应用”。
+- Designer 使用 controlled `value` / `onChange` 协议，Host 通过 `onSave` / `onLoad` 接入持久化。
+- UI 重构为面向报表开发者与设计师的高密度专业工作区，并支持响应式面板布局。
+
+### Infrastructure
+
+- 前端 CI 使用 Node 22，按 workspace 依赖顺序执行 typecheck/build，再运行测试、lint 和 Web build。
+- Web 镜像基于 Nginx，支持 `/healthz`、分支/SHA 标签、私有 GHCR 登录和脚本化回滚。
+- Server 使用 Prisma 7 driver adapter 与已提交的 SQLite migration。
+
+### Current boundaries
+
+- v2 workspace packages 尚未发布到 npm。
+- `apps/web` 仍使用内存示例模板，尚未连接 `apps/server`。
+- 当前 Docker/Compose 只部署 Web，不包含 Server 与数据库。
+- `@ptd/export` 仍是空脚手架；PDF、打印、Word 和自动溢出分页尚未实现。
+- 认证、上传、数据源代理和完整数据预览尚未实现。
+
+## Legacy v1 history
+
 ## [0.1.13](https://github.com/royians/print-template-designer/compare/0.1.12...0.1.13) (2023-01-13)
 
 

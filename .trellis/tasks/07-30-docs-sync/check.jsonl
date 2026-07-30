@@ -1,0 +1,3 @@
+{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file": ".trellis/spec/monorepo/quality-guidelines.md", "reason": "Formatting and documentation quality checks"}
+{"file": ".trellis/tasks/07-30-docs-sync/research/documentation-audit.md", "reason": "Fact-check source for final documentation review"}

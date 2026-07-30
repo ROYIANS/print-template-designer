@@ -12,7 +12,7 @@ print-template-designer/
     core/           @ptd/core           Framework-agnostic engine (pure TS)
     components/     @ptd/components     Canvas components (TS DOM + Preact Signals)
     react-designer/ @ptd/react-designer React designer UI
-    export/         @ptd/export         PDF / Word export utilities
+    export/         @ptd/export         Reserved export scaffold (no implementation yet)
   apps/
     web/            Designer web app (React + Vite)
     server/         NestJS + Prisma backend
@@ -22,15 +22,20 @@ print-template-designer/
   deploy.ps1        PowerShell 7 deployment script
   legacy/           Original Vue 2 source — READ ONLY, do not modify
   .trellis/         Trellis workflow, tasks, spec
+  README.md         Product overview and fastest valid setup
+  DEVELOPMENT.md    Local development, commands and troubleshooting
+  DEPLOYMENT.md     Current Web-only GHCR deployment operations
+  CHANGELOG.md      v2 Unreleased progress and preserved v1 history
   package.json      Root — private: true, pnpm workspaces
   pnpm-workspace.yaml
   tsconfig.base.json
 ```
 
-## Package Anatomy (each package under `packages/`)
+## Package Anatomy
 
 ```
 packages/<name>/
+  README.md         Public API, usage and maturity boundary
   src/
     index.ts        Public API entry — always re-export from here
   dist/             Build output (gitignored)
@@ -39,10 +44,15 @@ packages/<name>/
   tsconfig.build.json  outDir: dist, rootDir: src (used by build script)
 ```
 
+`@ptd/core`, `@ptd/components`, and `@ptd/react-designer` use tsup and Vitest. `@ptd/export`
+currently remains a `tsc`-only scaffold with no test runner; its README must state that explicitly.
+Do not describe a uniform package anatomy that the repository does not yet implement.
+
 ## Apps Anatomy
 
 ```
 apps/web/
+  README.md           Host behavior and integration boundary
   src/
     main.tsx
     App.tsx
@@ -51,6 +61,7 @@ apps/web/
   tsconfig.json
 
 apps/server/
+  README.md           Setup, database contract and HTTP API
   src/
     main.ts           NestJS ESM bootstrap (port 3000)
     app.module.ts
@@ -103,5 +114,6 @@ Never use relative paths (`../core/src`) to cross package boundaries.
 ## Anti-patterns
 
 - Do not import from `legacy/` in any v2 code — reference only for understanding
-- Do not add files directly to root (no `src/` at root)
+- Do not add application source directly to root (no root `src/`); root documentation and shared
+  configuration are expected
 - Do not create new top-level directories without a clear category

@@ -2,11 +2,21 @@
 
 ---
 
-## Build Tool: tsup (ESM + CJS dual output)
+## Implemented Package Modes
 
-All `packages/*` use **tsup** for building, not `tsc` directly. tsup produces ESM + CJS + `.d.ts` in one command.
+The repository currently has two package modes. Conventions must describe the live package rather
+than pretending every directory has already reached the same maturity.
 
-### tsup.config.ts (required in every package)
+| Packages | Current build/test mode |
+| --- | --- |
+| `@ptd/core`, `@ptd/components`, `@ptd/react-designer` | tsup ESM+CJS+d.ts, Vitest |
+| `@ptd/export` | `tsc`-only empty scaffold, no test script |
+
+New implemented library packages should use **tsup** for ESM + CJS + `.d.ts` unless an approved
+task establishes a different output contract. A reserved scaffold does not need fake build or test
+infrastructure before implementation starts.
+
+### tsup.config.ts (required in implemented tsup packages)
 
 ```ts
 import { defineConfig } from 'tsup'
@@ -22,7 +32,7 @@ export default defineConfig({
 
 ### package.json Required Fields
 
-Every package under `packages/` must have:
+Every implemented tsup package under `packages/` should have:
 
 ```json
 {
@@ -56,11 +66,15 @@ Every package under `packages/` must have:
 }
 ```
 
+Individual package engine ranges may remain broader when their runtime permits it. The complete
+workspace development baseline is Node 22.12+ because CI/Docker use Node 22 and the Server includes
+`better-sqlite3`; public setup documentation must recommend Node 22.12+.
+
 > **Warning**: In `exports`, `"types"` must come **before** `"import"` and `"require"`. Putting it after causes a tsup/esbuild warning: "The condition 'types' here will never be used."
 
 ### tsconfig Split Pattern
 
-Each package still has TWO tsconfig files (for IDE + typecheck):
+Implemented tsup packages keep two tsconfig files (for IDE + typecheck):
 
 | File                  | Purpose                                                |
 | --------------------- | ------------------------------------------------------ |
@@ -143,13 +157,14 @@ module map becomes `{}`, leaving the rendered UI without class names.
 
 ## Build Script Convention
 
-Root `package.json` scripts run all packages via pnpm filter:
+Root `package.json` scripts run packages via pnpm filters. Public and contributor documentation uses
+Corepack so the repository-declared pnpm version wins:
 
 ```bash
-pnpm build          # runs tsup in all packages/* and apps/
-pnpm dev            # builds Web dependencies, then watches them alongside apps/web
-pnpm typecheck      # tsc --noEmit in all packages
-pnpm lint           # eslint across workspace
+corepack pnpm build          # runs each workspace package/app's own build script
+corepack pnpm dev            # builds Web dependencies, then watches them alongside apps/web
+corepack pnpm typecheck      # runs each workspace's typecheck script
+corepack pnpm lint           # ESLint across workspace
 ```
 
 The Web development command must build `@ptd/core`, `@ptd/components`, and
@@ -165,6 +180,10 @@ first build; local ignored `dist` output can hide the resulting clean-runner res
 Individual package:
 
 ```bash
-pnpm --filter @ptd/core build
-pnpm --filter web dev
+corepack pnpm --filter @ptd/core build
+corepack pnpm --filter web dev
 ```
+
+`core`, `components`, and `react-designer` build through tsup. `export` builds with
+`tsc --project tsconfig.build.json` until the export implementation task deliberately establishes
+its public runtime and test contract.
