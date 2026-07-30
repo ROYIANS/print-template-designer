@@ -7,6 +7,8 @@ import {
   createDrawnComponentSchema,
   frequentCatalogItems,
   isAvailableCatalogItem,
+  rememberRecentComponentType,
+  searchAvailableComponentCatalog,
   searchComponentCatalog,
 } from '../catalog'
 import { createEditorStore } from '../state'
@@ -76,6 +78,26 @@ describe('component catalog', () => {
     expect(searchComponentCatalog('  ').map((item) => item.id)).toEqual(
       componentCatalog.map((item) => item.id),
     )
+    expect(searchAvailableComponentCatalog('自动分页')).toEqual([])
+    expect(searchAvailableComponentCatalog('').map((item) => item.type)).toHaveLength(10)
+  })
+
+  it('keeps an instance-local, unique and bounded recent-tool order', () => {
+    expect(rememberRecentComponentType([], 'RoyQRCode')).toEqual(['RoyQRCode'])
+    expect(
+      rememberRecentComponentType(
+        ['RoyImage', 'RoyQRCode', 'RoySimpleTable', 'RoyBarCode'],
+        'RoyQRCode',
+      ),
+    ).toEqual(['RoyQRCode', 'RoyImage', 'RoySimpleTable', 'RoyBarCode'])
+    expect(
+      rememberRecentComponentType(
+        ['RoyImage', 'RoySimpleTable', 'RoyQRCode', 'RoyBarCode'],
+        'RoyText',
+        4,
+      ),
+    ).toEqual(['RoyText', 'RoyImage', 'RoySimpleTable', 'RoyQRCode'])
+    expect(rememberRecentComponentType(['RoyImage'], 'RoyText', 0)).toEqual([])
   })
 
   it('creates complete schemas from registry defaults with unique ids', () => {

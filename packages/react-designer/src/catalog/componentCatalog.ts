@@ -219,6 +219,15 @@ export const frequentCatalogItems: readonly AvailableCatalogItem[] = frequentCom
   },
 )
 
+export function rememberRecentComponentType(
+  current: readonly CreatableComponentType[],
+  type: CreatableComponentType,
+  limit = 4,
+): CreatableComponentType[] {
+  if (limit <= 0) return []
+  return [type, ...current.filter((currentType) => currentType !== type)].slice(0, limit)
+}
+
 export function isAvailableCatalogItem(item: CatalogItem): item is AvailableCatalogItem {
   return item.kind === 'available'
 }
@@ -247,6 +256,10 @@ export function searchComponentCatalog(query: string): CatalogItem[] {
       .toLowerCase()
     return terms.every((term) => searchable.includes(term))
   })
+}
+
+export function searchAvailableComponentCatalog(query: string): AvailableCatalogItem[] {
+  return searchComponentCatalog(query).filter(isAvailableCatalogItem)
 }
 
 export function createComponentSchema(

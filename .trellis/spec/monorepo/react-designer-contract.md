@@ -112,6 +112,14 @@ import '@ptd/react-designer/styles.css'
   resurrecting the cancelled preview.
 - Shape menu keys are scoped: Arrow/Home/End navigate; Enter/Space choose; Escape closes only the menu.
   These keys must not bubble to object nudge, temporary Hand or global Escape handling.
+- The complete component catalog is exposed through an instance-local More picker rather than a Resource
+  Panel. It renders only available tools, never planned items; opening, searching and recent-tool order are
+  UI state and must not emit Host changes or history.
+- The Text Dock group remembers the last plain/rich text tool per Designer instance. Picker and grouped-tool
+  Portal/menu boundaries own Arrow/Home/End, Enter/Space and Escape, and restore trigger focus when dismissed.
+- Pointer-mouse outside press may dismiss the More picker. Touch/Pen outside pointerdown must not dismiss it;
+  explicit close, tool selection and Escape remain available. Portal geometry stays clamped to the Designer
+  container and carries the shared theme plus editor-interactive boundary.
 
 #### Clipboard placement
 
@@ -166,9 +174,10 @@ import '@ptd/react-designer/styles.css'
 - New QR and barcode frames have non-empty valid defaults and render immediately. QR exposes content,
   correction level, quiet-zone margin and dark/light colors. Barcode exposes content, supported symbology,
   foreground color and human-readable-text visibility, with symbology-specific validation.
-- Framework-independent renderers expose explicit empty, loading, ready and error states where applicable.
-  Dynamic QR/barcode imports use a per-instance render token so stale promises cannot overwrite newer
-  content or a destroyed component; load/generation errors must never be swallowed into a blank frame.
+- Framework-independent renderers expose mutually exclusive empty, loading, ready and error states where
+  applicable. Image source changes remove the previous image while the next source loads off-DOM; image
+  events and dynamic QR/barcode imports use per-instance render identity so stale work cannot overwrite
+  newer content or a destroyed component. Load/generation errors must never become a blank frame.
 - Inspector text/select/color changes use the existing begin/transient/commit gesture boundary. Discrete
   file, clear and segmented commands are one history entry each; locked components disable every path.
 
@@ -287,8 +296,9 @@ import '@ptd/react-designer/styles.css'
   threshold and non-mutation of registry defaults.
 - Canvas/browser test: persistent Hand changes only viewport scroll with grab/grabbing cursor; Text
   activation creates nothing; one valid text frame is one undo step; cancel/lost capture creates none.
-- Sidebar test/browser assertion: six primary tools use 40×40 targets and centered 20×20 glyphs;
-  Shape disclosure overlays without shifting the glyph; menu Space/Escape never activates Hand/Select.
+- Sidebar test/browser assertion: primary tools use the documented fine/coarse/mobile targets and centered
+  glyphs; Text/Shape disclosure overlays without shifting the glyph; grouped-menu and More-picker keys never
+  activate Hand/Select or reach object shortcuts.
 - Store unit test: `pasteAt` preserves multi-selection geometry, selects fresh ids, emits one host
   change, creates one history entry, undoes as one operation and clamps into physical page bounds.
 - Store unit test: add/duplicate/delete/reorder page commands cover fresh recursive ids, final-page
@@ -297,8 +307,9 @@ import '@ptd/react-designer/styles.css'
 - Inspector helper test: structured values are read-only; numeric primitive values preserve type.
 - Core content tests: image/QR/barcode defaults, exact guards, legacy normalization, unsafe image
   source rejection and every supported barcode format validation remain deterministic.
-- Renderer tests: empty/unsafe images and invalid QR/barcodes expose explicit frame states rather
-  than broken-image chrome or blank DOM; async code rendering cannot outlive its render token.
+- Renderer tests: empty/unsafe images and invalid QR/barcodes expose explicit frame states rather than
+  broken-image chrome or blank DOM; image states remain mutually exclusive across source updates, and no
+  asynchronous media/code rendering can outlive its render identity.
 - Store test: a focused Inspector gesture can upgrade a legacy image string to structured content as
   one history entry, and Undo restores the exact legacy string.
 - Table tests: legacy input normalization cannot execute HTML; merge/split and row/column insertion/deletion

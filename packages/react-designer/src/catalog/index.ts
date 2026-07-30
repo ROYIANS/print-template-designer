@@ -9,6 +9,8 @@ export {
   isDrawnComponentType,
   isDrawingComponentType,
   PTD_COMPONENT_MIME,
+  rememberRecentComponentType,
+  searchAvailableComponentCatalog,
   searchComponentCatalog,
   type AvailableCatalogItem,
   type CatalogGroupDefinition,

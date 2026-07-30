@@ -97,6 +97,23 @@
   background: var(--ptd-selection);
 }
 
+.dockButton[data-state-kind='disclosure'][aria-expanded='true'] {
+  color: var(--ptd-text-strong);
+  background: var(--ptd-surface-panel);
+}
+
+.moreToolButton[data-detail-active='true']::after {
+  content: '';
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  width: 4px;
+  height: 4px;
+  border: 1px solid var(--ptd-surface-app);
+  border-radius: var(--ptd-radius-round);
+  background: var(--ptd-selection);
+}
+
 .dockButton:focus-visible,
 .closePanel:focus-visible,
 .resizeHandle:focus-visible,

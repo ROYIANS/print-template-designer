@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type PointerEvent, type RefObject } from 'react'
 
-export type ResourcePanelId = 'pages' | 'layers' | 'data' | 'components'
+export type ResourcePanelId = 'assets' | 'pages' | 'layers' | 'data'
 export type WorkspaceMode = 'wide' | 'standard' | 'compact'
 export type PanelSide = 'resources' | 'inspector'
 
@@ -9,6 +9,7 @@ export const RESOURCE_PANEL_MAX = 360
 export const RESOURCE_PANEL_DEFAULT = 280
 export const INSPECTOR_MIN = 280
 export const INSPECTOR_MAX = 420
+export const DEFAULT_RESOURCE_PANEL: ResourcePanelId = 'pages'
 
 export function workspaceModeForWidth(width: number): WorkspaceMode {
   if (width < 1180) return 'compact'
@@ -24,7 +25,7 @@ export function clampPanelWidth(side: PanelSide, width: number): number {
 
 export function useWorkspaceLayout(rootRef: RefObject<HTMLElement | null>) {
   const [mode, setMode] = useState<WorkspaceMode>('wide')
-  const [activeResource, setActiveResource] = useState<ResourcePanelId>('components')
+  const [activeResource, setActiveResource] = useState<ResourcePanelId>(DEFAULT_RESOURCE_PANEL)
   const [resourcesOpen, setResourcesOpen] = useState(true)
   const [inspectorOpen, setInspectorOpen] = useState(true)
   const [resourceWidth, setResourceWidth] = useState(RESOURCE_PANEL_DEFAULT)

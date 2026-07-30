@@ -1,0 +1,5 @@
+{"file":".trellis/spec/monorepo/ptd-ui-system.md","reason":"Check visual density, state treatment, keyboard, Portal and responsive acceptance gates."}
+{"file":".trellis/spec/monorepo/react-designer-contract.md","reason":"Check that tool activation remains UI-only and existing creation/history behavior is preserved."}
+{"file":".trellis/tasks/07-30-tool-dock-materials/prd.md","reason":"Check every approved functional and manual acceptance criterion."}
+{"file":".trellis/spec/monorepo/package-conventions.md","reason":"Check package boundaries and dependency-ordered verification."}
+{"file":".trellis/spec/monorepo/quality-guidelines.md","reason":"Check tests, lint, formatting and build output requirements."}

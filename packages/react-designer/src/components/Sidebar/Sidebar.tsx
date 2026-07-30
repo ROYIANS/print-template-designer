@@ -1,12 +1,13 @@
 import {
+  useCallback,
   useEffect,
   useId,
-  useMemo,
   useRef,
   useState,
   type DragEvent,
   type KeyboardEvent,
   type PointerEvent,
+  type Ref,
   type ReactNode,
 } from 'react'
 import { useSignals } from '@preact/signals-react/runtime'
@@ -23,31 +24,26 @@ import {
   RiDraggable,
   RiFileList2Line,
   RiFileCopyLine,
-  RiApps2Line,
+  RiGalleryLine,
   RiHand,
   RiLock2Line,
+  RiMore2Line,
   RiPagesLine,
-  RiSearchLine,
   RiStackLine,
 } from '@remixicon/react'
 import {
-  catalogGroups,
-  componentCatalog,
   findAvailableCatalogItem,
-  frequentCatalogItems,
-  isAvailableCatalogItem,
   isDrawnComponentType,
   isDrawingComponentType,
-  searchComponentCatalog,
+  rememberRecentComponentType,
   type AvailableCatalogItem,
   type CreatableComponentType,
-  type DrawingComponentType,
-  type PlannedCatalogItem,
 } from '../../catalog'
 import type { ResourcePanelId, WorkspaceMode } from '../../hooks/useWorkspaceLayout'
 import { useEditorStore } from '../../state'
 import { PanelBody, PanelFooter, PanelHeader, PanelRoot, PanelTools } from '../Panel'
 import { ptdThemeClass } from '../Theme'
+import { ComponentToolPicker } from './ComponentToolPicker'
 import styles from './Sidebar.module.css'
 
 interface SidebarProps {
@@ -59,7 +55,7 @@ interface SidebarProps {
 }
 
 const RESOURCE_PANELS = [
-  { value: 'components', label: '组件', icon: RiApps2Line },
+  { value: 'assets', label: '素材', icon: RiGalleryLine },
   { value: 'pages', label: '页面', icon: RiPagesLine },
   { value: 'layers', label: '图层', icon: RiStackLine },
   { value: 'data', label: '数据', icon: RiDatabase2Line },
@@ -81,6 +77,16 @@ const DRAW_TOOL_TYPES = [
   'RoyStar',
 ] satisfies readonly CreatableComponentType[]
 
+const TEXT_TOOL_TYPES = [
+  'RoySimpleText',
+  'RoyText',
+] as const satisfies readonly CreatableComponentType[]
+type TextToolType = (typeof TEXT_TOOL_TYPES)[number]
+
+function isTextToolType(type: string): type is TextToolType {
+  return type === 'RoySimpleText' || type === 'RoyText'
+}
+
 const PTD_PAGE_MIME = 'application/x-ptd-page'
 
 export function Sidebar({ mode, activePanel, open, onTogglePanel, onResizeStart }: SidebarProps) {
@@ -89,13 +95,34 @@ export function Sidebar({ mode, activePanel, open, onTogglePanel, onResizeStart 
   const dockComponentTools = DOCK_COMPONENT_TOOL_TYPES.map(findAvailableCatalogItem).filter(
     (item): item is AvailableCatalogItem => Boolean(item),
   )
-  const textTool = findAvailableCatalogItem('RoySimpleText')
-  const TextToolIcon = textTool?.icon
+  const textTools = TEXT_TOOL_TYPES.map(findAvailableCatalogItem).filter(
+    (item): item is AvailableCatalogItem => Boolean(item),
+  )
+  const moreButtonRef = useRef<HTMLButtonElement>(null)
+  const pickerId = useId()
+  const [lastTextTool, setLastTextTool] = useState<TextToolType>('RoySimpleText')
+  const [pickerOpen, setPickerOpen] = useState(false)
+  const [recentTypes, setRecentTypes] = useState<readonly CreatableComponentType[]>([])
   const effectiveTool = store.effectiveTool.value
+  const activeTool = store.activeTool.value
+  const pickerOnlyToolActive = activeTool === 'RoyQRCode' || activeTool === 'RoyBarCode'
 
-  const create = (item: AvailableCatalogItem) => {
-    if (isDrawnComponentType(item.type)) store.setActiveTool(item.type)
+  const activate = (item: AvailableCatalogItem, remember = false) => {
+    if (!isDrawnComponentType(item.type)) return
+    store.setActiveTool(item.type)
+    if (isTextToolType(item.type)) setLastTextTool(item.type)
+    if (remember) {
+      setRecentTypes((current) => rememberRecentComponentType(current, item.type))
+    }
   }
+
+  const closePicker = useCallback(
+    (restoreFocus: boolean) => {
+      setPickerOpen(false)
+      if (restoreFocus) requestAnimationFrame(() => moreButtonRef.current?.focus())
+    },
+    [setPickerOpen],
+  )
 
   return (
     <aside
@@ -125,15 +152,17 @@ export function Sidebar({ mode, activePanel, open, onTogglePanel, onResizeStart 
             >
               <RiHand />
             </DockButton>
-            {textTool && TextToolIcon && (
-              <DockButton
-                label="文本框工具"
-                stateKind="tool"
-                pressed={effectiveTool === 'RoySimpleText'}
-                onClick={() => create(textTool)}
-              >
-                <TextToolIcon />
-              </DockButton>
+            {textTools.length > 0 && (
+              <GroupedDockTool
+                groupLabel="文本工具"
+                activeType={lastTextTool}
+                items={textTools}
+                pressed={isTextToolType(effectiveTool)}
+                onSelect={(type) => {
+                  const item = findAvailableCatalogItem(type)
+                  if (item) activate(item)
+                }}
+              />
             )}
             <ShapeToolGroup />
             {dockComponentTools.map((item) => {
@@ -144,12 +173,29 @@ export function Sidebar({ mode, activePanel, open, onTogglePanel, onResizeStart 
                   label={`${item.name}工具`}
                   stateKind="tool"
                   pressed={effectiveTool === item.type}
-                  onClick={() => create(item)}
+                  onClick={() => activate(item)}
                 >
                   <Icon />
                 </DockButton>
               )
             })}
+            <DockButton
+              buttonRef={moreButtonRef}
+              label={
+                pickerOnlyToolActive
+                  ? `更多组件，当前为${findAvailableCatalogItem(activeTool)?.name ?? '组件'}工具`
+                  : '更多组件'
+              }
+              stateKind="disclosure"
+              className={styles.moreToolButton}
+              expanded={pickerOpen}
+              controls={pickerId}
+              popupKind="dialog"
+              detailActive={pickerOnlyToolActive}
+              onClick={() => setPickerOpen((current) => !current)}
+            >
+              <RiMore2Line />
+            </DockButton>
           </div>
           <span className={styles.dockGrow} />
           <div className={styles.dockZone} role="group" aria-label="工作区资源面板">
@@ -166,13 +212,30 @@ export function Sidebar({ mode, activePanel, open, onTogglePanel, onResizeStart 
             ))}
           </div>
         </nav>
+        {pickerOpen && (
+          <ComponentToolPicker
+            id={pickerId}
+            activeTool={activeTool}
+            recentTypes={recentTypes}
+            triggerRef={moreButtonRef}
+            onSelect={(item) => activate(item, true)}
+            onClose={closePicker}
+          />
+        )}
         <div className={styles.panelSlot} hidden={!open} data-ptd-region="resource-panel">
+          {activePanel === 'assets' && (
+            <AssetsPanel
+              onClose={() => onTogglePanel('assets')}
+              onDrawImage={() => {
+                const image = findAvailableCatalogItem('RoyImage')
+                if (image) activate(image)
+                if (mode === 'compact') onTogglePanel('assets')
+              }}
+            />
+          )}
           {activePanel === 'pages' && <PagesPanel onClose={() => onTogglePanel('pages')} />}
           {activePanel === 'layers' && <LayersPanel onClose={() => onTogglePanel('layers')} />}
           {activePanel === 'data' && <DataPanel onClose={() => onTogglePanel('data')} />}
-          {activePanel === 'components' && (
-            <ComponentsPanel onClose={() => onTogglePanel('components')} />
-          )}
           <button
             type="button"
             className={styles.resizeHandle}
@@ -186,19 +249,29 @@ export function Sidebar({ mode, activePanel, open, onTogglePanel, onResizeStart 
 }
 
 function DockButton({
+  buttonRef,
   label,
   shortcut,
   pressed,
   stateKind,
   className,
+  expanded,
+  controls,
+  popupKind,
+  detailActive,
   children,
   onClick,
 }: {
+  buttonRef?: Ref<HTMLButtonElement>
   label: string
   shortcut?: string
   pressed?: boolean
-  stateKind?: 'tool' | 'panel'
+  stateKind?: 'tool' | 'panel' | 'disclosure'
   className?: string
+  expanded?: boolean
+  controls?: string
+  popupKind?: 'menu' | 'dialog'
+  detailActive?: boolean
   children: ReactNode
   onClick: () => void
 }) {
@@ -206,11 +279,16 @@ function DockButton({
     <Tooltip.Root>
       <Tooltip.Trigger asChild>
         <button
+          ref={buttonRef}
           type="button"
           className={`${styles.dockButton} ${className ?? ''}`}
           aria-label={label}
           aria-pressed={pressed}
+          aria-expanded={expanded}
+          aria-controls={controls}
+          aria-haspopup={popupKind}
           data-state-kind={stateKind}
+          data-detail-active={detailActive || undefined}
           onClick={onClick}
         >
           {children}
@@ -234,23 +312,50 @@ function DockButton({
 function ShapeToolGroup() {
   useSignals()
   const store = useEditorStore()
+  const activeShape = isDrawingComponentType(store.activeTool.value)
+    ? store.activeTool.value
+    : store.lastDrawingTool.value
+  const shapeItems = DRAW_TOOL_TYPES.map(findAvailableCatalogItem).filter(
+    (item): item is AvailableCatalogItem => Boolean(item),
+  )
+
+  return (
+    <GroupedDockTool
+      groupLabel="图形工具"
+      activeType={activeShape}
+      items={shapeItems}
+      pressed={isDrawingComponentType(store.effectiveTool.value)}
+      onSelect={(type) => {
+        if (isDrawingComponentType(type)) store.setActiveTool(type)
+      }}
+    />
+  )
+}
+
+function GroupedDockTool({
+  groupLabel,
+  activeType,
+  items,
+  pressed,
+  onSelect,
+}: {
+  groupLabel: string
+  activeType: CreatableComponentType
+  items: readonly AvailableCatalogItem[]
+  pressed: boolean
+  onSelect: (type: CreatableComponentType) => void
+}) {
   const menuId = useId()
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
   const disclosureRef = useRef<HTMLButtonElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
-  const activeShape = isDrawingComponentType(store.activeTool.value)
-    ? store.activeTool.value
-    : store.lastDrawingTool.value
-  const activeItem = findAvailableCatalogItem(activeShape)
-  const shapeItems = DRAW_TOOL_TYPES.map(findAvailableCatalogItem).filter(
-    (item): item is AvailableCatalogItem => Boolean(item),
-  )
+  const activeItem = findAvailableCatalogItem(activeType)
 
   useEffect(() => {
     if (!open) return
     const selected = menuRef.current?.querySelector<HTMLButtonElement>(
-      `[data-shape-type="${activeShape}"]`,
+      `[data-tool-type="${activeType}"]`,
     )
     selected?.focus()
     const closeOnOutsidePointer = (event: globalThis.PointerEvent) => {
@@ -258,13 +363,13 @@ function ShapeToolGroup() {
     }
     document.addEventListener('pointerdown', closeOnOutsidePointer)
     return () => document.removeEventListener('pointerdown', closeOnOutsidePointer)
-  }, [activeShape, open])
+  }, [activeType, open])
 
   if (!activeItem) return null
   const ActiveIcon = activeItem.icon
 
-  const selectShape = (type: DrawingComponentType) => {
-    store.setActiveTool(type)
+  const selectTool = (type: CreatableComponentType) => {
+    onSelect(type)
     setOpen(false)
   }
 
@@ -306,15 +411,15 @@ function ShapeToolGroup() {
       ref={rootRef}
       className={styles.shapeToolGroup}
       role="group"
-      aria-label="图形工具"
-      data-active-tool={isDrawingComponentType(store.effectiveTool.value) || undefined}
+      aria-label={groupLabel}
+      data-active-tool={pressed || undefined}
     >
       <DockButton
         className={styles.shapePrimary}
         label={`使用${activeItem.name}工具`}
         stateKind="tool"
-        pressed={isDrawingComponentType(store.effectiveTool.value)}
-        onClick={() => store.setActiveTool(activeShape)}
+        pressed={pressed}
+        onClick={() => onSelect(activeType)}
       >
         <ActiveIcon />
       </DockButton>
@@ -324,7 +429,7 @@ function ShapeToolGroup() {
             ref={disclosureRef}
             type="button"
             className={styles.shapeDisclosure}
-            aria-label="选择图形工具"
+            aria-label={`选择${groupLabel}`}
             aria-haspopup="menu"
             aria-expanded={open}
             aria-controls={menuId}
@@ -339,7 +444,7 @@ function ShapeToolGroup() {
             side="right"
             sideOffset={8}
           >
-            选择图形工具
+            {`选择${groupLabel}`}
             <Tooltip.Arrow className={styles.tooltipArrow} />
           </Tooltip.Content>
         </Tooltip.Portal>
@@ -350,22 +455,20 @@ function ShapeToolGroup() {
           id={menuId}
           className={styles.shapeToolMenu}
           role="menu"
-          aria-label="选择图形工具"
+          aria-label={`选择${groupLabel}`}
           onKeyDown={handleMenuKeyDown}
         >
-          <span className={styles.shapeMenuTitle}>图形工具</span>
-          {shapeItems.map((item) => {
+          <span className={styles.shapeMenuTitle}>{groupLabel}</span>
+          {items.map((item) => {
             const Icon = item.icon
             return (
               <button
                 key={item.type}
                 type="button"
                 role="menuitemradio"
-                aria-checked={activeShape === item.type}
-                data-shape-type={item.type}
-                onClick={() => {
-                  if (isDrawingComponentType(item.type)) selectShape(item.type)
-                }}
+                aria-checked={activeType === item.type}
+                data-tool-type={item.type}
+                onClick={() => selectTool(item.type)}
               >
                 <Icon aria-hidden="true" />
                 <span>{item.name}</span>
@@ -420,6 +523,25 @@ function PageActionButton({
         </Tooltip.Content>
       </Tooltip.Portal>
     </Tooltip.Root>
+  )
+}
+
+function AssetsPanel({ onClose, onDrawImage }: { onClose: () => void; onDrawImage: () => void }) {
+  return (
+    <PanelRoot data-ptd-region="asset-panel">
+      <PanelHeader title="素材" meta="0 项">
+        <PanelCloseButton label="关闭素材面板" onClick={onClose} />
+      </PanelHeader>
+      <PanelBody>
+        <PanelEmpty
+          title="还没有可复用素材"
+          detail="先绘制图片框并在属性面板载入图片。素材持久化将在资产阶段接入。"
+          actionLabel="绘制图片框"
+          onAction={onDrawImage}
+        />
+      </PanelBody>
+      <PanelFooter>未来用于图片、Logo、印章与 SVG 素材</PanelFooter>
+    </PanelRoot>
   )
 }
 
@@ -558,7 +680,10 @@ function LayersPanel({ onClose }: { onClose: () => void }) {
             ))}
           </ol>
         ) : (
-          <PanelEmpty title="画布中还没有对象" detail="使用左侧创建工具，或从组件面板添加对象。" />
+          <PanelEmpty
+            title="画布中还没有对象"
+            detail="使用左侧创建工具，或从更多组件选择器选择工具后在纸张上绘制。"
+          />
         )}
       </PanelBody>
       <PanelFooter>列表顶部对应纸张最上层</PanelFooter>
@@ -596,314 +721,26 @@ function DataPanel({ onClose }: { onClose: () => void }) {
   )
 }
 
-function ComponentsPanel({ onClose }: { onClose: () => void }) {
-  useSignals()
-  const store = useEditorStore()
-  const [query, setQuery] = useState('')
-  const [plannedOpen, setPlannedOpen] = useState(false)
-  const filtered = useMemo(() => searchComponentCatalog(query), [query])
-  const effectiveTool = store.effectiveTool.value
-  const searchActive = query.trim().length > 0
-  const availableItems = filtered.filter(isAvailableCatalogItem)
-  const plannedItems = filtered.filter(
-    (item): item is PlannedCatalogItem => item.kind === 'planned',
-  )
-  const allAvailable = componentCatalog.filter(isAvailableCatalogItem)
-  const allPlanned = componentCatalog.filter(
-    (item): item is PlannedCatalogItem => item.kind === 'planned',
-  )
-
-  const create = (item: AvailableCatalogItem) => {
-    if (isDrawnComponentType(item.type)) store.setActiveTool(item.type)
-  }
-
-  return (
-    <PanelRoot data-ptd-region="component-panel">
-      <PanelHeader
-        title="组件"
-        meta={`${availableItems.length} 可用 · ${plannedItems.length} 规划`}
-      >
-        <PanelCloseButton label="关闭组件面板" onClick={onClose} />
-      </PanelHeader>
-      <PanelTools>
-        <label className={styles.search}>
-          <RiSearchLine aria-hidden="true" />
-          <span className={styles.visuallyHidden}>搜索组件</span>
-          <input
-            type="search"
-            value={query}
-            placeholder="搜索组件"
-            onChange={(event) => setQuery(event.target.value)}
-          />
-        </label>
-      </PanelTools>
-      <PanelBody>
-        {searchActive ? (
-          <>
-            {availableItems.length > 0 && (
-              <CatalogSection
-                id="search-results"
-                name="搜索结果"
-                introduction={`${availableItems.length} 个可用组件`}
-              >
-                <div className={styles.catalogSearchList}>
-                  {availableItems.map((item) => (
-                    <CatalogSearchItem
-                      key={item.id}
-                      item={item}
-                      active={effectiveTool === item.type}
-                      onCreate={() => create(item)}
-                    />
-                  ))}
-                </div>
-              </CatalogSection>
-            )}
-            {plannedItems.length > 0 && (
-              <PlannedCatalogSection
-                items={plannedItems}
-                open
-                forceOpen
-                onOpenChange={setPlannedOpen}
-              />
-            )}
-          </>
-        ) : (
-          <>
-            <CatalogSection
-              id="frequent"
-              name="常用"
-              introduction="高频创建组件"
-              meta={`${frequentCatalogItems.length} 项`}
-            >
-              <div className={styles.catalogTileGrid}>
-                {frequentCatalogItems.map((item) => (
-                  <CatalogAvailableButton
-                    key={item.id}
-                    item={item}
-                    variant="tile"
-                    active={effectiveTool === item.type}
-                    onCreate={() => create(item)}
-                  />
-                ))}
-              </div>
-            </CatalogSection>
-            {catalogGroups
-              .filter((group) => group.id !== 'shape')
-              .map((group) => {
-                const items = allAvailable.filter((item) => item.group === group.id)
-                return (
-                  <CatalogSection
-                    key={group.id}
-                    id={group.id}
-                    name={group.name}
-                    introduction={group.introduction}
-                    meta={`${items.length} 项`}
-                  >
-                    <div className={styles.catalogTileGrid}>
-                      {items.map((item) => (
-                        <CatalogAvailableButton
-                          key={item.id}
-                          item={item}
-                          variant="tile"
-                          active={effectiveTool === item.type}
-                          onCreate={() => create(item)}
-                        />
-                      ))}
-                    </div>
-                  </CatalogSection>
-                )
-              })}
-            <CatalogSection
-              id="shape"
-              name="图形"
-              introduction="选择工具后，在纸张上拖动绘制"
-              meta="4 项"
-            >
-              <div className={styles.shapePresetGrid}>
-                {allAvailable
-                  .filter((item) => item.group === 'shape')
-                  .map((item) => (
-                    <CatalogAvailableButton
-                      key={item.id}
-                      item={item}
-                      variant="shape"
-                      active={effectiveTool === item.type}
-                      onCreate={() => create(item)}
-                    />
-                  ))}
-              </div>
-            </CatalogSection>
-            <PlannedCatalogSection
-              items={allPlanned}
-              open={plannedOpen}
-              onOpenChange={setPlannedOpen}
-            />
-          </>
-        )}
-        {filtered.length === 0 && searchActive && (
-          <div className={styles.emptyState}>
-            <strong>没有匹配的组件</strong>
-            <span>换一个名称或组件类型试试。</span>
-            <button type="button" onClick={() => setQuery('')}>
-              清除搜索
-            </button>
-          </div>
-        )}
-      </PanelBody>
-      <PanelFooter>选择组件工具后，在纸张上拖动绘制</PanelFooter>
-    </PanelRoot>
-  )
-}
-
-function CatalogSection({
-  id,
-  name,
-  introduction,
-  meta,
-  children,
+function PanelEmpty({
+  title,
+  detail,
+  actionLabel,
+  onAction,
 }: {
-  id: string
-  name: string
-  introduction: string
-  meta?: string
-  children: ReactNode
+  title: string
+  detail: string
+  actionLabel?: string
+  onAction?: () => void
 }) {
-  const headingId = `catalog-section-${id}`
-  return (
-    <section className={styles.catalogSection} aria-labelledby={headingId}>
-      <div className={styles.catalogGroupHeader}>
-        <h3 id={headingId}>{name}</h3>
-        {meta && <span>{meta}</span>}
-      </div>
-      <p className={styles.catalogGroupIntro}>{introduction}</p>
-      {children}
-    </section>
-  )
-}
-
-function CatalogAvailableButton({
-  item,
-  variant,
-  active,
-  onCreate,
-}: {
-  item: AvailableCatalogItem
-  variant: 'tile' | 'shape'
-  active: boolean
-  onCreate: () => void
-}) {
-  const Icon = item.icon
-  return (
-    <Tooltip.Root>
-      <Tooltip.Trigger asChild>
-        <button
-          type="button"
-          className={variant === 'shape' ? styles.shapePreset : styles.catalogTile}
-          data-active-tool={active || undefined}
-          onClick={onCreate}
-          aria-label={`${item.name}：${item.description}`}
-        >
-          <Icon aria-hidden="true" />
-          <span>{item.name}</span>
-        </button>
-      </Tooltip.Trigger>
-      <Tooltip.Portal>
-        <Tooltip.Content
-          className={`${styles.catalogTooltip} ${ptdThemeClass}`}
-          side="right"
-          sideOffset={8}
-        >
-          <strong>{item.name}</strong>
-          <span>{item.description}</span>
-          <Tooltip.Arrow className={styles.tooltipArrow} />
-        </Tooltip.Content>
-      </Tooltip.Portal>
-    </Tooltip.Root>
-  )
-}
-
-function CatalogSearchItem({
-  item,
-  active,
-  onCreate,
-}: {
-  item: AvailableCatalogItem
-  active: boolean
-  onCreate: () => void
-}) {
-  const Icon = item.icon
-  return (
-    <button
-      type="button"
-      className={styles.catalogSearchItem}
-      data-active-tool={active || undefined}
-      onClick={onCreate}
-      aria-label={`${item.name}：${item.description}`}
-    >
-      <Icon aria-hidden="true" />
-      <span>
-        <strong>{item.name}</strong>
-        <small>{item.description}</small>
-      </span>
-    </button>
-  )
-}
-
-function PlannedCatalogSection({
-  items,
-  open,
-  forceOpen = false,
-  onOpenChange,
-}: {
-  items: readonly PlannedCatalogItem[]
-  open: boolean
-  forceOpen?: boolean
-  onOpenChange: (open: boolean) => void
-}) {
-  return (
-    <details
-      className={styles.plannedSection}
-      open={open}
-      onToggle={(event) => onOpenChange(event.currentTarget.open)}
-    >
-      <summary onClick={forceOpen ? (event) => event.preventDefault() : undefined}>
-        <span>
-          <strong>即将支持</strong>
-          <small>{items.length} 项 · 规划中</small>
-        </span>
-        <RiArrowDownSLine aria-hidden="true" />
-      </summary>
-      <div className={styles.plannedList}>
-        {items.map((item) => {
-          const Icon = item.icon
-          return (
-            <button
-              key={item.id}
-              type="button"
-              className={styles.plannedItem}
-              disabled
-              draggable={false}
-              aria-label={`${item.name}：${item.description}，规划中`}
-            >
-              <Icon aria-hidden="true" />
-              <span>
-                <strong>{item.name}</strong>
-                <small>{item.description}</small>
-              </span>
-              <em>规划中</em>
-            </button>
-          )
-        })}
-      </div>
-    </details>
-  )
-}
-
-function PanelEmpty({ title, detail }: { title: string; detail: string }) {
   return (
     <div className={styles.emptyState}>
       <strong>{title}</strong>
       <span>{detail}</span>
+      {actionLabel && onAction && (
+        <button type="button" onClick={onAction}>
+          {actionLabel}
+        </button>
+      )}
     </div>
   )
 }
