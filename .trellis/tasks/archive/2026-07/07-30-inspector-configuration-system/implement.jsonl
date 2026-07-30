@@ -1,0 +1,11 @@
+{"file":".trellis/spec/monorepo/package-conventions.md","reason":"Core 与 React Designer 的构建、导出及包边界约束。"}
+{"file":".trellis/spec/monorepo/typescript-conventions.md","reason":"新增度量类型、工具和 Store 状态必须遵守 strict TypeScript 与公共导出约束。"}
+{"file":".trellis/spec/monorepo/styling-conventions.md","reason":"Inspector 控件与 Canvas 动态几何分别使用 CSS Modules 和 CSS Custom Properties。"}
+{"file":".trellis/spec/monorepo/directory-structure.md","reason":"新增 Core 工具、React Designer 控件与测试需要放在正确包层。"}
+{"file":".trellis/spec/monorepo/quality-guidelines.md","reason":"确定 Vitest、ESLint、Prettier 和构建验证要求。"}
+{"file":".trellis/spec/monorepo/ptd-ui-system.md","reason":"属性面板密度、度量输入、状态、无障碍和 PTD 视觉语言的权威合同。"}
+{"file":".trellis/spec/monorepo/react-designer-contract.md","reason":"实例隔离、受控状态、Gesture、Host onChange 与历史边界。"}
+{"file":".trellis/spec/guides/code-reuse-thinking-guide.md","reason":"集中度量换算并复用既有 Inspector 输入行为，避免散落换算和重复控件。"}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"统一 Core 度量合同与 Designer 多处展示消费者之间的数据边界。"}
+{"file":".trellis/tasks/07-30-inspector-configuration-system/research/property-capability-audit.md","reason":"页面、组件、Renderer 与现有 Inspector 能力缺口基线。"}
+{"file":".trellis/tasks/07-30-inspector-configuration-system/research/professional-control-patterns.md","reason":"专业属性控件映射、渐进披露和交互方案基线。"}
