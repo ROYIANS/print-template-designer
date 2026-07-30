@@ -100,10 +100,10 @@ PTD 是一张数字化的制版工作台：**精密、轻快、可信，带有�
 
 ```css
 .ptdTheme {
-  --ptd-surface-app: var(--ptd-paper-2);
-  --ptd-surface-panel: var(--ptd-paper-1);
+  --ptd-surface-app: var(--ptd-paper-1);
+  --ptd-surface-panel: var(--ptd-paper-0);
   --ptd-surface-raised: var(--ptd-paper-0);
-  --ptd-surface-sunken: var(--ptd-paper-3);
+  --ptd-surface-sunken: var(--ptd-paper-2);
   --ptd-surface-canvas: oklch(91.5% 0.012 255);
   --ptd-surface-paper: var(--ptd-paper-0);
 
@@ -136,6 +136,11 @@ PTD 是一张数字化的制版工作台：**精密、轻快、可信，带有�
 - 图标、边框、焦点环和选中指示至少达到 3:1。
 - Placeholder 不是标签，且颜色同样要满足正文对比度要求。
 - 错误状态使用 `--ptd-danger`；校样朱红不能代替错误语义。
+- Context Bar、Resource Panel、Inspector 与 Status Bar 使用接近白色的 `surface-panel`，让长时间
+  工作的主 Chrome 保持清洁；`surface-app` 只承担框架底色，`surface-sunken` 只用于局部凹槽、
+  hover 和禁用状态。不得把多个深浅相近的灰 surface 反复嵌套成暗淡的整屏底色。
+- 深色 App Bar、冷灰 Pasteboard 和冷白 Paper 继续形成三个明确层级；“提高 Panel 明度”不等于
+  将 Canvas 或整页宿主铺成纯白。
 
 ### 4.3 间距、尺寸与圆角
 
@@ -165,6 +170,8 @@ PTD 是一张数字化的制版工作台：**精密、轻快、可信，带有�
 - 浮层和空状态容器最多使用 4px 圆角。
 - 只有单选、状态点、头像和旋转控制点可以为圆形或 pill。
 - 不允许使用 8px 以上大圆角作为默认视觉。
+- App Bar 是明确例外：为了保持与 ChemViz 产品家族一致，栏体使用 14px 底部圆角，展开命令项
+  使用 12px 圆角；该例外不能扩散到普通 Panel、Inspector 或画布组件。
 
 ### 4.4 阴影与层级
 
@@ -256,12 +263,13 @@ PTD 是一张数字化的制版工作台：**精密、轻快、可信，带有�
 
 ```text
 ┌────────────────────────────────────────────────────────────────────┐
-│ Document Bar：品牌、文档身份、真实载入/保存动作                     │ 36
+│ App Bar：品牌、应用菜单、载入/保存、账户入口                        │ 42
+│ └─ Application Menu：悬停/焦点展开，真实下压下方工作区              │ auto
 ├────────────────────────────────────────────────────────────────────┤
 │ Context Bar：历史 + 当前页面/单选/多选/参考线命令                  │ 40
 ├────┬──────────────┬──────────────────────────┬─────────────────────┤
 │Dock│ Resource     │ Canvas / Ruler / Paper   │ Inspector           │
-│ 52 │ 280, 按需    │ minmax(0, 1fr)           │ 304, 按需           │
+│ 42 │ 280, 按需    │ minmax(0, 1fr)           │ 304, 按需           │
 ├────┴──────────────┴──────────────────────────┴─────────────────────┤
 │ Status Bar：页码、选择、页面尺寸、参考线、缩放                      │ 24
 └────────────────────────────────────────────────────────────────────┘
@@ -269,25 +277,45 @@ PTD 是一张数字化的制版工作台：**精密、轻快、可信，带有�
 
 ```css
 .ptdTheme {
-  --ptd-app-bar-height: 36px;
+  --ptd-app-bar-height: 42px;
   --ptd-command-bar-height: 40px;
   --ptd-status-bar-height: 24px;
-  --ptd-tool-dock-width: 52px;
+  --ptd-tool-dock-width: 42px;
   --ptd-resource-panel-width: 280px;
   --ptd-inspector-width: 304px;
 }
 ```
 
-- Document Bar 只放文档身份和真实文档级动作；不存在的预览、云保存或同步状态不得占位。
+- App Bar 复用 ChemViz 桌面导航的材质合同：`rgb(0 0 0 / 88%)` 背景、16px backdrop blur、
+  `rgb(255 255 255 / 6%)` hairline 与 `0 10px 28px rgb(0 0 0 / 12%)` 阴影；根据 PTD 高密度
+  工作台语境将高度收紧为 42px、底角收紧为 14px。
+- App Bar 折叠时高 42px，第一行轨道使用内容高度；展开菜单必须参与 Designer Grid 布局并真实
+  下压 Context Bar、Canvas 和 Panel，禁止使用 fixed/absolute 覆盖工作区。
+- App Bar 保留品牌与真实载入/保存动作；账户入口在认证功能接入前可以显示明确的用户占位，但不
+  重复展示当前模板标题、页码、纸张方向和尺寸，这些信息由 Context Bar、Inspector 与 Status Bar
+  承担。不存在的云保存、同步或运行状态不得占位。
+- 应用菜单分类统一为文件(F)、编辑(E)、对象(O)、视图(V)、窗口(W)、帮助(H)，靠左排列在品牌
+  之后并提供 `accessKey`/`aria-keyshortcuts` 助记键语义。展开区直接显示命令名称、简短用途与
+  Windows 风格快捷键，不增加“应用命令”“界面预览”等解释性标题；尚未实现的命令必须使用
+  `aria-disabled`，不能执行假动作。
+- 只有具体菜单分类在 hover/focus/click 时展开；品牌、载入/保存和账户入口不触发并会
+  收起菜单。鼠标离开后延迟 120ms 收起；左右方向键/Home/End 可以切换分类，Escape 收起。
+  `prefers-reduced-motion` 下取消轨道和位移动画。
+- 窄容器将六个桌面分类折叠为汉堡按钮；点击在原位展开菜单，并在展开区顶部显示可横向滚动的
+  分类条。载入、保存、账户等关键入口适配成紧凑图标，不因响应式布局被删除。
+- 披露节奏与 ChemViz 一致：轨道使用 340ms `cubic-bezier(0.22, 1, 0.36, 1)`，内容从
+  `translateY(-8px)` 与透明态进入；实现优先使用 `grid-template-rows: 0fr → 1fr`，不测量或动画
+  固定高度。
 - Context Bar 依据 effective tool、页面、单选、多选和参考线选择切换命令；Text/Shape/Hand 工具
   优先显示当前模式、直接操作和退出提示，返回 Select 后才恢复页面/选择上下文。
-- Tool Dock 分为“工具”和“面板”两区：Select/Hand/Text/Shape/Image/Table 属于操作入口，
+- Tool Dock 在语义上分为工具和资源面板两区，但不常驻显示“工具”“面板”文字；使用分区位置、
+  `role="group"` 与 `aria-label` 保持可理解性。Select/Hand/Text/Shape/Image/Table 属于操作入口，
   Components/Pages/Layers/Data 只负责披露资源面板。它使用与面板相连的中性纸灰/石墨 surface；
   常态图标中性，键盘 Focus 才固定使用钴蓝。Document Bar 承担深色视觉锚点，Dock 不应表现成
   与画布割裂的第二套导航产品。
-- Persistent tool 激活使用 raised paper、石墨 hairline 与 inset keycap 底边；资源面板入口打开时
-  表现为连接到相邻面板的中性 tab。禁止用“钴蓝左竖线 + 大面积浅钴蓝底”同时表达这两种状态，
-  普通 Dock 按钮不使用外投影。
+- 精细指针下 Persistent Tool 激活使用轻中性 paper 底、钴蓝图标与靠 Dock 外缘的短几何标记；
+  打开的资源面板入口把短标记放在邻近 Panel 的一侧。两种状态不得改变按钮尺寸，也不使用三边
+  inset、负 margin、keycap 底边或外投影。禁止用“长钴蓝竖线 + 大面积浅钴蓝底”同时表达状态。
 - Resource Panel 默认宽 280px、限制在 240–360px；Inspector 默认 304px、限制在 280–420px。
   两者均可折叠和拖动调整，最后宽度在当前 Designer 实例中保留。
 - 无组件选择时 Inspector 必须展示真实 Page Inspector，而不是空状态；只读信息不得伪装成输入框。
@@ -326,8 +354,9 @@ PanelRoot
   折叠的“即将支持”，保留禁用、不可拖拽和“规划中”语义；搜索命中时可强制显示但不得创建。
 - `creationMode='insert'` 的项支持点击居中与 native drag 定位；`creationMode='draw'` 的 Text/Shape
   点击只激活 persistent tool，必须由 Paper 拖框后创建。拖拽不是 insert 项的唯一创建路径。
-- Shape 使用一个 Dock 工具组和四个面板 preset；Dock 主按钮为完整 40×40、图标 20×20 居中，
-  disclosure 作为右下角 16×16 覆盖目标，不能压缩主按钮或把图标挤偏。
+- Shape 使用一个 Dock 工具组和四个面板 preset；精细指针下 Dock 主按钮为完整 30×30、图标
+  16×16 居中，disclosure 作为右下角 13×13 覆盖目标。coarse pointer 下恢复 40×40 主目标、
+  20×20 图标与 16×16 disclosure。任何尺寸都不能压缩主按钮或把图标挤偏。
 - 当前 Shape preset 使用中性 graphite 边缘/字重与 inset edge，不使用蓝色左线或浅蓝填充。
 - Drag preview 显示组件图标与名称，不能复制整张面板卡片。
 - 创建 Schema 只能调用统一 Component Catalog/Factory，面板不能自己拼接默认属性。
@@ -358,13 +387,16 @@ PanelRoot
 - 标准工具图标 16px，重要文档级动作 18px；描边粗细保持一致。
 - 禁止使用 Emoji、Unicode 箭头或“左齐/中齐/横分”等文字缩写代替正式图标。
 - 每个图标按钮必须有 `aria-label` 和 Tooltip；Tooltip 同时展示名称与快捷键。
-- 图标按钮视觉尺寸 28px；在 coarse pointer 下将可点击区域提升到至少 40px。
-- Tool Dock 的主入口固定使用 40×40 target 和 20×20 图标，所有 glyph 共用同一光学中心；组合工具的
-  disclosure 只能叠加在角落，不能改变主图标 grid cell。Shape 菜单必须消费 Arrow/Home/End、
+- 常规命令栏图标按钮视觉尺寸 28px；在 coarse pointer 下将可点击区域提升到至少 40px。
+- Tool Dock 的主入口在精细指针下使用 30×30 target 和 16×16 图标，coarse pointer 下使用
+  40×40 target 和 20×20 图标；所有 glyph 共用同一光学中心。组合工具的 disclosure 只能叠加
+  在角落，不能改变主图标 grid cell。Shape 菜单必须消费 Arrow/Home/End、
   Enter/Space 与 Escape，禁止继续冒泡到对象移动、临时 Hand 或全局退出工具快捷键。
 - 命令按领域分组：历史、剪贴板、排列、层级、组合、视图。
 - 低频排列命令可进入 Dropdown；撤销、重做、删除、锁定、组合和缩放保持可发现。
 - 禁用按钮保留位置，使用 `opacity: 0.45` 并移除事件；不靠 `cursor: not-allowed` 表达状态。
+- Status Bar 的缩放减/选择/增保持一个紧凑语义组，但不绘制表单式整组外框和固定竖分隔线；
+  单个动作只在 hover/focus 时出现局部 surface 或 focus ring，避免与状态文本争夺视觉重量。
 
 ## 9. 表单与属性检查器
 
@@ -531,6 +563,7 @@ PTD 是桌面优先的生产工具，但不能假设所有桌面设备都有精�
 ```tsx
 <div data-ptd-region="designer" />
 <header data-ptd-region="app-bar" />
+<div data-ptd-region="application-menu" />
 <nav data-ptd-region="command-bar" />
 <aside data-ptd-region="left-sidebar" />
 <div data-ptd-region="resource-panel" />
