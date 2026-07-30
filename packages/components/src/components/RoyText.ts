@@ -1,5 +1,6 @@
 import type { ComponentSchema } from '@ptd/core'
 import { BaseComponent } from '../base/base-component'
+import { sanitizeRichTextHtml } from './richTextHtml'
 
 export class RoyText extends BaseComponent {
   private inner: HTMLDivElement | null = null
@@ -19,12 +20,12 @@ export class RoyText extends BaseComponent {
     }
     this.inner = inner
     const html = typeof this.schema.propValue === 'string' ? this.schema.propValue : ''
-    inner.innerHTML = html
+    inner.innerHTML = sanitizeRichTextHtml(html)
   }
 
   setContent(html: string): void {
     if (this.inner) {
-      this.inner.innerHTML = html
+      this.inner.innerHTML = sanitizeRichTextHtml(html)
     }
   }
 }

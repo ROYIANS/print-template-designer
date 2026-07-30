@@ -56,8 +56,11 @@ describe('component catalog', () => {
       'RoySimpleTable',
       'RoyQRCode',
     ])
-    expect(defaultRegistry.get('RoySimpleText')?.catalog?.creationMode).toBe('draw')
-    expect(defaultRegistry.get('RoyText')?.catalog?.creationMode).toBe('insert')
+    expect(
+      defaultRegistry
+        .getCatalogDefinitions()
+        .every((definition) => definition.catalog.creationMode === 'draw'),
+    ).toBe(true)
   })
 
   it('searches names, Chinese use cases, descriptions and technical types deterministically', () => {
@@ -174,42 +177,80 @@ describe('component catalog', () => {
     },
   )
 
-  it('keeps Text persistent while each valid frame adds one schema and history entry', () => {
+  it('keeps shape tools active after each completed frame', () => {
     const onChange = vi.fn()
     const store = createEditorStore(template(), { onChange })
-    store.setActiveTool('RoySimpleText')
+    store.setActiveTool('RoyRect')
 
-    const first = createDrawnComponentSchema(
-      'RoySimpleText',
+    const component = createDrawnComponentSchema(
+      'RoyRect',
       { x: 20, y: 30 },
       { x: 180, y: 90 },
       PAGE,
     )
-    const second = createDrawnComponentSchema(
-      'RoySimpleText',
-      { x: 220, y: 160 },
-      { x: 80, y: 110 },
-      PAGE,
-    )
-    expect(first).not.toBeNull()
-    expect(second).not.toBeNull()
-    if (!first || !second) return
+    expect(component).not.toBeNull()
+    if (!component) return
 
-    store.addComponent(first)
-    expect(store.activeTool.value).toBe('RoySimpleText')
+    expect(store.completeDrawnComponent(component, 'RoyRect')).toBe(true)
+    expect(store.activeTool.value).toBe('RoyRect')
     expect(store.history.value).toHaveLength(2)
     expect(onChange).toHaveBeenCalledTimes(1)
+  })
 
-    store.addComponent(second)
-    expect(store.components.value).toHaveLength(2)
-    expect(store.activeTool.value).toBe('RoySimpleText')
-    expect(store.history.value).toHaveLength(3)
-    expect(onChange).toHaveBeenCalledTimes(2)
+  it.each(['RoySimpleText', 'RoyText'] as const)(
+    'returns %s to Select and immediately enters content editing',
+    (type) => {
+      const onChange = vi.fn()
+      const store = createEditorStore(template(), { onChange })
+      store.setActiveTool(type)
+      const component = createDrawnComponentSchema(type, { x: 20, y: 30 }, { x: 180, y: 90 }, PAGE)
+      expect(component).not.toBeNull()
+      if (!component) return
 
-    store.setActiveTool('hand')
+      expect(store.completeDrawnComponent(component, type)).toBe(true)
+      expect(store.activeTool.value).toBe('select')
+      expect(store.editingComponentId.value).toBe(component.id)
+      expect(store.selectedIds.value).toEqual([component.id])
+      expect(store.history.value).toHaveLength(2)
+      expect(onChange).toHaveBeenCalledTimes(1)
+    },
+  )
+
+  it.each(['RoyImage', 'RoyQRCode', 'RoyBarCode', 'RoySimpleTable', 'RoyComplexTable'] as const)(
+    'returns one-shot %s to Select without opening a text editor',
+    (type) => {
+      const store = createEditorStore(template())
+      store.setActiveTool(type)
+      const component = createDrawnComponentSchema(type, { x: 20, y: 30 }, { x: 180, y: 90 }, PAGE)
+      expect(component).not.toBeNull()
+      if (!component) return
+
+      expect(store.completeDrawnComponent(component, type)).toBe(true)
+      expect(store.activeTool.value).toBe('select')
+      expect(store.editingComponentId.value).toBeNull()
+      expect(store.history.value).toHaveLength(2)
+    },
+  )
+
+  it('does not create or switch tools when draw completion no longer matches the active tool', () => {
+    const onChange = vi.fn()
+    const store = createEditorStore(template(), { onChange })
+    store.setActiveTool('RoyImage')
+    const component = createDrawnComponentSchema(
+      'RoyImage',
+      { x: 20, y: 30 },
+      { x: 180, y: 90 },
+      PAGE,
+    )
+    expect(component).not.toBeNull()
+    if (!component) return
+
     store.setActiveTool('select')
-    expect(store.history.value).toHaveLength(3)
-    expect(onChange).toHaveBeenCalledTimes(2)
+    expect(store.completeDrawnComponent(component, 'RoyImage')).toBe(false)
+    expect(store.components.value).toHaveLength(0)
+    expect(store.activeTool.value).toBe('select')
+    expect(store.history.value).toHaveLength(1)
+    expect(onChange).not.toHaveBeenCalled()
   })
 })
 

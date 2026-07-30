@@ -1,0 +1,211 @@
+.editorFrame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  overflow: auto;
+  border: var(--ptd-border);
+  border-radius: var(--ptd-border-radius);
+  color: var(--ptd-color);
+  background: var(--ptd-background);
+  opacity: var(--ptd-opacity);
+  cursor: text;
+  user-select: text;
+}
+
+.plainEditor,
+.richContent {
+  width: 100%;
+  min-height: 100%;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.richContent {
+  height: 100%;
+}
+
+.plainEditor {
+  display: block;
+  text-align: var(--ptd-text-align, left);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.plainEditor:empty::before,
+.richEditable > p:first-child:last-child:has(> br:only-child)::before {
+  content: '输入文本…';
+  color: color-mix(in oklch, var(--ptd-color) 38%, transparent);
+  pointer-events: none;
+}
+
+.richEditable {
+  width: 100%;
+  min-height: 100%;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.richEditable p,
+.richEditable h1,
+.richEditable h2,
+.richEditable h3,
+.richEditable h4 {
+  margin: 0;
+}
+
+.richEditable ul,
+.richEditable ol {
+  margin: 0;
+  padding-inline-start: 1.5em;
+}
+
+.richEditable blockquote {
+  margin: 0;
+  padding-inline-start: 0.8em;
+  border-inline-start: 2px solid var(--ptd-selection);
+}
+
+.editingHint {
+  position: absolute;
+  z-index: 2;
+  right: 4px;
+  bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 5px;
+  color: var(--ptd-text-muted);
+  background: color-mix(in oklch, var(--ptd-surface-raised) 92%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in oklch, var(--ptd-border-strong) 52%, transparent);
+  font-size: 9px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.editingHint kbd {
+  padding: 1px 3px;
+  border: 1px solid var(--ptd-border-strong);
+  background: var(--ptd-surface-sunken);
+  font: inherit;
+}
+
+.richToolbar {
+  z-index: var(--ptd-layer-tooltip);
+  max-width: min(1040px, calc(100vw - 24px));
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  padding: 3px;
+  overflow-x: auto;
+  border: 1px solid var(--ptd-graphite-700);
+  color: var(--ptd-paper-0);
+  background: var(--ptd-graphite-950);
+  box-shadow: var(--ptd-shadow-floating);
+  overscroll-behavior-inline: contain;
+  white-space: nowrap;
+}
+
+.richToolbar button,
+.richToolbar select,
+.colorWell {
+  height: 26px;
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: var(--ptd-radius-1);
+  color: color-mix(in oklch, var(--ptd-paper-0) 82%, var(--ptd-graphite-950));
+  background: transparent;
+  font:
+    500 10px/1 'Sarasa UI SC',
+    'Microsoft YaHei UI',
+    sans-serif;
+}
+
+.richToolbar button {
+  width: 26px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+
+.richToolbar button svg {
+  width: 14px;
+  height: 14px;
+}
+
+.richToolbar button:hover,
+.richToolbar button:focus-visible,
+.richToolbar button[data-active='true'] {
+  color: var(--ptd-paper-0);
+  background: color-mix(in oklch, var(--ptd-paper-0) 17%, transparent);
+}
+
+.richToolbar button[data-active='true'] {
+  box-shadow: inset 0 -2px 0 var(--ptd-selection);
+}
+
+.richToolbar select {
+  max-width: 92px;
+  padding: 0 20px 0 6px;
+}
+
+.richToolbar select:hover,
+.richToolbar select:focus-visible {
+  background: color-mix(in oklch, var(--ptd-paper-0) 12%, transparent);
+  outline: none;
+}
+
+.richToolbar option {
+  color: var(--ptd-text-primary);
+  background: var(--ptd-surface-raised);
+}
+
+.toolbarDivider {
+  width: 1px;
+  height: 17px;
+  flex: 0 0 auto;
+  margin: 0 2px;
+  background: color-mix(in oklch, var(--ptd-paper-0) 22%, transparent);
+}
+
+.colorWell {
+  position: relative;
+  width: 26px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.colorWell input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.highlightMark {
+  padding: 1px 2px;
+  color: var(--ptd-graphite-950);
+  background: #fff1a8;
+}
+
+.linkEditor {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.linkEditor input {
+  width: 176px;
+  height: 24px;
+  box-sizing: border-box;
+  padding: 0 6px;
+  border: 1px solid var(--ptd-graphite-600);
+  border-radius: var(--ptd-radius-1);
+  color: var(--ptd-paper-0);
+  background: var(--ptd-graphite-900);
+  font:
+    500 10px/1 'Outfit',
+    sans-serif;
+}

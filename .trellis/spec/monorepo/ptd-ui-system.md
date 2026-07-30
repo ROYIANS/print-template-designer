@@ -358,18 +358,17 @@ PanelRoot
   名称与 Remix line 图标承担日常扫描，长描述进入 Tooltip/搜索结果，不用 9px 常驻说明堆密度。
 - `basic/complex` 是 catalog 元数据，不在每个可用 tile 上重复显示。所有 planned item 集中在默认
   折叠的“即将支持”，保留禁用、不可拖拽和“规划中”语义；搜索命中时可强制显示但不得创建。
-- `creationMode='insert'` 的项支持点击居中与 native drag 定位；`creationMode='draw'` 的 Text/Shape
-  点击只激活 persistent tool，必须由 Paper 拖框后创建。拖拽不是 insert 项的唯一创建路径。
+- 所有可用组件点击后只激活对应创作工具，不得立即在页面中心插入，也不得通过 Sidebar native
+  drag 绕过拖框。用户必须在 Paper 上拖动定义组件 Frame；无效短拖和取消不创建组件。
 - Shape 使用一个 Dock 工具组和四个面板 preset；精细指针下 Dock 主按钮为完整 30×30、图标
   16×16 居中，disclosure 作为右下角 13×13 覆盖目标。coarse pointer 下恢复 40×40 主目标、
   20×20 图标与 16×16 disclosure。任何尺寸都不能压缩主按钮或把图标挤偏。
 - 当前 Shape preset 使用中性 graphite 边缘/字重与 inset edge，不使用蓝色左线或浅蓝填充。
-- Drag preview 显示组件图标与名称，不能复制整张面板卡片。
 - 创建 Schema 只能调用统一 Component Catalog/Factory，面板不能自己拼接默认属性。
-- Insert 或有效 Draw 每次只添加一个完整 Schema、写入一个历史节点并发出一次最终 `onChange`；
-  tool activation、preview、Hand/pan、short/cancelled draw 不发出模板变更。
-- Insert 点击创建后，Canvas viewport 应把新组件平滑带回可见中心并消费一次性 reveal 请求；
-  Draw/native drag 保留用户落点，不强制居中。Reveal 只属于 UI state。
+- 有效 Draw 每次只添加一个完整 Schema、写入一个历史节点并发出一次最终 `onChange`；tool
+  activation、preview、Hand/pan、short/cancelled draw 不发出模板变更，也不自动退出当前工具。
+- 四种 Shape 完成后保持连续绘制；文本、富文本、图像、编码和表格完成一次后回到 Select。
+  普通文本和富文本创建完成立即进入内容编辑，其他一次性工具保留新组件选中态供属性配置。
 
 ### 7.1 Pages 资源面板
 
@@ -461,14 +460,15 @@ PanelRoot
 - 旋转、缩放和移动反馈不得改变组件本身的 Schema 样式。
 - Editor tool 分为 persistent `activeTool` 与临时覆盖后的 `effectiveTool`。`H` 激活 persistent Hand，
   `V`/Escape 返回 Select；可编辑控件外按住 Space 只临时令 effective tool 为 Hand，keyup、blur 或
-  卸载必须恢复原 persistent Text/Shape/Select，且不得修改 last-used Shape。
+  卸载必须恢复原 Creation/Shape/Select，且不得修改 last-used Shape。
 - Hand 只通过 pointer drag 改变 Canvas viewport 的 `scrollLeft/scrollTop`，idle 使用 `grab`、drag
   使用 `grabbing`；不得清除选择、移动 Paper/对象/参考线、触发 `onChange` 或写历史。pointer cancel、
   lost capture、工具切换与 window blur 都必须清理 pan session。
-- `RoySimpleText` 与四种 Shape 是 persistent draw tools。Pointer down/move 产生本地 preview，4 CSS px
-  以下、Escape、Hand/Space、pointer cancel、lost capture 与 blur 都只取消；有效 pointer up 归一化、
-  clamp 页面几何并调用一次 `addComponent()`。Text 支持正反拖框且 Shift 不约束；闭合 Shape 的 Shift
-  等比，Line 使用中点、欧氏长度与 `atan2` 角度。
+- 所有可用目录组件都是 draw tools。Pointer down/move 产生本地 preview；4 CSS px 以下、Escape、
+  Hand/Space、pointer cancel、lost capture 与 blur 都只取消。有效 pointer up 归一化并 clamp 页面几何，
+  再调用一次 `completeDrawnComponent()`。四种 Shape 连续绘制；其余工具完成一次后回到 Select；
+  `RoySimpleText` / `RoyText` 同时进入内容编辑。内容 Frame 支持正反拖框且 Shift 不约束，QR 始终
+  保持正方形；闭合 Shape 的 Shift 等比，Line 使用中点、欧氏长度与 `atan2` 角度。
 - 框选区域使用清晰边框和不超过 8% 的选中色透明填充，不能遮挡待选组件。拖动接近 Canvas
   viewport 边缘时应按距离渐进自动滚动；滚动后的框选坐标必须使用实时 Paper 矩形重新换算，
   并限制在未缩放纸张边界内，不能继续沿用按下瞬间缓存的屏幕矩形。
@@ -505,6 +505,9 @@ PanelRoot
   菜单交互沿用 Radix roving focus，支持方向键、Enter 和 Escape，焦点态不能只依赖颜色。
 - ContextMenu Portal 应用共享 `ptdTheme`，使用 `--ptd-layer-context`；在 compact Inspector/Resource
   Scrim 上方可见可操作，但仍低于 Modal、Toast 与 Tooltip。
+- ContextMenu 主菜单与每一级子菜单都属于独立的 Portal 交互边界。Designer 根节点不得在其
+  `pointerdown` 捕获阶段抢回焦点，全局快捷键也不得消费菜单的方向键、Enter 或 Escape；鼠标从
+  父菜单移入子菜单后，子项必须保持可悬停、可点击并完成命令选择。
 
 ## 11. Portal 与主题合同
 
@@ -512,6 +515,9 @@ Radix Tooltip、DropdownMenu、ContextMenu、Popover 和 Dialog 通过 Portal �
 后，不会继承根节点 token。因此：
 
 - Designer 根节点和每个 Portal Content 必须同时应用共享 `ptdTheme` 类。
+- 每个可交互 Portal Content 必须声明统一的交互边界，使 Designer 根节点的焦点捕获和全局快捷键
+  跳过该子树。React Portal 的事件仍沿 React 树传播，不能仅凭 DOM 已挂载到 `document.body`
+  就假定事件与 Designer 隔离。
 - 禁止在单个浮层内重新声明一套颜色或写 magic-number `z-index`。
 - 浮层使用第 4.4 节语义 layer token。
 - ContextMenu 必须高于普通 floating，低于 Modal、Toast 和 Tooltip。
@@ -599,7 +605,7 @@ PTD 是桌面优先的生产工具，但不能假设所有桌面设备都有精�
 
 - 统一使用：组件、结构、属性、数据源、全局设置、组合、拆分、锁定、解锁、置顶、置底。
 - 按钮使用明确动作，如“添加文本”“解锁组件”“删除 3 个组件”，不用“确定”“提交”。
-- 空状态说明下一步：`画布中还没有组件。拖入一个组件，或点击组件名称开始。`
+- 空状态说明下一步：`画布中还没有组件。选择一个组件工具，然后在纸张上拖动绘制。`
 - 错误信息包含发生了什么、原因和恢复方式，不能只写“操作失败”。
 - Tooltip 可补充快捷键，但不能承载完成任务所必需的唯一说明。
 

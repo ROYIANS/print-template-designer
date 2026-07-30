@@ -36,4 +36,13 @@ describe('drawing tool context guidance', () => {
       secondaryHint: { key: 'Space', label: '松开返回' },
     })
   })
+
+  it.each([
+    ['RoyText', 'TEXT', '富文本工具'],
+    ['RoyImage', 'FRAME', '图片工具'],
+    ['RoySimpleTable', 'FRAME', '自由表格工具'],
+    ['RoyQRCode', 'FRAME', '二维码工具'],
+  ] as const)('describes the %s creation tool', (tool, kind, name) => {
+    expect(getToolGuidance(tool)).toMatchObject({ kind, name, shiftHint: null })
+  })
 })

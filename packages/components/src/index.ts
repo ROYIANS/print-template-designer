@@ -1,9 +1,11 @@
 export { BaseComponent } from './base/base-component'
-export { applyCssVars } from './base/css-variables'
+export { applyCssVars, componentStyleToCssVariables } from './base/css-variables'
+export type { ComponentCssVariables } from './base/css-variables'
 export { injectStylesheet } from './base/stylesheet'
 
 export { RoySimpleText } from './components/RoySimpleText'
 export { RoyText } from './components/RoyText'
+export { sanitizeRichTextHtml } from './components/richTextHtml'
 export { RoyLine } from './components/RoyLine'
 export { RoyRect } from './components/RoyRect'
 export { RoyCircle } from './components/RoyCircle'

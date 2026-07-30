@@ -1,2 +1,6 @@
-{"file": ".trellis/spec/monorepo/quality-guidelines.md", "reason": "ESLint/Prettier 规范，检查代码风格合规性"}
-{"file": ".trellis/spec/monorepo/typescript-conventions.md", "reason": "strict TS 合规检查：钩子接口类型安全，禁止 as any"}
+{"file":".trellis/spec/monorepo/react-designer-contract.md","reason":"verify menu, keyboard and toolbar reuse the same EditorStore commands"}
+{"file":".trellis/spec/monorepo/ptd-ui-system.md","reason":"verify capability, disabled and pending states are visually and accessibly accurate"}
+{"file":".trellis/spec/monorepo/package-conventions.md","reason":"verify no Web, Server, routing or HTTP dependency leaks into react-designer"}
+{"file":".trellis/spec/monorepo/typescript-conventions.md","reason":"verify strict, extensible public command and document-state types"}
+{"file":".trellis/spec/monorepo/quality-guidelines.md","reason":"verify lint, tests, builds, formatting and artifacts"}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"verify application lifecycle remains Host-owned"}

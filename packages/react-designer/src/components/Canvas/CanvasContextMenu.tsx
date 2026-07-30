@@ -71,6 +71,7 @@ function LayerMenu({ disabled }: { disabled: boolean }) {
       <ContextMenu.Portal>
         <ContextMenu.SubContent
           className={`${styles.content} ${ptdThemeClass}`}
+          data-ptd-portal-interactive
           sideOffset={4}
           collisionPadding={8}
         >
@@ -113,7 +114,11 @@ export function CanvasContextMenu({
     <ContextMenu.Root>
       <ContextMenu.Trigger asChild>{children}</ContextMenu.Trigger>
       <ContextMenu.Portal>
-        <ContextMenu.Content className={`${styles.content} ${ptdThemeClass}`} collisionPadding={8}>
+        <ContextMenu.Content
+          className={`${styles.content} ${ptdThemeClass}`}
+          data-ptd-portal-interactive
+          collisionPadding={8}
+        >
           <MenuItem label={blank ? '页面属性' : '组件属性'} onSelect={onOpenInspector}>
             <RiLayoutRightLine aria-hidden="true" />
           </MenuItem>

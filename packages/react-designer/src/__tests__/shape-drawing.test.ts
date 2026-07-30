@@ -105,4 +105,31 @@ describe('shape drawing geometry', () => {
       position: { x: 10, y: 10 },
     })
   })
+
+  it.each([
+    'RoySimpleText',
+    'RoyText',
+    'RoySimpleTable',
+    'RoyComplexTable',
+    'RoyImage',
+    'RoyBarCode',
+  ] as const)('creates normalized rectangular frames for %s', (type) => {
+    expect(drawnComponentGeometry(type, { x: 80, y: 60 }, { x: 10, y: 20 }, PAGE)).toEqual({
+      left: 10,
+      top: 20,
+      width: 70,
+      height: 40,
+      rotate: 0,
+    })
+  })
+
+  it('keeps QR code frames square without requiring Shift', () => {
+    expect(drawnComponentGeometry('RoyQRCode', { x: 10, y: 10 }, { x: 80, y: 45 }, PAGE)).toEqual({
+      left: 10,
+      top: 10,
+      width: 35,
+      height: 35,
+      rotate: 0,
+    })
+  })
 })

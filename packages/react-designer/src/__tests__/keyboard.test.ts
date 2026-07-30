@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  isEditorInteractiveTarget,
   isEditableTarget,
   isHandToolShortcut,
   isSelectToolShortcut,
@@ -24,6 +25,20 @@ describe('keyboard target guard', () => {
       isEditableTarget({ tagName: 'DIV', closest: () => null } as unknown as EventTarget),
     ).toBe(false)
     expect(isEditableTarget(null)).toBe(false)
+  })
+
+  it('preserves focus and native keyboard handling inside portal menus', () => {
+    const portalItem = {
+      tagName: 'DIV',
+      closest: (selector: string) =>
+        selector.includes('[data-ptd-portal-interactive]') ? {} : null,
+    } as unknown as EventTarget
+
+    expect(isEditableTarget(portalItem)).toBe(false)
+    expect(isEditorInteractiveTarget(portalItem)).toBe(true)
+    expect(
+      isEditorInteractiveTarget({ tagName: 'DIV', closest: () => null } as unknown as EventTarget),
+    ).toBe(false)
   })
 })
 

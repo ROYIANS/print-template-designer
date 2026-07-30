@@ -1,4 +1,7 @@
-{"file": ".trellis/spec/monorepo/package-conventions.md", "reason": "tsup 构建配置、peerDependencies 约定，集成钩子作为 @ptd/react-designer 的 props 扩展"}
-{"file": ".trellis/spec/monorepo/typescript-conventions.md", "reason": "strict TS、公共 API 类型导出规范，钩子接口类型定义"}
-{"file": ".trellis/spec/monorepo/styling-conventions.md", "reason": "CSS Modules 用法，钩子 UI 相关样式规范"}
-{"file": ".trellis/spec/monorepo/quality-guidelines.md", "reason": "ESLint/Prettier/Node >=20 约定"}
+{"file":".trellis/spec/monorepo/package-conventions.md","reason":"public package API and dependency ownership for the host-command boundary"}
+{"file":".trellis/spec/monorepo/react-designer-contract.md","reason":"controlled Designer state, EditorStore commands, keyboard and instance isolation"}
+{"file":".trellis/spec/monorepo/ptd-ui-system.md","reason":"application menu, command state, pending feedback and professional Chrome interaction"}
+{"file":".trellis/spec/monorepo/typescript-conventions.md","reason":"typed command IDs, capability declarations and public API exports"}
+{"file":".trellis/spec/monorepo/styling-conventions.md","reason":"CSS Modules and Portal theme rules for command UI state"}
+{"file":".trellis/spec/monorepo/quality-guidelines.md","reason":"required lint, tests, builds and package artifact checks"}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"keep host lifecycle concerns outside the reusable designer package"}

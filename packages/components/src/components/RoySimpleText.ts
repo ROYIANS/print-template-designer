@@ -24,7 +24,7 @@ export class RoySimpleText extends BaseComponent {
     }
     this.inner = inner
     const text = this.resolveText()
-    inner.innerHTML = text
+    inner.textContent = text
   }
 
   private resolveText(): string {
@@ -36,7 +36,7 @@ export class RoySimpleText extends BaseComponent {
   resolveWithData(engine: DataBindingEngine): void {
     const raw = typeof this.schema.propValue === 'string' ? this.schema.propValue : ''
     if (this.inner) {
-      this.inner.innerHTML = engine.resolve(raw)
+      this.inner.textContent = engine.resolve(raw)
     }
   }
 }

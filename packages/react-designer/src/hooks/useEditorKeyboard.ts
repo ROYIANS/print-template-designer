@@ -1,6 +1,13 @@
 import { useEffect, type RefObject } from 'react'
 import type { EditorStore } from '../state'
 
+const EDITOR_INTERACTIVE_SELECTOR = [
+  '[data-ptd-editor-interactive]',
+  '[data-ptd-portal-interactive]',
+  '[role="menu"]',
+  '[role="menuitem"]',
+].join(',')
+
 export function isEditableTarget(target: EventTarget | null): boolean {
   if (!target || typeof target !== 'object') return false
   const element = target as {
@@ -16,6 +23,13 @@ export function isEditableTarget(target: EventTarget | null): boolean {
     Boolean(element.isContentEditable) ||
     Boolean(element.closest?.('[contenteditable="true"]'))
   )
+}
+
+export function isEditorInteractiveTarget(target: EventTarget | null): boolean {
+  if (isEditableTarget(target)) return true
+  if (!target || typeof target !== 'object') return false
+  const element = target as { closest?: (selector: string) => unknown }
+  return Boolean(element.closest?.(EDITOR_INTERACTIVE_SELECTOR))
 }
 
 export function isSelectToolShortcut(
@@ -44,7 +58,7 @@ export function useEditorKeyboard(
 ): void {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (isEditableTarget(event.target)) return
+      if (isEditorInteractiveTarget(event.target)) return
       const root = rootRef.current
       if (!root || !root.contains(document.activeElement)) return
       const command = event.metaKey || event.ctrlKey

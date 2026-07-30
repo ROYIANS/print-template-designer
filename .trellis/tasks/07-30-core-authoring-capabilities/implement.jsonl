@@ -1,0 +1,10 @@
+{"file":".trellis/spec/monorepo/index.md","reason":"v2 monorepo authority and required pre-development routing"}
+{"file":".trellis/spec/monorepo/package-conventions.md","reason":"public package boundaries, dependency ownership and build exports"}
+{"file":".trellis/spec/monorepo/react-designer-contract.md","reason":"controlled Designer, gesture history, keyboard, canvas and package consumption invariants"}
+{"file":".trellis/spec/monorepo/ptd-ui-system.md","reason":"professional high-density PTD interaction, overlay, responsive and visual contracts"}
+{"file":".trellis/spec/monorepo/styling-conventions.md","reason":"CSS Modules, Portal theme, font and styling boundaries"}
+{"file":".trellis/spec/monorepo/typescript-conventions.md","reason":"strict public prop contracts, runtime guards and no unchecked any"}
+{"file":".trellis/spec/monorepo/quality-guidelines.md","reason":"required test, lint, build and artifact quality gates"}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"coordinate core schema, renderer and React authoring changes without leaking responsibilities"}
+{"file":".trellis/tasks/07-30-core-authoring-capabilities/research/rich-text-editor-selection.md","reason":"Tiptap/Slate/Lexical comparison, Spike gates and persistence decision"}
+{"file":".trellis/tasks/07-30-core-authoring-capabilities/research/component-capability-audit.md","reason":"current gaps, Legacy behavior and recommended ownership by layer"}

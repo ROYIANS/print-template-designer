@@ -39,7 +39,7 @@ describe('ComponentRegistry', () => {
       expect(definition.catalog.keywords.length).toBeGreaterThanOrEqual(3)
       expect(['text', 'table', 'image', 'code', 'shape']).toContain(definition.catalog.group)
       expect(['basic', 'complex']).toContain(definition.catalog.maturity)
-      expect(['insert', 'draw']).toContain(definition.catalog.creationMode)
+      expect(definition.catalog.creationMode).toBe('draw')
     }
     expect(
       new Set(defaultRegistry.getCatalogDefinitions().map(({ catalog }) => catalog.id)).size,
@@ -53,15 +53,22 @@ describe('ComponentRegistry', () => {
       category: 'data',
     })
     expect(defaultRegistry.get('RoyCircle')).toMatchObject({ name: '椭圆', category: 'shape' })
-    expect(defaultRegistry.get('RoySimpleText')?.catalog?.creationMode).toBe('draw')
-    expect(defaultRegistry.get('RoyText')?.catalog?.creationMode).toBe('insert')
-    expect(defaultRegistry.get('RoyRect')?.catalog?.creationMode).toBe('draw')
+    expect(
+      defaultRegistry
+        .getCatalogDefinitions()
+        .every((definition) => definition.catalog.creationMode === 'draw'),
+    ).toBe(true)
   })
 
   it('get returns definition for known type', () => {
     const def = defaultRegistry.get('RoySimpleText')
     expect(def).toBeDefined()
     expect(def?.name).toBe('文本')
+  })
+
+  it('keeps new text content empty so editor placeholders never persist into templates', () => {
+    expect(defaultRegistry.get('RoySimpleText')?.defaultProps).toBe('')
+    expect(defaultRegistry.get('RoyText')?.defaultProps).toBe('<p></p>')
   })
 
   it('get returns undefined for unknown type', () => {

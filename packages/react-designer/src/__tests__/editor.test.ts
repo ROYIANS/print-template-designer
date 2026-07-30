@@ -39,7 +39,55 @@ function template(components = [component('a', 0), component('b', 20)]): Templat
   }
 }
 
+function textComponent(
+  id: string,
+  type: 'RoySimpleText' | 'RoyText' = 'RoySimpleText',
+): ComponentSchema {
+  return {
+    ...component(id, 0, 0, 200, 50),
+    component: type,
+    propValue: type === 'RoyText' ? '<p>初始富文本</p>' : '初始文本',
+  }
+}
+
 describe('EditorStore history and ownership', () => {
+  it('commits one direct content-edit session as one document history step', () => {
+    const onChange = vi.fn()
+    const store = new EditorStore(template([textComponent('text')]), { onChange })
+
+    expect(store.startContentEditing('text')).toBe(true)
+    expect(store.editingComponentId.value).toBe('text')
+    store.commitContentEditing('text', '新的内容')
+
+    expect(store.editingComponentId.value).toBeNull()
+    expect(store.components.value[0]?.propValue).toBe('新的内容')
+    expect(store.history.value).toHaveLength(2)
+    expect(onChange).toHaveBeenCalledTimes(1)
+    store.undo()
+    expect(store.components.value[0]?.propValue).toBe('初始文本')
+  })
+
+  it('cancels direct content editing without changing schema or history', () => {
+    const initial = template([textComponent('rich', 'RoyText')])
+    const store = new EditorStore(initial)
+
+    expect(store.startContentEditing('rich')).toBe(true)
+    store.cancelContentEditing('rich')
+
+    expect(store.template.value).toBe(initial)
+    expect(store.history.value).toHaveLength(1)
+    expect(store.editingComponentId.value).toBeNull()
+  })
+
+  it('rejects direct editing for locked and non-text components', () => {
+    const locked = { ...textComponent('locked'), isLock: true }
+    const store = new EditorStore(template([locked, component('shape', 20)]))
+
+    expect(store.startContentEditing('locked')).toBe(false)
+    expect(store.startContentEditing('shape')).toBe(false)
+    expect(store.editingComponentId.value).toBeNull()
+  })
+
   it('undoes the first mutation and redoes it', () => {
     const initial = template()
     const store = new EditorStore(initial)

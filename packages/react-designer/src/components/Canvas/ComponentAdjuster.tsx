@@ -16,6 +16,7 @@ import {
   RiBringForward,
   RiDeleteBinLine,
   RiDragMove2Line,
+  RiEditLine,
   RiFileCopyLine,
   RiLockLine,
   RiLockUnlockLine,
@@ -24,6 +25,7 @@ import { useEditorStore } from '../../state'
 import { getComponentRotatedStyle, mod360, type Point } from '../../utils'
 import { calculateComponentPositionAndSize } from '../../utils/calculateComponentPositionAndSize'
 import { ptdThemeClass } from '../Theme'
+import { isDirectlyEditableComponent } from '../ContentEditor/ContentEditor'
 import styles from './ComponentAdjuster.module.css'
 
 type HandleName = 'lt' | 't' | 'rt' | 'r' | 'rb' | 'b' | 'lb' | 'l'
@@ -76,6 +78,7 @@ function getPointVariables(
 interface ComponentAdjusterProps {
   schema: ComponentSchema
   isActive: boolean
+  isEditing: boolean
   editorRef: React.RefObject<HTMLDivElement | null>
   scale: number
   onMove?: (isDownward: boolean, isRightward: boolean) => void
@@ -131,6 +134,7 @@ function QuickAction({
 export function ComponentAdjuster({
   schema,
   isActive,
+  isEditing,
   editorRef,
   scale,
   onMove,
@@ -150,8 +154,8 @@ export function ComponentAdjuster({
   const style = schema.style
   const isLocked = schema.isLock ?? false
   const hasLockedSelection = store.selectedComponents.value.some((component) => component.isLock)
-  const showHandles = isActive && !isLocked && !hasLockedSelection
-  const showQuickBar = isActive && store.selectedIds.value.length === 1
+  const showHandles = isActive && !isEditing && !isLocked && !hasLockedSelection
+  const showQuickBar = isActive && !isEditing && store.selectedIds.value.length === 1
   const revealRequested = store.componentToReveal.value === schema.id
   const pointList = useMemo(() => getPointList(schema.component), [schema.component])
   const cursors = useMemo(
@@ -278,6 +282,8 @@ export function ComponentAdjuster({
   const handleMouseDownOnShape = useCallback(
     (event: MouseEvent) => {
       if (event.button !== 0) return
+      if (event.target instanceof Element && event.target.closest('[data-ptd-editor-interactive]'))
+        return
       event.stopPropagation()
       store.selectComponent(schema.id, event.shiftKey || event.metaKey || event.ctrlKey)
     },
@@ -431,8 +437,15 @@ export function ComponentAdjuster({
         ref={adjusterRef}
         data-ptd-component-id={schema.id}
         style={variables}
-        className={`${styles.adjuster} ${isActive ? styles.active : ''} ${isLocked ? styles.locked : ''}`}
+        className={`${styles.adjuster} ${isActive ? styles.active : ''} ${isLocked ? styles.locked : ''} ${isEditing ? styles.editing : ''}`}
+        data-editing={isEditing || undefined}
         onMouseDown={handleMouseDownOnShape}
+        onDoubleClick={(event) => {
+          if (isLocked || !isDirectlyEditableComponent(schema)) return
+          event.preventDefault()
+          event.stopPropagation()
+          store.startContentEditing(schema.id)
+        }}
       >
         {showHandles && !['RoySimpleTable', 'RoyComplexTable'].includes(schema.component) && (
           <button
@@ -481,6 +494,15 @@ export function ComponentAdjuster({
               <QuickAction label="拖动组件" disabled={isLocked} onMouseDown={handleMove}>
                 <RiDragMove2Line />
               </QuickAction>
+              {isDirectlyEditableComponent(schema) && (
+                <QuickAction
+                  label="编辑内容"
+                  disabled={isLocked}
+                  onClick={() => store.startContentEditing(schema.id)}
+                >
+                  <RiEditLine />
+                </QuickAction>
+              )}
               <QuickAction
                 label={isLocked ? '解锁组件' : '锁定组件'}
                 onClick={() => store.setLock(!isLocked)}
