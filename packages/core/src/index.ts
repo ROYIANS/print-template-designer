@@ -38,6 +38,8 @@ export {
   DEFAULT_BAR_CODE_PROPS,
   DEFAULT_IMAGE_PROPS,
   DEFAULT_PAGE_CONFIG,
+  normalizePageConfig,
+  pageConfigError,
   DEFAULT_QR_CODE_PROPS,
   barCodeContentError,
   imageSourceError,
@@ -73,8 +75,27 @@ export {
 export { PAGE_SIZES, COMMON_SCALE, AUTO_PAGE_COMPONENTS } from './constants'
 export type { PageSizeDefinition } from './constants'
 
-export { mmToPx, pxToMm, getPageDimensions, getPageSizeDimensions } from './utils'
-export type { PageDimensions } from './utils'
+export {
+  MEASUREMENT_UNIT_DEFINITIONS,
+  convertMeasurement,
+  formatMeasurement,
+  fromDisplayMeasurement,
+  getMeasurementStep,
+  getPageDimensions,
+  getPageSizeDimensions,
+  mmToPx,
+  parseMeasurement,
+  pxToMm,
+  snapMeasurement,
+  toDisplayMeasurement,
+} from './utils'
+export type {
+  FormatMeasurementOptions,
+  MeasurementStepMode,
+  MeasurementUnit,
+  MeasurementUnitDefinition,
+  PageDimensions,
+} from './utils'
 
 export { DataBindingEngine, convertByType } from './data-binding'
 

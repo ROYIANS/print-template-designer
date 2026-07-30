@@ -79,6 +79,7 @@ interface ComponentAdjusterProps {
   schema: ComponentSchema
   isActive: boolean
   isEditing: boolean
+  outOfBounds: boolean
   editorRef: React.RefObject<HTMLDivElement | null>
   scale: number
   onMove?: (isDownward: boolean, isRightward: boolean) => void
@@ -135,6 +136,7 @@ export function ComponentAdjuster({
   schema,
   isActive,
   isEditing,
+  outOfBounds,
   editorRef,
   scale,
   onMove,
@@ -439,6 +441,7 @@ export function ComponentAdjuster({
         style={variables}
         className={`${styles.adjuster} ${isActive ? styles.active : ''} ${isLocked ? styles.locked : ''} ${isEditing ? styles.editing : ''}`}
         data-editing={isEditing || undefined}
+        data-out-of-bounds={outOfBounds || undefined}
         onMouseDown={handleMouseDownOnShape}
         onDoubleClick={(event) => {
           if (isLocked || !isDirectlyEditableComponent(schema)) return
@@ -447,6 +450,11 @@ export function ComponentAdjuster({
           store.startContentEditing(schema.id)
         }}
       >
+        {outOfBounds && (
+          <span className={styles.outOfBoundsMarker} aria-label="组件超出页面边界">
+            !
+          </span>
+        )}
         {showHandles && !['RoySimpleTable', 'RoyComplexTable'].includes(schema.component) && (
           <button
             type="button"

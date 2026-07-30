@@ -27,6 +27,8 @@ Internal command boundary:
 
 ```ts
 class EditorStore {
+  readonly measurementUnit: Signal<MeasurementUnit>
+  readonly recentColors: Signal<readonly string[]>
   readonly activeTool: Signal<EditorTool>
   readonly temporaryHand: Signal<boolean>
   readonly effectiveTool: ReadonlySignal<EditorTool>
@@ -34,6 +36,9 @@ class EditorStore {
   setActiveTool(tool: EditorTool): void
   completeDrawnComponent(component: ComponentSchema, tool: DrawnComponentType): boolean
   setTemporaryHand(active: boolean): void
+  setMeasurementUnit(unit: MeasurementUnit): void
+  recordRecentColor(color: string): void
+  updatePageConfig(patch: Partial<PageConfig>, transient?: boolean): boolean
   syncExternal(template: TemplateSchema): void
   updateComponent(id: string, patch: Partial<ComponentSchema>, transient?: boolean): void
   updateComponentStyle(id: string, patch: Partial<ComponentStyle>, transient?: boolean): void
@@ -86,6 +91,41 @@ import '@ptd/react-designer/styles.css'
 - A new edit after undo discards the redo branch.
 - Locked components reject content, style, geometry and structural commands; changing `isLock` to
   unlock remains allowed.
+
+#### Measurement display and document page configuration
+
+- Every Designer instance defaults to `mm` and may switch globally to PTD Canvas `px`; the unit is
+  instance UI state and survives external template synchronization without entering `TemplateSchema`.
+- Switching units updates Page/Single/Table Inspector geometry, ruler, guides, Context Bar and Status
+  Bar. It changes formatting, parsing, precision and step only; it emits no Host change and creates no
+  history. Font size remains `pt`, rotation remains degrees, opacity remains percent and line height is unitless.
+- PTD Canvas coordinates use the existing fixed contract `1 mm = 5 px`; display `px` is not browser DPI
+  and does not define bitmap export resolution.
+- One top-level `PageConfig` applies to every manual page. It includes four content-safety margins;
+  legacy values missing left/right margins normalize through Core compatibility helpers.
+- Invalid page size, margin combination, font size or line height is rejected before Schema mutation.
+  Focused drafts remain local; Escape restores the exact gesture start and valid continuous edits add
+  at most one history node.
+- Paper resize preserves every component geometry. Out-of-bounds components are derived from rotated
+  bounds, shown as a count in Page Inspector and marked on Canvas without persisting warning state.
+
+#### Inspector controls and color state
+
+- Page, Single, Multi and free-table business panels compose the shared `InspectorControls` layer;
+  native input/select/textarea/color elements are implementation details of that layer rather than
+  independently styled business fields.
+- Typed numeric drafts outside the declared range remain local and expose an associated accessible
+  error. They do not clamp into Schema, emit a Host change or create history; steppers and scrubbers may
+  stop at an explicit boundary. Escape restores the exact gesture start.
+- Color controls accept three- or six-digit HEX drafts and persist normalized six-digit lowercase HEX.
+  Transparent/no-color is exposed only for renderer properties that support it; reset restores the
+  control's explicit semantic default.
+- Recent colors are bounded Designer-instance UI state. Document colors are derived from PageConfig,
+  component styles, table cells and QR/barcode content, normalized and de-duplicated by frequency plus
+  stable document order. Neither palette mutates TemplateSchema or history, and disabled/locked controls
+  close any open palette.
+- Rich-text HTML is not a primary Inspector field. Content and selection-level formatting remain in the
+  canvas editor; Inspector typography and appearance are component-frame defaults.
 
 #### Persistent tools, temporary Hand and drawn creation
 
@@ -241,6 +281,9 @@ import '@ptd/react-designer/styles.css'
 | First user mutation then undo             | Restore initial `value`                                            |
 | Gesture emits many transient updates      | One final history entry                                            |
 | Gesture is cancelled                      | Restore the exact gesture-start value; add no history entry        |
+| Switch `mm` / `px`                        | Update all display consumers; no Schema, Host or history mutation  |
+| Page config draft is invalid              | Keep it local; do not emit or create history                       |
+| Page resize makes objects out of bounds   | Preserve geometry; derive warning count and Canvas marker          |
 | Select/Text/Shape + Space keydown         | `effectiveTool=hand`; persistent tool/history/selection unchanged  |
 | Space keyup, blur or cleanup              | Clear temporary Hand; restore exact persistent tool                |
 | Hand pointer drag                         | Change viewport scroll only; no host/history/selection mutation    |
@@ -287,6 +330,10 @@ import '@ptd/react-designer/styles.css'
 ### 6. Tests Required
 
 - Store unit test: two stores do not share template, selection, clipboard or history.
+- Store/Core unit tests: measurement preferences are instance-local and history-free; conversion,
+  formatting, parsing, precision and stepping preserve canonical Canvas geometry.
+- Core/Store tests: legacy page config gains left/right margins; invalid content areas are rejected;
+  one page-config gesture creates one history node; resize preserves out-of-bounds component geometry.
 - Store unit test: first mutation undo/redo and redo-branch truncation.
 - Store unit test: a committed transient gesture produces one snapshot; a cancelled gesture restores
   the exact starting template without history; locked commands are no-ops.
@@ -305,6 +352,8 @@ import '@ptd/react-designer/styles.css'
   protection, one host/history mutation, active-page identity and Undo/Redo index repair.
 - Geometry unit test: group → scale/rotate/move → ungroup preserves visual geometry.
 - Inspector helper test: structured values are read-only; numeric primitive values preserve type.
+- Inspector value/palette tests: out-of-range drafts are rejected without clamping; shorthand HEX is
+  normalized; document colors remain stable; recent colors are unique, bounded and instance-local.
 - Core content tests: image/QR/barcode defaults, exact guards, legacy normalization, unsafe image
   source rejection and every supported barcode format validation remain deterministic.
 - Renderer tests: empty/unsafe images and invalid QR/barcodes expose explicit frame states rather than

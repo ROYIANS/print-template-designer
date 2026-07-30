@@ -1,5 +1,5 @@
 export type { PageConfig, PageSize, PageDirection, PageLayout } from './page-config'
-export { DEFAULT_PAGE_CONFIG } from './page-config'
+export { DEFAULT_PAGE_CONFIG, normalizePageConfig, pageConfigError } from './page-config'
 export type {
   ComponentSchema,
   ComponentStyle,

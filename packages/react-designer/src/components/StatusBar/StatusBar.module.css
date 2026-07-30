@@ -16,6 +16,7 @@
 .statusGroup,
 .pageStatus,
 .guideStatus,
+.unitSwitch,
 .zoom {
   display: flex;
   align-items: center;
@@ -71,6 +72,40 @@
 
 .grow {
   flex: 1;
+}
+
+.unitSwitch {
+  height: 20px;
+  flex: 0 0 auto;
+  gap: 1px;
+  padding: 1px;
+  border: 1px solid var(--ptd-border-subtle);
+  border-radius: var(--ptd-radius-1);
+  background: var(--ptd-surface-sunken);
+}
+
+.unitSwitch button {
+  min-width: 28px;
+  height: 16px;
+  padding: 0 5px;
+  border: 0;
+  border-radius: 1px;
+  color: var(--ptd-text-muted);
+  background: transparent;
+  font: inherit;
+  font-size: 9px;
+  cursor: pointer;
+}
+
+.unitSwitch button:hover {
+  color: var(--ptd-text-strong);
+  background: var(--ptd-surface-raised);
+}
+
+.unitSwitch button[aria-pressed='true'] {
+  color: var(--ptd-selection-strong);
+  background: var(--ptd-surface-raised);
+  box-shadow: inset 0 -1px 0 var(--ptd-selection);
 }
 
 .zoom {
@@ -130,6 +165,7 @@
 }
 
 .guideStatus:focus-visible,
+.unitSwitch button:focus-visible,
 .zoom button:focus-visible,
 .zoom select:focus-visible {
   position: relative;
@@ -151,5 +187,11 @@
   .statusGroup:nth-of-type(2),
   .divider:nth-of-type(2) {
     display: none;
+  }
+}
+
+@container (max-width: 480px) {
+  .unitSwitch button {
+    min-width: 26px;
   }
 }

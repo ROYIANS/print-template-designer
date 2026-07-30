@@ -35,4 +35,16 @@ describe('serialization', () => {
     const raw = JSON.stringify({ ...sampleTemplate, _version: undefined })
     expect(() => deserialize(raw)).not.toThrow()
   })
+
+  it('deserialize fills legacy left and right page margins', () => {
+    const legacy = JSON.parse(JSON.stringify(sampleTemplate)) as Record<string, unknown>
+    const pageConfig = legacy['pageConfig'] as Record<string, unknown>
+    delete pageConfig['pageMarginLeft']
+    delete pageConfig['pageMarginRight']
+
+    const result = deserialize(JSON.stringify(legacy))
+
+    expect(result.pageConfig.pageMarginLeft).toBe(DEFAULT_PAGE_CONFIG.pageMarginLeft)
+    expect(result.pageConfig.pageMarginRight).toBe(DEFAULT_PAGE_CONFIG.pageMarginRight)
+  })
 })

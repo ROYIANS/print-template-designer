@@ -13,6 +13,8 @@ const INITIAL_TEMPLATE: TemplateSchema = {
     pageCurHeight: 297,
     pageMarginBottom: 10,
     pageMarginTop: 10,
+    pageMarginLeft: 10,
+    pageMarginRight: 10,
     title: '新建模板',
     scale: 1,
     background: '#fcfdff',

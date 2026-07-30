@@ -1,5 +1,5 @@
 import { useSignals } from '@preact/signals-react/runtime'
-import { getPageDimensions, pxToMm } from '@ptd/core'
+import { formatMeasurement, getPageDimensions } from '@ptd/core'
 import {
   RiEyeLine,
   RiEyeOffLine,
@@ -22,6 +22,7 @@ export function StatusBar() {
   const pageNumber = store.currentPageIndex.value + 1
   const pageCount = store.template.value.pages.length
   const scale = store.scale.value
+  const measurementUnit = store.measurementUnit.value
 
   return (
     <footer className={styles.status} aria-label="设计器状态" data-ptd-region="status-bar">
@@ -34,7 +35,8 @@ export function StatusBar() {
         <span>{selectedCount ? `已选择 ${selectedCount} 个对象` : '未选择对象'}</span>
         <span className={styles.divider} aria-hidden="true" />
         <span className={styles.pageMetric}>
-          {pxToMm(page.width)} × {pxToMm(page.height)} mm
+          {formatMeasurement(page.width, measurementUnit)} ×{' '}
+          {formatMeasurement(page.height, measurementUnit)} {measurementUnit}
         </span>
       </div>
 
@@ -59,6 +61,20 @@ export function StatusBar() {
       </div>
 
       <span className={styles.grow} />
+
+      <div className={styles.unitSwitch} role="group" aria-label="文档显示单位">
+        {(['mm', 'px'] as const).map((unit) => (
+          <button
+            key={unit}
+            type="button"
+            aria-label={unit === 'mm' ? '使用毫米显示尺寸' : '使用 PTD 画布像素显示尺寸'}
+            aria-pressed={measurementUnit === unit}
+            onClick={() => store.setMeasurementUnit(unit)}
+          >
+            {unit}
+          </button>
+        ))}
+      </div>
 
       <div className={styles.zoom} aria-label="画布缩放">
         <button

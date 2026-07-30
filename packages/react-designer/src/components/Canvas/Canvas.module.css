@@ -115,19 +115,11 @@
   flex: 0 0 auto;
 }
 
-.marginTop {
-  top: var(--margin-top);
-}
-.marginBottom {
-  bottom: var(--margin-bottom);
-}
-
-.marginLine {
+.safeArea {
   position: absolute;
   z-index: var(--ptd-layer-guide);
-  width: 100%;
-  height: 0;
-  border-top: 1px dashed var(--ptd-proof);
+  inset: var(--margin-top) var(--margin-right) var(--margin-bottom) var(--margin-left);
+  border: 1px dashed var(--ptd-proof);
   opacity: 0.42;
   pointer-events: none;
 }

@@ -323,6 +323,8 @@ function template(): TemplateSchema {
       pageCurHeight: 297,
       pageMarginBottom: 8,
       pageMarginTop: 8,
+      pageMarginLeft: 8,
+      pageMarginRight: 8,
       title: '测试模板',
       scale: 1,
       background: '#fcfdff',

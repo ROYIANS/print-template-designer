@@ -4,9 +4,12 @@ import {
   getTableCellAt,
   getTableCellBounds,
   normalizeSimpleTableProps,
+  pageConfigError,
   updateTableCellText,
   type ComponentSchema,
   type ComponentStyle,
+  type MeasurementUnit,
+  type PageConfig,
   type PageDirection,
   type TemplatePage,
   type TemplateSchema,
@@ -22,6 +25,7 @@ import {
 
 const HISTORY_LIMIT = 20
 const PASTE_OFFSET = 12
+const RECENT_COLOR_LIMIT = 8
 
 export type Alignment = 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom'
 export type Distribution = 'horizontal' | 'vertical'
@@ -117,6 +121,8 @@ export class EditorStore {
   readonly currentPageIndex = signal(0)
   readonly selectedIds = signal<string[]>([])
   readonly scale = signal(1)
+  readonly measurementUnit = signal<MeasurementUnit>('mm')
+  readonly recentColors = signal<readonly string[]>([])
   readonly showRuler = signal(true)
   readonly guides = signal<CanvasGuide[]>([])
   readonly guidesVisible = signal(true)
@@ -150,6 +156,18 @@ export class EditorStore {
     const id = this.selectedIds.value.at(-1)
     return id ? (this.components.value.find((component) => component.id === id) ?? null) : null
   })
+  readonly outOfBoundsComponents = computed(() => {
+    const page = getPageDimensions(this.pageConfig.value)
+    return this.components.value.filter((component) => {
+      const bounds = getComponentRotatedStyle(component.style)
+      return (
+        bounds.left < 0 ||
+        bounds.top < 0 ||
+        bounds.right > page.width ||
+        bounds.bottom > page.height
+      )
+    })
+  })
   readonly effectiveTool = computed<EditorTool>(() =>
     this.temporaryHand.value ? 'hand' : this.activeTool.value,
   )
@@ -170,6 +188,15 @@ export class EditorStore {
 
   setOnChange(onChange?: (template: TemplateSchema) => void): void {
     this.onChange = onChange
+  }
+
+  recordRecentColor(color: string): void {
+    const normalized = color.trim().toLowerCase()
+    if (!/^#[0-9a-f]{6}$/.test(normalized)) return
+    this.recentColors.value = [
+      normalized,
+      ...this.recentColors.value.filter((item) => item !== normalized),
+    ].slice(0, RECENT_COLOR_LIMIT)
   }
 
   syncExternal(template: TemplateSchema): void {
@@ -811,19 +838,28 @@ export class EditorStore {
   }
 
   setPageDirection(direction: PageDirection): void {
-    if (this.pageConfig.value.pageDirection === direction) return
-    this.commit({
-      ...this.template.value,
-      pageConfig: { ...this.pageConfig.value, pageDirection: direction },
-    })
+    this.updatePageConfig({ pageDirection: direction })
+  }
+
+  updatePageConfig(patch: Partial<PageConfig>, transient = false): boolean {
+    const current = this.pageConfig.value
+    if (!hasChanges(current, patch)) return false
+    const next = { ...current, ...patch }
+    if (pageConfigError(next)) return false
+    this.commit({ ...this.template.value, pageConfig: next }, transient)
     this.guides.value = this.guides.value.map((guide) => ({
       ...guide,
       positionMm: this.clampGuidePosition(guide.axis, guide.positionMm),
     }))
+    return true
   }
 
   setZoom(scale: number): void {
     this.scale.value = Math.min(2, Math.max(0.25, Math.round(scale * 100) / 100))
+  }
+
+  setMeasurementUnit(unit: MeasurementUnit): void {
+    this.measurementUnit.value = unit
   }
 
   toggleRuler(): void {

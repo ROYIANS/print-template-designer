@@ -3,6 +3,7 @@ import type { ComponentSchema } from '@ptd/core'
 import {
   isEditableTextPropValue,
   isHexColor,
+  normalizeHexColor,
   parseFiniteNumber,
   parseTextPropValue,
   scrubNumberValue,
@@ -30,19 +31,27 @@ describe('property inspector value guards', () => {
     expect(isEditableTextPropValue(component('RoyGroup', []))).toBe(false)
   })
 
-  it('preserves numeric prop values and rejects invalid numeric drafts', () => {
+  it('preserves valid numeric values and rejects empty or out-of-range drafts', () => {
     expect(parseTextPropValue(12, '12.5')).toBe(12.5)
     expect(parseTextPropValue(12, 'not a number')).toBeNull()
     expect(parseTextPropValue('12', '13')).toBe('13')
     expect(parseFiniteNumber('', { min: 1 })).toBeNull()
-    expect(parseFiniteNumber('-4', { min: 1 })).toBe(1)
-    expect(parseFiniteNumber('3', { max: 1 })).toBe(1)
+    expect(parseFiniteNumber('-4', { min: 1 })).toBeNull()
+    expect(parseFiniteNumber('3', { max: 1 })).toBeNull()
+    expect(parseFiniteNumber('1', { min: 1, max: 1 })).toBe(1)
   })
 
   it('accepts only six-digit hex colors', () => {
     expect(isHexColor('#cf4d34')).toBe(true)
     expect(isHexColor('#fff')).toBe(false)
     expect(isHexColor('mixed')).toBe(false)
+  })
+
+  it('normalizes precise and shorthand hex drafts for inspector controls', () => {
+    expect(normalizeHexColor(' #CF4D34 ')).toBe('#cf4d34')
+    expect(normalizeHexColor('#AbC')).toBe('#aabbcc')
+    expect(normalizeHexColor('transparent')).toBeNull()
+    expect(normalizeHexColor('#12')).toBeNull()
   })
 
   it('calculates normal, accelerated, precise and clamped scrub values', () => {
