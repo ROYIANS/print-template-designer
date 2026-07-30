@@ -457,3 +457,36 @@ Built the five-group component catalog with planned placeholders, a two-level ne
 ### Next Steps
 
 - None - task complete
+
+
+## Session 14: Header 菜单改为点击切换
+
+**Date**: 2026-07-30
+**Task**: Header 菜单改为点击切换
+**Branch**: `feature/refc`
+
+### Summary
+
+将 App Bar 从 hover/focus 自动展开改为显式 click-to-toggle，修复 Designer 根节点焦点捕获导致同一菜单二次点击先关闭又重开的竞态；新增桌面与移动端交互回归验证，111 项 React Designer 测试、TypeScript、ESLint、构建、Prettier 和 diff 检查通过。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `a4d3b26` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
