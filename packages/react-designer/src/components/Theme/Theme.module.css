@@ -55,8 +55,10 @@
   --ptd-control-xs: 24px;
   --ptd-control-sm: 28px;
   --ptd-control-md: 32px;
+  --ptd-control-touch: 40px;
   --ptd-radius-1: 2px;
   --ptd-radius-2: 4px;
+  --ptd-radius-round: 999px;
   --ptd-shadow-paper:
     0 0 0 1px oklch(71% 0.012 258 / 78%), 4px 4px 0 oklch(21% 0.02 258 / 10%),
     0 18px 38px oklch(21% 0.02 258 / 10%);
@@ -105,6 +107,12 @@
     'Outfit', 'Outfit Variable', 'Sarasa UI SC', 'Sarasa Gothic SC', 'Microsoft YaHei UI',
     sans-serif;
   --ptd-font-serif: 'Noto Serif SC', 'Noto Serif CJK SC', 'Source Han Serif SC', 'Songti SC', serif;
+  --ptd-text-10: 0.625rem;
+  --ptd-text-11: 0.6875rem;
+  --ptd-text-12: 0.75rem;
+  --ptd-text-13: 0.8125rem;
+  --ptd-text-15: 0.9375rem;
+  --ptd-text-18: 1.125rem;
   --ptd-duration-instant: 120ms;
   --ptd-duration-state: 180ms;
   --ptd-duration-panel: 240ms;

@@ -1,15 +1,16 @@
-import type { ComponentSchema } from '@ptd/core'
+import {
+  normalizeQRCodeProps,
+  qrCodeContentError,
+  type ComponentSchema,
+  type QRCodeErrorCorrection,
+} from '@ptd/core'
 import { BaseComponent } from '../base/base-component'
 
-interface QRCodeProps {
-  text?: string
-  colorDark?: string
-  colorLight?: string
-  correctLevel?: number
-}
+const CORRECTION_LEVEL: Record<QRCodeErrorCorrection, number> = { L: 1, M: 0, Q: 3, H: 2 }
 
 export class RoyQRCode extends BaseComponent {
   private qrContainer: HTMLDivElement | null = null
+  private renderToken = 0
 
   constructor(schema: ComponentSchema) {
     super(schema)
@@ -31,29 +32,60 @@ export class RoyQRCode extends BaseComponent {
 
   private renderQRCode(): void {
     if (!this.qrContainer) return
-    const props = this.schema.propValue as QRCodeProps | null
-    const text = props?.text ?? ''
-    if (!text) return
+    const target = this.qrContainer
+    const token = ++this.renderToken
+    const props = normalizeQRCodeProps(this.schema.propValue)
+    const contentError = qrCodeContentError(props)
 
-    // Clear previous content
-    this.qrContainer.innerHTML = ''
+    if (contentError) {
+      setCodeStatus(this.container, target, 'error', contentError)
+      return
+    }
+    setCodeStatus(this.container, target, 'loading', '正在生成二维码…')
 
-    // Dynamically import to allow tree-shaking and avoid issues in SSR/test
     import('easyqrcodejs')
       .then((mod) => {
+        if (token !== this.renderToken || this.qrContainer !== target) return
         const QRCode = mod.default ?? mod
-        if (!this.qrContainer) return
-        new QRCode(this.qrContainer, {
-          text,
-          width: this.schema.style.width,
-          height: this.schema.style.height,
-          colorDark: props?.colorDark ?? '#000000',
-          colorLight: props?.colorLight ?? '#ffffff',
-          correctLevel: props?.correctLevel ?? 0,
-        })
+        target.replaceChildren()
+        try {
+          new QRCode(target, {
+            text: props.text,
+            width: this.schema.style.width,
+            height: this.schema.style.height,
+            colorDark: props.colorDark,
+            colorLight: props.colorLight,
+            correctLevel: CORRECTION_LEVEL[props.correctLevel],
+            quietZone: props.margin,
+          })
+          this.container.dataset.renderState = 'ready'
+        } catch {
+          setCodeStatus(this.container, target, 'error', '二维码生成失败，请缩短或检查内容')
+        }
       })
       .catch(() => {
-        // Silently fail if easyqrcodejs is not available (e.g., test env)
+        if (token === this.renderToken && this.qrContainer === target) {
+          setCodeStatus(this.container, target, 'error', '二维码渲染模块载入失败')
+        }
       })
   }
+
+  override destroy(): void {
+    this.renderToken += 1
+    super.destroy()
+  }
+}
+
+function setCodeStatus(
+  container: HTMLElement,
+  target: HTMLElement,
+  state: 'loading' | 'error',
+  message: string,
+): void {
+  const status = document.createElement('div')
+  status.className = 'ptd-render-state'
+  status.dataset.state = state
+  status.textContent = message
+  target.replaceChildren(status)
+  container.dataset.renderState = state
 }

@@ -112,6 +112,14 @@ import '@ptd/react-designer/styles.css'
   resurrecting the cancelled preview.
 - Shape menu keys are scoped: Arrow/Home/End navigate; Enter/Space choose; Escape closes only the menu.
   These keys must not bubble to object nudge, temporary Hand or global Escape handling.
+- The complete component catalog is exposed through an instance-local More picker rather than a Resource
+  Panel. It renders only available tools, never planned items; opening, searching and recent-tool order are
+  UI state and must not emit Host changes or history.
+- The Text Dock group remembers the last plain/rich text tool per Designer instance. Picker and grouped-tool
+  Portal/menu boundaries own Arrow/Home/End, Enter/Space and Escape, and restore trigger focus when dismissed.
+- Pointer-mouse outside press may dismiss the More picker. Touch/Pen outside pointerdown must not dismiss it;
+  explicit close, tool selection and Escape remain available. Portal geometry stays clamped to the Designer
+  container and carries the shared theme plus editor-interactive boundary.
 
 #### Clipboard placement
 
@@ -152,6 +160,46 @@ import '@ptd/react-designer/styles.css'
   otherwise empty point inside the frame forwards focus to the contenteditable surface.
 - ProseMirror's trailing `<br>` in an empty paragraph must still expose the visual placeholder. The
   placeholder disappears after input without changing the persisted HTML on its own.
+
+#### Media and code content
+
+- `@ptd/core` owns public image, QR and barcode content types, usable defaults, exact runtime guards,
+  compatibility normalizers and format-specific validation. Renderer and Inspector must consume the
+  same functions instead of maintaining unchecked casts or divergent fallback values.
+- New images persist structured `{ src, alt, fit, position }` content while legacy string sources remain
+  readable. The first content edit may lazily upgrade a legacy string, and the complete focused edit is
+  one transient gesture that Undo restores to the exact legacy value.
+- Image file selection reads `image/*` through `FileReader` and persists its Data URL directly. A
+  `blob:` URL, script URL or non-image Data URL is never committed as a stable template source.
+- New QR and barcode frames have non-empty valid defaults and render immediately. QR exposes content,
+  correction level, quiet-zone margin and dark/light colors. Barcode exposes content, supported symbology,
+  foreground color and human-readable-text visibility, with symbology-specific validation.
+- Framework-independent renderers expose mutually exclusive empty, loading, ready and error states where
+  applicable. Image source changes remove the previous image while the next source loads off-DOM; image
+  events and dynamic QR/barcode imports use per-instance render identity so stale work cannot overwrite
+  newer content or a destroyed component. Load/generation errors must never become a blank frame.
+- Inspector text/select/color changes use the existing begin/transient/commit gesture boundary. Discrete
+  file, clear and segmented commands are one history entry each; locked components disable every path.
+
+#### Free-table authoring
+
+- `@ptd/core` owns the canonical `SimpleTableProps` model. Every grid coordinate references a Cell ID;
+  rectangular merged regions repeat that ID, while the Cell Map stores one plain-text payload, span and
+  style record. The model must keep at least one row/column, unique IDs, rectangular non-overlapping spans
+  and an addressable owner for every covered coordinate.
+- Legacy `tableConfig/tableData` remains a compatibility input. Renderer and Designer normalize it through
+  the same Core function; legacy cell HTML becomes plain text and must never be executed. New tables start
+  with a real independent 2×2 grid rather than `null` or a renderer-only placeholder.
+- Insert/delete row/column, merge/split, track resize, text update and cell-style update are immutable Core
+  commands without DOM geometry. A discrete structure command performs one component replacement, one Host
+  change and one PTD history node. Focused Inspector input and pointer track resize use one transient gesture.
+- Selecting the table object is distinct from selecting cells. Cell anchor/focus, drag selection and active
+  cell editing are instance UI state and never enter `TemplateSchema`. Single click selects, drag/Shift extends,
+  Arrow/Tab navigates, and double click or Enter/F2 opens a local plain-text draft; Escape cancels and commit
+  writes at most one history node.
+- Locked tables use the framework-independent Renderer and reject every cell selection/edit/structure path.
+  `RoyComplexTable` remains a read-only compatibility Renderer and a planned Catalog item until data binding,
+  section authoring, repeated detail and derived pagination contracts are implemented.
 
 #### Manual pages and derived pagination
 
@@ -206,6 +254,11 @@ import '@ptd/react-designer/styles.css'
 | Context click targets blank paper         | Clear selection; expose page properties and positioned paste       |
 | Pointer enters a context submenu          | Preserve Radix focus; allow submenu item click and keyboard select |
 | Newly drawn rich text has empty HTML      | Focus full-frame editor; type without Inspector/source workaround  |
+| New QR or barcode frame                   | Persist a valid visible default; expose dedicated Inspector fields |
+| Image content is a legacy string          | Render unchanged; first edit may normalize as one undoable gesture |
+| Image source uses `blob:`/unsafe data     | Show field/frame error; never commit it as a stable source         |
+| QR/barcode content is invalid             | Show format-specific error; never leave a silent blank frame       |
+| Async code render resolves after update   | Ignore stale result through the instance render token              |
 | `pasteAt` receives a multi-selection      | Preserve relative geometry; regenerate every id; one history       |
 | Switch an existing page                   | Change UI page only; clear local selection; no host/history        |
 | Add or duplicate a page                   | Insert after source; select new page; one host/history             |
@@ -213,7 +266,7 @@ import '@ptd/react-designer/styles.css'
 | Delete the only page                      | No-op; template always retains at least one manual page            |
 | Reorder around the active page            | Preserve active `page.id` and valid component selection            |
 | History removes the active page           | Select nearest valid page; never expose an invalid index           |
-| Structured `propValue` (array/object)     | Inspector is read-only; never coerce to string                     |
+| Unsupported structured `propValue`        | Inspector is read-only; never coerce to string                     |
 | Host omits `styles.css` import            | Integration is invalid; UI styling is not guaranteed               |
 | Built CSS Module default export is `{}`   | Invalid package build; host elements receive no class names        |
 | Host omits a peer dependency              | Workspace/install validation must fail before release              |
@@ -243,14 +296,25 @@ import '@ptd/react-designer/styles.css'
   threshold and non-mutation of registry defaults.
 - Canvas/browser test: persistent Hand changes only viewport scroll with grab/grabbing cursor; Text
   activation creates nothing; one valid text frame is one undo step; cancel/lost capture creates none.
-- Sidebar test/browser assertion: six primary tools use 40×40 targets and centered 20×20 glyphs;
-  Shape disclosure overlays without shifting the glyph; menu Space/Escape never activates Hand/Select.
+- Sidebar test/browser assertion: primary tools use the documented fine/coarse/mobile targets and centered
+  glyphs; Text/Shape disclosure overlays without shifting the glyph; grouped-menu and More-picker keys never
+  activate Hand/Select or reach object shortcuts.
 - Store unit test: `pasteAt` preserves multi-selection geometry, selects fresh ids, emits one host
   change, creates one history entry, undoes as one operation and clamps into physical page bounds.
 - Store unit test: add/duplicate/delete/reorder page commands cover fresh recursive ids, final-page
   protection, one host/history mutation, active-page identity and Undo/Redo index repair.
 - Geometry unit test: group → scale/rotate/move → ungroup preserves visual geometry.
 - Inspector helper test: structured values are read-only; numeric primitive values preserve type.
+- Core content tests: image/QR/barcode defaults, exact guards, legacy normalization, unsafe image
+  source rejection and every supported barcode format validation remain deterministic.
+- Renderer tests: empty/unsafe images and invalid QR/barcodes expose explicit frame states rather than
+  broken-image chrome or blank DOM; image states remain mutually exclusive across source updates, and no
+  asynchronous media/code rendering can outlive its render identity.
+- Store test: a focused Inspector gesture can upgrade a legacy image string to structured content as
+  one history entry, and Undo restores the exact legacy string.
+- Table tests: legacy input normalization cannot execute HTML; merge/split and row/column insertion/deletion
+  preserve all grid invariants; table cell selection is history-free; one cell-edit commit is exactly one
+  history entry and locked/non-table objects reject table sessions.
 - Package build assertion: ESM, CJS, DTS and `dist/index.css` exist; ESM/CJS contain non-empty CSS
   Module class maps such as `Designer_designer`.
 - Host build assertion: peer dependencies resolve and `@ptd/react-designer/styles.css` imports.

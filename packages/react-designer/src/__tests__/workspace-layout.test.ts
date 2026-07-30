@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   clampPanelWidth,
+  DEFAULT_RESOURCE_PANEL,
   INSPECTOR_MAX,
   INSPECTOR_MIN,
   RESOURCE_PANEL_MAX,
@@ -11,6 +12,7 @@ import {
 
 describe('workspace layout contracts', () => {
   it('uses content-driven workspace modes at the documented boundaries', () => {
+    expect(DEFAULT_RESOURCE_PANEL).toBe('pages')
     expect(workspaceModeForWidth(1179)).toBe('compact')
     expect(workspaceModeForWidth(1180)).toBe('standard')
     expect(workspaceModeForWidth(1439)).toBe('standard')

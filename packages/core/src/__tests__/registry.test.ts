@@ -5,11 +5,10 @@ import {
   type ComponentDefinition,
 } from '../registry/component-registry'
 
-const CREATABLE_TYPES = [
+const AVAILABLE_TYPES = [
   'RoySimpleText',
   'RoyText',
   'RoySimpleTable',
-  'RoyComplexTable',
   'RoyImage',
   'RoyQRCode',
   'RoyBarCode',
@@ -24,12 +23,14 @@ describe('ComponentRegistry', () => {
     expect(defaultRegistry.getAll()).toHaveLength(12)
   })
 
-  it('exposes exactly 11 catalog definitions and keeps groups internal', () => {
+  it('exposes exactly 10 honest catalog definitions and keeps read-only components internal', () => {
     expect(defaultRegistry.getCatalogDefinitions().map((definition) => definition.type)).toEqual(
-      CREATABLE_TYPES,
+      AVAILABLE_TYPES,
     )
     expect(defaultRegistry.get('RoyGroup')).toMatchObject({ internal: true })
     expect(defaultRegistry.get('RoyGroup')?.catalog).toBeUndefined()
+    expect(defaultRegistry.get('RoyComplexTable')).toMatchObject({ internal: true })
+    expect(defaultRegistry.get('RoyComplexTable')?.catalog).toBeUndefined()
   })
 
   it('provides complete canonical metadata for every creatable definition', () => {
@@ -43,7 +44,7 @@ describe('ComponentRegistry', () => {
     }
     expect(
       new Set(defaultRegistry.getCatalogDefinitions().map(({ catalog }) => catalog.id)).size,
-    ).toBe(11)
+    ).toBe(10)
   })
 
   it('preserves persisted categories while clarifying product names', () => {
@@ -69,6 +70,52 @@ describe('ComponentRegistry', () => {
   it('keeps new text content empty so editor placeholders never persist into templates', () => {
     expect(defaultRegistry.get('RoySimpleText')?.defaultProps).toBe('')
     expect(defaultRegistry.get('RoyText')?.defaultProps).toBe('<p></p>')
+  })
+
+  it('gives media and code components usable structured defaults', () => {
+    expect(defaultRegistry.get('RoyImage')?.defaultProps).toMatchObject({
+      src: '',
+      fit: 'contain',
+    })
+    expect(defaultRegistry.get('RoyQRCode')?.defaultProps).toMatchObject({
+      text: 'PTD-QR-0001',
+      correctLevel: 'M',
+    })
+    expect(defaultRegistry.get('RoyBarCode')?.defaultProps).toMatchObject({
+      text: 'PTD-2026-0001',
+      bcid: 'code128',
+      includeText: true,
+    })
+  })
+
+  it('gives a new free table a real independent 2 x 2 cell model', () => {
+    const value = defaultRegistry.get('RoySimpleTable')?.defaultProps
+    expect(value).toMatchObject({
+      rowHeights: [100, 100],
+      columnWidths: [250, 250],
+      grid: [
+        ['cell-1', 'cell-2'],
+        ['cell-3', 'cell-4'],
+      ],
+    })
+  })
+
+  it('gives every new shape an immediately visible neutral default', () => {
+    expect(defaultRegistry.get('RoyLine')?.defaultStyle).toMatchObject({
+      height: 2,
+      background: '#647184',
+    })
+    for (const type of ['RoyRect', 'RoyCircle'] as const) {
+      expect(defaultRegistry.get(type)?.defaultStyle).toMatchObject({
+        background: 'transparent',
+        borderWidth: 1,
+        borderType: 'solid',
+        borderColor: '#647184',
+      })
+    }
+    expect(defaultRegistry.get('RoyStar')?.defaultStyle).toMatchObject({
+      background: '#647184',
+    })
   })
 
   it('get returns undefined for unknown type', () => {

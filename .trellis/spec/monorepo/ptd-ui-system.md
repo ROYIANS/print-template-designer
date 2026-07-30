@@ -315,8 +315,8 @@ PTD 是一张数字化的制版工作台：**精密、轻快、可信，带有�
 - Context Bar 依据 effective tool、页面、单选、多选和参考线选择切换命令；Text/Shape/Hand 工具
   优先显示当前模式、直接操作和退出提示，返回 Select 后才恢复页面/选择上下文。
 - Tool Dock 在语义上分为工具和资源面板两区，但不常驻显示“工具”“面板”文字；使用分区位置、
-  `role="group"` 与 `aria-label` 保持可理解性。Select/Hand/Text/Shape/Image/Table 属于操作入口，
-  Components/Pages/Layers/Data 只负责披露资源面板。它使用与面板相连的中性纸灰/石墨 surface；
+  `role="group"` 与 `aria-label` 保持可理解性。Select/Hand/Text/Shape/Image/Table/More 属于操作入口，
+  Assets/Pages/Layers/Data 只负责披露资源面板。它使用与面板相连的中性纸灰/石墨 surface；
   常态图标中性，键盘 Focus 才固定使用钴蓝。Document Bar 承担深色视觉锚点，Dock 不应表现成
   与画布割裂的第二套导航产品。
 - 精细指针下 Persistent Tool 激活使用轻中性 paper 底、钴蓝图标与靠 Dock 外缘的短几何标记；
@@ -350,16 +350,30 @@ PanelRoot
 - Hover 才出现的次要动作必须提供键盘可达的替代入口。
 - 空状态包含：当前状态、下一步价值和一个明确动作。
 
-## 7. 组件库面板
+## 7. 组件工具选择器与素材面板
 
 - Catalog 使用独立于持久 Schema category 的五组 taxonomy：文本、表格、图像、编码、图形；
-  `common/data/shape` 与既有 `ComponentType` 只承担模板兼容，不能直接决定面板分组。
-- Header 明确区分可用与规划数量。可用区提供“常用”四项、两列内容 tile 和四列 Shape preset；
-  名称与 Remix line 图标承担日常扫描，长描述进入 Tooltip/搜索结果，不用 9px 常驻说明堆密度。
-- `basic/complex` 是 catalog 元数据，不在每个可用 tile 上重复显示。所有 planned item 集中在默认
-  折叠的“即将支持”，保留禁用、不可拖拽和“规划中”语义；搜索命中时可强制显示但不得创建。
+  `common/data/shape` 与既有 `ComponentType` 只承担模板兼容，不能直接决定工具分组。
+- Select、Hand、Text Group、Shape Group、Image、Simple Table 是位置稳定的高频 Dock 工具；其下的
+  More 按钮打开完整组件工具 Picker。文本组记忆本 Designer 实例最近使用的简单文本或富文本，
+  图形组继续记忆最近 Shape；两者的 disclosure 都不能挤偏主图标。
+- Picker 是锚定 Dock 的非模态 Portal，而不是 Resource Panel 或大型 Modal。它提供搜索、最近使用和
+  五组紧凑二列工具项，只显示 `kind: available` 的真实组件；planned 项保留在产品 Catalog/文档，
+  不进入可操作浮层，也不以禁用按钮伪装为当前能力。
+- Picker 打开后聚焦搜索；Arrow/Home/End 在工具项间移动，Enter/Space 选择，Escape 关闭并恢复
+  More 焦点。鼠标支持 light-dismiss；Touch/Pen 的外部 pointerdown 不关闭，避免轻触误关，必须通过
+  关闭按钮、选择工具或 Escape 明确结束。
+- Picker 根据 Designer 容器、触发按钮和自身尺寸实时定位并 clamp；Portal 必须应用共享主题和
+  `data-ptd-editor-interactive`，不能被全局画布快捷键抢占。搜索、最近使用与开合只属于实例 UI state。
+- 原 Components 资源入口改为 Assets。正式资产引用、去重与持久化合同建立前，素材面板只提供诚实
+  空态和真实可执行的图片框入口，不创建刷新即丢失的伪上传、收藏、文件夹或服务端同步。
 - 所有可用组件点击后只激活对应创作工具，不得立即在页面中心插入，也不得通过 Sidebar native
   drag 绕过拖框。用户必须在 Paper 上拖动定义组件 Frame；无效短拖和取消不创建组件。
+- 新建 Shape 必须在取消选中时仍然可见：Line 默认使用 2px 蓝石墨填充，Rect/Circle 默认透明填充
+  与 1px 蓝石墨实线描边，Star 默认蓝石墨填充。默认值来自 Core Registry，不能只在 Designer
+  preview 或 React Overlay 中补视觉假象。
+- Shape Renderer 必须自包含实际几何；Star 等轮廓使用包内 SVG，不能依赖宿主是否加载某套图标
+  字体来决定画布内容是否可见。
 - Shape 使用一个 Dock 工具组和四个面板 preset；精细指针下 Dock 主按钮为完整 30×30、图标
   16×16 居中，disclosure 作为右下角 13×13 覆盖目标。coarse pointer 下恢复 40×40 主目标、
   20×20 图标与 16×16 disclosure。任何尺寸都不能压缩主按钮或把图标挤偏。
@@ -369,6 +383,13 @@ PanelRoot
   activation、preview、Hand/pan、short/cancelled draw 不发出模板变更，也不自动退出当前工具。
 - 四种 Shape 完成后保持连续绘制；文本、富文本、图像、编码和表格完成一次后回到 Select。
   普通文本和富文本创建完成立即进入内容编辑，其他一次性工具保留新组件选中态供属性配置。
+- 自由表格对象第一次点击仍只选择组件；选中后单元格表面接管精细操作。单击/拖动/Shift 扩展建立
+  单元格选区，双击或 Enter/F2 原位编辑纯文本，Arrow/Tab 导航。选区使用浅钴蓝蒙版和精确描边，
+  不能用不透明填充遮住单元格内容。
+- 行列分隔线 hover 才显示细窄拖动命中区，拖动即时改变相邻轨道且形成一个 Gesture 历史节点。
+  高频增删、合并、拆分与单元格排版位于 Inspector；不为表格打开遮断画布的大型 Modal。
+- 表格结构命令使用完整动作名称和明确 disabled 状态；至少一行一列不能删除。`RoyComplexTable`
+  在完整数据/分页合同完成前只作为规划项展示，旧 Schema 的只读渲染兼容不等于可创作能力。
 
 ### 7.1 Pages 资源面板
 
@@ -422,6 +443,15 @@ PanelRoot
 - 混合值、锁定、禁用与非法草稿必须同时通过文字、图标或控件状态表达，不能只改变颜色。
 - 高频且与当前组件相关的内容、几何、排版和基础外观分区保持展开和位置稳定；不适用的分区直接
   隐藏。Disclosure 只用于低频高级属性（如描边与圆角），不能把所有主分区都做成折叠面板。
+- 图片、二维码和条形码必须在内容分区提供专用配置，不得用“结构化内容由专用编辑器维护”占位。
+  图片支持稳定 URL/Data URL、本地文件读取、替代文本、适配方式和对象位置；二维码支持内容、
+  纠错等级、静区与前/背景色；条形码支持内容、码制、前景色和可读文字开关。
+- 本地图片通过 `FileReader` 转换为可持久化 Data URL；临时 `blob:` URL、脚本协议和非图片 Data URL
+  必须在字段附近显示文字错误并拒绝提交。图片未设置、载入中和载入失败都要在组件 Frame 内显示
+  可理解状态，不能展示浏览器破图图标或静默空白。empty/loading/ready/error 四态互斥；地址更新时
+  必须立即移除旧图，旧请求迟到的 load/error 回调不能覆盖当前地址或已销毁组件。
+- 二维码和条形码创建后必须带合法、可见的默认内容。码制校验错误与渲染模块错误使用紧凑的字段
+  状态和 Frame 内状态呈现；内容背景与组件外观背景语义重复时，只保留专用内容字段。
 - 混合值显示明确的“多值”状态，不能伪造默认颜色或数字。
 - 数字输入在提交前保留合法草稿；空值或非法值不能静默写成 0。
 - 锁定组件的字段禁用，并在面板顶部提供明确的“解锁组件”动作。
@@ -589,7 +619,8 @@ PTD 是桌面优先的生产工具，但不能假设所有桌面设备都有精�
 <div data-ptd-region="pages-panel" />
 <div data-ptd-region="structure-panel" />
 <div data-ptd-region="data-panel" />
-<div data-ptd-region="component-panel" />
+<div data-ptd-region="asset-panel" />
+<div data-ptd-region="component-tool-picker" />
 <div data-ptd-region="canvas-viewport" />
 <div data-ptd-region="paper" />
 <aside data-ptd-region="inspector" />

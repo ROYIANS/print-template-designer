@@ -7,6 +7,12 @@ import type {
   ComponentType,
   CreatableComponentType,
 } from '../types/component-schema'
+import {
+  DEFAULT_BAR_CODE_PROPS,
+  DEFAULT_IMAGE_PROPS,
+  DEFAULT_QR_CODE_PROPS,
+} from '../types/component-content'
+import { DEFAULT_SIMPLE_TABLE_PROPS } from '../types/table-content'
 
 export interface ComponentCatalogMetadata {
   id: string
@@ -33,7 +39,7 @@ export type CatalogComponentDefinition = ComponentDefinitionBase<CreatableCompon
 
 export type ComponentDefinition =
   | CatalogComponentDefinition
-  | (ComponentDefinitionBase<'RoyGroup'> & {
+  | (ComponentDefinitionBase<'RoyGroup' | 'RoyComplexTable'> & {
       internal: true
       catalog?: never
     })
@@ -85,21 +91,14 @@ const BUILT_IN_COMPONENTS = [
       creationMode: 'draw',
     },
     defaultStyle: { width: 500, height: 200, rotate: 0, opacity: 1 },
-    defaultProps: null,
+    defaultProps: DEFAULT_SIMPLE_TABLE_PROPS,
   },
   {
     type: 'RoyComplexTable',
     name: '结构表格',
     icon: 'ri-table-line',
     category: 'data',
-    catalog: {
-      id: 'structured-table',
-      group: 'table',
-      description: '创建带表头、表体与表尾的分区表格',
-      keywords: ['表头', '表体', '表尾', '分区', '报表'],
-      maturity: 'complex',
-      creationMode: 'draw',
-    },
+    internal: true,
     defaultStyle: { width: 500, height: 200, rotate: 0, opacity: 1 },
     defaultProps: null,
   },
@@ -117,7 +116,7 @@ const BUILT_IN_COMPONENTS = [
       creationMode: 'draw',
     },
     defaultStyle: { width: 200, height: 150, rotate: 0, opacity: 1 },
-    defaultProps: null,
+    defaultProps: DEFAULT_IMAGE_PROPS,
   },
   {
     type: 'RoyQRCode',
@@ -133,7 +132,7 @@ const BUILT_IN_COMPONENTS = [
       creationMode: 'draw',
     },
     defaultStyle: { width: 100, height: 100, rotate: 0, opacity: 1 },
-    defaultProps: null,
+    defaultProps: DEFAULT_QR_CODE_PROPS,
   },
   {
     type: 'RoyBarCode',
@@ -149,7 +148,7 @@ const BUILT_IN_COMPONENTS = [
       creationMode: 'draw',
     },
     defaultStyle: { width: 200, height: 80, rotate: 0, opacity: 1 },
-    defaultProps: null,
+    defaultProps: DEFAULT_BAR_CODE_PROPS,
   },
   {
     type: 'RoyLine',
@@ -164,7 +163,7 @@ const BUILT_IN_COMPONENTS = [
       maturity: 'basic',
       creationMode: 'draw',
     },
-    defaultStyle: { width: 200, height: 2, rotate: 0, opacity: 1 },
+    defaultStyle: { width: 200, height: 2, rotate: 0, opacity: 1, background: '#647184' },
     defaultProps: null,
   },
   {
@@ -180,7 +179,17 @@ const BUILT_IN_COMPONENTS = [
       maturity: 'basic',
       creationMode: 'draw',
     },
-    defaultStyle: { width: 200, height: 100, rotate: 0, opacity: 1 },
+    defaultStyle: {
+      width: 200,
+      height: 100,
+      rotate: 0,
+      opacity: 1,
+      background: 'transparent',
+      borderWidth: 1,
+      borderType: 'solid',
+      borderColor: '#647184',
+      borderRadius: '0',
+    },
     defaultProps: null,
   },
   {
@@ -196,7 +205,16 @@ const BUILT_IN_COMPONENTS = [
       maturity: 'basic',
       creationMode: 'draw',
     },
-    defaultStyle: { width: 100, height: 100, rotate: 0, opacity: 1 },
+    defaultStyle: {
+      width: 100,
+      height: 100,
+      rotate: 0,
+      opacity: 1,
+      background: 'transparent',
+      borderWidth: 1,
+      borderType: 'solid',
+      borderColor: '#647184',
+    },
     defaultProps: null,
   },
   {
@@ -212,7 +230,7 @@ const BUILT_IN_COMPONENTS = [
       maturity: 'basic',
       creationMode: 'draw',
     },
-    defaultStyle: { width: 100, height: 100, rotate: 0, opacity: 1 },
+    defaultStyle: { width: 100, height: 100, rotate: 0, opacity: 1, background: '#647184' },
     defaultProps: null,
   },
   {

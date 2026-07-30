@@ -1,0 +1,177 @@
+.editor {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  outline: none;
+  cursor: cell;
+}
+
+.editor:focus-visible {
+  box-shadow: inset 0 0 0 1px var(--ptd-focus);
+}
+
+.table {
+  width: 100%;
+  height: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.table col {
+  width: var(--table-track-size);
+}
+
+.table tr {
+  height: var(--table-track-size);
+}
+
+.cell {
+  position: relative;
+  box-sizing: border-box;
+  padding: 0;
+  overflow: hidden;
+  border: var(--table-border-width) var(--table-border-style) var(--table-border-color);
+  color: var(--table-color);
+  background: var(--table-background);
+  font-family: var(--table-font-family);
+  font-size: var(--table-font-size);
+  font-style: var(--table-font-style);
+  font-weight: var(--table-font-weight);
+  text-align: var(--table-horizontal-align);
+  vertical-align: var(--table-vertical-align);
+}
+
+.cell[data-selected='true']::after {
+  content: '';
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  border: 1px solid color-mix(in oklch, var(--ptd-selection) 72%, transparent);
+  background: color-mix(in oklch, var(--ptd-selection) 8%, transparent);
+  pointer-events: none;
+}
+
+.cell[data-primary='true']::after {
+  border-width: 2px;
+  border-color: var(--ptd-selection);
+}
+
+.cellContent {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  padding: var(--table-padding);
+  overflow: hidden;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  text-decoration: var(--table-text-decoration);
+  user-select: none;
+}
+
+.cellInput {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  resize: none;
+  padding: var(--table-padding);
+  overflow: auto;
+  border: 0;
+  outline: 2px solid var(--ptd-selection);
+  outline-offset: -2px;
+  color: var(--table-color);
+  background: color-mix(in oklch, var(--table-background) 96%, var(--ptd-selection));
+  font: inherit;
+  text-align: inherit;
+  text-decoration: var(--table-text-decoration);
+  line-height: 1.35;
+}
+
+.columnHandle,
+.rowHandle {
+  position: absolute;
+  z-index: 3;
+  display: block;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  opacity: 0;
+  transition: opacity 100ms ease-out;
+}
+
+.editor:hover .columnHandle,
+.editor:hover .rowHandle,
+.columnHandle:focus-visible,
+.rowHandle:focus-visible {
+  opacity: 1;
+}
+
+.columnHandle {
+  top: 0;
+  bottom: 0;
+  left: var(--table-handle-position);
+  width: 7px;
+  transform: translateX(-50%);
+  cursor: col-resize;
+}
+
+.rowHandle {
+  right: 0;
+  left: 0;
+  top: var(--table-handle-position);
+  height: 7px;
+  transform: translateY(-50%);
+  cursor: row-resize;
+}
+
+.columnHandle::after,
+.rowHandle::after {
+  content: '';
+  position: absolute;
+  background: color-mix(in oklch, var(--ptd-selection) 68%, transparent);
+}
+
+.columnHandle::after {
+  top: 0;
+  bottom: 0;
+  left: 3px;
+  width: 1px;
+}
+
+.rowHandle::after {
+  top: 3px;
+  right: 0;
+  left: 0;
+  height: 1px;
+}
+
+.columnHandle:hover::after,
+.columnHandle:focus-visible::after,
+.rowHandle:hover::after,
+.rowHandle:focus-visible::after {
+  background: var(--ptd-selection);
+}
+
+.selectionReadout {
+  position: absolute;
+  z-index: 4;
+  right: 4px;
+  bottom: 4px;
+  padding: 3px 5px;
+  color: var(--ptd-text-muted);
+  background: color-mix(in oklch, var(--ptd-surface-raised) 92%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in oklch, var(--ptd-border-strong) 52%, transparent);
+  font-size: 9px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .columnHandle,
+  .rowHandle {
+    transition: none;
+  }
+}

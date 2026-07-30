@@ -1,15 +1,9 @@
-import type { ComponentSchema } from '@ptd/core'
+import { barCodeContentError, normalizeBarCodeProps, type ComponentSchema } from '@ptd/core'
 import { BaseComponent } from '../base/base-component'
-
-interface BarCodeProps {
-  text?: string
-  bcid?: string
-  colorDark?: string
-  includeText?: boolean
-}
 
 export class RoyBarCode extends BaseComponent {
   private barContainer: HTMLDivElement | null = null
+  private renderToken = 0
 
   constructor(schema: ComponentSchema) {
     super(schema)
@@ -18,65 +12,83 @@ export class RoyBarCode extends BaseComponent {
   protected render(): void {
     this.container.classList.add('ptd-barcode')
 
-    let barContainer = this.container.querySelector<HTMLDivElement>('.ptd-barcode__bar')
+    let barContainer = this.container.querySelector<HTMLDivElement>('.ptd-barcode__inner')
     if (!barContainer) {
       barContainer = document.createElement('div')
-      barContainer.className = 'ptd-barcode__bar'
+      barContainer.className = 'ptd-barcode__inner'
       this.container.appendChild(barContainer)
     }
     this.barContainer = barContainer
-
-    const props = this.schema.propValue as BarCodeProps | null
-    const includeText = props?.includeText ?? false
-
-    barContainer.style.width = '100%'
-    barContainer.style.height = includeText ? 'calc(100% - 14px)' : '100%'
-
-    // Text label
-    let textEl = this.container.querySelector<HTMLDivElement>('.ptd-barcode__text')
-    if (includeText) {
-      if (!textEl) {
-        textEl = document.createElement('div')
-        textEl.className = 'ptd-barcode__text'
-        this.container.appendChild(textEl)
-      }
-      textEl.textContent = props?.text ?? ''
-      textEl.style.color = props?.colorDark ?? '#000000'
-      textEl.style.background = this.schema.style.background ?? 'transparent'
-    } else if (textEl) {
-      textEl.remove()
-    }
-
     this.renderBarCode()
   }
 
   private renderBarCode(): void {
     if (!this.barContainer) return
-    const props = this.schema.propValue as BarCodeProps | null
-    const text = props?.text ?? ''
-    if (!text) return
+    const target = this.barContainer
+    const token = ++this.renderToken
+    const props = normalizeBarCodeProps(this.schema.propValue)
+    const contentError = barCodeContentError(props)
 
-    this.barContainer.innerHTML = ''
+    if (contentError) {
+      setBarCodeStatus(this.container, target, 'error', contentError)
+      return
+    }
+    setBarCodeStatus(this.container, target, 'loading', '正在生成条形码…')
 
     import('bwip-js')
       .then((mod) => {
+        if (token !== this.renderToken || this.barContainer !== target) return
         const bwipjs = mod.default ?? mod
-        if (!this.barContainer) return
         const canvas = document.createElement('canvas')
         try {
           bwipjs.toCanvas(canvas, {
-            bcid: props?.bcid ?? 'code128',
-            text,
+            bcid: props.bcid,
+            text: props.text,
             scale: 2,
-            barcolor: props?.colorDark ?? '000000',
+            barcolor: withoutHash(props.colorDark),
+            textcolor: withoutHash(props.colorDark),
+            backgroundcolor: backgroundColor(this.schema.style.background),
+            includetext: props.includeText,
+            textxalign: 'center',
+            textsize: 10,
           })
-          this.barContainer?.appendChild(canvas)
+          target.replaceChildren(canvas)
+          this.container.dataset.renderState = 'ready'
         } catch {
-          // Silently fail if barcode rendering fails (e.g., invalid bcid in test env)
+          setBarCodeStatus(this.container, target, 'error', '条形码内容不符合当前码制')
         }
       })
       .catch(() => {
-        // Silently fail if bwip-js is not available
+        if (token === this.renderToken && this.barContainer === target) {
+          setBarCodeStatus(this.container, target, 'error', '条形码渲染模块载入失败')
+        }
       })
   }
+
+  override destroy(): void {
+    this.renderToken += 1
+    super.destroy()
+  }
+}
+
+function withoutHash(value: string): string {
+  return value.replace(/^#/, '')
+}
+
+function backgroundColor(value: unknown): string {
+  return typeof value === 'string' && /^#[0-9a-f]{6}$/i.test(value) ? withoutHash(value) : 'ffffff'
+}
+
+function setBarCodeStatus(
+  container: HTMLElement,
+  target: HTMLElement,
+  state: 'loading' | 'error',
+  message: string,
+): void {
+  const status = document.createElement('div')
+  status.className = 'ptd-render-state'
+  status.dataset.state = state
+  status.textContent = message
+  target.replaceChildren(status)
+  container.dataset.renderState = state
 }

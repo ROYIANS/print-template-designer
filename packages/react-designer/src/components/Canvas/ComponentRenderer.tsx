@@ -18,6 +18,7 @@ import {
 import { getScaledGroupChildren } from '../../utils/groupGeometry'
 import { useEditorStore } from '../../state'
 import { ContentEditor, isDirectlyEditableComponent } from '../ContentEditor/ContentEditor'
+import { TableEditor } from '../TableEditor/TableEditor'
 import styles from './ComponentRenderer.module.css'
 
 type ComponentConstructor = new (schema: ComponentSchema) => BaseComponent
@@ -45,6 +46,14 @@ export function ComponentRenderer({ schema }: ComponentRendererProps) {
   useSignals()
   const store = useEditorStore()
   if (schema.component === 'RoyGroup') return <GroupRenderer schema={schema} />
+  if (
+    schema.component === 'RoySimpleTable' &&
+    !schema.isLock &&
+    store.selectedIds.value.length === 1 &&
+    store.selectedIds.value[0] === schema.id
+  ) {
+    return <TableEditor schema={schema} />
+  }
   if (store.editingComponentId.value === schema.id && isDirectlyEditableComponent(schema)) {
     return <ContentEditor schema={schema} />
   }

@@ -133,6 +133,16 @@ const plannedCatalogItems = [
   },
   {
     kind: 'planned',
+    id: 'structured-table',
+    name: '结构表格',
+    group: 'table',
+    icon: RiTableLine,
+    description: '按表头、表体与表尾组织数据，并支持报表分页合同',
+    keywords: ['表头', '表体', '表尾', '分区', '报表', '只读兼容'],
+    maturity: 'planned',
+  },
+  {
+    kind: 'planned',
     id: 'repeating-list',
     name: '重复明细 / 列表',
     group: 'table',
@@ -209,6 +219,15 @@ export const frequentCatalogItems: readonly AvailableCatalogItem[] = frequentCom
   },
 )
 
+export function rememberRecentComponentType(
+  current: readonly CreatableComponentType[],
+  type: CreatableComponentType,
+  limit = 4,
+): CreatableComponentType[] {
+  if (limit <= 0) return []
+  return [type, ...current.filter((currentType) => currentType !== type)].slice(0, limit)
+}
+
 export function isAvailableCatalogItem(item: CatalogItem): item is AvailableCatalogItem {
   return item.kind === 'available'
 }
@@ -237,6 +256,10 @@ export function searchComponentCatalog(query: string): CatalogItem[] {
       .toLowerCase()
     return terms.every((term) => searchable.includes(term))
   })
+}
+
+export function searchAvailableComponentCatalog(query: string): AvailableCatalogItem[] {
+  return searchComponentCatalog(query).filter(isAvailableCatalogItem)
 }
 
 export function createComponentSchema(

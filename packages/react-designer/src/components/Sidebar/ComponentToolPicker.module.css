@@ -1,0 +1,303 @@
+.picker {
+  position: fixed;
+  z-index: var(--ptd-layer-floating);
+  top: var(--ptd-picker-top);
+  left: var(--ptd-picker-left);
+  width: var(--ptd-picker-width);
+  max-height: var(--ptd-picker-max-height);
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  overflow: hidden;
+  border: 1px solid var(--ptd-border-strong);
+  border-radius: var(--ptd-radius-2);
+  color: var(--ptd-text);
+  background: var(--ptd-surface-raised);
+  box-shadow: var(--ptd-shadow-floating);
+  font-family: var(--ptd-font-ui);
+  font-size: var(--ptd-text-11);
+  line-height: 1.35;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-4px);
+  transition:
+    opacity var(--ptd-duration-state) var(--ptd-ease-out),
+    transform var(--ptd-duration-state) var(--ptd-ease-out);
+  container-type: inline-size;
+}
+
+.picker[data-positioned='true'] {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(0);
+}
+
+.header {
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ptd-space-2);
+  padding: 0 var(--ptd-space-2) 0 var(--ptd-space-3);
+  border-bottom: 1px solid var(--ptd-border);
+  background: var(--ptd-surface-panel);
+}
+
+.header > span {
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: var(--ptd-space-2);
+}
+
+.header strong {
+  color: var(--ptd-text-strong);
+  font-size: var(--ptd-text-12);
+  font-weight: 700;
+}
+
+.header small,
+.sectionHeader span {
+  color: var(--ptd-text-muted);
+  font-family: var(--ptd-font-metric);
+  font-size: var(--ptd-text-10);
+  font-variant-numeric: tabular-nums;
+}
+
+.closeButton {
+  width: var(--ptd-control-sm);
+  height: var(--ptd-control-sm);
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: var(--ptd-radius-1);
+  color: var(--ptd-text-muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.closeButton:hover {
+  color: var(--ptd-text-strong);
+  background: var(--ptd-surface-sunken);
+}
+
+.closeButton:active {
+  transform: translateY(1px);
+}
+
+.closeButton svg {
+  width: 16px;
+  height: 16px;
+}
+
+.search {
+  min-height: 34px;
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  padding: var(--ptd-space-1) var(--ptd-space-2);
+  border-bottom: 1px solid var(--ptd-border-subtle);
+  color: var(--ptd-text-muted);
+  background: var(--ptd-surface-panel);
+}
+
+.search > svg {
+  width: 15px;
+  height: 15px;
+}
+
+.search input {
+  min-width: 0;
+  height: var(--ptd-control-sm);
+  padding: 0 6px;
+  border: 1px solid var(--ptd-border);
+  border-radius: var(--ptd-radius-1);
+  color: var(--ptd-text-strong);
+  background: var(--ptd-surface-raised);
+  font: inherit;
+}
+
+.search input::placeholder {
+  color: var(--ptd-text-muted);
+}
+
+.body {
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  background: var(--ptd-surface-panel);
+}
+
+.section {
+  padding: var(--ptd-space-1) var(--ptd-space-2);
+  border-bottom: 1px solid var(--ptd-border-subtle);
+}
+
+.section:last-child {
+  border-bottom: 0;
+}
+
+.sectionHeader {
+  min-height: 18px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--ptd-space-2);
+  padding: 0 2px 2px;
+}
+
+.sectionHeader strong {
+  color: var(--ptd-text-strong);
+  font-size: var(--ptd-text-10);
+  font-weight: 650;
+  letter-spacing: 0.035em;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2px;
+}
+
+.item {
+  position: relative;
+  min-width: 0;
+  min-height: 34px;
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) 16px;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 5px;
+  border: 1px solid transparent;
+  border-radius: var(--ptd-radius-1);
+  color: var(--ptd-text);
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    color var(--ptd-duration-instant) var(--ptd-ease-out),
+    background-color var(--ptd-duration-instant) var(--ptd-ease-out),
+    border-color var(--ptd-duration-instant) var(--ptd-ease-out),
+    transform var(--ptd-duration-instant) var(--ptd-ease-out);
+}
+
+.item:hover {
+  color: var(--ptd-text-strong);
+  border-color: var(--ptd-border);
+  background: var(--ptd-surface-sunken);
+}
+
+.item:active {
+  transform: translateY(1px) scale(0.99);
+}
+
+.item[aria-pressed='true'] {
+  color: var(--ptd-text-strong);
+  border-color: var(--ptd-border-strong);
+  background: var(--ptd-surface-raised);
+  font-weight: 650;
+}
+
+.item > svg:first-child {
+  width: 16px;
+  height: 16px;
+  color: var(--ptd-text-muted);
+}
+
+.item:hover > svg:first-child,
+.item[aria-pressed='true'] > svg:first-child,
+.check {
+  color: var(--ptd-selection-strong);
+}
+
+.item > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.check {
+  width: 15px;
+  height: 15px;
+}
+
+.emptyState {
+  min-height: 148px;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: var(--ptd-space-2);
+  padding: var(--ptd-space-6);
+  text-align: center;
+}
+
+.emptyState strong {
+  color: var(--ptd-text-strong);
+  font-size: var(--ptd-text-12);
+}
+
+.emptyState span {
+  color: var(--ptd-text-muted);
+  font-size: var(--ptd-text-10);
+  line-height: 1.55;
+}
+
+.emptyState button {
+  height: var(--ptd-control-sm);
+  padding: 0 var(--ptd-space-2);
+  border: 1px solid var(--ptd-border);
+  border-radius: var(--ptd-radius-1);
+  color: var(--ptd-text);
+  background: var(--ptd-surface-raised);
+  font: inherit;
+  cursor: pointer;
+}
+
+.closeButton:focus-visible,
+.search input:focus-visible,
+.item:focus-visible,
+.emptyState button:focus-visible {
+  outline: 2px solid var(--ptd-focus);
+  outline-offset: 1px;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+@container (max-width: 240px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (pointer: coarse) {
+  .closeButton {
+    width: var(--ptd-control-touch);
+    height: var(--ptd-control-touch);
+  }
+
+  .search {
+    min-height: 44px;
+  }
+
+  .search input,
+  .item {
+    min-height: var(--ptd-control-touch);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .picker,
+  .item {
+    transition: none;
+  }
+}

@@ -454,7 +454,10 @@ export function Canvas({ onOpenInspector }: { onOpenInspector: () => void }) {
                 key={schema.id}
                 schema={schema}
                 isActive={selectedIds.includes(schema.id)}
-                isEditing={store.editingComponentId.value === schema.id}
+                isEditing={
+                  store.editingComponentId.value === schema.id ||
+                  store.editingTableCell.value?.componentId === schema.id
+                }
                 editorRef={editorRef}
                 scale={scale}
                 onMove={handleMove}

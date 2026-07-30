@@ -107,29 +107,30 @@ const CSS = `
 }
 
 .ptd-star {
-  color: var(--ptd-background);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background: transparent;
 }
 
-.ptd-star .ptd-star__icon {
-  font-size: var(--ptd-height);
-  line-height: var(--ptd-height);
+.ptd-star__svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  fill: var(--ptd-background);
+  pointer-events: none;
 }
 
 .ptd-image {
   background: var(--ptd-background);
+  border: var(--ptd-border);
+  border-radius: var(--ptd-border-radius);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--ptd-border-width);
 }
 
 .ptd-image img {
+  width: 100%;
   height: 100%;
-  border-radius: var(--ptd-border-radius);
-  border: var(--ptd-border);
+  display: block;
 }
 
 .ptd-qrcode {
@@ -139,6 +140,12 @@ const CSS = `
 
 .ptd-qrcode canvas,
 .ptd-qrcode img {
+  width: 100%;
+  height: 100%;
+}
+
+.ptd-qrcode__inner,
+.ptd-barcode__inner {
   width: 100%;
   height: 100%;
 }
@@ -155,14 +162,24 @@ const CSS = `
   height: 100%;
 }
 
-.ptd-barcode__text {
+.ptd-render-state {
   width: 100%;
-  height: 14px;
-  font-size: 12px;
-  position: absolute;
-  bottom: 0;
-  left: 0;
+  height: 100%;
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  padding: 8px;
+  color: #647184;
+  background: rgb(231 236 243 / 46%);
+  font-family: system-ui, sans-serif;
+  font-size: 11px;
+  line-height: 1.35;
   text-align: center;
+}
+
+.ptd-render-state[data-state='error'] {
+  color: #9f3523;
+  background: rgb(207 77 52 / 8%);
 }
 
 .ptd-group {
@@ -170,25 +187,45 @@ const CSS = `
 }
 
 .ptd-simple-table {
-  color: var(--ptd-color);
-  background: var(--ptd-background);
   width: 100%;
-  height: auto;
+  height: 100%;
   position: relative;
+  overflow: hidden;
 }
 
 .ptd-simple-table table {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: var(--ptd-border-spacing);
-  background-color: var(--ptd-border-color);
+  height: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
 }
 
 .ptd-simple-table td {
   position: relative;
-  padding: 2px;
-  background-color: var(--ptd-background, #fff);
+  box-sizing: border-box;
+  padding: 0;
+  border: var(--ptd-table-border-width) var(--ptd-table-border-style)
+    var(--ptd-table-border-color);
+  color: var(--ptd-table-color);
+  background: var(--ptd-table-background);
+  font-family: var(--ptd-table-font-family);
+  font-size: var(--ptd-table-font-size);
+  font-style: var(--ptd-table-font-style);
+  font-weight: var(--ptd-table-font-weight);
+  text-align: var(--ptd-table-horizontal-align);
+  vertical-align: var(--ptd-table-vertical-align);
   overflow: hidden;
+}
+
+.ptd-simple-table__cell-content {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  padding: var(--ptd-table-padding);
+  overflow: hidden;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  text-decoration: var(--ptd-table-text-decoration);
 }
 
 .ptd-complex-table {

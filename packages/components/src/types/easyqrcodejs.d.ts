@@ -6,6 +6,7 @@ declare module 'easyqrcodejs' {
     colorDark?: string
     colorLight?: string
     correctLevel?: number
+    quietZone?: number
     onRenderingEnd?: (options: QRCodeOptions, dataURL: string) => void
   }
 

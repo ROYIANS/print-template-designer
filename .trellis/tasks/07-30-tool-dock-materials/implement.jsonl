@@ -1,0 +1,5 @@
+{"file":".trellis/spec/monorepo/ptd-ui-system.md","reason":"Defines PTD Tool Dock, Resource Panel, Portal, responsive, motion, accessibility and visual contracts."}
+{"file":".trellis/spec/monorepo/react-designer-contract.md","reason":"Defines instance isolation, persistent tools, drawn creation and package verification contracts."}
+{"file":".trellis/tasks/07-30-tool-dock-materials/prd.md","reason":"Defines the approved component picker, text tool group and honest assets-panel scope."}
+{"file":".trellis/spec/monorepo/package-conventions.md","reason":"Defines Core/Components/React package boundaries and sequential build requirements for the shape-default change."}
+{"file":".trellis/spec/monorepo/quality-guidelines.md","reason":"Defines unit-test, formatting, lint and package quality requirements."}

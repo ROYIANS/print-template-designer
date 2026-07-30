@@ -1,6 +1,10 @@
 import { computed, signal } from '@preact/signals-react'
 import {
   getPageDimensions,
+  getTableCellAt,
+  getTableCellBounds,
+  normalizeSimpleTableProps,
+  updateTableCellText,
   type ComponentSchema,
   type ComponentStyle,
   type PageDirection,
@@ -37,6 +41,19 @@ export interface CanvasGuide {
 export interface AreaSelection {
   style: { top: number; left: number; width: number; height: number }
   componentIds: string[]
+}
+
+export interface TableCellSelection {
+  componentId: string
+  anchorRow: number
+  anchorColumn: number
+  focusRow: number
+  focusColumn: number
+}
+
+export interface EditingTableCell {
+  componentId: string
+  cellId: string
 }
 
 interface ClipboardData {
@@ -119,6 +136,8 @@ export class EditorStore {
   readonly history = signal<TemplateSchema[]>([])
   readonly historyIndex = signal(0)
   readonly editingComponentId = signal<string | null>(null)
+  readonly tableCellSelection = signal<TableCellSelection | null>(null)
+  readonly editingTableCell = signal<EditingTableCell | null>(null)
 
   readonly currentPage = computed(() => this.template.value.pages[this.currentPageIndex.value])
   readonly components = computed(() => this.currentPage.value?.componentData ?? [])
@@ -169,6 +188,8 @@ export class EditorStore {
     this.history.value = [template]
     this.historyIndex.value = 0
     this.editingComponentId.value = null
+    this.tableCellSelection.value = null
+    this.editingTableCell.value = null
     this.gestureStart = null
   }
 
@@ -230,6 +251,7 @@ export class EditorStore {
 
   selectComponent(id: string, additive = false): void {
     if (!this.components.value.some((component) => component.id === id)) return
+    if (this.tableCellSelection.value?.componentId !== id) this.clearTableSession()
     this.selectedGuideId.value = null
     if (!additive) {
       this.selectedIds.value = [id]
@@ -252,6 +274,7 @@ export class EditorStore {
     this.activeTool.value = 'select'
     this.temporaryHand.value = false
     this.editingComponentId.value = id
+    this.editingTableCell.value = null
     return true
   }
 
@@ -265,15 +288,80 @@ export class EditorStore {
     if (this.editingComponentId.value === id) this.editingComponentId.value = null
   }
 
+  selectTableCell(componentId: string, row: number, column: number, extend = false): boolean {
+    const component = this.components.value.find((item) => item.id === componentId)
+    if (!component || component.component !== 'RoySimpleTable' || component.isLock) return false
+    const value = normalizeSimpleTableProps(component.propValue)
+    const cell = getTableCellAt(value, row, column)
+    const bounds = cell ? getTableCellBounds(value, cell.id) : null
+    if (!cell || !bounds) return false
+    this.selectComponent(componentId)
+    this.activeTool.value = 'select'
+    this.temporaryHand.value = false
+    const current = this.tableCellSelection.value
+    this.tableCellSelection.value =
+      extend && current?.componentId === componentId
+        ? { ...current, focusRow: row, focusColumn: column }
+        : {
+            componentId,
+            anchorRow: bounds.startRow,
+            anchorColumn: bounds.startColumn,
+            focusRow: row,
+            focusColumn: column,
+          }
+    return true
+  }
+
+  startTableCellEditing(componentId: string, cellId: string): boolean {
+    const component = this.components.value.find((item) => item.id === componentId)
+    if (!component || component.component !== 'RoySimpleTable' || component.isLock) return false
+    const value = normalizeSimpleTableProps(component.propValue)
+    const bounds = getTableCellBounds(value, cellId)
+    if (!value.cells[cellId] || !bounds) return false
+    this.selectTableCell(componentId, bounds.startRow, bounds.startColumn)
+    this.editingComponentId.value = null
+    this.editingTableCell.value = { componentId, cellId }
+    return true
+  }
+
+  commitTableCellEditing(componentId: string, cellId: string, text: string): void {
+    const editing = this.editingTableCell.value
+    if (editing?.componentId !== componentId || editing.cellId !== cellId) return
+    this.editingTableCell.value = null
+    const component = this.components.value.find((item) => item.id === componentId)
+    if (!component || component.component !== 'RoySimpleTable' || component.isLock) return
+    const current = normalizeSimpleTableProps(component.propValue)
+    const next = updateTableCellText(current, cellId, text)
+    if (next !== current) this.updateComponent(componentId, { propValue: next })
+  }
+
+  cancelTableCellEditing(componentId: string, cellId: string): void {
+    const editing = this.editingTableCell.value
+    if (editing?.componentId === componentId && editing.cellId === cellId) {
+      this.editingTableCell.value = null
+    }
+  }
+
+  clearTableCellSelection(componentId?: string): void {
+    if (componentId && this.tableCellSelection.value?.componentId !== componentId) return
+    this.clearTableSession()
+  }
+
   selectComponents(ids: string[]): void {
     const available = new Set(this.components.value.map((component) => component.id))
     this.selectedIds.value = [...new Set(ids)].filter((id) => available.has(id))
     this.selectedGuideId.value = null
+    if (
+      this.selectedIds.value.length !== 1 ||
+      this.tableCellSelection.value?.componentId !== this.selectedIds.value[0]
+    )
+      this.clearTableSession()
   }
 
   clearSelection(): void {
     this.selectedIds.value = []
     this.selectedGuideId.value = null
+    this.clearTableSession()
   }
 
   setActiveTool(tool: EditorTool): void {
@@ -486,6 +574,9 @@ export class EditorStore {
     if (this.editingComponentId.value && ids.has(this.editingComponentId.value)) {
       this.editingComponentId.value = null
     }
+    if (this.editingTableCell.value && ids.has(this.editingTableCell.value.componentId)) {
+      this.clearTableSession()
+    }
     this.updateCurrentPage((components) => components.filter((component) => !ids.has(component.id)))
     this.clearSelection()
   }
@@ -554,6 +645,9 @@ export class EditorStore {
     if (ids.size === 0) return
     if (locked && this.editingComponentId.value && ids.has(this.editingComponentId.value)) {
       this.editingComponentId.value = null
+    }
+    if (locked && this.editingTableCell.value && ids.has(this.editingTableCell.value.componentId)) {
+      this.editingTableCell.value = null
     }
     this.updateCurrentPage((components) =>
       components.map((component) =>
@@ -760,6 +854,7 @@ export class EditorStore {
   undo(): void {
     if (!this.canUndo.value) return
     this.editingComponentId.value = null
+    this.clearTableSession()
     this.historyIndex.value -= 1
     this.restoreHistory()
   }
@@ -767,6 +862,7 @@ export class EditorStore {
   redo(): void {
     if (!this.canRedo.value) return
     this.editingComponentId.value = null
+    this.clearTableSession()
     this.historyIndex.value += 1
     this.restoreHistory()
   }
@@ -843,6 +939,7 @@ export class EditorStore {
   private resetPageSession(): void {
     this.selectedIds.value = []
     this.editingComponentId.value = null
+    this.clearTableSession()
     this.componentToReveal.value = null
     this.guides.value = []
     this.selectedGuideId.value = null
@@ -853,6 +950,13 @@ export class EditorStore {
     const available = new Set(this.components.value.map((component) => component.id))
     const repaired = this.selectedIds.value.filter((id) => available.has(id))
     if (repaired.length !== this.selectedIds.value.length) this.selectedIds.value = repaired
+    const tableSelection = this.tableCellSelection.value
+    if (tableSelection && !available.has(tableSelection.componentId)) this.clearTableSession()
+  }
+
+  private clearTableSession(): void {
+    this.tableCellSelection.value = null
+    this.editingTableCell.value = null
   }
 
   private hasLockedSelection(): boolean {

@@ -8,8 +8,30 @@ import {
   type ReactNode,
 } from 'react'
 import { useSignals } from '@preact/signals-react/runtime'
-import { getPageDimensions, pxToMm, type ComponentSchema, type ComponentStyle } from '@ptd/core'
-import { RiAddLine, RiLandscapeLine, RiRuler2Line, RiSubtractLine } from '@remixicon/react'
+import {
+  BAR_CODE_FORMATS,
+  barCodeContentError,
+  getPageDimensions,
+  imageSourceError,
+  normalizeBarCodeProps,
+  normalizeImageProps,
+  normalizeQRCodeProps,
+  pxToMm,
+  qrCodeContentError,
+  type BarCodeProps,
+  type ComponentSchema,
+  type ComponentStyle,
+  type ImageProps,
+  type QRCodeProps,
+} from '@ptd/core'
+import {
+  RiAddLine,
+  RiDeleteBinLine,
+  RiLandscapeLine,
+  RiRuler2Line,
+  RiSubtractLine,
+  RiUpload2Line,
+} from '@remixicon/react'
 import {
   CJK_FONT_FAMILY_OPTIONS,
   composeFontFamily,
@@ -27,6 +49,7 @@ import {
   scrubNumberValue,
 } from './propertyValue'
 import styles from './PropertyInspector.module.css'
+import { TableContentFields } from './TableContentFields'
 
 type ColorVariables = CSSProperties & { '--field-color': string }
 
@@ -167,27 +190,22 @@ const CONTENT_COMPONENTS = new Set<ComponentSchema['component']>([
 const TYPOGRAPHY_COMPONENTS = new Set<ComponentSchema['component']>([
   'RoySimpleText',
   'RoyText',
-  'RoySimpleTable',
   'RoyComplexTable',
 ])
 const ALIGNMENT_COMPONENTS = new Set<ComponentSchema['component']>(['RoySimpleText'])
 const BACKGROUND_COMPONENTS = new Set<ComponentSchema['component']>([
   'RoySimpleText',
   'RoyText',
-  'RoySimpleTable',
   'RoyComplexTable',
   'RoyLine',
   'RoyRect',
   'RoyCircle',
   'RoyStar',
   'RoyImage',
-  'RoyQRCode',
-  'RoyBarCode',
 ])
 const BORDER_COMPONENTS = new Set<ComponentSchema['component']>([
   'RoySimpleText',
   'RoyText',
-  'RoySimpleTable',
   'RoyComplexTable',
   'RoyRect',
   'RoyCircle',
@@ -209,6 +227,12 @@ const RADIUS_COMPONENTS = new Set<ComponentSchema['component']>([
   'RoyText',
   'RoyRect',
   'RoyImage',
+])
+const CONFIGURABLE_CONTENT_COMPONENTS = new Set<ComponentSchema['component']>([
+  'RoySimpleTable',
+  'RoyImage',
+  'RoyQRCode',
+  'RoyBarCode',
 ])
 
 export function PropertyInspector() {
@@ -314,10 +338,18 @@ function SingleInspector({ component }: { component: ComponentSchema }) {
     updateStyle(key, value)
     finish()
   }
+  const updateContent = (value: unknown) =>
+    store.updateComponent(component.id, { propValue: value }, true)
+  const updateDiscreteContent = (value: unknown) => {
+    start()
+    updateContent(value)
+    finish()
+  }
 
   useEffect(() => () => store.commitGesture(), [store])
 
   const editableText = isEditableTextPropValue(component)
+  const configurableContent = isConfigurableContentComponent(component)
   const showsContent = CONTENT_COMPONENTS.has(component.component)
   const showsTypography = TYPOGRAPHY_COMPONENTS.has(component.component)
   const showsAlignment = ALIGNMENT_COMPONENTS.has(component.component)
@@ -351,8 +383,30 @@ function SingleInspector({ component }: { component: ComponentSchema }) {
       }
     >
       {showsContent && (
-        <InspectorSection title="内容" meta={editableText ? '可编辑' : '专用编辑器'}>
-          {editableText ? (
+        <InspectorSection
+          title="内容"
+          meta={
+            editableText
+              ? '可编辑'
+              : component.component === 'RoySimpleTable'
+                ? '单元格编辑'
+                : configurableContent
+                  ? '实时预览'
+                  : '专用编辑器'
+          }
+        >
+          {configurableContent ? (
+            <ConfigurableContentFields
+              key={component.id}
+              component={component}
+              disabled={locked}
+              onStart={start}
+              onFinish={finish}
+              onCancel={cancel}
+              onValue={updateContent}
+              onDiscreteValue={updateDiscreteContent}
+            />
+          ) : editableText ? (
             <Field label={component.component === 'RoyText' ? '内容源码' : '文本值'} wide>
               {component.component === 'RoyText' ? (
                 <textarea
@@ -579,6 +633,351 @@ function SingleInspector({ component }: { component: ComponentSchema }) {
       )}
     </InspectorShell>
   )
+}
+
+type ConfigurableContentComponent =
+  | (ComponentSchema & { component: 'RoySimpleTable' })
+  | (ComponentSchema & { component: 'RoyImage' })
+  | (ComponentSchema & { component: 'RoyQRCode' })
+  | (ComponentSchema & { component: 'RoyBarCode' })
+
+interface ConfigurableContentFieldsProps {
+  component: ConfigurableContentComponent
+  disabled: boolean
+  onStart: () => void
+  onFinish: () => void
+  onCancel: () => void
+  onValue: (value: unknown) => void
+  onDiscreteValue: (value: unknown) => void
+}
+
+function isConfigurableContentComponent(
+  component: ComponentSchema,
+): component is ConfigurableContentComponent {
+  return CONFIGURABLE_CONTENT_COMPONENTS.has(component.component)
+}
+
+function ConfigurableContentFields(props: ConfigurableContentFieldsProps) {
+  switch (props.component.component) {
+    case 'RoySimpleTable':
+      return <TableContentFields {...props} component={props.component} />
+    case 'RoyImage':
+      return <ImageContentFields {...props} />
+    case 'RoyQRCode':
+      return <QRCodeContentFields {...props} />
+    case 'RoyBarCode':
+      return <BarCodeContentFields {...props} />
+  }
+}
+
+function ImageContentFields({
+  component,
+  disabled,
+  onStart,
+  onFinish,
+  onValue,
+  onDiscreteValue,
+}: ConfigurableContentFieldsProps) {
+  const value = normalizeImageProps(component.propValue)
+  const [sourceDraft, setSourceDraft] = useState<string | null>(null)
+  const [sourceStart, setSourceStart] = useState('')
+  const [fileError, setFileError] = useState<string | null>(null)
+  const shownSource = sourceDraft ?? value.src
+  const sourceError = imageSourceError(shownSource)
+  const patch = (next: Partial<ImageProps>) => onValue({ ...value, ...next })
+  const patchDiscrete = (next: Partial<ImageProps>) => onDiscreteValue({ ...value, ...next })
+  const loadFile = (file: File | undefined) => {
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      setFileError('请选择浏览器支持的图片文件')
+      return
+    }
+    const reader = new FileReader()
+    reader.onerror = () => setFileError('图片读取失败，请重新选择')
+    reader.onload = () => {
+      if (typeof reader.result !== 'string') {
+        setFileError('图片读取结果无效')
+        return
+      }
+      setFileError(null)
+      patchDiscrete({
+        src: reader.result,
+        alt: value.alt || file.name.replace(/\.[^.]+$/, ''),
+      })
+    }
+    reader.readAsDataURL(file)
+  }
+
+  return (
+    <div className={styles.contentEditor}>
+      <div className={styles.fieldGrid}>
+        <Field label="图片地址" wide>
+          <input
+            className={styles.textControl}
+            type="text"
+            spellCheck={false}
+            aria-label="图片地址"
+            aria-invalid={Boolean(sourceError) || undefined}
+            value={shownSource}
+            placeholder="https://… 或 data:image/…"
+            disabled={disabled}
+            onFocus={(event) => {
+              setSourceStart(value.src)
+              setSourceDraft(event.currentTarget.value)
+              onStart()
+            }}
+            onChange={(event) => {
+              const next = event.target.value
+              setSourceDraft(next)
+              if (!imageSourceError(next)) patch({ src: next })
+            }}
+            onBlur={() => {
+              if (sourceError) patch({ src: sourceStart })
+              setSourceDraft(null)
+              onFinish()
+            }}
+          />
+        </Field>
+        <Field label="替代文本" wide>
+          <input
+            className={styles.textControl}
+            type="text"
+            aria-label="图片替代文本"
+            value={value.alt}
+            placeholder="例如：公司 Logo"
+            disabled={disabled}
+            onFocus={onStart}
+            onBlur={onFinish}
+            onChange={(event) => patch({ alt: event.target.value })}
+          />
+        </Field>
+        <SelectInput
+          label="适配方式"
+          value={value.fit}
+          options={[
+            ['contain', '完整显示'],
+            ['cover', '填满裁切'],
+            ['fill', '拉伸填满'],
+          ]}
+          disabled={disabled}
+          onStart={onStart}
+          onFinish={onFinish}
+          onValue={(fit) => patch({ fit: fit as ImageProps['fit'] })}
+        />
+        <SelectInput
+          label="对象位置"
+          value={value.position}
+          options={[
+            ['center', '居中'],
+            ['top', '顶部'],
+            ['right', '右侧'],
+            ['bottom', '底部'],
+            ['left', '左侧'],
+          ]}
+          disabled={disabled}
+          onStart={onStart}
+          onFinish={onFinish}
+          onValue={(position) => patch({ position: position as ImageProps['position'] })}
+        />
+      </div>
+      <div className={styles.assetActions}>
+        <label className={styles.assetAction} data-disabled={disabled || undefined}>
+          <RiUpload2Line aria-hidden="true" />
+          <span>选择本地图片</span>
+          <input
+            className={styles.visuallyHidden}
+            type="file"
+            accept="image/*"
+            disabled={disabled}
+            onChange={(event) => {
+              loadFile(event.currentTarget.files?.[0])
+              event.currentTarget.value = ''
+            }}
+          />
+        </label>
+        <button
+          type="button"
+          className={styles.assetAction}
+          disabled={disabled || value.src === ''}
+          onClick={() => patchDiscrete({ src: '' })}
+        >
+          <RiDeleteBinLine aria-hidden="true" />
+          <span>清除图片</span>
+        </button>
+      </div>
+      <ValidationMessage
+        error={sourceError ?? fileError}
+        idle={
+          value.src === '' ? '绘制框已创建，请选择图片或输入稳定地址。' : '图片内容已写入模板。'
+        }
+      />
+    </div>
+  )
+}
+
+function QRCodeContentFields({
+  component,
+  disabled,
+  onStart,
+  onFinish,
+  onCancel,
+  onValue,
+}: ConfigurableContentFieldsProps) {
+  const value = normalizeQRCodeProps(component.propValue)
+  const patch = (next: Partial<QRCodeProps>) => onValue({ ...value, ...next })
+  const error = qrCodeContentError(value)
+  return (
+    <div className={styles.contentEditor}>
+      <div className={styles.fieldGrid}>
+        <Field label="编码内容" wide>
+          <textarea
+            className={styles.textArea}
+            aria-label="二维码内容"
+            aria-invalid={Boolean(error) || undefined}
+            value={value.text}
+            disabled={disabled}
+            onFocus={onStart}
+            onBlur={onFinish}
+            onChange={(event) => patch({ text: event.target.value })}
+          />
+        </Field>
+        <SelectInput
+          label="纠错等级"
+          value={value.correctLevel}
+          options={[
+            ['L', 'L · 约 7%'],
+            ['M', 'M · 约 15%'],
+            ['Q', 'Q · 约 25%'],
+            ['H', 'H · 约 30%'],
+          ]}
+          disabled={disabled}
+          onStart={onStart}
+          onFinish={onFinish}
+          onValue={(correctLevel) =>
+            patch({ correctLevel: correctLevel as QRCodeProps['correctLevel'] })
+          }
+        />
+        <NumberInput
+          label="静区"
+          value={value.margin}
+          unit="px"
+          min={0}
+          max={32}
+          disabled={disabled}
+          onStart={onStart}
+          onFinish={onFinish}
+          onCancel={onCancel}
+          onValue={(margin) => patch({ margin })}
+        />
+        <ColorInput
+          label="前景"
+          value={value.colorDark}
+          disabled={disabled}
+          onStart={onStart}
+          onFinish={onFinish}
+          onValue={(colorDark) => patch({ colorDark })}
+        />
+        <ColorInput
+          label="背景"
+          value={value.colorLight}
+          disabled={disabled}
+          onStart={onStart}
+          onFinish={onFinish}
+          onValue={(colorLight) => patch({ colorLight })}
+        />
+      </div>
+      <ValidationMessage error={error} idle="内容与样式会实时生成二维码。" />
+    </div>
+  )
+}
+
+function BarCodeContentFields({
+  component,
+  disabled,
+  onStart,
+  onFinish,
+  onValue,
+  onDiscreteValue,
+}: ConfigurableContentFieldsProps) {
+  const value = normalizeBarCodeProps(component.propValue)
+  const patch = (next: Partial<BarCodeProps>) => onValue({ ...value, ...next })
+  const error = barCodeContentError(value)
+  return (
+    <div className={styles.contentEditor}>
+      <div className={styles.fieldGrid}>
+        <Field label="编码内容" wide>
+          <input
+            className={styles.textControl}
+            type="text"
+            spellCheck={false}
+            aria-label="条形码内容"
+            aria-invalid={Boolean(error) || undefined}
+            value={value.text}
+            disabled={disabled}
+            onFocus={onStart}
+            onBlur={onFinish}
+            onChange={(event) => patch({ text: event.target.value })}
+          />
+        </Field>
+        <SelectInput
+          label="码制"
+          value={value.bcid}
+          options={BAR_CODE_FORMATS.map(
+            (format) => [format, barCodeFormatLabel(format)] as [string, string],
+          )}
+          disabled={disabled}
+          onStart={onStart}
+          onFinish={onFinish}
+          onValue={(bcid) => patch({ bcid: bcid as BarCodeProps['bcid'] })}
+        />
+        <ColorInput
+          label="前景"
+          value={value.colorDark}
+          disabled={disabled}
+          onStart={onStart}
+          onFinish={onFinish}
+          onValue={(colorDark) => patch({ colorDark })}
+        />
+        <SegmentedInput
+          label="可读文字"
+          value={value.includeText ? 'show' : 'hide'}
+          wide
+          disabled={disabled}
+          options={[
+            { value: 'show', label: '显示' },
+            { value: 'hide', label: '隐藏' },
+          ]}
+          onValue={(next) => onDiscreteValue({ ...value, includeText: next === 'show' })}
+        />
+      </div>
+      <ValidationMessage error={error} idle="当前内容符合所选码制。" />
+    </div>
+  )
+}
+
+function ValidationMessage({ error, idle }: { error: string | null; idle: string }) {
+  return (
+    <div
+      className={styles.validationMessage}
+      data-error={Boolean(error) || undefined}
+      role="status"
+    >
+      <strong>{error ? '需要修正' : '配置有效'}</strong>
+      <span>{error ?? idle}</span>
+    </div>
+  )
+}
+
+function barCodeFormatLabel(format: BarCodeProps['bcid']): string {
+  const labels: Record<BarCodeProps['bcid'], string> = {
+    code128: 'Code 128',
+    code39: 'Code 39',
+    ean13: 'EAN-13',
+    ean8: 'EAN-8',
+    upca: 'UPC-A',
+    itf14: 'ITF-14',
+  }
+  return labels[format]
 }
 
 function BatchInspector({ components }: { components: ComponentSchema[] }) {
