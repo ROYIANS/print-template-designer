@@ -557,3 +557,36 @@ Replaced the SQLite baseline with PostgreSQL, added Better Auth GitHub-only OAut
 ### Next Steps
 
 - None - task complete
+
+
+## Session 17: Complete self-hosted deployment stack
+
+**Date**: 2026-07-31
+**Task**: Complete self-hosted deployment stack
+**Branch**: `feature/refc`
+
+### Summary
+
+Added PostgreSQL, migration, Server and Web Compose lifecycle; hardened Bash/PowerShell deployment; published Web and Server images through CI; documented GitHub OAuth and safe operations; verified clean image builds, repeated force-recreate deployment, migrations, health and same-origin auth smoke flows.
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `c8fb221` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete

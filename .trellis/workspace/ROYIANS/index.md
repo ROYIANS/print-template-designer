@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 16
+- **Total Sessions**: 17
 - **Last Active**: 2026-07-31
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~559 | Active |
+| `journal-1.md` | ~592 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 17 | 2026-07-31 | Complete self-hosted deployment stack | `c8fb221` | `feature/refc` |
 | 16 | 2026-07-31 | PostgreSQL and GitHub authentication | `006bc46` | `feature/refc` |
 | 15 | 2026-07-30 | Designer Host 应用命令与文档状态合同 | `657ceee`, `c6b5a4d` | `feature/refc` |
 | 14 | 2026-07-30 | Header 菜单改为点击切换 | `a4d3b26` | `feature/refc` |
