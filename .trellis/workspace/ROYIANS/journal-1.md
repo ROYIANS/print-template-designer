@@ -524,3 +524,36 @@ Built the five-group component catalog with planned placeholders, a two-level ne
 ### Next Steps
 
 - None - task complete
+
+
+## Session 16: PostgreSQL and GitHub authentication
+
+**Date**: 2026-07-31
+**Task**: PostgreSQL and GitHub authentication
+**Branch**: `feature/refc`
+
+### Summary
+
+Replaced the SQLite baseline with PostgreSQL, added Better Auth GitHub-only OAuth with a fail-closed email allowlist, protected and owner-scoped all template/version APIs, added the Web login shell and PostgreSQL CI coverage, verified migrations and 12 Server tests against an isolated PostgreSQL database, and smoke-tested the compiled auth/HTTP runtime.
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `006bc46` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
