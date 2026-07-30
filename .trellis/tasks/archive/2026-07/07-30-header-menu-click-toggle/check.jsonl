@@ -1,0 +1,7 @@
+{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file": ".trellis/spec/monorepo/index.md", "reason": "Run monorepo quality checklist"}
+{"file": ".trellis/spec/monorepo/quality-guidelines.md", "reason": "Verify tests, accessibility behavior and regression risk"}
+{"file": ".trellis/spec/monorepo/ptd-ui-system.md", "reason": "Verify App Bar UI interaction contract"}
+{"file": ".trellis/spec/monorepo/react-designer-contract.md", "reason": "Verify Designer keyboard and integration behavior"}
+{"file": ".trellis/spec/monorepo/typescript-conventions.md", "reason": "Verify strict React and DOM typing"}
+{"file": ".trellis/spec/monorepo/styling-conventions.md", "reason": "Verify no visual or styling regression"}
