@@ -47,7 +47,7 @@ corepack pnpm --filter @ptd/react-designer build
 corepack pnpm --filter web build
 ```
 
-当前 Web 使用内存示例模板，不会连接或写入 Server。
+当前 Web 使用内存空白模板，不会连接或写入 Server。
 
 ## 启动 Server
 

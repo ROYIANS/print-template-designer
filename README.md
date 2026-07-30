@@ -45,7 +45,7 @@ Print Template Designer（PTD）不是一个只能独立运行的页面 Demo，�
 | `@ptd/core` | 已实现 | Schema、单位、序列化、数据绑定、组件注册表 |
 | `@ptd/components` | 已实现 | 框架无关 DOM 渲染组件 |
 | `@ptd/react-designer` | 已实现，持续打磨 | Controlled React 编辑器和专业画布交互 |
-| `apps/web` | 可运行 Host | 使用内存中的示例模板，尚未连接 Server |
+| `apps/web` | 可运行 Host | 使用内存中的空白模板，尚未连接 Server |
 | `apps/server` | API 已实现 | SQLite 模板/版本 API，尚未纳入当前 Compose 部署 |
 | `@ptd/export` | 空脚手架 | PDF、打印、Word 和自动溢出分页均未实现 |
 
