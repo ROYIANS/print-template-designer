@@ -1,61 +1,57 @@
-# Frontend deployment
+# Web 部署指南
 
-The current deployment contains the standalone Web designer only. The backend, database and API
-proxy are deliberately excluded until their application contract is ready.
+当前部署栈只交付独立 Web 设计器。`apps/server` 的模板/版本 API 已经实现，但还没有 Server 镜像、数据库持久化卷、迁移 Job 或 Web-to-API 配置，因此不包含在当前 Compose 中。
 
-## How the release flow works
+## 发布流程
 
 ```text
-GitHub push / tag / manual run
-             │
-             ▼
-Frontend typecheck + tests + lint + build
-             │
-             ▼
-Docker Buildx publishes to GHCR
-             │
-             ▼
-Server runs deploy.sh / deploy.ps1
-             │
-             ▼
+GitHub push / tag / 手工触发
+              │
+              ▼
+前端 typecheck + tests + lint + build
+              │
+              ▼
+Docker Buildx 发布 Web 镜像到 GHCR
+              │
+              ▼
+服务器运行 deploy.sh / deploy.ps1
+              │
+              ▼
 docker compose pull → up --no-build → /healthz
 ```
 
-The server never compiles the repository. The runtime image is Nginx plus the Vite static output,
-so Node.js and pnpm are not required on the deployment host.
+部署服务器不会编译仓库。运行时镜像由 Nginx 和 Vite 静态产物组成，因此服务器不需要 Node.js、pnpm 或 Buildx。
 
-## Published image and tags
+## 镜像与标签
 
-The workflow publishes this image by default:
+默认镜像：
 
 ```text
 ghcr.io/royians/print-template-designer-web
 ```
 
-| Git event                  | Published tags                           | Intended use               |
-| -------------------------- | ---------------------------------------- | -------------------------- |
-| Push to any branch         | normalized branch name, `sha-<full-sha>` | preview and exact rollback |
-| Push to the default branch | branch, SHA, `latest`                    | normal deployment          |
-| Push a `v*` Git tag        | Git tag, SHA                             | named release              |
-| Pull request               | no image                                 | quality checks only        |
-| Manual workflow run        | current branch, SHA                      | rebuild or preview         |
+| Git 事件 | 发布标签 | 用途 |
+| --- | --- | --- |
+| 推送任意分支 | 规范化分支名、`sha-<full-sha>` | 分支预览与精确回滚 |
+| 推送默认分支 | 分支名、SHA、`latest` | 常规部署 |
+| 推送 `v*` Tag | Git Tag、SHA | 命名发布 |
+| Pull Request | 不发布镜像 | 只执行质量检查 |
+| 手工运行 workflow | 当前分支、SHA | 重建或预览 |
 
-For example, `feature/refc` is normalized by Docker Metadata Action to `feature-refc`. Until that
-branch is merged into the repository default branch, deploy `IMAGE_TAG=feature-refc` rather than
-`latest` to preview its current UI.
+分支名由 Docker Metadata Action 规范化，例如 `feature/refc` 会发布为 `feature-refc`。预览未合并分支时使用对应分支标签，不要误用 `latest`。
 
-## Prerequisites
+## 服务器要求
 
-- A Linux server (recommended) or Windows Server with PowerShell 7.
-- Docker Engine with the Docker Compose v2 plugin (`docker compose version`).
-- Network access to `ghcr.io`.
-- Git, only to clone and update the Compose/scripts in this repository.
+- 推荐 Linux；Windows Server 需要 PowerShell 7+。
+- Docker Engine 与 Docker Compose v2（`docker compose version`）。
+- 能访问 `ghcr.io`。
+- Git，仅用于拉取 Compose 和部署脚本。
 
-No Node.js, pnpm, compiler or local Docker Buildx installation is required on the server.
+不需要在服务器安装 Node.js、pnpm、编译器或本地 Docker Buildx。
 
-## First deployment on Linux
+## Linux 首次部署
 
-Push the branch to GitHub first and wait for the `Frontend CI & GHCR` workflow to succeed. Then:
+先将目标分支推送到 GitHub，并等待 `Frontend CI & GHCR` workflow 成功：
 
 ```bash
 git clone https://github.com/ROYIANS/print-template-designer.git
@@ -64,22 +60,27 @@ chmod +x deploy.sh
 ./deploy.sh
 ```
 
-The first run copies `.env.example` to `.env`. The defaults expose the site at:
+第一次运行会把 `.env.example` 复制为 `.env`。默认地址：
 
 ```text
 http://<server-ip>:8080
 ```
 
-To preview the current feature branch before it is merged, clone that branch and override its image
-tag on the first run:
+预览某个分支时，克隆该分支并在首次运行指定其规范化镜像标签：
 
 ```bash
-git clone --branch feature/refc --single-branch https://github.com/ROYIANS/print-template-designer.git
+git clone --branch <branch> --single-branch https://github.com/ROYIANS/print-template-designer.git
 cd print-template-designer
+IMAGE_TAG=<normalized-branch-tag> ./deploy.sh
+```
+
+例如 `feature/refc` 对应：
+
+```bash
 IMAGE_TAG=feature-refc ./deploy.sh
 ```
 
-Alternatively, edit `.env` and keep the branch tag there:
+也可以把选择保存在本机 `.env`：
 
 ```dotenv
 WEB_PORT=8080
@@ -87,12 +88,11 @@ IMAGE_REPOSITORY=ghcr.io/royians/print-template-designer-web
 IMAGE_TAG=feature-refc
 ```
 
-The script pulls the selected image, recreates only the frontend service and waits until the
-container reports a healthy `/healthz` response.
+脚本会拉取指定镜像、只重建 Web service，并等待容器的 `/healthz` 变为 healthy。
 
-## First deployment on Windows Server
+## Windows Server 首次部署
 
-From PowerShell 7:
+在 PowerShell 7 中运行：
 
 ```powershell
 git clone https://github.com/ROYIANS/print-template-designer.git
@@ -100,14 +100,13 @@ Set-Location print-template-designer
 .\deploy.ps1
 ```
 
-The `.env` keys and behavior are identical to the Bash deployment.
+`.env` 的键和部署行为与 Bash 版本一致。
 
-## Private GHCR packages
+## 私有 GHCR Package
 
-The first GHCR publication is often private. You can either make the package public in GitHub's
-package settings or use a token that has only `read:packages` permission.
+GHCR package 初次发布时可能是 private。可以在 GitHub package 设置中改为 public，或使用仅有 `read:packages` 权限的 Token。
 
-Prefer passing credentials from the server's secret store or shell environment:
+优先从服务器密钥系统或 shell 环境注入凭据：
 
 ```bash
 export GHCR_USERNAME=your-github-username
@@ -115,7 +114,7 @@ export GHCR_TOKEN=github_pat_xxx
 ./deploy.sh
 ```
 
-PowerShell equivalent:
+PowerShell：
 
 ```powershell
 $env:GHCR_USERNAME = 'your-github-username'
@@ -123,36 +122,32 @@ $env:GHCR_TOKEN = 'github_pat_xxx'
 .\deploy.ps1
 ```
 
-The scripts also recognize those two keys in `.env`, but a plaintext token file should only be
-used on a locked-down host. Never commit `.env`; it is gitignored.
+脚本也会识别 `.env` 中的这两个键，但明文 Token 只适合权限受控的服务器。`.env` 已被 Git 忽略，仍然不要提交它。
 
-## Updating
+## 更新
 
-For a mutable tag such as `latest` or a branch preview tag:
+对于 `latest` 或分支标签这类可变标签：
 
 ```bash
 git pull --ff-only
 ./deploy.sh
 ```
 
-The script always runs `docker compose pull` before recreating the container. Compose contains no
-`build:` section and the script explicitly uses `up --no-build`.
+脚本始终先执行 `docker compose pull`，再用 `up --no-build` 重建容器。根 Compose 没有 `build:`，不会意外在服务器本地编译。
 
-## Pinning and rollback
+## 固定版本与回滚
 
-For production or a review that must not change underneath you, copy the full SHA tag from the
-workflow or GHCR package page:
+正式环境或需要稳定复现的评审环境，应使用 workflow/GHCR 页面中的完整 SHA 标签：
 
 ```dotenv
 IMAGE_TAG=sha-0123456789abcdef0123456789abcdef01234567
 ```
 
-Run `./deploy.sh` again. Rollback uses the same operation: replace `IMAGE_TAG` with a previously
-known-good SHA tag and redeploy. No source checkout reset and no server-side rebuild are needed.
+修改标签后重新执行部署脚本即可。回滚同理：换回已知可用的 SHA 标签，不需要 reset 服务器源码，也不需要重新构建。
 
-## Operations
+## 运维命令
 
-Linux / macOS / Git Bash:
+Linux / macOS / Git Bash：
 
 ```bash
 ./deploy.sh --status
@@ -160,7 +155,7 @@ Linux / macOS / Git Bash:
 ./deploy.sh --down
 ```
 
-PowerShell 7:
+PowerShell 7：
 
 ```powershell
 .\deploy.ps1 -Status
@@ -168,7 +163,7 @@ PowerShell 7:
 .\deploy.ps1 -Down
 ```
 
-Direct Compose commands remain available when needed:
+必要时可直接使用 Compose：
 
 ```bash
 docker compose ps
@@ -176,37 +171,36 @@ docker compose logs --tail=100 web
 docker inspect ptd-web
 ```
 
-## Reverse proxy and TLS
+## 反向代理与 TLS
 
-For an internet-facing server, put Caddy, Traefik or an existing Nginx instance in front of port
-8080 and terminate TLS there. If the proxy runs on the same host, bind the port to loopback by
-changing the Compose `ports` entry to `127.0.0.1:${WEB_PORT:-8080}:80` in your deployment fork.
+公开网络部署时，建议在 8080 前放置 Caddy、Traefik 或已有 Nginx，并在那里终止 TLS。如果代理与容器位于同一主机，可在部署分支中把端口绑定改为：
 
-## Troubleshooting
+```yaml
+ports:
+  - '127.0.0.1:${WEB_PORT:-8080}:80'
+```
+
+## 排障
 
 ### `manifest unknown`
 
-The selected `IMAGE_TAG` has not been published. Confirm that the GitHub Actions run completed and
-that branch slashes were normalized to dashes (for example, `feature/refc` → `feature-refc`).
+指定的 `IMAGE_TAG` 尚未发布。确认 GitHub Actions 已成功，并确认分支中的 `/` 已转换为 `-`。
 
-### `denied` while pulling from GHCR
+### 拉取 GHCR 时返回 `denied`
 
-The package is private or the token cannot access it. Supply both `GHCR_USERNAME` and a token with
-`read:packages`, or make the package public.
+Package 是 private，或 Token 没有访问权。提供 `GHCR_USERNAME` 和带 `read:packages` 的 Token，或把 Package 改为 public。
 
 ### Container is unhealthy
 
-Run `./deploy.sh --logs` (or `.\deploy.ps1 -Logs`) and inspect the Nginx startup output. The script
-also prints the last 100 log lines when the health check fails or times out.
+运行 `./deploy.sh --logs` 或 `.\deploy.ps1 -Logs` 检查 Nginx 输出。健康检查失败或超时时，脚本也会打印最后 100 行日志。
 
-### Port 8080 is already in use
+### 8080 端口被占用
 
-Change `WEB_PORT` in `.env`, then redeploy. For example, `WEB_PORT=8088` exposes the site on port
-8088 without changing the container image.
+修改 `.env` 中的 `WEB_PORT` 后重新部署。例如 `WEB_PORT=8088` 会将站点暴露在 8088，不需要重建镜像。
 
-## CI and architecture notes
+## 当前限制与下一阶段
 
-- The workflow currently publishes `linux/amd64`, matching typical x86-64 servers.
-- ARM64 servers require adding `linux/arm64` to the workflow's `platforms` list before deployment.
-- The first real container build is performed by GitHub Actions. Local static checks cannot replace
-  that build, especially on a development machine without Docker.
+- workflow 仅发布 `linux/amd64`；ARM64 服务器需要先在 `.github/workflows/ci.yml` 增加 `linux/arm64`。
+- GitHub Actions 才是实际容器构建环境。本地静态检查不能替代首次真实镜像构建。
+- 当前 Nginx 只托管静态 Web 和 `/healthz`，没有 `/api` 反向代理。
+- 完整前后端部署需要补充 Server 镜像、数据库/卷策略、migration 生命周期、环境密钥和 Web API 地址，再扩展 Compose；不能只把 `apps/server` 塞进现有容器。

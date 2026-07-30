@@ -1,0 +1,2 @@
+{"file":".trellis/spec/monorepo/ptd-ui-system.md","reason":"Verify visual hierarchy, Dock state semantics, focus visibility, coarse targets and screenshots."}
+{"file":".trellis/spec/monorepo/quality-guidelines.md","reason":"Verify static CSS constraints and available automated quality checks."}

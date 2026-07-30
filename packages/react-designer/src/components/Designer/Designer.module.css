@@ -5,7 +5,7 @@
   min-height: 0;
   display: grid;
   grid-template-rows:
-    var(--ptd-app-bar-height) var(--ptd-command-bar-height) minmax(0, 1fr)
+    auto var(--ptd-command-bar-height) minmax(0, 1fr)
     var(--ptd-status-bar-height);
   overflow: hidden;
   color: var(--ptd-text);

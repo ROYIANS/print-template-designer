@@ -120,7 +120,6 @@ export function Sidebar({ mode, activePanel, open, onTogglePanel, onResizeStart 
       <Tooltip.Provider delayDuration={400} skipDelayDuration={120}>
         <nav className={styles.toolDock} aria-label="画布工具">
           <div className={styles.dockZone} role="group" aria-label="创建与交互工具">
-            <span className={styles.dockZoneLabel}>工具</span>
             <DockButton
               label="选择工具"
               shortcut="V"
@@ -161,7 +160,6 @@ export function Sidebar({ mode, activePanel, open, onTogglePanel, onResizeStart 
           </div>
           <span className={styles.dockGrow} />
           <div className={styles.dockZone} role="group" aria-label="工作区资源面板">
-            <span className={styles.dockZoneLabel}>面板</span>
             {RESOURCE_PANELS.map(({ value, label, icon: Icon }) => (
               <DockButton
                 key={value}

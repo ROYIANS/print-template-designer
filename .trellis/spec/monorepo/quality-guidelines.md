@@ -28,7 +28,7 @@ This applies to both the main agent and all sub-agents (`trellis-implement`, `tr
 | ESLint     | v9 (flat config) | `eslint.config.js` at root                    |
 | Prettier   | v3               | `.prettierrc.json` at root                    |
 | TypeScript | v5+              | `tsconfig.base.json` + per-package            |
-| Node       | ≥ 20             | `engines` field in all `package.json`         |
+| Node       | 22.12+ recommended | Full workspace baseline; CI/Docker use Node 22 |
 | pnpm       | 10.15.1          | root `packageManager` + `pnpm-workspace.yaml` |
 
 ---
@@ -63,18 +63,22 @@ insert_final_newline = true
 
 Uses flat config (`eslint.config.js`). TypeScript rules applied to `**/*.{ts,tsx}`. React rules applied to `apps/web/**` and `packages/react-designer/**`.
 
-Run: `pnpm lint`
+Run: `corepack pnpm lint`
 
 ---
 
 ## Required Patterns
 
-- Every `packages/*` must have a `typecheck` script (`tsc --noEmit`)
-- Every `packages/*` must have a `build` script (`tsup`)
-- Every `packages/*` must have a `test` script (`vitest run`)
+- Every `packages/*` must have a `typecheck` and build script appropriate to its current package
+  contract
+- Implemented library packages (`core`, `components`, `react-designer`) use tsup and Vitest
+- `@ptd/export` is currently a `tsc`-only empty scaffold and has no test script; add tests/build
+  infrastructure when its implementation contract is approved
 - `src/index.ts` must exist and be the only public API entry point
-- `pnpm install` must succeed from root after any `package.json` change
-- Destroy third-party instances in cleanup / component unmount (e.g., Puppeteer browser `browser.close()`)
+- After an authorized dependency change, `corepack pnpm install` must succeed from root and the
+  lockfile must be committed with the manifest change
+- Destroy third-party instances in cleanup / component unmount (DOM listeners, observers, editors,
+  renderers, browser processes, or other external resources)
 
 ---
 
@@ -90,7 +94,8 @@ Run: `pnpm lint`
 
 ## Testing
 
-All `packages/*` use **Vitest** for unit tests.
+Implemented library packages use **Vitest** for unit tests. `@ptd/export` remains an untested empty
+scaffold until export work begins.
 
 ### vitest.config.ts (required in every package)
 

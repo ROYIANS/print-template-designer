@@ -20,10 +20,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  padding: 6px 0;
+  gap: 3px;
+  padding: 5px 0;
   border-right: 1px solid var(--ptd-border);
-  background: var(--ptd-surface-sunken);
+  background: var(--ptd-surface-app);
 }
 
 .dockZone {
@@ -33,19 +33,10 @@
   gap: 2px;
 }
 
-.dockZoneLabel {
-  height: 14px;
-  color: var(--ptd-text-muted);
-  font-size: 9px;
-  font-weight: 650;
-  line-height: 14px;
-  letter-spacing: 0.08em;
-}
-
 .dockButton {
   position: relative;
-  width: 40px;
-  height: 40px;
+  width: 30px;
+  height: 30px;
   display: grid;
   place-items: center;
   padding: 0;
@@ -61,39 +52,49 @@
 }
 
 .dockButton svg {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
 }
 
 .dockButton:hover {
   color: var(--ptd-text-strong);
-  background: var(--ptd-surface-raised);
+  background: color-mix(in oklch, var(--ptd-surface-panel) 62%, var(--ptd-selection-subtle));
 }
 
 .dockButton:active {
-  transform: translateY(1px);
+  transform: translateY(1px) scale(0.98);
 }
 
 .dockButton[data-state-kind='tool'][aria-pressed='true'] {
-  color: var(--ptd-text-strong);
-  background: var(--ptd-surface-raised);
-  box-shadow:
-    inset 0 0 0 1px var(--ptd-border-strong),
-    inset 0 -2px 0 var(--ptd-graphite-300);
+  color: var(--ptd-selection-strong);
+  background: var(--ptd-surface-panel);
+}
+
+.dockButton[data-state-kind='tool'][aria-pressed='true']::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: -6px;
+  width: 2px;
+  border-radius: 0 1px 1px 0;
+  background: var(--ptd-selection);
 }
 
 .dockButton[data-state-kind='panel'][aria-pressed='true'] {
-  z-index: 1;
-  width: 46px;
-  justify-self: end;
-  margin-right: -1px;
-  border-radius: var(--ptd-radius-1) 0 0 var(--ptd-radius-1);
-  color: var(--ptd-text-strong);
+  color: var(--ptd-selection-strong);
   background: var(--ptd-surface-panel);
-  box-shadow:
-    inset 1px 0 0 var(--ptd-border),
-    inset 0 1px 0 var(--ptd-border),
-    inset 0 -1px 0 var(--ptd-border);
+}
+
+.dockButton[data-state-kind='panel'][aria-pressed='true']::after {
+  content: '';
+  position: absolute;
+  top: 6px;
+  right: -6px;
+  bottom: 6px;
+  width: 2px;
+  border-radius: 1px 0 0 1px;
+  background: var(--ptd-selection);
 }
 
 .dockButton:focus-visible,
@@ -116,12 +117,12 @@
 
 .shapeToolGroup {
   position: relative;
-  width: 40px;
-  height: 40px;
+  width: 30px;
+  height: 30px;
 }
 
 .shapePrimary {
-  width: 40px;
+  width: 30px;
 }
 
 .shapeDisclosure {
@@ -129,8 +130,8 @@
   z-index: 2;
   right: 0;
   bottom: 0;
-  width: 16px;
-  height: 16px;
+  width: 13px;
+  height: 13px;
   display: grid;
   place-items: center;
   padding: 0;
@@ -148,8 +149,8 @@
 }
 
 .shapeDisclosure svg {
-  width: 11px;
-  height: 11px;
+  width: 9px;
+  height: 9px;
 }
 
 .shapeToolMenu {
@@ -925,6 +926,22 @@
   .dockButton {
     width: 40px;
     height: 40px;
+  }
+
+  .shapeToolGroup,
+  .shapePrimary {
+    width: 40px;
+    height: 40px;
+  }
+
+  .shapeDisclosure {
+    width: 16px;
+    height: 16px;
+  }
+
+  .shapeDisclosure svg {
+    width: 11px;
+    height: 11px;
   }
 
   .pageRow,
