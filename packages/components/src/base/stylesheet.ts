@@ -107,15 +107,15 @@ const CSS = `
 }
 
 .ptd-star {
-  color: var(--ptd-background);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background: transparent;
 }
 
-.ptd-star .ptd-star__icon {
-  font-size: var(--ptd-height);
-  line-height: var(--ptd-height);
+.ptd-star__svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  fill: var(--ptd-background);
+  pointer-events: none;
 }
 
 .ptd-image {

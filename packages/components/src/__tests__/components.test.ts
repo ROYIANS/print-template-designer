@@ -13,7 +13,10 @@ import { RoyGroup } from '../components/RoyGroup'
 import { RoySimpleTable } from '../components/RoySimpleTable'
 import { RoyComplexTable } from '../components/RoyComplexTable'
 
-function makeSchema(component: ComponentSchema['component'], propValue: unknown = ''): ComponentSchema {
+function makeSchema(
+  component: ComponentSchema['component'],
+  propValue: unknown = '',
+): ComponentSchema {
   return {
     id: `test-${component}`,
     component,
@@ -36,10 +39,13 @@ const allComponents: Array<[string, () => unknown]> = [
   ['RoyLine', () => new RoyLine(makeSchema('RoyLine'))],
   ['RoyRect', () => new RoyRect(makeSchema('RoyRect'))],
   ['RoyCircle', () => new RoyCircle(makeSchema('RoyCircle'))],
-  ['RoyStar', () => new RoyStar(makeSchema('RoyStar', { icon: 'ri-star-fill' }))],
+  ['RoyStar', () => new RoyStar(makeSchema('RoyStar'))],
   ['RoyImage', () => new RoyImage(makeSchema('RoyImage', 'https://example.com/img.png'))],
   ['RoyQRCode', () => new RoyQRCode(makeSchema('RoyQRCode', { text: 'https://example.com' }))],
-  ['RoyBarCode', () => new RoyBarCode(makeSchema('RoyBarCode', { text: '12345', bcid: 'code128' }))],
+  [
+    'RoyBarCode',
+    () => new RoyBarCode(makeSchema('RoyBarCode', { text: '12345', bcid: 'code128' })),
+  ],
   ['RoyGroup', () => new RoyGroup(makeSchema('RoyGroup'))],
   [
     'RoySimpleTable',
@@ -72,4 +78,17 @@ describe('All components smoke test', () => {
       expect(() => comp.destroy()).not.toThrow()
     })
   }
+
+  it('renders the star as a self-contained SVG shape', () => {
+    const component = new RoyStar(makeSchema('RoyStar'))
+    const parent = document.createElement('div')
+    component.mount(parent)
+
+    const svg = parent.querySelector<SVGSVGElement>('.ptd-star__svg')
+    expect(svg?.getAttribute('viewBox')).toBe('0 0 100 100')
+    expect(svg?.querySelector('polygon')?.getAttribute('points')).toBeTruthy()
+    expect(parent.querySelector('i')).toBeNull()
+
+    component.destroy()
+  })
 })

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { ComponentSchema } from '@ptd/core'
 import { RoyBarCode } from '../components/RoyBarCode'
 import { RoyImage } from '../components/RoyImage'
@@ -32,16 +32,71 @@ function mount(component: { mount: (parent: HTMLElement) => void }): HTMLElement
 }
 
 describe('media component render states', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
   it('renders an actionable empty image state instead of a broken image icon', () => {
     const component = new RoyImage(schema('RoyImage', null))
     const element = mount(component)
 
     expect(element.dataset['renderState']).toBe('empty')
-    expect(element.querySelector('img')?.hidden).toBe(true)
+    expect(element.querySelector('img')).toBeNull()
     expect(element.querySelector('.ptd-render-state')?.textContent).toContain('选择图片')
   })
 
-  it('supports structured image semantics and exposes unsafe source errors', () => {
+  it('keeps image loading states mutually exclusive and ignores stale callbacks', () => {
+    const createdImages: HTMLImageElement[] = []
+    const createElement = document.createElement.bind(document)
+    vi.spyOn(document, 'createElement').mockImplementation(((
+      tagName: string,
+      options?: ElementCreationOptions,
+    ) => {
+      const element = createElement(tagName, options)
+      if (tagName.toLowerCase() === 'img') createdImages.push(element as HTMLImageElement)
+      return element
+    }) as typeof document.createElement)
+
+    const component = new RoyImage(
+      schema('RoyImage', { src: 'https://example.test/a.png', alt: 'A' }),
+    )
+    const element = mount(component)
+    const imageA = createdImages[0]
+    const lateLoadA = imageA?.onload
+
+    expect(element.dataset['renderState']).toBe('loading')
+    expect(element.children).toHaveLength(1)
+    expect(element.querySelector('.ptd-render-state')?.textContent).toContain('正在载入')
+    expect(element.querySelector('img')).toBeNull()
+
+    component.update(
+      schema('RoyImage', {
+        src: 'https://example.test/b.png',
+        alt: 'B',
+        fit: 'cover',
+        position: 'top',
+      }),
+    )
+    const imageB = createdImages[1]
+
+    expect(imageA?.onload).toBeNull()
+    expect(element.children).toHaveLength(1)
+    expect(element.querySelector('.ptd-render-state')?.textContent).toContain('正在载入')
+    lateLoadA?.call(imageA, new Event('load'))
+    expect(element.dataset['renderState']).toBe('loading')
+    expect(element.querySelector('img')).toBeNull()
+
+    imageB?.dispatchEvent(new Event('load'))
+    expect(element.dataset['renderState']).toBe('ready')
+    expect(element.children).toHaveLength(1)
+    expect(element.querySelector('img')).toBe(imageB)
+    expect(element.querySelector('img')?.alt).toBe('B')
+    expect(element.querySelector('img')?.style.objectFit).toBe('cover')
+    expect(element.querySelector('img')?.style.objectPosition).toBe('top')
+    expect(element.querySelector('.ptd-render-state')).toBeNull()
+  })
+
+  it('exposes unsafe source errors without retaining an image node', () => {
     const component = new RoyImage(
       schema('RoyImage', {
         src: 'blob:https://example.test/temporary',
@@ -53,9 +108,7 @@ describe('media component render states', () => {
     const element = mount(component)
     const image = element.querySelector('img')
 
-    expect(image?.alt).toBe('公司 Logo')
-    expect(image?.style.objectFit).toBe('cover')
-    expect(image?.style.objectPosition).toBe('top')
+    expect(image).toBeNull()
     expect(element.dataset['renderState']).toBe('error')
     expect(element.textContent).toContain('blob')
   })

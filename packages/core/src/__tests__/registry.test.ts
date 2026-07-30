@@ -100,6 +100,24 @@ describe('ComponentRegistry', () => {
     })
   })
 
+  it('gives every new shape an immediately visible neutral default', () => {
+    expect(defaultRegistry.get('RoyLine')?.defaultStyle).toMatchObject({
+      height: 2,
+      background: '#647184',
+    })
+    for (const type of ['RoyRect', 'RoyCircle'] as const) {
+      expect(defaultRegistry.get(type)?.defaultStyle).toMatchObject({
+        background: 'transparent',
+        borderWidth: 1,
+        borderType: 'solid',
+        borderColor: '#647184',
+      })
+    }
+    expect(defaultRegistry.get('RoyStar')?.defaultStyle).toMatchObject({
+      background: '#647184',
+    })
+  })
+
   it('get returns undefined for unknown type', () => {
     expect(defaultRegistry.get('Unknown' as never)).toBeUndefined()
   })
