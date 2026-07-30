@@ -1,0 +1,6 @@
+{"file":".trellis/spec/monorepo/server-architecture.md","reason":"复核 Prisma 7 PostgreSQL、迁移、事务并发、HTTP 错误和 clean-runner 门禁"}
+{"file":".trellis/spec/monorepo/typescript-conventions.md","reason":"复核 ESM/NodeNext、strict 类型和禁止 unchecked any"}
+{"file":".trellis/spec/monorepo/quality-guidelines.md","reason":"复核 Prettier、ESLint、测试、构建、敏感信息和生成产物"}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"复核认证没有泄漏进 Designer，owner 授权在 Server 强制执行"}
+{"file":".trellis/tasks/archive/2026-07/05-21-integration-hooks/research/better-auth-public-deployment.md","reason":"复核 GitHub-only、Allowlist 撤权、Cookie、trusted origins 与跨 owner 保护"}
+{"file":".trellis/tasks/07-30-postgres-github-auth/research/implementation-baseline.md","reason":"复核 PostgreSQL adapter、单 PrismaClient、真实 PostgreSQL 测试和非目标边界"}

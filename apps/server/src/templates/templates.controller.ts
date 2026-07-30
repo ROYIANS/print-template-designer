@@ -8,7 +8,11 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  Req,
+  UseGuards,
 } from '@nestjs/common'
+import { AuthGuard } from '../auth/auth.guard.js'
+import type { AuthenticatedRequest } from '../auth/authenticated-request.js'
 import {
   parseCreateTemplateBody,
   parseRestoreTemplateBody,
@@ -18,53 +22,69 @@ import { PositiveIntPipe } from './positive-int.pipe.js'
 import { TemplatesService } from './templates.service.js'
 
 @Controller('api/templates')
+@UseGuards(AuthGuard)
 export class TemplatesController {
   constructor(@Inject(TemplatesService) private readonly templates: TemplatesService) {}
 
   @Get()
-  list() {
-    return this.templates.list()
+  list(@Req() request: AuthenticatedRequest) {
+    return this.templates.list(request.user.id)
   }
 
   @Post()
-  create(@Body() body: unknown) {
-    return this.templates.create(parseCreateTemplateBody(body))
+  create(@Req() request: AuthenticatedRequest, @Body() body: unknown) {
+    return this.templates.create(request.user.id, parseCreateTemplateBody(body))
   }
 
   @Get(':id')
-  get(@Param('id', ParseIntPipe, PositiveIntPipe) id: number) {
-    return this.templates.get(id)
+  get(
+    @Req() request: AuthenticatedRequest,
+    @Param('id', ParseIntPipe, PositiveIntPipe) id: number,
+  ) {
+    return this.templates.get(request.user.id, id)
   }
 
   @Put(':id')
-  update(@Param('id', ParseIntPipe, PositiveIntPipe) id: number, @Body() body: unknown) {
-    return this.templates.update(id, parseUpdateTemplateBody(body))
+  update(
+    @Req() request: AuthenticatedRequest,
+    @Param('id', ParseIntPipe, PositiveIntPipe) id: number,
+    @Body() body: unknown,
+  ) {
+    return this.templates.update(request.user.id, id, parseUpdateTemplateBody(body))
   }
 
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe, PositiveIntPipe) id: number) {
-    return this.templates.remove(id)
+  remove(
+    @Req() request: AuthenticatedRequest,
+    @Param('id', ParseIntPipe, PositiveIntPipe) id: number,
+  ) {
+    return this.templates.remove(request.user.id, id)
   }
 
   @Get(':id/versions')
-  listVersions(@Param('id', ParseIntPipe, PositiveIntPipe) id: number) {
-    return this.templates.listVersions(id)
+  listVersions(
+    @Req() request: AuthenticatedRequest,
+    @Param('id', ParseIntPipe, PositiveIntPipe) id: number,
+  ) {
+    return this.templates.listVersions(request.user.id, id)
   }
 
   @Get(':id/versions/:version')
   getVersion(
+    @Req() request: AuthenticatedRequest,
     @Param('id', ParseIntPipe, PositiveIntPipe) id: number,
     @Param('version', ParseIntPipe, PositiveIntPipe) version: number,
   ) {
-    return this.templates.getVersion(id, version)
+    return this.templates.getVersion(request.user.id, id, version)
   }
 
   @Post(':id/versions/:version/restore')
   restore(
+    @Req() request: AuthenticatedRequest,
     @Param('id', ParseIntPipe, PositiveIntPipe) id: number,
     @Param('version', ParseIntPipe, PositiveIntPipe) version: number,
     @Body() body: unknown,
   ) {
-    return this.templates.restore(id, version, parseRestoreTemplateBody(body))
+    return this.templates.restore(request.user.id, id, version, parseRestoreTemplateBody(body))
   }
 }

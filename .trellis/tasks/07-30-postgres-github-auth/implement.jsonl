@@ -1,0 +1,7 @@
+{"file":".trellis/spec/monorepo/server-architecture.md","reason":"NestJS 11、Prisma 7、迁移、事务、模板 API 与验证基线；本任务需将其中 SQLite 专属条款升级为 PostgreSQL"}
+{"file":".trellis/spec/monorepo/typescript-conventions.md","reason":"Server ESM/NodeNext 与 strict TypeScript 约束"}
+{"file":".trellis/spec/monorepo/directory-structure.md","reason":"apps/server 与 apps/web 的模块和生成代码目录边界"}
+{"file":".trellis/spec/monorepo/quality-guidelines.md","reason":"格式、Lint、测试、构建与安全扫描门禁"}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"Web、Nest、Better Auth、Prisma 和 Designer 包之间的跨层边界"}
+{"file":".trellis/tasks/archive/2026-07/05-21-integration-hooks/research/better-auth-public-deployment.md","reason":"已确认的 PostgreSQL、GitHub-only、Allowlist、Cookie、Guard 与 ownerId 公网安全决策"}
+{"file":".trellis/tasks/07-30-postgres-github-auth/research/implementation-baseline.md","reason":"当前 PTD Server、Prisma PostgreSQL 技能结论与 easylife-os 可复用模式"}

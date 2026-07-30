@@ -79,6 +79,59 @@ jobs:
       - name: Build web
         run: pnpm --filter web build
 
+  server-quality:
+    name: Server quality (PostgreSQL)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: ptd
+          POSTGRES_PASSWORD: ptd_test
+          POSTGRES_DB: ptd_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ptd -d ptd_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://ptd:ptd_test@127.0.0.1:5432/ptd_test?schema=public
+      BETTER_AUTH_URL: http://localhost:3000
+      BETTER_AUTH_SECRET: ci-only-better-auth-secret-32-bytes
+      PTD_WEB_ORIGIN: http://localhost:5173
+      PTD_ALLOWED_EMAILS: owner-a@example.com,owner-b@example.com
+      GITHUB_CLIENT_ID: ci-placeholder
+      GITHUB_CLIENT_SECRET: ci-placeholder
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build core dependency
+        run: pnpm --filter @ptd/core build
+      - name: Validate and deploy PostgreSQL migration
+        run: |
+          pnpm --filter server prisma:validate
+          pnpm --filter server prisma:migrate:deploy
+          pnpm --filter server prisma:generate
+      - name: Check and test Server
+        run: |
+          pnpm --filter server lint
+          pnpm --filter server typecheck
+          pnpm --filter server test
+          pnpm --filter server build
+
   publish-web-image:
     name: Publish web image
     if: github.event_name != 'pull_request'

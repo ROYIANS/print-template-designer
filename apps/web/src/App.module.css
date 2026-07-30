@@ -1,5 +1,224 @@
 .app {
+  position: relative;
   width: 100%;
   height: 100%;
   overflow: hidden;
+}
+
+.loading {
+  width: 100%;
+  height: 100%;
+  background:
+    linear-gradient(90deg, transparent 49.8%, rgb(32 80 88 / 12%) 50%, transparent 50.2%),
+    oklch(91.5% 0.012 255);
+  background-size: 48px 100%;
+  animation: access-scan 1.1s linear infinite;
+}
+
+.accessShell {
+  --ink: #172024;
+  --muted: #647076;
+  --proof: #0f7476;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  color: var(--ink);
+  background:
+    linear-gradient(rgb(39 57 64 / 5%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(39 57 64 / 5%) 1px, transparent 1px),
+    linear-gradient(135deg, #e7ecee, #f5f7f5 52%, #dce6e6);
+  background-size:
+    24px 24px,
+    24px 24px,
+    auto;
+}
+
+.accessShell::before {
+  position: absolute;
+  width: min(70vw, 780px);
+  height: min(86vh, 940px);
+  content: '';
+  border: 1px solid rgb(29 56 63 / 16%);
+  background: rgb(255 255 255 / 46%);
+  box-shadow: 0 30px 90px rgb(30 51 58 / 13%);
+  transform: rotate(-2deg);
+}
+
+.registration {
+  position: absolute;
+  inset: 22px 26px auto;
+  display: flex;
+  justify-content: space-between;
+  color: rgb(32 55 62 / 45%);
+  font-family: 'Outfit', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+}
+
+.accessPanel {
+  position: relative;
+  width: min(420px, calc(100vw - 48px));
+  box-sizing: border-box;
+  padding: 44px 44px 38px;
+  border: 1px solid rgb(26 56 62 / 18%);
+  background: rgb(250 252 250 / 91%);
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 90%) inset,
+    0 22px 60px rgb(30 48 54 / 16%);
+}
+
+.mark {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 34px;
+  border: 1px solid rgb(15 116 118 / 30%);
+  border-radius: 50%;
+  color: var(--proof);
+  font-family: 'Outfit', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  box-shadow: 0 0 0 7px rgb(15 116 118 / 5%);
+}
+
+.eyebrow {
+  margin: 0 0 10px;
+  color: var(--proof);
+  font-family: 'Outfit', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.accessPanel h1 {
+  margin: 0;
+  font-family: 'Noto Serif SC', serif;
+  font-size: clamp(28px, 5vw, 38px);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1.24;
+}
+
+.lede {
+  margin: 18px 0 28px;
+  color: var(--muted);
+  font-family: 'Sarasa UI SC', sans-serif;
+  font-size: 13px;
+  line-height: 1.75;
+}
+
+.githubButton {
+  width: 100%;
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 18px;
+  border: 1px solid #111719;
+  border-radius: 4px;
+  color: #f7faf8;
+  background: #172024;
+  font-family: 'Sarasa UI SC', sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    transform 150ms ease,
+    background-color 150ms ease;
+}
+
+.githubButton:hover:not(:disabled) {
+  background: #0d5558;
+  transform: translateY(-1px);
+}
+
+.githubButton:disabled {
+  opacity: 0.58;
+  cursor: wait;
+}
+
+.githubButton svg {
+  width: 18px;
+  height: 18px;
+}
+
+.securityNote,
+.errorMessage {
+  margin: 15px 0 0;
+  font-family: 'Outfit', 'Sarasa UI SC', sans-serif;
+  font-size: 9px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.securityNote {
+  color: rgb(63 77 82 / 62%);
+  letter-spacing: 0.04em;
+}
+
+.errorMessage {
+  color: #a33c33;
+}
+
+.accountButton {
+  position: absolute;
+  z-index: 101;
+  top: 7px;
+  right: 20px;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid rgb(255 255 255 / 20%);
+  border-radius: 50%;
+  color: white;
+  background: #0f7476;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.accountButton img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@keyframes access-scan {
+  to {
+    background-position: 48px 0;
+  }
+}
+
+@media (max-width: 520px) {
+  .accessPanel {
+    padding: 34px 28px 30px;
+  }
+
+  .accessShell::before {
+    width: calc(100vw - 24px);
+  }
+
+  .accountButton {
+    right: 8px;
+    width: 32px;
+    height: 32px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading {
+    animation: none;
+  }
+
+  .githubButton {
+    transition: none;
+  }
 }

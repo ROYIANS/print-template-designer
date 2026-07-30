@@ -1,12 +1,8 @@
-const DEFAULT_DATABASE_URL = 'file:./dev.db'
-
 export function getDatabaseUrl(): string {
-  const databaseUrl = process.env.DATABASE_URL ?? DEFAULT_DATABASE_URL
-
-  if (!databaseUrl.startsWith('file:') || databaseUrl.startsWith('file::memory:')) {
-    return databaseUrl
+  const databaseUrl = process.env.DATABASE_URL?.trim()
+  if (!databaseUrl) throw new Error('DATABASE_URL is required')
+  if (!databaseUrl.startsWith('postgresql://') && !databaseUrl.startsWith('postgres://')) {
+    throw new Error('DATABASE_URL must use the PostgreSQL protocol')
   }
-
-  const serverDirectory = new URL('../../', import.meta.url)
-  return new URL(databaseUrl, serverDirectory).href
+  return databaseUrl
 }

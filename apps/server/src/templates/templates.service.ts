@@ -41,8 +41,12 @@ function fromPrismaJson(content: Prisma.JsonValue): TemplateSchema {
 
 function toTemplateResponse(template: StoredTemplate) {
   return {
-    ...template,
+    id: template.id,
+    title: template.title,
     content: fromPrismaJson(template.content),
+    version: template.version,
+    createdAt: template.createdAt,
+    updatedAt: template.updatedAt,
   }
 }
 
@@ -83,8 +87,9 @@ function isPrismaInputJsonValue(value: unknown): value is Prisma.InputJsonValue 
 export class TemplatesService {
   constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
-  list() {
+  list(ownerId: string) {
     return this.prisma.template.findMany({
+      where: { ownerId },
       select: {
         id: true,
         title: true,
@@ -96,13 +101,14 @@ export class TemplatesService {
     })
   }
 
-  async create(input: TemplateWriteInput) {
+  async create(ownerId: string, input: TemplateWriteInput) {
     const content = toPrismaJson(input.content)
     const template = await this.prisma.$transaction((transaction) =>
       transaction.template.create({
         data: {
           title: input.title,
           content,
+          ownerId,
           versions: {
             create: {
               version: 1,
@@ -117,8 +123,8 @@ export class TemplatesService {
     return toTemplateResponse(template)
   }
 
-  async get(id: number) {
-    const template = await this.prisma.template.findUnique({ where: { id } })
+  async get(ownerId: string, id: number) {
+    const template = await this.prisma.template.findFirst({ where: { id, ownerId } })
     if (!template) {
       throw new NotFoundException(`Template ${id} was not found`)
     }
@@ -126,11 +132,11 @@ export class TemplatesService {
     return toTemplateResponse(template)
   }
 
-  async update(id: number, input: TemplateUpdateInput) {
+  async update(ownerId: string, id: number, input: TemplateUpdateInput) {
     const content = toPrismaJson(input.content)
     const template = await this.prisma.$transaction(async (transaction) => {
-      const current = await transaction.template.findUnique({
-        where: { id },
+      const current = await transaction.template.findFirst({
+        where: { id, ownerId },
         select: { version: true },
       })
       if (!current) {
@@ -142,7 +148,7 @@ export class TemplatesService {
 
       const nextVersion = current.version + 1
       const updated = await transaction.template.updateMany({
-        where: { id, version: input.expectedVersion },
+        where: { id, ownerId, version: input.expectedVersion },
         data: {
           title: input.title,
           content,
@@ -162,14 +168,14 @@ export class TemplatesService {
         },
       })
 
-      return transaction.template.findUniqueOrThrow({ where: { id } })
+      return transaction.template.findFirstOrThrow({ where: { id, ownerId } })
     })
 
     return toTemplateResponse(template)
   }
 
-  async remove(id: number) {
-    const deleted = await this.prisma.template.deleteMany({ where: { id } })
+  async remove(ownerId: string, id: number) {
+    const deleted = await this.prisma.template.deleteMany({ where: { id, ownerId } })
     if (deleted.count !== 1) {
       throw new NotFoundException(`Template ${id} was not found`)
     }
@@ -177,24 +183,27 @@ export class TemplatesService {
     return { deleted: true }
   }
 
-  async listVersions(templateId: number) {
-    await this.ensureTemplateExists(templateId)
-    return this.prisma.templateVersion.findMany({
-      where: { templateId },
+  async listVersions(ownerId: string, templateId: number) {
+    const template = await this.prisma.template.findFirst({
+      where: { id: templateId, ownerId },
       select: {
-        version: true,
-        title: true,
-        createdAt: true,
+        versions: {
+          select: {
+            version: true,
+            title: true,
+            createdAt: true,
+          },
+          orderBy: { version: 'desc' },
+        },
       },
-      orderBy: { version: 'desc' },
     })
+    if (!template) throw new NotFoundException(`Template ${templateId} was not found`)
+    return template.versions
   }
 
-  async getVersion(templateId: number, version: number) {
-    const snapshot = await this.prisma.templateVersion.findUnique({
-      where: {
-        templateId_version: { templateId, version },
-      },
+  async getVersion(ownerId: string, templateId: number, version: number) {
+    const snapshot = await this.prisma.templateVersion.findFirst({
+      where: { templateId, version, template: { ownerId } },
     })
     if (!snapshot) {
       throw new NotFoundException(`Template ${templateId} version ${version} was not found`)
@@ -203,10 +212,10 @@ export class TemplatesService {
     return toVersionResponse(snapshot)
   }
 
-  async restore(templateId: number, version: number, input: TemplateRestoreInput) {
+  async restore(ownerId: string, templateId: number, version: number, input: TemplateRestoreInput) {
     const template = await this.prisma.$transaction(async (transaction) => {
-      const current = await transaction.template.findUnique({
-        where: { id: templateId },
+      const current = await transaction.template.findFirst({
+        where: { id: templateId, ownerId },
         select: { version: true },
       })
       if (!current) {
@@ -230,7 +239,7 @@ export class TemplatesService {
       const nextVersion = current.version + 1
       const content = toPrismaJson(fromPrismaJson(snapshot.content))
       const updated = await transaction.template.updateMany({
-        where: { id: templateId, version: input.expectedVersion },
+        where: { id: templateId, ownerId, version: input.expectedVersion },
         data: {
           title: snapshot.title,
           content,
@@ -250,19 +259,9 @@ export class TemplatesService {
         },
       })
 
-      return transaction.template.findUniqueOrThrow({ where: { id: templateId } })
+      return transaction.template.findFirstOrThrow({ where: { id: templateId, ownerId } })
     })
 
     return toTemplateResponse(template)
-  }
-
-  private async ensureTemplateExists(id: number): Promise<void> {
-    const template = await this.prisma.template.findUnique({
-      where: { id },
-      select: { id: true },
-    })
-    if (!template) {
-      throw new NotFoundException(`Template ${id} was not found`)
-    }
   }
 }
