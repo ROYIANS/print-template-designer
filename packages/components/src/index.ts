@@ -17,7 +17,12 @@ export { RoyGroup } from './components/RoyGroup'
 export { RoySimpleTable } from './components/RoySimpleTable'
 export { RoyComplexTable } from './components/RoyComplexTable'
 
-export type { SimpleTablePropValue, TableCellData, TableConfig } from './components/RoySimpleTable'
+export type {
+  LegacySimpleTablePropValue,
+  SimpleTablePropValue,
+  TableCellData,
+  TableConfig,
+} from './components/RoySimpleTable'
 export type {
   ComplexTablePropValue,
   ComplexTableSection,

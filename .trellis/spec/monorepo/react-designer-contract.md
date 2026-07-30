@@ -172,6 +172,26 @@ import '@ptd/react-designer/styles.css'
 - Inspector text/select/color changes use the existing begin/transient/commit gesture boundary. Discrete
   file, clear and segmented commands are one history entry each; locked components disable every path.
 
+#### Free-table authoring
+
+- `@ptd/core` owns the canonical `SimpleTableProps` model. Every grid coordinate references a Cell ID;
+  rectangular merged regions repeat that ID, while the Cell Map stores one plain-text payload, span and
+  style record. The model must keep at least one row/column, unique IDs, rectangular non-overlapping spans
+  and an addressable owner for every covered coordinate.
+- Legacy `tableConfig/tableData` remains a compatibility input. Renderer and Designer normalize it through
+  the same Core function; legacy cell HTML becomes plain text and must never be executed. New tables start
+  with a real independent 2×2 grid rather than `null` or a renderer-only placeholder.
+- Insert/delete row/column, merge/split, track resize, text update and cell-style update are immutable Core
+  commands without DOM geometry. A discrete structure command performs one component replacement, one Host
+  change and one PTD history node. Focused Inspector input and pointer track resize use one transient gesture.
+- Selecting the table object is distinct from selecting cells. Cell anchor/focus, drag selection and active
+  cell editing are instance UI state and never enter `TemplateSchema`. Single click selects, drag/Shift extends,
+  Arrow/Tab navigates, and double click or Enter/F2 opens a local plain-text draft; Escape cancels and commit
+  writes at most one history node.
+- Locked tables use the framework-independent Renderer and reject every cell selection/edit/structure path.
+  `RoyComplexTable` remains a read-only compatibility Renderer and a planned Catalog item until data binding,
+  section authoring, repeated detail and derived pagination contracts are implemented.
+
 #### Manual pages and derived pagination
 
 - `TemplateSchema.pages` is the ordered list of manually designed physical pages. Page switching is
@@ -281,6 +301,9 @@ import '@ptd/react-designer/styles.css'
   than broken-image chrome or blank DOM; async code rendering cannot outlive its render token.
 - Store test: a focused Inspector gesture can upgrade a legacy image string to structured content as
   one history entry, and Undo restores the exact legacy string.
+- Table tests: legacy input normalization cannot execute HTML; merge/split and row/column insertion/deletion
+  preserve all grid invariants; table cell selection is history-free; one cell-edit commit is exactly one
+  history entry and locked/non-table objects reject table sessions.
 - Package build assertion: ESM, CJS, DTS and `dist/index.css` exist; ESM/CJS contain non-empty CSS
   Module class maps such as `Designer_designer`.
 - Host build assertion: peer dependencies resolve and `@ptd/react-designer/styles.css` imports.

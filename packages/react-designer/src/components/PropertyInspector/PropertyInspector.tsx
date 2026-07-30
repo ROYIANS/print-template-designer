@@ -49,6 +49,7 @@ import {
   scrubNumberValue,
 } from './propertyValue'
 import styles from './PropertyInspector.module.css'
+import { TableContentFields } from './TableContentFields'
 
 type ColorVariables = CSSProperties & { '--field-color': string }
 
@@ -189,14 +190,12 @@ const CONTENT_COMPONENTS = new Set<ComponentSchema['component']>([
 const TYPOGRAPHY_COMPONENTS = new Set<ComponentSchema['component']>([
   'RoySimpleText',
   'RoyText',
-  'RoySimpleTable',
   'RoyComplexTable',
 ])
 const ALIGNMENT_COMPONENTS = new Set<ComponentSchema['component']>(['RoySimpleText'])
 const BACKGROUND_COMPONENTS = new Set<ComponentSchema['component']>([
   'RoySimpleText',
   'RoyText',
-  'RoySimpleTable',
   'RoyComplexTable',
   'RoyLine',
   'RoyRect',
@@ -207,7 +206,6 @@ const BACKGROUND_COMPONENTS = new Set<ComponentSchema['component']>([
 const BORDER_COMPONENTS = new Set<ComponentSchema['component']>([
   'RoySimpleText',
   'RoyText',
-  'RoySimpleTable',
   'RoyComplexTable',
   'RoyRect',
   'RoyCircle',
@@ -231,6 +229,7 @@ const RADIUS_COMPONENTS = new Set<ComponentSchema['component']>([
   'RoyImage',
 ])
 const CONFIGURABLE_CONTENT_COMPONENTS = new Set<ComponentSchema['component']>([
+  'RoySimpleTable',
   'RoyImage',
   'RoyQRCode',
   'RoyBarCode',
@@ -386,7 +385,15 @@ function SingleInspector({ component }: { component: ComponentSchema }) {
       {showsContent && (
         <InspectorSection
           title="内容"
-          meta={editableText ? '可编辑' : configurableContent ? '实时预览' : '专用编辑器'}
+          meta={
+            editableText
+              ? '可编辑'
+              : component.component === 'RoySimpleTable'
+                ? '单元格编辑'
+                : configurableContent
+                  ? '实时预览'
+                  : '专用编辑器'
+          }
         >
           {configurableContent ? (
             <ConfigurableContentFields
@@ -628,9 +635,11 @@ function SingleInspector({ component }: { component: ComponentSchema }) {
   )
 }
 
-type ConfigurableContentComponent = ComponentSchema & {
-  component: 'RoyImage' | 'RoyQRCode' | 'RoyBarCode'
-}
+type ConfigurableContentComponent =
+  | (ComponentSchema & { component: 'RoySimpleTable' })
+  | (ComponentSchema & { component: 'RoyImage' })
+  | (ComponentSchema & { component: 'RoyQRCode' })
+  | (ComponentSchema & { component: 'RoyBarCode' })
 
 interface ConfigurableContentFieldsProps {
   component: ConfigurableContentComponent
@@ -650,6 +659,8 @@ function isConfigurableContentComponent(
 
 function ConfigurableContentFields(props: ConfigurableContentFieldsProps) {
   switch (props.component.component) {
+    case 'RoySimpleTable':
+      return <TableContentFields {...props} component={props.component} />
     case 'RoyImage':
       return <ImageContentFields {...props} />
     case 'RoyQRCode':

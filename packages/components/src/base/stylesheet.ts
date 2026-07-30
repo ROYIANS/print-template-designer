@@ -187,25 +187,45 @@ const CSS = `
 }
 
 .ptd-simple-table {
-  color: var(--ptd-color);
-  background: var(--ptd-background);
   width: 100%;
-  height: auto;
+  height: 100%;
   position: relative;
+  overflow: hidden;
 }
 
 .ptd-simple-table table {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: var(--ptd-border-spacing);
-  background-color: var(--ptd-border-color);
+  height: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
 }
 
 .ptd-simple-table td {
   position: relative;
-  padding: 2px;
-  background-color: var(--ptd-background, #fff);
+  box-sizing: border-box;
+  padding: 0;
+  border: var(--ptd-table-border-width) var(--ptd-table-border-style)
+    var(--ptd-table-border-color);
+  color: var(--ptd-table-color);
+  background: var(--ptd-table-background);
+  font-family: var(--ptd-table-font-family);
+  font-size: var(--ptd-table-font-size);
+  font-style: var(--ptd-table-font-style);
+  font-weight: var(--ptd-table-font-weight);
+  text-align: var(--ptd-table-horizontal-align);
+  vertical-align: var(--ptd-table-vertical-align);
   overflow: hidden;
+}
+
+.ptd-simple-table__cell-content {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  padding: var(--ptd-table-padding);
+  overflow: hidden;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  text-decoration: var(--ptd-table-text-decoration);
 }
 
 .ptd-complex-table {

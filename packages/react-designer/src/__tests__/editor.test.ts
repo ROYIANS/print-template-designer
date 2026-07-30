@@ -1,5 +1,11 @@
 import { describe, expect, it, vi } from 'vitest'
-import { getPageDimensions, type ComponentSchema, type TemplateSchema } from '@ptd/core'
+import {
+  createSimpleTableProps,
+  getPageDimensions,
+  normalizeSimpleTableProps,
+  type ComponentSchema,
+  type TemplateSchema,
+} from '@ptd/core'
 import { EditorStore } from '../state/editor'
 
 function component(id: string, left: number, top = 0, width = 10, height = 10): ComponentSchema {
@@ -58,6 +64,15 @@ function imageComponent(id: string): ComponentSchema {
   }
 }
 
+function tableComponent(id: string, locked = false): ComponentSchema {
+  return {
+    ...component(id, 0, 0, 500, 200),
+    component: 'RoySimpleTable',
+    propValue: createSimpleTableProps(),
+    isLock: locked,
+  }
+}
+
 describe('EditorStore history and ownership', () => {
   it('commits one direct content-edit session as one document history step', () => {
     const onChange = vi.fn()
@@ -85,6 +100,60 @@ describe('EditorStore history and ownership', () => {
     expect(store.template.value).toBe(initial)
     expect(store.history.value).toHaveLength(1)
     expect(store.editingComponentId.value).toBeNull()
+  })
+
+  it('selects a table cell range without schema history and clears it across objects', () => {
+    const store = new EditorStore(template([tableComponent('table'), component('shape', 520)]))
+
+    expect(store.selectTableCell('table', 0, 0)).toBe(true)
+    expect(store.tableCellSelection.value).toEqual({
+      componentId: 'table',
+      anchorRow: 0,
+      anchorColumn: 0,
+      focusRow: 0,
+      focusColumn: 0,
+    })
+    expect(store.selectTableCell('table', 1, 1, true)).toBe(true)
+    expect(store.tableCellSelection.value).toMatchObject({ focusRow: 1, focusColumn: 1 })
+    expect(store.history.value).toHaveLength(1)
+
+    store.selectComponent('shape')
+    expect(store.tableCellSelection.value).toBeNull()
+    expect(store.editingTableCell.value).toBeNull()
+  })
+
+  it('commits table cell text as one history entry and cancels without mutations', () => {
+    const onChange = vi.fn()
+    const store = new EditorStore(template([tableComponent('table')]), { onChange })
+
+    expect(store.startTableCellEditing('table', 'cell-1')).toBe(true)
+    store.cancelTableCellEditing('table', 'cell-1')
+    expect(store.history.value).toHaveLength(1)
+    expect(onChange).not.toHaveBeenCalled()
+
+    expect(store.startTableCellEditing('table', 'cell-1')).toBe(true)
+    store.commitTableCellEditing('table', 'cell-1', '客户名称')
+
+    const current = normalizeSimpleTableProps(store.components.value[0]?.propValue)
+    expect(current.cells['cell-1']?.text).toBe('客户名称')
+    expect(store.editingTableCell.value).toBeNull()
+    expect(store.history.value).toHaveLength(2)
+    expect(onChange).toHaveBeenCalledTimes(1)
+    store.undo()
+    expect(
+      normalizeSimpleTableProps(store.components.value[0]?.propValue).cells['cell-1']?.text,
+    ).toBe('')
+  })
+
+  it('rejects cell selection and editing for locked or non-table components', () => {
+    const store = new EditorStore(
+      template([tableComponent('locked-table', true), component('shape', 520)]),
+    )
+
+    expect(store.selectTableCell('locked-table', 0, 0)).toBe(false)
+    expect(store.startTableCellEditing('locked-table', 'cell-1')).toBe(false)
+    expect(store.selectTableCell('shape', 0, 0)).toBe(false)
+    expect(store.tableCellSelection.value).toBeNull()
   })
 
   it('rejects direct editing for locked and non-text components', () => {

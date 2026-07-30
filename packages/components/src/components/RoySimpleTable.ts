@@ -1,6 +1,13 @@
-import type { ComponentSchema } from '@ptd/core'
+import {
+  getTableCellBounds,
+  normalizeSimpleTableProps,
+  type ComponentSchema,
+  type SimpleTableProps,
+  type TableCellStyle,
+} from '@ptd/core'
 import { BaseComponent } from '../base/base-component'
 
+/** @deprecated Legacy v1 table cell input accepted by the normalizer. */
 export interface TableCellData {
   id: string
   propValue: string
@@ -10,6 +17,7 @@ export interface TableCellData {
   bindValue?: unknown
 }
 
+/** @deprecated Legacy v1 table layout input accepted by the normalizer. */
 export interface TableConfig {
   rows: number
   cols: number
@@ -21,13 +29,14 @@ export interface TableConfig {
   }>
 }
 
-export interface SimpleTablePropValue {
+export interface LegacySimpleTablePropValue {
   tableConfig?: TableConfig
   tableData?: Record<string, TableCellData>
 }
 
-export class RoySimpleTable extends BaseComponent {
+export type SimpleTablePropValue = SimpleTableProps | LegacySimpleTablePropValue
 
+export class RoySimpleTable extends BaseComponent {
   constructor(schema: ComponentSchema) {
     super(schema)
   }
@@ -36,40 +45,47 @@ export class RoySimpleTable extends BaseComponent {
     this.container.classList.add('ptd-simple-table')
     this.container.innerHTML = ''
 
-    const propValue = this.schema.propValue as SimpleTablePropValue | null
-    const tableConfig = propValue?.tableConfig ?? { rows: 2, cols: 2, layoutDetail: [] }
-    const tableData = propValue?.tableData ?? {}
+    const value = normalizeSimpleTableProps(this.schema.propValue)
 
     const table = document.createElement('table')
+    table.setAttribute('aria-label', this.schema.name ?? '自由表格')
+    table.dataset.ptdTable = 'simple'
+    const colgroup = document.createElement('colgroup')
+    const totalWidth = sum(value.columnWidths)
+    value.columnWidths.forEach((width) => {
+      const column = document.createElement('col')
+      column.style.width = `${(width / totalWidth) * 100}%`
+      colgroup.appendChild(column)
+    })
+    table.appendChild(colgroup)
+
     const tbody = document.createElement('tbody')
     table.appendChild(tbody)
+    const totalHeight = sum(value.rowHeights)
 
-    const hiddenMap = this.buildHiddenMap(tableConfig)
-
-    for (let row = 1; row <= tableConfig.rows; row++) {
+    for (let row = 0; row < value.grid.length; row += 1) {
       const tr = document.createElement('tr')
-      for (let col = 1; col <= tableConfig.cols; col++) {
-        if (hiddenMap[`${row - 1}_${col - 1}`]) continue
+      tr.style.height = `${((value.rowHeights[row] ?? 0) / totalHeight) * 100}%`
+      for (let column = 0; column < value.columnWidths.length; column += 1) {
+        const cellId = value.grid[row]?.[column]
+        if (!cellId) continue
+        const bounds = getTableCellBounds(value, cellId)
+        if (!bounds || bounds.startRow !== row || bounds.startColumn !== column) continue
+        const cell = value.cells[cellId]
+        if (!cell) continue
 
         const td = document.createElement('td')
-        const layoutIndex = (row - 1) * tableConfig.cols + col - 1
-        const layout = tableConfig.layoutDetail[layoutIndex]
+        td.dataset.cellId = cellId
+        td.dataset.row = String(row)
+        td.dataset.column = String(column)
+        if (cell.colSpan > 1) td.colSpan = cell.colSpan
+        if (cell.rowSpan > 1) td.rowSpan = cell.rowSpan
+        applyCellVariables(td, cell.style)
 
-        if (layout?.colSpan && layout.colSpan > 1) td.colSpan = layout.colSpan
-        if (layout?.rowSpan && layout.rowSpan > 1) td.rowSpan = layout.rowSpan
-
-        const cellData = tableData[`${row}-${col}`]
-        if (cellData) {
-          td.style.width = `${cellData.width}px`
-          td.style.height = `${cellData.height}px`
-          td.style.padding = '0'
-          td.style.overflow = 'hidden'
-          const inner = document.createElement('div')
-          inner.style.width = '100%'
-          inner.style.height = '100%'
-          inner.innerHTML = typeof cellData.propValue === 'string' ? cellData.propValue : ''
-          td.appendChild(inner)
-        }
+        const inner = document.createElement('div')
+        inner.className = 'ptd-simple-table__cell-content'
+        inner.textContent = cell.text
+        td.appendChild(inner)
 
         tr.appendChild(td)
       }
@@ -78,23 +94,24 @@ export class RoySimpleTable extends BaseComponent {
 
     this.container.appendChild(table)
   }
+}
 
-  private buildHiddenMap(tableConfig: TableConfig): Record<string, boolean> {
-    const hidden: Record<string, boolean> = {}
-    for (let i = 0; i < tableConfig.rows; i++) {
-      for (let j = 0; j < tableConfig.cols; j++) {
-        const layout = tableConfig.layoutDetail[i * tableConfig.cols + j]
-        if (layout && ((layout.colSpan && layout.colSpan > 1) || (layout.rowSpan && layout.rowSpan > 1))) {
-          const rowSpan = layout.rowSpan ?? 1
-          const colSpan = layout.colSpan ?? 1
-          for (let r = i; r < i + rowSpan; r++) {
-            for (let c = r === i ? j + 1 : j; c < j + colSpan; c++) {
-              hidden[`${r}_${c}`] = true
-            }
-          }
-        }
-      }
-    }
-    return hidden
-  }
+function applyCellVariables(cell: HTMLTableCellElement, style: TableCellStyle): void {
+  cell.style.setProperty('--ptd-table-font-family', style.fontFamily)
+  cell.style.setProperty('--ptd-table-font-size', `${style.fontSize}px`)
+  cell.style.setProperty('--ptd-table-font-weight', style.fontWeight)
+  cell.style.setProperty('--ptd-table-font-style', style.fontStyle)
+  cell.style.setProperty('--ptd-table-text-decoration', style.textDecoration)
+  cell.style.setProperty('--ptd-table-color', style.color)
+  cell.style.setProperty('--ptd-table-background', style.background)
+  cell.style.setProperty('--ptd-table-horizontal-align', style.horizontalAlign)
+  cell.style.setProperty('--ptd-table-vertical-align', style.verticalAlign)
+  cell.style.setProperty('--ptd-table-padding', `${style.padding}px`)
+  cell.style.setProperty('--ptd-table-border-color', style.borderColor)
+  cell.style.setProperty('--ptd-table-border-width', `${style.borderWidth}px`)
+  cell.style.setProperty('--ptd-table-border-style', style.borderStyle)
+}
+
+function sum(values: number[]): number {
+  return values.reduce((total, value) => total + value, 0) || 1
 }

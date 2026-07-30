@@ -17,10 +17,10 @@ describe('component catalog', () => {
   it('exposes every creatable built-in but excludes the command-created group', () => {
     const available = componentCatalog.filter(isAvailableCatalogItem)
     expect(componentCatalog).toHaveLength(18)
-    expect(available).toHaveLength(11)
+    expect(available).toHaveLength(10)
     expect(available.map((item) => String(item.type))).not.toContain('RoyGroup')
     expect(new Set(available.map((item) => item.type)).size).toBe(available.length)
-    expect(componentCatalog.filter((item) => item.kind === 'planned')).toHaveLength(7)
+    expect(componentCatalog.filter((item) => item.kind === 'planned')).toHaveLength(8)
     expect(
       componentCatalog.filter((item) => item.kind === 'planned').every((item) => !('type' in item)),
     ).toBe(true)
@@ -44,7 +44,7 @@ describe('component catalog', () => {
       }),
     ).toEqual([
       [2, 3],
-      [2, 2],
+      [1, 3],
       [1, 1],
       [2, 0],
       [4, 1],
@@ -216,7 +216,7 @@ describe('component catalog', () => {
     },
   )
 
-  it.each(['RoyImage', 'RoyQRCode', 'RoyBarCode', 'RoySimpleTable', 'RoyComplexTable'] as const)(
+  it.each(['RoyImage', 'RoyQRCode', 'RoyBarCode', 'RoySimpleTable'] as const)(
     'returns one-shot %s to Select without opening a text editor',
     (type) => {
       const store = createEditorStore(template())
@@ -232,7 +232,13 @@ describe('component catalog', () => {
     },
   )
 
-  it('creates media and code frames with independent structured content defaults', () => {
+  it('creates table, media and code frames with independent structured content defaults', () => {
+    const table = createDrawnComponentSchema(
+      'RoySimpleTable',
+      { x: 20, y: 30 },
+      { x: 180, y: 90 },
+      PAGE,
+    )
     const image = createDrawnComponentSchema('RoyImage', { x: 20, y: 30 }, { x: 180, y: 90 }, PAGE)
     const qr = createDrawnComponentSchema('RoyQRCode', { x: 20, y: 30 }, { x: 120, y: 130 }, PAGE)
     const barcode = createDrawnComponentSchema(
@@ -243,6 +249,14 @@ describe('component catalog', () => {
     )
 
     expect(image?.propValue).toMatchObject({ src: '', fit: 'contain', position: 'center' })
+    expect(table?.propValue).toMatchObject({
+      rowHeights: [100, 100],
+      columnWidths: [250, 250],
+      grid: [
+        ['cell-1', 'cell-2'],
+        ['cell-3', 'cell-4'],
+      ],
+    })
     expect(qr?.propValue).toMatchObject({ text: 'PTD-QR-0001', correctLevel: 'M', margin: 4 })
     expect(barcode?.propValue).toMatchObject({
       text: 'PTD-2026-0001',
@@ -250,6 +264,7 @@ describe('component catalog', () => {
       includeText: true,
     })
     expect(image?.propValue).not.toBe(defaultRegistry.get('RoyImage')?.defaultProps)
+    expect(table?.propValue).not.toBe(defaultRegistry.get('RoySimpleTable')?.defaultProps)
   })
 
   it('does not create or switch tools when draw completion no longer matches the active tool', () => {

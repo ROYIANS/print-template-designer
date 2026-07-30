@@ -35,5 +35,37 @@ export type {
   QRCodeErrorCorrection,
   QRCodeProps,
 } from './component-content'
+export {
+  DEFAULT_SIMPLE_TABLE_PROPS,
+  DEFAULT_TABLE_CELL_STYLE,
+  createSimpleTableProps,
+  deleteTableColumn,
+  deleteTableRow,
+  expandTableCellRange,
+  getTableCellAt,
+  getTableCellBounds,
+  getTableCellIdsInRange,
+  insertTableColumn,
+  insertTableRow,
+  isSimpleTableProps,
+  mergeTableCells,
+  normalizeSimpleTableProps,
+  normalizeTableCellRange,
+  resizeTableColumn,
+  resizeTableRow,
+  splitTableCell,
+  updateTableCellText,
+  updateTableCellsStyle,
+} from './table-content'
+export type {
+  SimpleTableCell,
+  SimpleTableProps,
+  TableBorderStyle,
+  TableCellRange,
+  TableCellStyle,
+  TableCellTextDecoration,
+  TableHorizontalAlign,
+  TableVerticalAlign,
+} from './table-content'
 export type { DataSourceField, DataFieldType, DataSet } from './data-source'
 export type { TemplateSchema, TemplatePage } from './template-schema'

@@ -16,7 +16,7 @@
 - 编辑态与展示态现在复用同一套 Renderer CSS Variables；字号合同沿用 Legacy 的印刷单位 `pt`，
   属性面板、富文本工具栏与 HTML 白名单均支持点数及 10.5pt 等办公常用字号。编辑 DOM 进一步
   复用 Renderer 的文本结构类与共享样式注入，避免空白画布首次编辑和激活前后的字号时序差异。
-- 所有 11 个可用目录组件均改为工具式拖框创建：四种 Shape 连续绘制，其余组件一次创建后回到
+- 所有当时的 11 个目录组件均改为工具式拖框创建：四种 Shape 连续绘制，其余组件一次创建后回到
   Select；普通文本和富文本立即进入编辑，使用不写入 Schema 的空内容提示，QR 拖框始终保持
   正方形。
 - Bubble Toolbar 已脱离组件裁剪上下文，挂载到 `document.body` 的固定浮层；工具栏和编辑
@@ -33,12 +33,21 @@
   码制、内容、前景色和可读文字，并提供按码制即时校验。
 - 三类 Renderer 不再静默空白：图片显示空态/载入/失败，编码显示生成中/内容错误/模块错误；QR 与
   条码异步渲染使用实例 token，旧 Promise 不能覆盖更新后的 Schema 或已销毁组件。
-- 自动验证：Core 31 项、Components 41 项、React Designer 93 项测试通过；三包 TypeScript
-  与 ESLint 通过；Core、Components、React Designer 和 Web 顺序构建通过。
+- 自由表格已使用 Core 规范模型：`grid` 的重复 Cell ID 表达矩形合并区，Cell Map 保存唯一纯文本与
+  样式。默认插入生成真实 2×2 内容；旧 `tableConfig/tableData` 可安全归一化，旧 HTML 不再执行。
+- 行列增删、合并拆分、行高列宽、文本与样式更新均为不依赖 DOM 的不可变纯函数，并通过至少一行
+  一列、唯一 ID、矩形 Span 与完整坐标可寻址的不变量测试。
+- 选中自由表格后可拖选单元格、Shift 扩展、方向键/Tab 导航、Enter/F2 或双击原位编辑；行列边界
+  可直接拖动。Inspector 提供结构命令、内容、字体、对齐、内边距、颜色和边框，连续输入仍合并为
+  一个 Gesture 历史节点，结构命令各自形成一个原子节点。
+- `RoyComplexTable` 保留旧 Schema 只读 Renderer，但已从可创作 Registry 降级为目录规划项，避免在
+  数据驱动、分区编辑与自动分页合同完成前高估成熟度。当前目录因此为 10 个可用项、8 个规划项。
+- 自动验证：Core 38 项、Components 43 项、React Designer 95 项测试通过；分包 TypeScript 和
+  Core → Components → React Designer 的依赖顺序构建通过。完整 Lint/Web 构建在最终收尾执行。
 
-仍需在真实浏览器完成人工矩阵：75% / 100% / 150% 缩放、旋转组件、中文 IME、画布滚动时
-浮层跟随、内部/外部 Undo 分层、双 Designer 实例隔离，以及图片文件读取、远程图片失败、六种
-条码码制和 QR 纠错/静区视觉结果。完成前不把当前组件能力标记为最终验收。
+媒体与编码能力以及自由表格创作能力均已由用户在真实浏览器完成验收。自由表格的单元格选取、
+原位编辑、结构命令、样式配置、边界拖动与 Undo/Redo 行为符合当前阶段预期；本任务的核心组件
+创作能力已经达到归档条件。
 
 ## 分层结构
 
@@ -59,7 +68,7 @@ Vanilla Renderer，进入内容编辑态后由 React 覆盖或替换对应的可
 
 ## 内容编辑会话
 
-建议新增实例级 UI 状态：
+当前采用实例级 UI 状态：
 
 ```ts
 interface ContentEditSession {
@@ -139,8 +148,8 @@ Spike 不进入正式产品路径，目标是回答这些问题：
 
 ## 自由表格模型
 
-Legacy 的表格已经证明了选择、合并、拆分、行列增删和单元格调整的产品价值，但 v2 不复用其
-DOM 测量和深度 Watch。建议把表格命令实现为 `@ptd/core` 纯函数：
+Legacy 的表格已经证明了选择、合并、拆分、行列增删和单元格调整的产品价值，但 v2 没有复用其
+DOM 测量和深度 Watch。表格命令已经实现为 `@ptd/core` 纯函数：
 
 ```ts
 insertTableRow(value, at)
@@ -162,5 +171,6 @@ resizeTableRow(value, row, height)
 - 富文本工具条 Portal 可能与 Component Quick Bar、Context Menu、Compact Scrim 发生层级冲突。
 - Tiptap/ProseMirror History 与 PTD History 若同时拦截快捷键，会产生用户不可预测的 Undo。
 - Raw HTML 清洗不足会形成存储型 XSS；过度清洗又会破坏视觉往返。
-- 表格 Schema 当前允许稀疏 `tableData`，实现编辑器前必须明确规范化规则。
+- Legacy 稀疏 `tableData` 会在读取时升级为完整规范网格；后续持久化迁移仍需决定何时提升全局
+  `_version`，当前与图片结构化升级一致采用兼容读取和惰性写回。
 - 图片 Data URL 会放大模板与版本快照；不能把它误认为最终资产方案。

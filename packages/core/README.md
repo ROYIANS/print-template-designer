@@ -12,6 +12,7 @@ Print Template Designer 的框架无关核心包。它只包含 TypeScript 数�
 - 数据绑定解析与基础类型转换。
 - 组件定义注册表和组件目录元数据。
 - 图片、二维码与条形码的公开内容类型、默认值、运行时守卫、规范化和纯校验。
+- 自由表格的规范网格模型、Legacy 输入归一化、单元格样式与不可变结构命令。
 
 ## 公共 API
 
@@ -25,6 +26,7 @@ Print Template Designer 的框架无关核心包。它只包含 TypeScript 数�
 | Data binding       | `DataBindingEngine`、`convertByType`                                                                  |
 | Registry           | `ComponentRegistry`、`defaultRegistry` 及组件定义类型                                                 |
 | Component content  | `ImageProps`、`QRCodeProps`、`BarCodeProps`，对应默认值、守卫、规范化与校验函数                       |
+| Free table         | `SimpleTableProps`、`TableCellStyle`、2×2 默认值、增删行列、合并拆分、尺寸与样式纯函数命令            |
 | Serialization      | `serialize`、`deserialize`                                                                            |
 
 示例：
@@ -39,6 +41,11 @@ const tenMillimeters = mmToPx(10)
 ```
 
 `serialize` / `deserialize` 是模板跨应用、Server 与存储层传递时的规范化入口，不应由各 Host 自行维护另一套 Schema 转换。
+
+自由表格使用 `grid` 中重复的 Cell ID 表达矩形合并区域，`cells` 保存唯一内容与样式；因此每个可见或
+被合并覆盖的坐标都可寻址。`normalizeSimpleTableProps` 兼容旧 `tableConfig` / `tableData` 输入，并把
+旧单元格 HTML 转成纯文本。结构命令不读取 DOM、不修改输入对象，调用方可把每次命令作为一个原子
+历史节点。
 
 ## 页面语义
 

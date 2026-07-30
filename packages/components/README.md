@@ -6,14 +6,14 @@
 
 ## 公开渲染器
 
-| 类别 | 导出                                         |
-| ---- | -------------------------------------------- |
-| 文本 | `RoySimpleText`、`RoyText`                   |
-| 表格 | `RoySimpleTable`、`RoyComplexTable`          |
-| 图像 | `RoyImage`                                   |
-| 编码 | `RoyQRCode`、`RoyBarCode`                    |
-| 图形 | `RoyLine`、`RoyRect`、`RoyCircle`、`RoyStar` |
-| 结构 | `RoyGroup`                                   |
+| 类别 | 导出                                                     |
+| ---- | -------------------------------------------------------- |
+| 文本 | `RoySimpleText`、`RoyText`                               |
+| 表格 | `RoySimpleTable`；`RoyComplexTable` 仅用于旧模板只读兼容 |
+| 图像 | `RoyImage`                                               |
+| 编码 | `RoyQRCode`、`RoyBarCode`                                |
+| 图形 | `RoyLine`、`RoyRect`、`RoyCircle`、`RoyStar`             |
+| 结构 | `RoyGroup`                                               |
 
 `RoyGroup` 用于组合结构与内部渲染，不应作为普通组件目录 Tile 向用户宣传。
 
@@ -21,7 +21,7 @@
 
 - `BaseComponent` 生命周期基类。
 - `applyCssVars` 与 `injectStylesheet`。
-- 简单表格、复杂表格的公开 value/config 类型。
+- Legacy 简单表格输入类型；规范自由表格内容类型与命令由 `@ptd/core` 导出。
 
 ## 生命周期
 
@@ -47,9 +47,14 @@ component.destroy()
 条形码 Renderer 使用 `@ptd/core` 的统一规范化/校验，在动态渲染模块尚未完成、内容非法或模块失败时
 显示明确状态；异步结果通过实例 render token 防止旧 Promise 覆盖新内容。
 
+`RoySimpleTable` 按 Core 的规范网格确定性渲染行列、合并区域、纯文本和单元格样式；读取旧表格时
+先完成安全归一化，不执行旧单元格 HTML。`RoyComplexTable` 仍可显示已有静态 header/body/footer
+Schema，但在数据流、分区编辑和自动分页合同完成前不属于可创作目录项。
+
 ## 数据与安全
 
-部分文本/富文本渲染路径会把 Schema 内容写入 HTML。来自外部用户或远程数据源的富文本必须由上层在进入模板前完成可信校验或清洗，渲染组件不会替 Host 定义安全策略。
+普通文本与表格单元格只按文本渲染；富文本在保存边界和 Renderer 入口使用相同白名单清洗。Host
+仍应在远程数据进入模板前完成业务层授权与长度限制，但不能依赖浏览器执行任意 Schema HTML。
 
 ## 开发
 

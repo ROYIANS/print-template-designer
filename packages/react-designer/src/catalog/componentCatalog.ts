@@ -133,6 +133,16 @@ const plannedCatalogItems = [
   },
   {
     kind: 'planned',
+    id: 'structured-table',
+    name: '结构表格',
+    group: 'table',
+    icon: RiTableLine,
+    description: '按表头、表体与表尾组织数据，并支持报表分页合同',
+    keywords: ['表头', '表体', '表尾', '分区', '报表', '只读兼容'],
+    maturity: 'planned',
+  },
+  {
+    kind: 'planned',
     id: 'repeating-list',
     name: '重复明细 / 列表',
     group: 'table',
