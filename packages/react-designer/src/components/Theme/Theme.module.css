@@ -80,9 +80,12 @@
   --ptd-header-radius: 14px;
   --ptd-header-radius-round: 100px;
   --ptd-app-bar-height: 42px;
+  --ptd-app-bar-height-compact: 38px;
   --ptd-command-bar-height: 40px;
+  --ptd-command-bar-height-compact: 36px;
   --ptd-status-bar-height: 24px;
   --ptd-tool-dock-width: 42px;
+  --ptd-tool-dock-width-compact: 36px;
   --ptd-resource-panel-width: 280px;
   --ptd-inspector-width: 304px;
   --ptd-layer-base: 0;

@@ -278,9 +278,12 @@ PTD 是一张数字化的制版工作台：**精密、轻快、可信，带有�
 ```css
 .ptdTheme {
   --ptd-app-bar-height: 42px;
+  --ptd-app-bar-height-compact: 38px;
   --ptd-command-bar-height: 40px;
+  --ptd-command-bar-height-compact: 36px;
   --ptd-status-bar-height: 24px;
   --ptd-tool-dock-width: 42px;
+  --ptd-tool-dock-width-compact: 36px;
   --ptd-resource-panel-width: 280px;
   --ptd-inspector-width: 304px;
 }
@@ -296,13 +299,16 @@ PTD 是一张数字化的制版工作台：**精密、轻快、可信，带有�
   承担。不存在的云保存、同步或运行状态不得占位。
 - 应用菜单分类统一为文件(F)、编辑(E)、对象(O)、视图(V)、窗口(W)、帮助(H)，靠左排列在品牌
   之后并提供 `accessKey`/`aria-keyshortcuts` 助记键语义。展开区直接显示命令名称、简短用途与
-  Windows 风格快捷键，不增加“应用命令”“界面预览”等解释性标题；尚未实现的命令必须使用
-  `aria-disabled`，不能执行假动作。
-- 只有具体菜单分类在 hover/focus/click 时展开；品牌、载入/保存和账户入口不触发并会
-  收起菜单。鼠标离开后延迟 120ms 收起；左右方向键/Home/End 可以切换分类，Escape 收起。
+  Windows 风格快捷键，不增加“应用命令”“界面预览”等解释性标题；尚未实现的命令不得执行
+  业务动作，预览阶段允许点击后仅关闭披露层，并必须通过可访问名称和 Tooltip 明示“功能待接入”。
+- 只有真实鼠标 Pointer 可以通过 hover 自动展开/切换分类，并在进入品牌、载入/保存、账户入口或
+  离开 Header 后关闭；离开延迟 120ms。Touch/Pen Pointer 不参与任何自动开合，避免触摸浏览器
+  合成 mouse/hover 事件把刚打开的菜单误关。键盘 focus/click 仍可展开，左右方向键/Home/End
+  可以切换分类，Escape 在所有输入模式下收起。
   `prefers-reduced-motion` 下取消轨道和位移动画。
 - 窄容器将六个桌面分类折叠为汉堡按钮；点击在原位展开菜单，并在展开区顶部显示可横向滚动的
-  分类条。载入、保存、账户等关键入口适配成紧凑图标，不因响应式布局被删除。
+  分类条。Touch/Pen 下汉堡按钮显式切换开合，分类点击只切换内容并保持打开，命令点击或 Escape
+  收起。载入、保存、账户等关键入口适配成紧凑图标，不因响应式布局被删除。
 - 披露节奏与 ChemViz 一致：轨道使用 340ms `cubic-bezier(0.22, 1, 0.36, 1)`，内容从
   `translateY(-8px)` 与透明态进入；实现优先使用 `grid-template-rows: 0fr → 1fr`，不测量或动画
   固定高度。
@@ -387,10 +393,12 @@ PanelRoot
 - 标准工具图标 16px，重要文档级动作 18px；描边粗细保持一致。
 - 禁止使用 Emoji、Unicode 箭头或“左齐/中齐/横分”等文字缩写代替正式图标。
 - 每个图标按钮必须有 `aria-label` 和 Tooltip；Tooltip 同时展示名称与快捷键。
-- 常规命令栏图标按钮视觉尺寸 28px；在 coarse pointer 下将可点击区域提升到至少 40px。
+- 常规命令栏图标按钮视觉尺寸 28px；较宽的 coarse pointer 工作区将可点击区域提升到至少 40px。
+  `<= 480px` 的 Designer 容器使用 32×32 紧凑视觉控件和 15–16px glyph，避免按钮填满整条
+  36–38px Chrome；这是一项仅限手机宽度的高密度例外，不能扩散到平板或桌面触屏。
 - Tool Dock 的主入口在精细指针下使用 30×30 target 和 16×16 图标，coarse pointer 下使用
-  40×40 target 和 20×20 图标；所有 glyph 共用同一光学中心。组合工具的 disclosure 只能叠加
-  在角落，不能改变主图标 grid cell。Shape 菜单必须消费 Arrow/Home/End、
+  40×40 target 和 20×20 图标；`<= 480px` 容器覆盖为 32×32 与 15×15。所有 glyph 共用同一
+  光学中心。组合工具的 disclosure 只能叠加在角落，不能改变主图标 grid cell。Shape 菜单必须消费 Arrow/Home/End、
   Enter/Space 与 Escape，禁止继续冒泡到对象移动、临时 Hand 或全局退出工具快捷键。
 - 命令按领域分组：历史、剪贴板、排列、层级、组合、视图。
 - 低频排列命令可进入 Dropdown；撤销、重做、删除、锁定、组合和缩放保持可发现。
@@ -553,7 +561,10 @@ PTD 是桌面优先的生产工具，但不能假设所有桌面设备都有精�
 - compact Scrim 位于 Selection 与 Sticky Panel 两个语义层之间：它必须覆盖 Quick Bar、选框和
   画布编辑 Chrome，但不能盖住当前打开的 Resource/Inspector overlay。
 - 不因窄屏删除关键功能；只改变入口和披露层级。
-- `pointer: coarse` 时控件命中区域至少 40px，并取消依赖 Hover 才可发现的操作。
+- `pointer: coarse` 时取消依赖 Hover 才可发现的操作；正常宽度控件命中区域至少 40px。仅当 Designer
+  容器 `<= 480px` 时，App Bar 高 38px、Context Bar 高 36px、Tool Dock 宽 36px，三者的主要
+  控件收紧为 32px、glyph 为 15–16px。小屏覆盖必须写在 coarse-pointer 规则之后，并使用容器宽度，
+  不能通过 UA、设备型号或全局 viewport 猜测。
 - 浏览器缩放到 200% 时，工具栏允许分组折叠，不能产生不可达的横向命令。
 
 ## 15. 稳定定制入口

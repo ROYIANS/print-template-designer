@@ -953,6 +953,35 @@
   }
 }
 
+@container (max-width: 480px) {
+  .toolDock {
+    gap: 2px;
+    padding-block: var(--ptd-space-1);
+  }
+
+  .dockButton,
+  .shapeToolGroup,
+  .shapePrimary {
+    width: 32px;
+    height: 32px;
+  }
+
+  .dockButton svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .shapeDisclosure {
+    width: 12px;
+    height: 12px;
+  }
+
+  .shapeDisclosure svg {
+    width: 8px;
+    height: 8px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .dockButton,
   .catalogTile,

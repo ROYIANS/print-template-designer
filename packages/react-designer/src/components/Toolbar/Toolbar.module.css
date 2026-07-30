@@ -311,6 +311,24 @@
   }
 }
 
+@container (max-width: 480px) {
+  .toolbar {
+    min-height: var(--ptd-command-bar-height-compact);
+    gap: var(--ptd-space-1);
+    padding-inline: var(--ptd-space-1);
+  }
+
+  .toolButton {
+    width: 32px;
+    height: 32px;
+  }
+
+  .toolButton svg {
+    width: 15px;
+    height: 15px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .toolButton {
     transition: none;
