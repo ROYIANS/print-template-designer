@@ -34,7 +34,7 @@ export const PTD_COMPONENT_MIME = 'application/x-ptd-component'
 
 export type { CreatableComponentType } from '@ptd/core'
 export type DrawingComponentType = 'RoyLine' | 'RoyRect' | 'RoyCircle' | 'RoyStar'
-export type DrawnComponentType = 'RoySimpleText' | DrawingComponentType
+export type DrawnComponentType = CreatableComponentType
 export type CatalogMaturity = ComponentMaturity | 'planned'
 
 interface CatalogItemBase {
@@ -218,7 +218,7 @@ export function isDrawingComponentType(type: string): type is DrawingComponentTy
 }
 
 export function isDrawnComponentType(type: string): type is DrawnComponentType {
-  return type === 'RoySimpleText' || isDrawingComponentType(type)
+  return findAvailableCatalogItem(type)?.creationMode === 'draw'
 }
 
 export function findAvailableCatalogItem(type: string): AvailableCatalogItem | undefined {

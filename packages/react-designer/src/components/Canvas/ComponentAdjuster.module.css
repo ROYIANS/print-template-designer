@@ -35,6 +35,17 @@
   opacity: 1;
 }
 
+.editing {
+  user-select: text;
+}
+
+.editing::after {
+  border-style: solid;
+  border-color: color-mix(in oklch, var(--ptd-selection) 78%, var(--ptd-paper-0));
+  background: color-mix(in oklch, var(--ptd-selection) 3%, transparent);
+  opacity: 1;
+}
+
 .locked::after {
   border-style: dotted;
 }

@@ -32,6 +32,7 @@ class EditorStore {
   readonly effectiveTool: ReadonlySignal<EditorTool>
   readonly lastDrawingTool: Signal<DrawingComponentType>
   setActiveTool(tool: EditorTool): void
+  completeDrawnComponent(component: ComponentSchema, tool: DrawnComponentType): boolean
   setTemporaryHand(active: boolean): void
   syncExternal(template: TemplateSchema): void
   updateComponent(id: string, patch: Partial<ComponentSchema>, transient?: boolean): void
@@ -54,7 +55,7 @@ Tool types:
 
 ```ts
 type DrawingComponentType = 'RoyLine' | 'RoyRect' | 'RoyCircle' | 'RoyStar'
-type DrawnComponentType = 'RoySimpleText' | DrawingComponentType
+type DrawnComponentType = CreatableComponentType
 type EditorTool = 'select' | 'hand' | DrawnComponentType
 ```
 
@@ -88,7 +89,7 @@ import '@ptd/react-designer/styles.css'
 
 #### Persistent tools, temporary Hand and drawn creation
 
-- `activeTool` is the persistent user choice. `temporaryHand` is a UI-only Space override;
+- `activeTool` is the current user-selected tool. `temporaryHand` is a UI-only Space override;
   `effectiveTool` is `hand` only while that override is active and otherwise equals `activeTool`.
 - `lastDrawingTool` tracks only the four Shape subtypes. Select, Hand, Text and Space must not replace
   the remembered Shape used by the grouped Dock control.
@@ -96,13 +97,18 @@ import '@ptd/react-designer/styles.css'
   sets temporary Hand; keyup, window blur and hook cleanup clear it even if focus has since moved.
 - Hand pan sessions own only pointer/client origins and viewport scroll origins. Pointer move changes
   only `scrollLeft/scrollTop`; it does not clear selection, mutate Schema, call `onChange` or write history.
-- `RoySimpleText` and Shape catalog clicks activate persistent draw tools and create nothing immediately.
-  `RoyText` and other insert-mode entries retain click/native-drag insertion.
+- Every available catalog click only activates its draw tool and creates nothing immediately. The user
+  defines the frame by dragging on Paper; Sidebar click/native drag must not insert a centered component.
 - Draw preview is local Canvas state. A valid pointer-up runs geometry normalization/clamp and exactly
-  one `addComponent()`; preview movement, sub-4px client-space drags and every cancellation path create
-  no Schema, host emission or history node.
+  one `completeDrawnComponent()`; preview movement, sub-4px client-space drags and every cancellation
+  path create no Schema, host emission or history node and do not switch tools.
+- Shape tools (`RoyLine`, `RoyRect`, `RoyCircle`, `RoyStar`) remain active after successful creation.
+  Text, rich text, image, code and table tools are one-shot and return to Select. Newly created plain or
+  rich text enters direct editing immediately; other one-shot components remain selected for inspection.
+- QR frame geometry is always square. Other non-Shape tools accept normalized forward or reverse
+  rectangular frames; Shift constraints remain specific to closed Shape tools.
 - Pointer cancel, lost pointer capture, tool/effective-tool change and window blur must close the current
-  Pan/Draw session. Releasing temporary Space-Hand returns to the persistent Text/Shape tool without
+  Pan/Draw session. Releasing temporary Space-Hand returns to the previously selected creation tool without
   resurrecting the cancelled preview.
 - Shape menu keys are scoped: Arrow/Home/End navigate; Enter/Space choose; Escape closes only the menu.
   These keys must not bubble to object nudge, temporary Hand or global Escape handling.
@@ -133,6 +139,19 @@ import '@ptd/react-designer/styles.css'
 - The paper exposes an accessible name and supports both native pointer context-menu input and
   `Shift+F10` / the Context Menu key. Radix owns roving focus, Arrow navigation, Enter selection and
   Escape dismissal.
+- Main and nested context-menu portal content must be treated as editor-interactive targets. Designer
+  root pointer capture must not reclaim focus from them, and global editor shortcuts must yield to
+  Radix so submenu items remain pointer-clickable and keyboard-operable.
+
+#### Direct content editing
+
+- Empty rich text remains a valid semantic document such as `<p></p>`; product placeholders are
+  authoring-only UI and must never be persisted as component content.
+- The rich editor wrapper and its ProseMirror surface must fill the complete drawn component frame.
+  Entering a newly drawn empty rich-text component focuses the editor immediately, and clicking any
+  otherwise empty point inside the frame forwards focus to the contenteditable surface.
+- ProseMirror's trailing `<br>` in an empty paragraph must still expose the visual placeholder. The
+  placeholder disappears after input without changing the persisted HTML on its own.
 
 #### Manual pages and derived pagination
 
@@ -167,36 +186,38 @@ import '@ptd/react-designer/styles.css'
 
 ### 4. Validation & Error Matrix
 
-| Condition                                 | Required behavior                                                 |
-| ----------------------------------------- | ----------------------------------------------------------------- |
-| `value` is the exact last-emitted object  | No history reset                                                  |
-| `value` is a new external object          | Replace template; reset history baseline and selection            |
-| First user mutation then undo             | Restore initial `value`                                           |
-| Gesture emits many transient updates      | One final history entry                                           |
-| Gesture is cancelled                      | Restore the exact gesture-start value; add no history entry       |
-| Select/Text/Shape + Space keydown         | `effectiveTool=hand`; persistent tool/history/selection unchanged |
-| Space keyup, blur or cleanup              | Clear temporary Hand; restore exact persistent tool               |
-| Hand pointer drag                         | Change viewport scroll only; no host/history/selection mutation   |
-| Text/Shape tool activation                | UI state only; do not create a component                          |
-| Valid Text/Shape pointer-up               | One component, one host emission and one history entry            |
-| Short/cancelled/lost-capture draw         | Clear preview; no component/emission/history                      |
-| Shape menu Escape                         | Close menu; preserve active Shape tool                            |
-| Selection contains a locked component     | Destructive/structural command is a no-op                         |
-| Context click targets unselected object   | Select that object before rendering component commands            |
-| Context click targets selected group item | Preserve the existing multi-selection                             |
-| Context click targets blank paper         | Clear selection; expose page properties and positioned paste      |
-| `pasteAt` receives a multi-selection      | Preserve relative geometry; regenerate every id; one history      |
-| Switch an existing page                   | Change UI page only; clear local selection; no host/history       |
-| Add or duplicate a page                   | Insert after source; select new page; one host/history            |
-| Duplicate a page with groups              | Regenerate page, component and recursive child ids                |
-| Delete the only page                      | No-op; template always retains at least one manual page           |
-| Reorder around the active page            | Preserve active `page.id` and valid component selection           |
-| History removes the active page           | Select nearest valid page; never expose an invalid index          |
-| Structured `propValue` (array/object)     | Inspector is read-only; never coerce to string                    |
-| Host omits `styles.css` import            | Integration is invalid; UI styling is not guaranteed              |
-| Built CSS Module default export is `{}`   | Invalid package build; host elements receive no class names       |
-| Host omits a peer dependency              | Workspace/install validation must fail before release             |
-| App build overlaps package `clean`        | Invalid verification order; rerun sequentially                    |
+| Condition                                 | Required behavior                                                  |
+| ----------------------------------------- | ------------------------------------------------------------------ |
+| `value` is the exact last-emitted object  | No history reset                                                   |
+| `value` is a new external object          | Replace template; reset history baseline and selection             |
+| First user mutation then undo             | Restore initial `value`                                            |
+| Gesture emits many transient updates      | One final history entry                                            |
+| Gesture is cancelled                      | Restore the exact gesture-start value; add no history entry        |
+| Select/Text/Shape + Space keydown         | `effectiveTool=hand`; persistent tool/history/selection unchanged  |
+| Space keyup, blur or cleanup              | Clear temporary Hand; restore exact persistent tool                |
+| Hand pointer drag                         | Change viewport scroll only; no host/history/selection mutation    |
+| Text/Shape tool activation                | UI state only; do not create a component                           |
+| Valid Text/Shape pointer-up               | One component, one host emission and one history entry             |
+| Short/cancelled/lost-capture draw         | Clear preview; no component/emission/history                       |
+| Shape menu Escape                         | Close menu; preserve active Shape tool                             |
+| Selection contains a locked component     | Destructive/structural command is a no-op                          |
+| Context click targets unselected object   | Select that object before rendering component commands             |
+| Context click targets selected group item | Preserve the existing multi-selection                              |
+| Context click targets blank paper         | Clear selection; expose page properties and positioned paste       |
+| Pointer enters a context submenu          | Preserve Radix focus; allow submenu item click and keyboard select |
+| Newly drawn rich text has empty HTML      | Focus full-frame editor; type without Inspector/source workaround  |
+| `pasteAt` receives a multi-selection      | Preserve relative geometry; regenerate every id; one history       |
+| Switch an existing page                   | Change UI page only; clear local selection; no host/history        |
+| Add or duplicate a page                   | Insert after source; select new page; one host/history             |
+| Duplicate a page with groups              | Regenerate page, component and recursive child ids                 |
+| Delete the only page                      | No-op; template always retains at least one manual page            |
+| Reorder around the active page            | Preserve active `page.id` and valid component selection            |
+| History removes the active page           | Select nearest valid page; never expose an invalid index           |
+| Structured `propValue` (array/object)     | Inspector is read-only; never coerce to string                     |
+| Host omits `styles.css` import            | Integration is invalid; UI styling is not guaranteed               |
+| Built CSS Module default export is `{}`   | Invalid package build; host elements receive no class names        |
+| Host omits a peer dependency              | Workspace/install validation must fail before release              |
+| App build overlaps package `clean`        | Invalid verification order; rerun sequentially                     |
 
 ### 5. Good / Base / Bad Cases
 
@@ -234,7 +255,11 @@ import '@ptd/react-designer/styles.css'
   Module class maps such as `Designer_designer`.
 - Host build assertion: peer dependencies resolve and `@ptd/react-designer/styles.css` imports.
 - Browser assertion: right-click target resolution, blank/component command sets, locked disabled
-  states, positioned paste + one-step Undo, layer submenu and `Shift+F10` keyboard entry all work.
+  states, positioned paste + one-step Undo, clickable layer submenu and `Shift+F10` keyboard entry
+  all work without Designer root focus capture dismissing a menu.
+- Rich-text assertion: sanitized `<p></p>` remains valid; an empty editor fills the drawn frame,
+  focuses on creation and accepts input from any point inside the frame without persisting placeholder
+  text.
 - Verification ordering: finish the designer package build before starting the host build.
 
 ### 7. Wrong vs Correct

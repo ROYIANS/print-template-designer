@@ -6,11 +6,11 @@ React + Vite 的独立设计器 Host，也是当前 GHCR Web 镜像的入口。
 
 `src/App.tsx` 只做三件事：
 
-1. 在本地 `useState` 中持有一份示例 `TemplateSchema`。
+1. 在本地 `useState` 中持有一份单页 A4 空白 `TemplateSchema`。
 2. 以 `value` / `onChange` 方式渲染 `@ptd/react-designer`。
 3. 提供填满浏览器视口的 Host 布局。
 
-因此刷新页面会恢复示例模板。这里暂时没有模板列表、登录、保存提示、版本历史、冲突处理或 API 请求；`apps/server` 也不是启动 Web 的依赖。
+因此刷新页面会恢复一张没有组件的空白页面。这里暂时没有模板列表、登录、保存提示、版本历史、冲突处理或 API 请求；`apps/server` 也不是启动 Web 的依赖。
 
 ## 本地运行
 

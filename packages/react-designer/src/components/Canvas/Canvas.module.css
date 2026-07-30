@@ -40,11 +40,7 @@
   line-height: var(--canvas-line-height);
 }
 
-.canvas[data-effective-tool='RoySimpleText'],
-.canvas[data-effective-tool='RoyLine'],
-.canvas[data-effective-tool='RoyRect'],
-.canvas[data-effective-tool='RoyCircle'],
-.canvas[data-effective-tool='RoyStar'] {
+.canvas:not([data-effective-tool='select']):not([data-effective-tool='hand']) {
   cursor: crosshair;
 }
 
@@ -100,7 +96,13 @@
   );
 }
 
-.drawPreview[data-tool='RoySimpleText'] {
+.drawPreview[data-tool='RoySimpleText'],
+.drawPreview[data-tool='RoyText'],
+.drawPreview[data-tool='RoySimpleTable'],
+.drawPreview[data-tool='RoyComplexTable'],
+.drawPreview[data-tool='RoyImage'],
+.drawPreview[data-tool='RoyQRCode'],
+.drawPreview[data-tool='RoyBarCode'] {
   border-style: dashed;
   background: color-mix(in oklch, var(--ptd-surface-raised) 72%, transparent);
 }

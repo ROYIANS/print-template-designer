@@ -4,7 +4,6 @@ import {
   useRef,
   useState,
   type CSSProperties,
-  type DragEvent,
   type KeyboardEvent,
   type MouseEvent,
   type PointerEvent as ReactPointerEvent,
@@ -12,13 +11,10 @@ import {
 import { useSignals } from '@preact/signals-react/runtime'
 import { getPageDimensions, mmToPx } from '@ptd/core'
 import {
-  createComponentSchema,
   createDrawnComponentSchema,
   drawnComponentGeometry,
-  findAvailableCatalogItem,
   isDrawnComponentType,
   isDrawingGestureLongEnough,
-  PTD_COMPONENT_MIME,
   type ComponentPoint,
   type DrawnComponentType,
   type ShapeDrawGeometry,
@@ -114,35 +110,6 @@ export function Canvas({ onOpenInspector }: { onOpenInspector: () => void }) {
     window.addEventListener('blur', cancelInteractions)
     return () => window.removeEventListener('blur', cancelInteractions)
   }, [cancelDrawing, cancelPanning])
-
-  const handleDragOver = useCallback((event: DragEvent<HTMLDivElement>) => {
-    event.preventDefault()
-    event.dataTransfer.dropEffect = 'copy'
-  }, [])
-
-  const handleDrop = useCallback(
-    (event: DragEvent<HTMLDivElement>) => {
-      event.preventDefault()
-      const componentType =
-        event.dataTransfer.getData(PTD_COMPONENT_MIME) ||
-        event.dataTransfer.getData('componentType')
-      const item = findAvailableCatalogItem(componentType)
-      const editor = editorRef.current
-      if (!item || item.creationMode !== 'insert' || !editor) return
-      const rect = editor.getBoundingClientRect()
-      store.addComponent(
-        createComponentSchema(
-          item.type,
-          {
-            x: (event.clientX - rect.left) / scale,
-            y: (event.clientY - rect.top) / scale,
-          },
-          { width: pageWidthPx, height: pageHeightPx },
-        ),
-      )
-    },
-    [pageHeightPx, pageWidthPx, scale, store],
-  )
 
   const handleMouseDown = useCallback(
     (event: MouseEvent<HTMLDivElement>) => {
@@ -354,7 +321,7 @@ export function Canvas({ onOpenInspector }: { onOpenInspector: () => void }) {
         { width: pageWidthPx, height: pageHeightPx },
         event.shiftKey,
       )
-      if (component) store.addComponent(component)
+      if (component) store.completeDrawnComponent(component, current.tool)
     },
     [cancelDrawing, canvasPoint, pageHeightPx, pageWidthPx, store],
   )
@@ -475,8 +442,6 @@ export function Canvas({ onOpenInspector }: { onOpenInspector: () => void }) {
             tabIndex={0}
             onContextMenu={handleContextMenu}
             onKeyDown={handleContextMenuKeyDown}
-            onDragOver={handleDragOver}
-            onDrop={handleDrop}
             onMouseDown={handleMouseDown}
             onPointerDown={handleDrawPointerDown}
             onPointerMove={handleDrawPointerMove}
@@ -489,6 +454,7 @@ export function Canvas({ onOpenInspector }: { onOpenInspector: () => void }) {
                 key={schema.id}
                 schema={schema}
                 isActive={selectedIds.includes(schema.id)}
+                isEditing={store.editingComponentId.value === schema.id}
                 editorRef={editorRef}
                 scale={scale}
                 onMove={handleMove}

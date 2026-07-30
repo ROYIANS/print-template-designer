@@ -10,6 +10,13 @@ import {
 import { useSignals } from '@preact/signals-react/runtime'
 import { getPageDimensions, pxToMm, type ComponentSchema, type ComponentStyle } from '@ptd/core'
 import { RiAddLine, RiLandscapeLine, RiRuler2Line, RiSubtractLine } from '@remixicon/react'
+import {
+  CJK_FONT_FAMILY_OPTIONS,
+  composeFontFamily,
+  DEFAULT_CJK_FONT_FAMILY,
+  LATIN_FONT_FAMILY_OPTIONS,
+  resolveFontFamily,
+} from '../../config/typography'
 import { useEditorStore } from '../../state'
 import { PanelBody, PanelFooter, PanelHeader, PanelRoot } from '../Panel'
 import {
@@ -145,13 +152,6 @@ const NUMBER_FIELDS: Array<{
   },
   { key: 'fontSize', label: '字号', unit: 'px', min: 1 },
   { key: 'borderWidth', label: '边框', unit: 'px', min: 0 },
-]
-
-const FONT_OPTIONS: Array<[string, string]> = [
-  ["'Noto Serif SC', 'Noto Serif CJK SC', 'Source Han Serif SC', serif", 'Noto Serif SC'],
-  ["'Sarasa UI SC', 'Sarasa Gothic SC', 'Microsoft YaHei UI', sans-serif", 'Sarasa UI SC'],
-  ["'Outfit', 'Outfit Variable', sans-serif", 'Outfit'],
-  ["'Microsoft YaHei UI', 'PingFang SC', sans-serif", '系统无衬线'],
 ]
 
 const CONTENT_COMPONENTS = new Set<ComponentSchema['component']>([
@@ -327,10 +327,14 @@ function SingleInspector({ component }: { component: ComponentSchema }) {
   const showsBorderStyle = BORDER_STYLE_COMPONENTS.has(component.component)
   const showsRadius = RADIUS_COMPONENTS.has(component.component)
   const showsAppearance = showsTextColor || showsBackground || showsBorder
-  const fontValue = text(component.style.fontFamily, FONT_OPTIONS[0]![0])
-  const fontOptions = FONT_OPTIONS.some(([value]) => value === fontValue)
-    ? FONT_OPTIONS
-    : [[fontValue, primaryFontName(fontValue)] as [string, string], ...FONT_OPTIONS]
+  const fontValue = text(component.style.fontFamily, DEFAULT_CJK_FONT_FAMILY)
+  const fontSelection = resolveFontFamily(fontValue)
+  const cjkFontOptions = fontSelection.recognized
+    ? CJK_FONT_FAMILY_OPTIONS
+    : [
+        [fontSelection.cjk, primaryFontName(fontSelection.cjk)] as [string, string],
+        ...CJK_FONT_FAMILY_OPTIONS,
+      ]
 
   return (
     <InspectorShell
@@ -430,7 +434,7 @@ function SingleInspector({ component }: { component: ComponentSchema }) {
             <NumberInput
               label="字号"
               value={numeric(component.style.fontSize)}
-              unit="px"
+              unit="pt"
               min={1}
               disabled={locked}
               onStart={start}
@@ -439,13 +443,26 @@ function SingleInspector({ component }: { component: ComponentSchema }) {
               onValue={(value) => updateStyle('fontSize', value)}
             />
             <SelectInput
-              label="字体"
-              value={fontValue}
+              label="中文字体"
+              value={fontSelection.cjk}
               disabled={locked}
-              options={fontOptions}
+              options={cjkFontOptions}
               onStart={start}
               onFinish={finish}
-              onValue={(value) => updateStyle('fontFamily', value)}
+              onValue={(value) =>
+                updateStyle('fontFamily', composeFontFamily(value, fontSelection.latin))
+              }
+            />
+            <SelectInput
+              label="西文字体"
+              value={fontSelection.latin}
+              disabled={locked}
+              options={LATIN_FONT_FAMILY_OPTIONS}
+              onStart={start}
+              onFinish={finish}
+              onValue={(value) =>
+                updateStyle('fontFamily', composeFontFamily(fontSelection.cjk, value))
+              }
             />
             {showsAlignment && (
               <>
@@ -631,7 +648,7 @@ function BatchInspector({ components }: { components: ComponentSchema[] }) {
                 label="字号"
                 value={fontSize.mixed ? null : numeric(fontSize.value)}
                 placeholder={fontSize.mixed ? '混合' : '未设置'}
-                unit="px"
+                unit="pt"
                 min={1}
                 disabled={locked}
                 onStart={start}

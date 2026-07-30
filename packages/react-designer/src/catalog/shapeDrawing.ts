@@ -1,6 +1,7 @@
 import type { ComponentSchema } from '@ptd/core'
 import {
   createComponentSchema,
+  isDrawingComponentType,
   type ComponentPoint,
   type DrawnComponentType,
   type DrawingComponentType,
@@ -97,9 +98,12 @@ export function drawnComponentGeometry(
   bounds: PageBounds,
   constrain = false,
 ): ShapeDrawGeometry | null {
-  return type === 'RoySimpleText'
-    ? textFrameDrawGeometry(start, end, bounds)
-    : shapeDrawGeometry(type, start, end, bounds, constrain)
+  if (type === 'RoyQRCode') {
+    return shapeDrawGeometry('RoyRect', start, end, bounds, true)
+  }
+  return isDrawingComponentType(type)
+    ? shapeDrawGeometry(type, start, end, bounds, constrain)
+    : textFrameDrawGeometry(start, end, bounds)
 }
 
 export function createDrawnComponentSchema(

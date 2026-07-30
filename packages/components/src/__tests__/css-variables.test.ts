@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { applyCssVars } from '../base/css-variables'
+import { applyCssVars, componentStyleToCssVariables } from '../base/css-variables'
 import type { ComponentStyle } from '@ptd/core'
 
 const baseStyle: ComponentStyle = {
@@ -59,6 +59,17 @@ describe('applyCssVars', () => {
   it('sets --ptd-font-size in pt', () => {
     applyCssVars(el, baseStyle)
     expect(el.style.getPropertyValue('--ptd-font-size')).toBe('14pt')
+  })
+
+  it('uses the same computed variable map as authoring overlays', () => {
+    const variables = componentStyleToCssVariables(baseStyle)
+    applyCssVars(el, baseStyle)
+
+    expect(variables['--ptd-font-size']).toBe('14pt')
+    expect(variables['--ptd-font-family']).toBe('Arial')
+    for (const [property, value] of Object.entries(variables)) {
+      expect(el.style.getPropertyValue(property)).toBe(value)
+    }
   })
 
   it('sets --ptd-font-family', () => {

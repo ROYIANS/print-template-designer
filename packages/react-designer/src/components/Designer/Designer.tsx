@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type PointerEvent } from 'react'
 import type { TemplateSchema } from '@ptd/core'
 import { createEditorStore, EditorStoreProvider } from '../../state'
-import { isEditableTarget, useEditorKeyboard } from '../../hooks/useEditorKeyboard'
+import { isEditorInteractiveTarget, useEditorKeyboard } from '../../hooks/useEditorKeyboard'
 import { useWorkspaceLayout } from '../../hooks/useWorkspaceLayout'
 import { AppBar } from '../AppBar'
 import { Canvas } from '../Canvas'
@@ -46,7 +46,9 @@ export function Designer({ value, onChange, onSave, onLoad }: DesignerProps) {
         data-ptd-region="designer"
         tabIndex={-1}
         onPointerDownCapture={(event: PointerEvent<HTMLDivElement>) => {
-          if (!isEditableTarget(event.target)) rootRef.current?.focus({ preventScroll: true })
+          if (!isEditorInteractiveTarget(event.target)) {
+            rootRef.current?.focus({ preventScroll: true })
+          }
         }}
       >
         <AppBar onSave={onSave} onLoad={onLoad} />

@@ -10,7 +10,6 @@ import {
   type ReactNode,
 } from 'react'
 import { useSignals } from '@preact/signals-react/runtime'
-import { getPageDimensions } from '@ptd/core'
 import * as Tooltip from '@radix-ui/react-tooltip'
 import {
   RiAddLine,
@@ -34,13 +33,11 @@ import {
 import {
   catalogGroups,
   componentCatalog,
-  createComponentSchema,
   findAvailableCatalogItem,
   frequentCatalogItems,
   isAvailableCatalogItem,
   isDrawnComponentType,
   isDrawingComponentType,
-  PTD_COMPONENT_MIME,
   searchComponentCatalog,
   type AvailableCatalogItem,
   type CreatableComponentType,
@@ -72,7 +69,10 @@ const RESOURCE_PANELS = [
   icon: typeof RiPagesLine
 }>
 
-const INSERT_TOOL_TYPES = ['RoyImage', 'RoySimpleTable'] satisfies readonly CreatableComponentType[]
+const DOCK_COMPONENT_TOOL_TYPES = [
+  'RoyImage',
+  'RoySimpleTable',
+] satisfies readonly CreatableComponentType[]
 
 const DRAW_TOOL_TYPES = [
   'RoyLine',
@@ -86,8 +86,7 @@ const PTD_PAGE_MIME = 'application/x-ptd-page'
 export function Sidebar({ mode, activePanel, open, onTogglePanel, onResizeStart }: SidebarProps) {
   useSignals()
   const store = useEditorStore()
-  const page = getPageDimensions(store.pageConfig.value)
-  const insertTools = INSERT_TOOL_TYPES.map(findAvailableCatalogItem).filter(
+  const dockComponentTools = DOCK_COMPONENT_TOOL_TYPES.map(findAvailableCatalogItem).filter(
     (item): item is AvailableCatalogItem => Boolean(item),
   )
   const textTool = findAvailableCatalogItem('RoySimpleText')
@@ -95,19 +94,7 @@ export function Sidebar({ mode, activePanel, open, onTogglePanel, onResizeStart 
   const effectiveTool = store.effectiveTool.value
 
   const create = (item: AvailableCatalogItem) => {
-    if (item.creationMode === 'draw') {
-      if (isDrawnComponentType(item.type)) store.setActiveTool(item.type)
-      return
-    }
-    store.setActiveTool('select')
-    const offset = (store.components.value.length % 6) * 12
-    const component = createComponentSchema(
-      item.type,
-      { x: page.width / 2 + offset, y: page.height / 2 + offset },
-      page,
-    )
-    store.addComponent(component)
-    store.requestComponentReveal(component.id)
+    if (isDrawnComponentType(item.type)) store.setActiveTool(item.type)
   }
 
   return (
@@ -149,10 +136,16 @@ export function Sidebar({ mode, activePanel, open, onTogglePanel, onResizeStart 
               </DockButton>
             )}
             <ShapeToolGroup />
-            {insertTools.map((item) => {
+            {dockComponentTools.map((item) => {
               const Icon = item.icon
               return (
-                <DockButton key={item.type} label={`添加${item.name}`} onClick={() => create(item)}>
+                <DockButton
+                  key={item.type}
+                  label={`${item.name}工具`}
+                  stateKind="tool"
+                  pressed={effectiveTool === item.type}
+                  onClick={() => create(item)}
+                >
                   <Icon />
                 </DockButton>
               )
@@ -608,7 +601,6 @@ function ComponentsPanel({ onClose }: { onClose: () => void }) {
   const store = useEditorStore()
   const [query, setQuery] = useState('')
   const [plannedOpen, setPlannedOpen] = useState(false)
-  const page = getPageDimensions(store.pageConfig.value)
   const filtered = useMemo(() => searchComponentCatalog(query), [query])
   const effectiveTool = store.effectiveTool.value
   const searchActive = query.trim().length > 0
@@ -622,25 +614,7 @@ function ComponentsPanel({ onClose }: { onClose: () => void }) {
   )
 
   const create = (item: AvailableCatalogItem) => {
-    if (item.creationMode === 'draw') {
-      if (isDrawnComponentType(item.type)) store.setActiveTool(item.type)
-      return
-    }
-    store.setActiveTool('select')
-    const offset = (store.components.value.length % 6) * 12
-    const component = createComponentSchema(
-      item.type,
-      { x: page.width / 2 + offset, y: page.height / 2 + offset },
-      page,
-    )
-    store.addComponent(component)
-    store.requestComponentReveal(component.id)
-  }
-  const drag = (item: AvailableCatalogItem) => (event: DragEvent<HTMLButtonElement>) => {
-    event.dataTransfer.effectAllowed = 'copy'
-    event.dataTransfer.setData(PTD_COMPONENT_MIME, item.type)
-    event.dataTransfer.setData('componentType', item.type)
-    event.dataTransfer.setData('text/plain', item.name)
+    if (isDrawnComponentType(item.type)) store.setActiveTool(item.type)
   }
 
   return (
@@ -679,7 +653,6 @@ function ComponentsPanel({ onClose }: { onClose: () => void }) {
                       item={item}
                       active={effectiveTool === item.type}
                       onCreate={() => create(item)}
-                      onDragStart={item.creationMode === 'insert' ? drag(item) : undefined}
                     />
                   ))}
                 </div>
@@ -708,9 +681,8 @@ function ComponentsPanel({ onClose }: { onClose: () => void }) {
                     key={item.id}
                     item={item}
                     variant="tile"
-                    active={item.creationMode === 'draw' && effectiveTool === item.type}
+                    active={effectiveTool === item.type}
                     onCreate={() => create(item)}
-                    onDragStart={item.creationMode === 'insert' ? drag(item) : undefined}
                   />
                 ))}
               </div>
@@ -733,9 +705,8 @@ function ComponentsPanel({ onClose }: { onClose: () => void }) {
                           key={item.id}
                           item={item}
                           variant="tile"
-                          active={item.creationMode === 'draw' && effectiveTool === item.type}
+                          active={effectiveTool === item.type}
                           onCreate={() => create(item)}
-                          onDragStart={item.creationMode === 'insert' ? drag(item) : undefined}
                         />
                       ))}
                     </div>
@@ -779,7 +750,7 @@ function ComponentsPanel({ onClose }: { onClose: () => void }) {
           </div>
         )}
       </PanelBody>
-      <PanelFooter>绘制类先选工具；插入类可点击或拖入画布</PanelFooter>
+      <PanelFooter>选择组件工具后，在纸张上拖动绘制</PanelFooter>
     </PanelRoot>
   )
 }
@@ -815,13 +786,11 @@ function CatalogAvailableButton({
   variant,
   active,
   onCreate,
-  onDragStart,
 }: {
   item: AvailableCatalogItem
   variant: 'tile' | 'shape'
   active: boolean
   onCreate: () => void
-  onDragStart?: (event: DragEvent<HTMLButtonElement>) => void
 }) {
   const Icon = item.icon
   return (
@@ -831,9 +800,7 @@ function CatalogAvailableButton({
           type="button"
           className={variant === 'shape' ? styles.shapePreset : styles.catalogTile}
           data-active-tool={active || undefined}
-          draggable={Boolean(onDragStart)}
           onClick={onCreate}
-          onDragStart={onDragStart}
           aria-label={`${item.name}：${item.description}`}
         >
           <Icon aria-hidden="true" />
@@ -859,12 +826,10 @@ function CatalogSearchItem({
   item,
   active,
   onCreate,
-  onDragStart,
 }: {
   item: AvailableCatalogItem
   active: boolean
   onCreate: () => void
-  onDragStart?: (event: DragEvent<HTMLButtonElement>) => void
 }) {
   const Icon = item.icon
   return (
@@ -872,9 +837,7 @@ function CatalogSearchItem({
       type="button"
       className={styles.catalogSearchItem}
       data-active-tool={active || undefined}
-      draggable={Boolean(onDragStart)}
       onClick={onCreate}
-      onDragStart={onDragStart}
       aria-label={`${item.name}：${item.description}`}
     >
       <Icon aria-hidden="true" />

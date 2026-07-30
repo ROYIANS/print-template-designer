@@ -23,6 +23,7 @@ const CSS = `
 .ptd-simple-text__inner {
   width: 100%;
   height: 100%;
+  box-sizing: border-box;
   display: flex;
   word-break: break-all;
   justify-content: var(--ptd-justify-content);
@@ -43,7 +44,9 @@ const CSS = `
 }
 
 .ptd-text__inner {
+  width: 100%;
   height: 100%;
+  box-sizing: border-box;
   padding: var(--ptd-padding);
   line-height: var(--ptd-line-height);
   letter-spacing: var(--ptd-letter-spacing);
@@ -65,9 +68,26 @@ const CSS = `
   overflow: hidden;
 }
 
-.ptd-text__inner p {
+.ptd-text__inner p,
+.ptd-text__inner h1,
+.ptd-text__inner h2,
+.ptd-text__inner h3,
+.ptd-text__inner h4 {
   margin-block-start: 0;
   margin-block-end: 0;
+}
+
+.ptd-text__inner ul,
+.ptd-text__inner ol {
+  margin-block-start: 0;
+  margin-block-end: 0;
+  padding-inline-start: 1.5em;
+}
+
+.ptd-text__inner blockquote {
+  margin-block-start: 0;
+  margin-block-end: 0;
+  padding-inline-start: 0.8em;
 }
 
 .ptd-line {

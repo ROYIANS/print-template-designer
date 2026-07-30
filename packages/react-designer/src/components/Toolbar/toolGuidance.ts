@@ -1,63 +1,15 @@
-import type { DrawnComponentType } from '../../catalog'
+import { findAvailableCatalogItem, isDrawingComponentType } from '../../catalog'
 import type { EditorTool } from '../../state'
 
 export interface ToolGuidance {
   tool: Exclude<EditorTool, 'select'>
-  kind: 'DRAW' | 'TEXT' | 'HAND'
+  kind: 'DRAW' | 'TEXT' | 'FRAME' | 'HAND'
   name: string
   instruction: string
   shiftHint: string | null
   secondaryHint: { key: string; label: string } | null
   escapeHint: string
 }
-
-const DRAWING_TOOL_GUIDANCE = {
-  RoySimpleText: {
-    tool: 'RoySimpleText',
-    kind: 'TEXT',
-    name: '文本框工具',
-    instruction: '拖动画布创建文本框',
-    shiftHint: null,
-    secondaryHint: null,
-    escapeHint: '取消',
-  },
-  RoyLine: {
-    tool: 'RoyLine',
-    kind: 'DRAW',
-    name: '直线工具',
-    instruction: '拖动画布创建',
-    shiftHint: null,
-    secondaryHint: null,
-    escapeHint: '取消',
-  },
-  RoyRect: {
-    tool: 'RoyRect',
-    kind: 'DRAW',
-    name: '矩形工具',
-    instruction: '拖动画布创建',
-    shiftHint: '等比',
-    secondaryHint: null,
-    escapeHint: '取消',
-  },
-  RoyCircle: {
-    tool: 'RoyCircle',
-    kind: 'DRAW',
-    name: '椭圆工具',
-    instruction: '拖动画布创建',
-    shiftHint: '等比',
-    secondaryHint: null,
-    escapeHint: '取消',
-  },
-  RoyStar: {
-    tool: 'RoyStar',
-    kind: 'DRAW',
-    name: '星形工具',
-    instruction: '拖动画布创建',
-    shiftHint: '等比',
-    secondaryHint: null,
-    escapeHint: '取消',
-  },
-} satisfies Record<DrawnComponentType, ToolGuidance>
 
 export function getToolGuidance(tool: EditorTool, temporaryHand = false): ToolGuidance | null {
   if (tool === 'select') return null
@@ -74,5 +26,20 @@ export function getToolGuidance(tool: EditorTool, temporaryHand = false): ToolGu
       escapeHint: '选择',
     }
   }
-  return DRAWING_TOOL_GUIDANCE[tool]
+
+  const item = findAvailableCatalogItem(tool)
+  if (!item) return null
+  const isText = tool === 'RoySimpleText' || tool === 'RoyText'
+  const isShape = isDrawingComponentType(tool)
+  const name = tool === 'RoySimpleText' ? '文本框工具' : `${item.name}工具`
+
+  return {
+    tool,
+    kind: isText ? 'TEXT' : isShape ? 'DRAW' : 'FRAME',
+    name,
+    instruction: `拖动画布创建${isText ? '文本框' : item.name}`,
+    shiftHint: isShape && tool !== 'RoyLine' ? '等比' : null,
+    secondaryHint: null,
+    escapeHint: '取消',
+  }
 }

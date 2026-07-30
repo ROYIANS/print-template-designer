@@ -9,7 +9,12 @@ import {
 } from '@ptd/core'
 import { getComponentRotatedStyle } from '../utils'
 import { createGroupMetrics, getAbsoluteGroupChildren } from '../utils/groupGeometry'
-import type { DrawingComponentType } from '../catalog'
+import {
+  isDrawnComponentType,
+  isDrawingComponentType,
+  type DrawingComponentType,
+  type DrawnComponentType,
+} from '../catalog'
 
 const HISTORY_LIMIT = 20
 const PASTE_OFFSET = 12
@@ -19,7 +24,8 @@ export type Distribution = 'horizontal' | 'vertical'
 export type LayerAction = 'forward' | 'backward' | 'front' | 'back'
 export type GuideAxis = 'x' | 'y'
 export type GuideColor = 'cobalt' | 'vermilion' | 'emerald' | 'amber'
-export type EditorTool = 'select' | 'hand' | 'RoySimpleText' | DrawingComponentType
+export type EditorTool = 'select' | 'hand' | DrawnComponentType
+export type DirectlyEditableComponentType = 'RoySimpleText' | 'RoyText'
 
 export interface CanvasGuide {
   id: string
@@ -60,7 +66,7 @@ function number(value: unknown): number {
 }
 
 function isShapeDrawingTool(tool: EditorTool): tool is DrawingComponentType {
-  return tool === 'RoyLine' || tool === 'RoyRect' || tool === 'RoyCircle' || tool === 'RoyStar'
+  return isDrawingComponentType(tool)
 }
 
 function clamp(value: number, min: number, max: number): number {
@@ -112,6 +118,7 @@ export class EditorStore {
   readonly lastDrawingTool = signal<DrawingComponentType>('RoyRect')
   readonly history = signal<TemplateSchema[]>([])
   readonly historyIndex = signal(0)
+  readonly editingComponentId = signal<string | null>(null)
 
   readonly currentPage = computed(() => this.template.value.pages[this.currentPageIndex.value])
   readonly components = computed(() => this.currentPage.value?.componentData ?? [])
@@ -161,6 +168,7 @@ export class EditorStore {
     this.selectedGuideId.value = null
     this.history.value = [template]
     this.historyIndex.value = 0
+    this.editingComponentId.value = null
     this.gestureStart = null
   }
 
@@ -230,6 +238,31 @@ export class EditorStore {
     this.selectedIds.value = this.selectedIds.value.includes(id)
       ? this.selectedIds.value.filter((selectedId) => selectedId !== id)
       : [...this.selectedIds.value, id]
+  }
+
+  startContentEditing(id: string): boolean {
+    const component = this.components.value.find((item) => item.id === id)
+    if (
+      !component ||
+      component.isLock ||
+      (component.component !== 'RoySimpleText' && component.component !== 'RoyText')
+    )
+      return false
+    this.selectComponent(id)
+    this.activeTool.value = 'select'
+    this.temporaryHand.value = false
+    this.editingComponentId.value = id
+    return true
+  }
+
+  commitContentEditing(id: string, propValue: string): void {
+    if (this.editingComponentId.value !== id) return
+    this.editingComponentId.value = null
+    this.updateComponent(id, { propValue })
+  }
+
+  cancelContentEditing(id: string): void {
+    if (this.editingComponentId.value === id) this.editingComponentId.value = null
   }
 
   selectComponents(ids: string[]): void {
@@ -354,6 +387,24 @@ export class EditorStore {
     this.selectComponent(component.id)
   }
 
+  completeDrawnComponent(component: ComponentSchema, tool: DrawnComponentType): boolean {
+    if (
+      this.effectiveTool.value !== tool ||
+      component.component !== tool ||
+      !isDrawnComponentType(component.component)
+    )
+      return false
+
+    this.addComponent(component)
+    if (isShapeDrawingTool(tool)) return true
+
+    this.setActiveTool('select')
+    if (tool === 'RoySimpleText' || tool === 'RoyText') {
+      this.startContentEditing(component.id)
+    }
+    return true
+  }
+
   requestComponentReveal(id: string): void {
     if (!this.components.value.some((component) => component.id === id)) return
     this.componentToReveal.value = id
@@ -432,6 +483,9 @@ export class EditorStore {
   deleteSelected(): void {
     const ids = new Set(this.selectedIds.value)
     if (ids.size === 0 || this.hasLockedSelection()) return
+    if (this.editingComponentId.value && ids.has(this.editingComponentId.value)) {
+      this.editingComponentId.value = null
+    }
     this.updateCurrentPage((components) => components.filter((component) => !ids.has(component.id)))
     this.clearSelection()
   }
@@ -498,6 +552,9 @@ export class EditorStore {
   setLock(locked: boolean): void {
     const ids = new Set(this.selectedIds.value)
     if (ids.size === 0) return
+    if (locked && this.editingComponentId.value && ids.has(this.editingComponentId.value)) {
+      this.editingComponentId.value = null
+    }
     this.updateCurrentPage((components) =>
       components.map((component) =>
         ids.has(component.id) && Boolean(component.isLock) !== locked
@@ -702,12 +759,14 @@ export class EditorStore {
 
   undo(): void {
     if (!this.canUndo.value) return
+    this.editingComponentId.value = null
     this.historyIndex.value -= 1
     this.restoreHistory()
   }
 
   redo(): void {
     if (!this.canRedo.value) return
+    this.editingComponentId.value = null
     this.historyIndex.value += 1
     this.restoreHistory()
   }
@@ -783,6 +842,7 @@ export class EditorStore {
 
   private resetPageSession(): void {
     this.selectedIds.value = []
+    this.editingComponentId.value = null
     this.componentToReveal.value = null
     this.guides.value = []
     this.selectedGuideId.value = null

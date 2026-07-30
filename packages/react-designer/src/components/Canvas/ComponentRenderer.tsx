@@ -1,4 +1,5 @@
 import { useEffect, useRef, type CSSProperties } from 'react'
+import { useSignals } from '@preact/signals-react/runtime'
 import type { ComponentSchema } from '@ptd/core'
 import {
   RoyBarCode,
@@ -15,6 +16,8 @@ import {
   type BaseComponent,
 } from '@ptd/components'
 import { getScaledGroupChildren } from '../../utils/groupGeometry'
+import { useEditorStore } from '../../state'
+import { ContentEditor, isDirectlyEditableComponent } from '../ContentEditor/ContentEditor'
 import styles from './ComponentRenderer.module.css'
 
 type ComponentConstructor = new (schema: ComponentSchema) => BaseComponent
@@ -39,7 +42,12 @@ interface ComponentRendererProps {
 }
 
 export function ComponentRenderer({ schema }: ComponentRendererProps) {
+  useSignals()
+  const store = useEditorStore()
   if (schema.component === 'RoyGroup') return <GroupRenderer schema={schema} />
+  if (store.editingComponentId.value === schema.id && isDirectlyEditableComponent(schema)) {
+    return <ContentEditor schema={schema} />
+  }
   return <VanillaRenderer schema={schema} />
 }
 
