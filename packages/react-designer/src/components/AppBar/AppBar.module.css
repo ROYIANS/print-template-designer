@@ -461,6 +461,94 @@
   }
 }
 
+@container (max-width: 480px) {
+  .topBar {
+    height: var(--ptd-app-bar-height-compact);
+    gap: 6px;
+    padding-inline: 8px;
+  }
+
+  .legacyLogo {
+    width: 19px;
+    height: 19px;
+  }
+
+  .wordmark {
+    font-size: 14px;
+  }
+
+  .actions {
+    gap: var(--ptd-space-1);
+  }
+
+  .quietAction,
+  .primaryAction,
+  .userPlaceholder,
+  .mobileMenuTrigger {
+    min-width: 32px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .quietAction svg,
+  .primaryAction svg,
+  .userPlaceholder svg,
+  .mobileMenuTrigger svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .mobileCategories button {
+    min-width: auto;
+    height: 32px;
+    padding-inline: 7px;
+  }
+
+  .menuPanelInner {
+    padding: 8px 8px 12px;
+  }
+
+  .commandItem {
+    min-width: 168px;
+    min-height: 60px;
+    padding: 8px 10px;
+  }
+}
+
+/*
+ * Phone-host fallback: keep the compact contract when a coarse-pointer browser
+ * resolves the component query against a wider embedding container. The extra
+ * .topBar/.appBar specificity intentionally wins over the 40px coarse rule.
+ */
+@media (pointer: coarse) and (max-width: 480px) {
+  .topBar {
+    height: var(--ptd-app-bar-height-compact);
+  }
+
+  .topBar .quietAction,
+  .topBar .primaryAction,
+  .topBar .userPlaceholder,
+  .topBar .mobileMenuTrigger {
+    min-width: 32px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .topBar .quietAction svg,
+  .topBar .primaryAction svg,
+  .topBar .userPlaceholder svg,
+  .topBar .mobileMenuTrigger svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .appBar .mobileCategories button {
+    min-width: auto;
+    height: 32px;
+    padding-inline: 7px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .appBar,
   .menuPanel,

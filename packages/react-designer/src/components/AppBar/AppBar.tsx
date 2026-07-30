@@ -157,6 +157,7 @@ const APP_MENUS = [
 ] as const
 
 type AppMenuId = (typeof APP_MENUS)[number]['id']
+type InputModality = 'mouse' | 'touch' | 'keyboard'
 
 const CLOSE_DELAY = 120
 
@@ -168,6 +169,7 @@ export function AppBar({ onSave, onLoad }: AppBarProps) {
   const [activeMenuId, setActiveMenuId] = useState<AppMenuId>('file')
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const menuButtonRefs = useRef<Array<HTMLButtonElement | null>>([])
+  const inputModalityRef = useRef<InputModality>('keyboard')
   const activeMenu = APP_MENUS.find((menu) => menu.id === activeMenuId) ?? APP_MENUS[0]
 
   const cancelScheduledClose = () => {
@@ -190,6 +192,10 @@ export function AppBar({ onSave, onLoad }: AppBarProps) {
   const scheduleClose = () => {
     cancelScheduledClose()
     closeTimerRef.current = setTimeout(() => setIsExpanded(false), CLOSE_DELAY)
+  }
+
+  const handleMousePointer = (pointerType: string, action: () => void) => {
+    if (pointerType === 'mouse') action()
   }
 
   useEffect(() => {
@@ -227,10 +233,21 @@ export function AppBar({ onSave, onLoad }: AppBarProps) {
       className={styles.appBar}
       data-expanded={isExpanded}
       data-ptd-region="app-bar"
-      onMouseEnter={cancelScheduledClose}
-      onMouseLeave={scheduleClose}
+      onPointerDownCapture={(event) => {
+        inputModalityRef.current = event.pointerType === 'mouse' ? 'mouse' : 'touch'
+      }}
+      onPointerEnter={(event) => handleMousePointer(event.pointerType, cancelScheduledClose)}
+      onPointerLeave={(event) => handleMousePointer(event.pointerType, scheduleClose)}
       onBlurCapture={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) scheduleClose()
+        if (
+          inputModalityRef.current !== 'touch' &&
+          !event.currentTarget.contains(event.relatedTarget as Node | null)
+        ) {
+          scheduleClose()
+        }
+      }}
+      onKeyDownCapture={() => {
+        inputModalityRef.current = 'keyboard'
       }}
       onKeyDown={(event) => {
         if (event.key !== 'Escape') return
@@ -241,7 +258,11 @@ export function AppBar({ onSave, onLoad }: AppBarProps) {
       }}
     >
       <div className={styles.topBar}>
-        <div className={styles.brand} aria-label="Print Template Designer" onMouseEnter={closeMenu}>
+        <div
+          className={styles.brand}
+          aria-label="Print Template Designer"
+          onPointerEnter={(event) => handleMousePointer(event.pointerType, closeMenu)}
+        >
           <span className={styles.legacyLogo} aria-hidden="true" />
           <span className={styles.wordmark}>PTD</span>
           <span className={styles.productName}>打印模板设计器</span>
@@ -261,7 +282,9 @@ export function AppBar({ onSave, onLoad }: AppBarProps) {
               aria-expanded={isExpanded && activeMenuId === menu.id}
               aria-keyshortcuts={`Alt+${menu.mnemonic}`}
               accessKey={menu.mnemonic.toLowerCase()}
-              onMouseEnter={() => openMenu(menu.id)}
+              onPointerEnter={(event) =>
+                handleMousePointer(event.pointerType, () => openMenu(menu.id))
+              }
               onFocus={() => openMenu(menu.id)}
               onClick={() => openMenu(menu.id)}
               onKeyDown={(event) => moveMenuFocus(event, index)}
@@ -286,7 +309,10 @@ export function AppBar({ onSave, onLoad }: AppBarProps) {
           {isExpanded ? <RiCloseLine aria-hidden="true" /> : <RiMenuLine aria-hidden="true" />}
         </button>
 
-        <div className={styles.actions} onMouseEnter={closeMenu}>
+        <div
+          className={styles.actions}
+          onPointerEnter={(event) => handleMousePointer(event.pointerType, closeMenu)}
+        >
           {onLoad && (
             <button
               type="button"
@@ -352,10 +378,10 @@ export function AppBar({ onSave, onLoad }: AppBarProps) {
                     key={item.label}
                     type="button"
                     className={styles.commandItem}
-                    aria-disabled="true"
                     tabIndex={isExpanded ? 0 : -1}
-                    title={`${item.label} · 功能待接入`}
-                    onClick={(event) => event.preventDefault()}
+                    aria-label={`${item.label}（功能待接入，关闭菜单）`}
+                    title={`${item.label} · 功能待接入 · 点击关闭菜单`}
+                    onClick={closeMenu}
                   >
                     <Icon aria-hidden="true" />
                     <span className={styles.commandCopy}>

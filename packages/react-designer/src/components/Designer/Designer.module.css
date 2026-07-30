@@ -4,9 +4,7 @@
   min-width: 0;
   min-height: 0;
   display: grid;
-  grid-template-rows:
-    auto var(--ptd-command-bar-height) minmax(0, 1fr)
-    var(--ptd-status-bar-height);
+  grid-template-rows: auto auto minmax(0, 1fr) var(--ptd-status-bar-height);
   overflow: hidden;
   color: var(--ptd-text);
   background: var(--ptd-surface-app);
@@ -134,4 +132,16 @@
 
 .workspace[data-mode='compact'] .resizeHandle {
   display: none;
+}
+
+@container (max-width: 480px) {
+  .workspace {
+    --ptd-tool-dock-width: var(--ptd-tool-dock-width-compact);
+  }
+}
+
+@media (pointer: coarse) and (max-width: 480px) {
+  .workspace {
+    --ptd-tool-dock-width: var(--ptd-tool-dock-width-compact);
+  }
 }
