@@ -19,10 +19,8 @@
 .env.*
 !.env.example
 
-# Files not required by the frontend image
-apps/server
+# Files not required by either runtime image
 packages/export
 legacy
-docker/Dockerfile.server
 **/*.md
 **/*.log

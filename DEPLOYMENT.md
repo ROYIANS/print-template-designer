@@ -1,26 +1,85 @@
-# Web 部署指南
+# 完整自托管部署指南
 
-当前部署栈只交付独立 Web 设计器。`apps/server` 的模板/版本 API 已经实现，但还没有 Server 镜像、数据库持久化卷、迁移 Job 或 Web-to-API 配置，因此不包含在当前 Compose 中。
-
-## 发布流程
+PTD 的默认 Compose 栈包含四个阶段：
 
 ```text
-GitHub push / tag / 手工触发
-              │
-              ▼
-前端 typecheck + tests + lint + build
-              │
-              ▼
-Docker Buildx 发布 Web 镜像到 GHCR
-              │
-              ▼
-服务器运行 deploy.sh / deploy.ps1
-              │
-              ▼
-docker compose pull → up --no-build → /healthz
+PostgreSQL 17（named volume）
+          ↓ healthy
+Prisma migrate deploy（一次性容器）
+          ↓ exit 0
+Nest Server（Better Auth + 模板 API）
+          ↓ healthy
+Nginx Web（静态应用 + 同源 /api 代理）
 ```
 
-部署服务器不会编译仓库。运行时镜像由 Nginx 和 Vite 静态产物组成，因此服务器不需要 Node.js、pnpm 或 Buildx。
+GitHub Actions 对 Web、Server 和容器执行质量检查，并将两个运行时镜像发布到 GHCR。正常部署服务器只需要 Git、Docker Engine 和 Docker Compose v2，不需要 Node.js、pnpm 或编译器。显式 `--build`/`-Build` 模式才会在服务器本地构建镜像。
+
+## 首次部署
+
+```bash
+git clone https://github.com/ROYIANS/print-template-designer.git
+cd print-template-designer
+cp .env.example .env
+```
+
+必须先编辑 `.env`，替换所有 `CHANGE_ME`：
+
+- `POSTGRES_PASSWORD`：至少 16 位，只使用字母、数字、`.`、`_`、`~`、`-`。Compose 会把它安全拼入内部 `DATABASE_URL`。
+- `BETTER_AUTH_SECRET`：至少 32 字符，建议 `openssl rand -base64 32`。
+- `BETTER_AUTH_URL`：浏览器实际访问的公开 origin，不包含路径。
+- `PTD_WEB_ORIGIN`：通常与 `BETTER_AUTH_URL` 相同。
+- `PTD_ALLOWED_EMAILS`：允许登录的 GitHub 邮箱，多个值用逗号分隔。
+- `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET`：GitHub OAuth App 凭据。
+
+然后执行：
+
+```bash
+chmod +x deploy.sh
+./deploy.sh
+```
+
+Windows Server 使用 PowerShell 7：
+
+```powershell
+Copy-Item .env.example .env
+# 编辑 .env
+.\deploy.ps1
+```
+
+如果直接使用默认端口，入口是 `http://<server-ip>:8080`。首次运行脚本若发现 `.env` 不存在，只会复制示例并停止，不会使用占位 Secret 启动服务。
+
+## GitHub OAuth App
+
+在 <https://github.com/settings/developers> 创建 OAuth App。生产示例：
+
+```dotenv
+BETTER_AUTH_URL=https://ptd.example.com
+PTD_WEB_ORIGIN=https://ptd.example.com
+```
+
+对应配置：
+
+```text
+Homepage URL: https://ptd.example.com
+Authorization callback URL: https://ptd.example.com/api/auth/callback/github
+```
+
+GitHub App callback、`BETTER_AUTH_URL` 和真实浏览器 origin 必须精确一致。Web 和 API 在容器内仍为不同服务，但 Nginx 将 `/api/*` 代理到 Server，所以浏览器看到的是同一个 origin，Better Auth Cookie 不需要暴露给其他域名。
+
+## HTTPS 与反向代理
+
+公网必须使用 HTTPS。推荐让 Caddy、Traefik 或宿主机 Nginx 终止 TLS，并把 `.env` 改为：
+
+```dotenv
+BIND_ADDRESS=127.0.0.1
+WEB_PORT=8080
+BETTER_AUTH_URL=https://ptd.example.com
+PTD_WEB_ORIGIN=https://ptd.example.com
+```
+
+上游代理转发到 `http://127.0.0.1:8080`，并保留 `Host`、`X-Forwarded-For` 和 `X-Forwarded-Proto`。容器 Nginx 会继续把这些信息交给启用了受控 `trust proxy` 的 Nest Server。
+
+不要把 PostgreSQL 或 Server 端口直接开放到公网；默认 Compose 只发布 Web 端口。
 
 ## 镜像与标签
 
@@ -28,85 +87,29 @@ docker compose pull → up --no-build → /healthz
 
 ```text
 ghcr.io/royians/print-template-designer-web
+ghcr.io/royians/print-template-designer-server
 ```
 
-| Git 事件 | 发布标签 | 用途 |
-| --- | --- | --- |
-| 推送任意分支 | 规范化分支名、`sha-<full-sha>` | 分支预览与精确回滚 |
-| 推送默认分支 | 分支名、SHA、`latest` | 常规部署 |
-| 推送 `v*` Tag | Git Tag、SHA | 命名发布 |
-| Pull Request | 不发布镜像 | 只执行质量检查 |
-| 手工运行 workflow | 当前分支、SHA | 重建或预览 |
+两个镜像由同一次 workflow 发布相同标签：
 
-分支名由 Docker Metadata Action 规范化，例如 `feature/refc` 会发布为 `feature-refc`。预览未合并分支时使用对应分支标签，不要误用 `latest`。
+| Git 事件      | 标签                           | 用途                 |
+| ------------- | ------------------------------ | -------------------- |
+| 任意分支 push | 规范化分支名、`sha-<full-sha>` | 预览与精确版本       |
+| 默认分支 push | 分支名、SHA、`latest`          | 常规部署             |
+| `v*` tag      | Git tag、SHA                   | 命名发布             |
+| Pull Request  | 不发布                         | 只运行质量和容器构建 |
 
-## 服务器要求
-
-- 推荐 Linux；Windows Server 需要 PowerShell 7+。
-- Docker Engine 与 Docker Compose v2（`docker compose version`）。
-- 能访问 `ghcr.io`。
-- Git，仅用于拉取 Compose 和部署脚本。
-
-不需要在服务器安装 Node.js、pnpm、编译器或本地 Docker Buildx。
-
-## Linux 首次部署
-
-先将目标分支推送到 GitHub，并等待 `Frontend CI & GHCR` workflow 成功：
-
-```bash
-git clone https://github.com/ROYIANS/print-template-designer.git
-cd print-template-designer
-chmod +x deploy.sh
-./deploy.sh
-```
-
-第一次运行会把 `.env.example` 复制为 `.env`。默认地址：
-
-```text
-http://<server-ip>:8080
-```
-
-预览某个分支时，克隆该分支并在首次运行指定其规范化镜像标签：
-
-```bash
-git clone --branch <branch> --single-branch https://github.com/ROYIANS/print-template-designer.git
-cd print-template-designer
-IMAGE_TAG=<normalized-branch-tag> ./deploy.sh
-```
-
-例如 `feature/refc` 对应：
-
-```bash
-IMAGE_TAG=feature-refc ./deploy.sh
-```
-
-也可以把选择保存在本机 `.env`：
+生产推荐固定完整 SHA：
 
 ```dotenv
-WEB_PORT=8080
-IMAGE_REPOSITORY=ghcr.io/royians/print-template-designer-web
-IMAGE_TAG=feature-refc
+IMAGE_TAG=sha-0123456789abcdef0123456789abcdef01234567
 ```
 
-脚本会拉取指定镜像、只重建 Web service，并等待容器的 `/healthz` 变为 healthy。
+修改 `IMAGE_TAG` 后重新执行部署脚本即可升级或回滚。数据库 migration 只能向前执行；回滚到不兼容旧 Schema 的应用镜像前，必须先评估 migration 兼容性和备份，而不是删除 volume。
 
-## Windows Server 首次部署
+## 私有 GHCR
 
-在 PowerShell 7 中运行：
-
-```powershell
-git clone https://github.com/ROYIANS/print-template-designer.git
-Set-Location print-template-designer
-.\deploy.ps1
-```
-
-`.env` 的键和部署行为与 Bash 版本一致。
-
-## 私有 GHCR Package
-
-GHCR package 初次发布时可能是 private。可以在 GitHub package 设置中改为 public，或使用仅有 `read:packages` 权限的 Token。
-
-优先从服务器密钥系统或 shell 环境注入凭据：
+如果 package 是 private，使用只有 `read:packages` 的 Token。优先通过 shell 或服务器 Secret Store 注入：
 
 ```bash
 export GHCR_USERNAME=your-github-username
@@ -122,32 +125,26 @@ $env:GHCR_TOKEN = 'github_pat_xxx'
 .\deploy.ps1
 ```
 
-脚本也会识别 `.env` 中的这两个键，但明文 Token 只适合权限受控的服务器。`.env` 已被 Git 忽略，仍然不要提交它。
+脚本不会打印 Token。也可以写入 gitignored `.env`，但应限制该文件的主机权限。
 
-## 更新
+## 更新与本地构建
 
-对于 `latest` 或分支标签这类可变标签：
+拉取预构建镜像并更新，数据库保留：
 
 ```bash
 git pull --ff-only
 ./deploy.sh
 ```
 
-脚本始终先执行 `docker compose pull`，再用 `up --no-build` 重建容器。根 Compose 没有 `build:`，不会意外在服务器本地编译。
+本地构建当前源码：
 
-## 固定版本与回滚
-
-正式环境或需要稳定复现的评审环境，应使用 workflow/GHCR 页面中的完整 SHA 标签：
-
-```dotenv
-IMAGE_TAG=sha-0123456789abcdef0123456789abcdef01234567
+```bash
+./deploy.sh --build
 ```
 
-修改标签后重新执行部署脚本即可。回滚同理：换回已知可用的 SHA 标签，不需要 reset 服务器源码，也不需要重新构建。
+PowerShell 对应 `.\deploy.ps1 -Build`。本地构建仍然使用与 CI 相同的 Dockerfile、Node 22 和 pnpm 10.15.1，不使用宿主机 Node_modules。
 
 ## 运维命令
-
-Linux / macOS / Git Bash：
 
 ```bash
 ./deploy.sh --status
@@ -155,7 +152,7 @@ Linux / macOS / Git Bash：
 ./deploy.sh --down
 ```
 
-PowerShell 7：
+PowerShell：
 
 ```powershell
 .\deploy.ps1 -Status
@@ -163,44 +160,72 @@ PowerShell 7：
 .\deploy.ps1 -Down
 ```
 
-必要时可直接使用 Compose：
+`down` 只删除容器和网络，保留 `ptd-pgdata` named volume。再次部署会从原数据继续运行并重新检查 migration。
+
+## Fresh 清库
+
+Fresh 会永久删除全部账户、会话、模板和版本，只适合明确的测试环境重建：
 
 ```bash
-docker compose ps
-docker compose logs --tail=100 web
-docker inspect ptd-web
+./deploy.sh --fresh
+# 必须输入 WIPE_PTD_DATA
 ```
 
-## 反向代理与 TLS
+自动化环境还必须额外传入确认参数：
 
-公开网络部署时，建议在 8080 前放置 Caddy、Traefik 或已有 Nginx，并在那里终止 TLS。如果代理与容器位于同一主机，可在部署分支中把端口绑定改为：
-
-```yaml
-ports:
-  - '127.0.0.1:${WEB_PORT:-8080}:80'
+```bash
+./deploy.sh --fresh --yes
 ```
 
-## 排障
+PowerShell 对应 `-Fresh` 和 `-Fresh -Yes`。不要把 fresh 当作 migration 失败的排障方式。
+
+## 备份与恢复
+
+当前栈不自动上传备份。升级前可手工创建 PostgreSQL custom-format dump：
+
+```bash
+docker compose exec -T postgres pg_dump \
+  --username "$POSTGRES_USER" \
+  --dbname "$POSTGRES_DB" \
+  --format=custom > ptd-$(date +%F-%H%M%S).dump
+```
+
+上面的变量需要先从 `.env` 导入当前 shell；也可以直接替换为实际数据库用户名和库名。恢复是破坏性操作，必须在独立环境演练，并确认目标库后再执行 `pg_restore`。
+
+## 健康与排障
+
+部署脚本逐个验证 PostgreSQL、migration、Server 和 Web。失败时会打印 `docker compose ps -a` 和最近 120 行日志。
+
+常用诊断：
+
+```bash
+docker compose ps -a
+docker compose logs --tail=120 postgres migrate server web
+docker compose exec server node -e "fetch('http://127.0.0.1:3000/healthz').then(async r=>console.log(r.status, await r.text()))"
+```
 
 ### `manifest unknown`
 
-指定的 `IMAGE_TAG` 尚未发布。确认 GitHub Actions 已成功，并确认分支中的 `/` 已转换为 `-`。
+指定标签尚未发布，或 Web/Server 其中一个镜像缺少该标签。确认 `Frontend CI & GHCR` workflow 的两个矩阵发布任务都成功。
 
-### 拉取 GHCR 时返回 `denied`
+### GHCR `denied`
 
-Package 是 private，或 Token 没有访问权。提供 `GHCR_USERNAME` 和带 `read:packages` 的 Token，或把 Package 改为 public。
+Package 是 private，或 Token 没有 `read:packages`。同时配置 `GHCR_USERNAME` 和 `GHCR_TOKEN`。
 
-### Container is unhealthy
+### Migration 失败
 
-运行 `./deploy.sh --logs` 或 `.\deploy.ps1 -Logs` 检查 Nginx 输出。健康检查失败或超时时，脚本也会打印最后 100 行日志。
+查看 `docker compose logs migrate postgres`。修复连接或 migration 后重新运行普通部署；不要先清空 volume。
 
-### 8080 端口被占用
+### GitHub callback/cookie 错误
 
-修改 `.env` 中的 `WEB_PORT` 后重新部署。例如 `WEB_PORT=8088` 会将站点暴露在 8088，不需要重建镜像。
+检查浏览器地址、`BETTER_AUTH_URL`、`PTD_WEB_ORIGIN`、OAuth App callback 和反向代理 `X-Forwarded-Proto` 是否一致。HTTPS 站点不能配置成 HTTP origin。
 
-## 当前限制与下一阶段
+### 端口被占用
 
-- workflow 仅发布 `linux/amd64`；ARM64 服务器需要先在 `.github/workflows/ci.yml` 增加 `linux/arm64`。
-- GitHub Actions 才是实际容器构建环境。本地静态检查不能替代首次真实镜像构建。
-- 当前 Nginx 只托管静态 Web 和 `/healthz`，没有 `/api` 反向代理。
-- 完整前后端部署需要补充 Server 镜像、数据库/卷策略、migration 生命周期、环境密钥和 Web API 地址，再扩展 Compose；不能只把 `apps/server` 塞进现有容器。
+修改 `WEB_PORT`。如果宿主机反向代理与 PTD 同机，优先使用 `BIND_ADDRESS=127.0.0.1`。
+
+## 当前边界
+
+- 镜像目前只发布 `linux/amd64`；ARM64 需要扩展 CI platforms。
+- PostgreSQL 是单实例 named volume，不提供自动高可用、远程备份或灾难恢复。
+- 部署脚本是单主机 Compose 运维入口，不是零停机滚动发布系统。

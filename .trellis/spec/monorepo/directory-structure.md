@@ -17,14 +17,14 @@ print-template-designer/
     web/            Designer web app (React + Vite)
     server/         NestJS + Prisma backend
   docker/           Dockerfiles and runtime service configuration (for example nginx.conf)
-  docker-compose.yml Pull-only deployment entrypoint (no server-side image build)
+  docker-compose.yml Complete PostgreSQL/migration/Server/Web deployment entrypoint
   deploy.sh         Linux / macOS / Git Bash deployment script
   deploy.ps1        PowerShell 7 deployment script
   legacy/           Original Vue 2 source — READ ONLY, do not modify
   .trellis/         Trellis workflow, tasks, spec
   README.md         Product overview and fastest valid setup
   DEVELOPMENT.md    Local development, commands and troubleshooting
-  DEPLOYMENT.md     Current Web-only GHCR deployment operations
+  DEPLOYMENT.md     Full-stack GHCR/Compose deployment operations
   CHANGELOG.md      v2 Unreleased progress and preserved v1 history
   package.json      Root — private: true, pnpm workspaces
   pnpm-workspace.yaml
@@ -68,10 +68,11 @@ apps/server/
     generated/prisma/ Ignored Prisma 7 generated Client
     health/           Health endpoint
     prisma/           Driver adapter, URL and lifecycle service
-    templates/        HTTP contracts, controller and versioned persistence service
+    auth/             Better Auth configuration, Allowlist and Cookie Guard
+    templates/        Owner-scoped HTTP contracts, controller and versioned persistence service
   prisma/
-    migrations/       Committed SQLite migration history
-    schema.prisma     Template + immutable TemplateVersion models
+    migrations/       Committed PostgreSQL migration history
+    schema.prisma     Better Auth + owned Template + immutable TemplateVersion models
   test/               Real Nest HTTP integration tests
   prisma.config.ts    Prisma 7 schema/migration/datasource configuration
   vitest.config.ts    Node integration test configuration
@@ -81,13 +82,19 @@ apps/server/
 
 ## Deployment Layout
 
-- Runtime images are built by CI and published to GHCR.
-- The root `docker-compose.yml` references published images with `image:` and must not add a
-  `build:` fallback. Deployment hosts pull immutable or channel tags; they do not compile source.
+- Web and Server runtime images are built by CI and published to GHCR with matching branch/tag/SHA
+  tags. The normal deployment path pulls them; an explicit `--build`/`-Build` operator action may
+  build the same Dockerfiles locally for isolated or pre-publication environments.
+- The root Compose owns PostgreSQL persistence, one-shot committed migrations, Server health and the
+  Web same-origin `/api` proxy. PostgreSQL and Server stay internal unless an intentional override is
+  added outside the default stack.
 - Image build files and runtime configuration stay under `docker/`.
 - Root deployment scripts are the public operator entrypoints and must keep Bash and PowerShell 7
   behavior aligned.
-- Local secrets belong in the gitignored `.env`; `.env.example` contains safe defaults only.
+- Local secrets belong in the gitignored `.env`; `.env.example` contains placeholders and scripts
+  must refuse to deploy while required placeholders remain.
+- Normal updates keep the PostgreSQL volume. Destructive fresh deployment requires a dedicated flag
+  plus confirmation; it must never be an implicit recovery action.
 
 ## Naming Conventions
 

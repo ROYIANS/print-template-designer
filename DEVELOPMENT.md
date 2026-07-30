@@ -4,11 +4,11 @@
 
 ## 环境基线
 
-| 工具 | 建议版本 | 说明 |
-| --- | --- | --- |
-| Node.js | 22.12+ | CI/Docker 使用 Node 22；完整工作区含原生 SQLite 依赖 |
-| pnpm | 10.15.1 | 由根 `packageManager` 声明，通过 Corepack 调用 |
-| PowerShell | 7+ | Windows 脚本和项目约定的最低版本 |
+| 工具       | 建议版本 | 说明                                                |
+| ---------- | -------- | --------------------------------------------------- |
+| Node.js    | 22.12+   | CI、Docker 构建与生产 Server 运行时统一使用 Node 22 |
+| pnpm       | 10.15.1  | 由根 `packageManager` 声明，通过 Corepack 调用      |
+| PowerShell | 7+       | Windows 脚本和项目约定的最低版本                    |
 
 先确认实际运行时，而不是只看版本管理器当前配置：
 
@@ -47,22 +47,35 @@ corepack pnpm --filter @ptd/react-designer build
 corepack pnpm --filter web build
 ```
 
-当前 Web 使用内存空白模板，不会连接或写入 Server。
+当前 Web 会通过同源 `/api` 代理连接 Server，完成 GitHub Cookie 会话和 Allowlist 准入检查。模板内容仍保存在内存中，尚未连接模板 CRUD。
 
 ## 启动 Server
 
-Server 默认读取 `DATABASE_URL=file:./dev.db`，监听 `PORT=3000`。首次运行先应用已提交的 SQLite migration：
+Server 只支持 PostgreSQL，`DATABASE_URL` 必填，默认监听 `PORT=3000`。先复制开发环境示例并配置隔离的 PostgreSQL 数据库、GitHub OAuth App 与 Allowlist：
+
+```bash
+cp apps/server/.env.example apps/server/.env
+# 编辑 apps/server/.env，不要指向共享或生产数据库
+```
+
+首次运行先应用已提交的 PostgreSQL migration：
 
 ```bash
 corepack pnpm --filter server prisma:migrate:deploy
 corepack pnpm --filter server start:dev
 ```
 
-自定义环境时，可在启动命令所在环境设置：
+自定义环境时，至少需要提供：
 
 ```dotenv
-DATABASE_URL=file:./dev.db
+DATABASE_URL=postgresql://ptd:change-me@127.0.0.1:5432/ptd?schema=public
 PORT=3000
+BETTER_AUTH_URL=http://localhost:3000
+BETTER_AUTH_SECRET=replace-with-openssl-rand-base64-32
+PTD_WEB_ORIGIN=http://localhost:5173
+PTD_ALLOWED_EMAILS=owner@example.com
+GITHUB_CLIENT_ID=replace-me
+GITHUB_CLIENT_SECRET=replace-me
 ```
 
 常用 Prisma 命令：
@@ -73,7 +86,7 @@ corepack pnpm --filter server prisma:generate
 corepack pnpm --filter server prisma:migrate:deploy
 ```
 
-不要手工编辑 `apps/server/src/generated/prisma/`；它由 Prisma 7 生成且被忽略。数据库结构变更必须提交新的 migration，不能只修改本地数据库。
+不要手工编辑 `apps/server/src/generated/prisma/`；它由 Prisma 7 生成且被忽略。数据库结构变更必须提交新的 migration，不能用 `db push` 取代已提交的 migration 历史。
 
 ## 质量检查
 
@@ -112,15 +125,12 @@ Markdown 和其他受 Prettier 支持的文件可检查为：
 corepack pnpm exec prettier --check "**/*.md"
 ```
 
-## Windows：`better-sqlite3` 安装失败
+## PostgreSQL 开发与测试安全
 
-`apps/server` 使用 `better-sqlite3@12.11.1`。在 Windows + Node 20 下，该版本可能找不到对应的预编译二进制，随后回退到 `node-gyp`，并要求 Visual Studio C++ 工具链。优先处理顺序是：
-
-1. 切换到 Node 22.12+，再次确认 `node --version`。
-2. 确认 npm registry/GitHub Release 下载不被网络、代理或证书策略拦截。
-3. 只有确实需要源码编译时，才安装 Visual Studio 的 “Desktop development with C++” workload。
-
-如果网络必须经过代理，只在本机 shell 或包管理器配置中设置代理，不要把个人代理地址或凭据写入仓库。
+- 本地开发、CI 和集成测试都使用 PostgreSQL，不提供 SQLite 回退。
+- Server 集成测试会清理指定数据库中的认证、模板与版本数据，只能指向明确隔离的测试库。
+- `prisma migrate reset --force` 会破坏数据；未经明确确认不要对任何环境执行。
+- 如果网络必须经过代理，只在本机 shell 或包管理器配置中设置代理，不要把个人代理地址或凭据写入仓库。
 
 ## 代码与文档边界
 
@@ -128,7 +138,7 @@ corepack pnpm exec prettier --check "**/*.md"
 - `@ptd/core` 不依赖 React 或 NestJS。
 - `@ptd/components` 负责 DOM 渲染，不负责编辑器工作区。
 - `@ptd/react-designer` 是受控组件，持久化由 Host 决定。
-- `apps/web` 当前只是 standalone Host；`apps/server` 是独立 API。
+- `apps/web` 通过同源 `/api` 使用 Server 认证，但模板 CRUD 仍由后续 Host 集成任务接入。
 - `@ptd/export` 目前没有导出实现。
 - `TemplateSchema.pages` 是手工页面；未来自动分页是预览/导出派生结果。
 

@@ -172,6 +172,12 @@ corepack pnpm --filter server build
 - 静态资源上传与管理。
 - 数据源代理。
 - PDF/打印/Word 导出。
-- Server Docker 镜像、数据库卷和完整 Compose 部署。
+- 自动备份上传、数据库高可用和容器编排平台配置。
 
 这些能力需要单独设计，不属于现有 API 的隐含保证。架构约束见 [Server Architecture](../../.trellis/spec/monorepo/server-architecture.md)。
+
+## 容器部署
+
+根 `docker-compose.yml` 使用 PostgreSQL 17 named volume、一次性 `migrate` 服务和 Server 健康检查。
+Server 不直接暴露宿主机端口，由 Web Nginx 通过 Compose 网络代理同源 `/api/*`。部署与 GitHub OAuth
+callback、升级、回滚、fresh 清库和备份说明见 [DEPLOYMENT.md](../../DEPLOYMENT.md)。

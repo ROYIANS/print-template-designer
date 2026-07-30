@@ -6,7 +6,7 @@
 </div>
 
 > [!IMPORTANT]
-> 当前仓库正在进行 v2 重写。核心模型、渲染组件、React 编辑器、多页面管理、模板版本 API 与 Web-only 容器部署已经落地；Web 与 Server 尚未连接，导出能力尚未实现。原 Vue 2 版本保存在 [`legacy/`](./legacy/) 中，仅供参考。
+> 当前仓库正在进行 v2 重写。核心模型、渲染组件、React 编辑器、多页面管理、GitHub 登录、模板版本 API 与完整自托管容器栈已经落地；Web 的模板保存/打开流程和导出能力尚未实现。原 Vue 2 版本保存在 [`legacy/`](./legacy/) 中，仅供参考。
 
 ## 项目定位
 
@@ -35,19 +35,19 @@ Print Template Designer（PTD）不是一个只能独立运行的页面 Demo，�
 
 - 框架无关的 `TemplateSchema`、页面配置、序列化、数据绑定和组件注册表。
 - 原生 DOM 渲染组件：文本、表格、图像、二维码、条码和基础图形。
-- NestJS + Prisma + SQLite 模板 API，支持 CRUD、不可变版本快照、恢复和乐观并发控制。
-- GitHub Actions 构建 Web 镜像并发布到 GHCR；部署服务器只需拉取镜像。
+- NestJS + Prisma + PostgreSQL 多用户模板 API，支持 GitHub OAuth、Allowlist、owner 隔离、不可变版本快照、恢复和乐观并发控制。
+- GitHub Actions 构建 Web/Server 镜像并发布到 GHCR；Compose 管理 PostgreSQL、migration、Server 和同源 Web 入口。
 
 ### 成熟度边界
 
-| 模块 | 当前状态 | 说明 |
-| --- | --- | --- |
-| `@ptd/core` | 已实现 | Schema、单位、序列化、数据绑定、组件注册表 |
-| `@ptd/components` | 已实现 | 框架无关 DOM 渲染组件 |
-| `@ptd/react-designer` | 已实现，持续打磨 | Controlled React 编辑器和专业画布交互 |
-| `apps/web` | 可运行 Host | 使用内存中的空白模板，尚未连接 Server |
-| `apps/server` | API 已实现 | SQLite 模板/版本 API，尚未纳入当前 Compose 部署 |
-| `@ptd/export` | 空脚手架 | PDF、打印、Word 和自动溢出分页均未实现 |
+| 模块                  | 当前状态         | 说明                                                    |
+| --------------------- | ---------------- | ------------------------------------------------------- |
+| `@ptd/core`           | 已实现           | Schema、单位、序列化、数据绑定、组件注册表              |
+| `@ptd/components`     | 已实现           | 框架无关 DOM 渲染组件                                   |
+| `@ptd/react-designer` | 已实现，持续打磨 | Controlled React 编辑器和专业画布交互                   |
+| `apps/web`            | 认证 Host 已实现 | GitHub 登录已连接 Server；模板仍在内存中，尚未接入 CRUD |
+| `apps/server`         | API 已实现       | PostgreSQL、Better Auth、owner 隔离和模板/版本 API      |
+| `@ptd/export`         | 空脚手架         | PDF、打印、Word 和自动溢出分页均未实现                  |
 
 ## 架构
 
@@ -62,7 +62,7 @@ apps/web (React + Vite) ───────────────┐
                          │                         ▲
                          └─────────────────────────┘
 
-apps/server (NestJS + Prisma + SQLite) ──────── @ptd/core
+apps/server (NestJS + Prisma + PostgreSQL) ──── @ptd/core
 
 @ptd/export ── 当前仅为脚手架，尚未进入运行链路
 ```
@@ -76,7 +76,7 @@ packages/
 apps/
   web/              独立设计器 Host
   server/           模板持久化与版本 API
-docker/             Web 镜像与 Nginx 配置
+docker/             Web/Server 镜像与 Nginx 同源代理配置
 legacy/             只读的 Vue 2 版本
 ```
 
@@ -89,7 +89,7 @@ legacy/             只读的 Vue 2 版本
 - Node.js **22.12 或更高版本**（CI 与 Docker 使用 Node 22）。
 - 通过 Corepack 使用仓库声明的 pnpm **10.15.1**。
 
-虽然部分 package 的 `engines` 仍允许 Node 20，但完整工作区包含原生依赖 `better-sqlite3`；在 Windows + Node 20 上可能回退到本地 C++ 编译。因此完整开发环境统一推荐 Node 22.12+。
+虽然部分 package 的 `engines` 仍允许 Node 20，完整开发、CI 与容器环境统一使用 Node 22，以减少工具链和 Prisma 运行时差异。
 
 ### 启动 Web 设计器
 
@@ -103,14 +103,14 @@ corepack pnpm dev
 
 ### 启动模板服务
 
-Server 并不是当前 Web Host 的运行前提；以下命令用于单独开发 API：
+Web 的登录与准入检查依赖 Server。复制 `apps/server/.env.example` 并配置 PostgreSQL/GitHub OAuth 后，可单独启动 API：
 
 ```bash
 corepack pnpm --filter server prisma:migrate:deploy
 corepack pnpm --filter server start:dev
 ```
 
-默认服务地址为 <http://localhost:3000>，健康检查为 `GET /healthz`。数据库默认使用 SQLite：`DATABASE_URL=file:./dev.db`。
+默认服务地址为 <http://localhost:3000>，健康检查为 `GET /healthz`。`DATABASE_URL` 必须指向 PostgreSQL；没有本地文件数据库回退。
 
 更完整的环境、命令和原生依赖排障见 [DEVELOPMENT.md](./DEVELOPMENT.md)。
 
@@ -139,12 +139,12 @@ export function TemplateEditor({ initialValue }: { initialValue: TemplateSchema 
 
 `DesignerProps` 当前只有四项：
 
-| 属性 | 类型 | 说明 |
-| --- | --- | --- |
-| `value` | `TemplateSchema` | 必填，Host 持有的当前模板 |
-| `onChange` | `(value) => void` | 编辑器产生变更时通知 Host |
-| `onSave` | `(value) => void` | 用户触发保存时调用 |
-| `onLoad` | `() => TemplateSchema \| Promise<TemplateSchema>` | 用户触发载入时调用 |
+| 属性       | 类型                                              | 说明                      |
+| ---------- | ------------------------------------------------- | ------------------------- |
+| `value`    | `TemplateSchema`                                  | 必填，Host 持有的当前模板 |
+| `onChange` | `(value) => void`                                 | 编辑器产生变更时通知 Host |
+| `onSave`   | `(value) => void`                                 | 用户触发保存时调用        |
+| `onLoad`   | `() => TemplateSchema \| Promise<TemplateSchema>` | 用户触发载入时调用        |
 
 样式需要由 Host 显式导入。API 与集成约束见 [`@ptd/react-designer` README](./packages/react-designer/README.md)。
 
@@ -152,14 +152,14 @@ export function TemplateEditor({ initialValue }: { initialValue: TemplateSchema 
 
 模板服务提供以下 HTTP 端点：
 
-| 方法 | 路径 | 用途 |
-| --- | --- | --- |
-| `GET` | `/healthz` | 健康检查 |
-| `GET` / `POST` | `/api/templates` | 列表 / 创建 |
-| `GET` / `PUT` / `DELETE` | `/api/templates/:id` | 读取 / 更新 / 删除 |
-| `GET` | `/api/templates/:id/versions` | 版本列表 |
-| `GET` | `/api/templates/:id/versions/:version` | 读取指定快照 |
-| `POST` | `/api/templates/:id/versions/:version/restore` | 将历史快照恢复为一个新版本 |
+| 方法                     | 路径                                           | 用途                       |
+| ------------------------ | ---------------------------------------------- | -------------------------- |
+| `GET`                    | `/healthz`                                     | 健康检查                   |
+| `GET` / `POST`           | `/api/templates`                               | 列表 / 创建                |
+| `GET` / `PUT` / `DELETE` | `/api/templates/:id`                           | 读取 / 更新 / 删除         |
+| `GET`                    | `/api/templates/:id/versions`                  | 版本列表                   |
+| `GET`                    | `/api/templates/:id/versions/:version`         | 读取指定快照               |
+| `POST`                   | `/api/templates/:id/versions/:version/restore` | 将历史快照恢复为一个新版本 |
 
 更新和恢复请求必须携带 `expectedVersion`。版本过期时返回 `409 Conflict`，以避免静默覆盖其他写入。请求体和响应语义见 [Server README](./apps/server/README.md)。
 
@@ -169,10 +169,12 @@ export function TemplateEditor({ initialValue }: { initialValue: TemplateSchema 
 
 ## Docker 部署
 
-当前生产链路只交付 Web：
+当前生产链路交付完整自托管栈：
 
 ```text
-GitHub Actions → 前端质量检查 → GHCR Web 镜像 → Pull-only Compose → Nginx /healthz
+GitHub Actions → 前后端质量/容器构建 → GHCR Web + Server 镜像
+                                            ↓
+                  PostgreSQL → migration → Server → Nginx Web/API
 ```
 
 服务器不需要 Node.js 或 pnpm：
@@ -180,24 +182,26 @@ GitHub Actions → 前端质量检查 → GHCR Web 镜像 → Pull-only Compose 
 ```bash
 git clone https://github.com/ROYIANS/print-template-designer.git
 cd print-template-designer
+cp .env.example .env
+# 编辑 .env 中所有 CHANGE_ME、公开 origin 和 GitHub OAuth 配置
 ./deploy.sh
 ```
 
-默认访问 `http://<server-ip>:8080`。PowerShell 7、分支预览、私有 GHCR、版本固定和回滚说明见 [DEPLOYMENT.md](./DEPLOYMENT.md)。Server 已有代码，但还没有 Server 镜像、数据库卷或 Web-to-API 配置，不能把当前 Compose 当作完整前后端部署。
+默认访问 `http://<server-ip>:8080`。PowerShell 7、HTTPS 反向代理、GitHub callback、数据库卷、备份、私有 GHCR、版本固定和回滚说明见 [DEPLOYMENT.md](./DEPLOYMENT.md)。
 
 ## 模块文档
 
-| 模块 | 文档 |
-| --- | --- |
-| Web Host | [`apps/web/README.md`](./apps/web/README.md) |
-| Template Server | [`apps/server/README.md`](./apps/server/README.md) |
-| Core | [`packages/core/README.md`](./packages/core/README.md) |
-| Components | [`packages/components/README.md`](./packages/components/README.md) |
-| React Designer | [`packages/react-designer/README.md`](./packages/react-designer/README.md) |
-| Export scaffold | [`packages/export/README.md`](./packages/export/README.md) |
-| 开发指南 | [`DEVELOPMENT.md`](./DEVELOPMENT.md) |
-| 部署指南 | [`DEPLOYMENT.md`](./DEPLOYMENT.md) |
-| 变更记录 | [`CHANGELOG.md`](./CHANGELOG.md) |
+| 模块            | 文档                                                                       |
+| --------------- | -------------------------------------------------------------------------- |
+| Web Host        | [`apps/web/README.md`](./apps/web/README.md)                               |
+| Template Server | [`apps/server/README.md`](./apps/server/README.md)                         |
+| Core            | [`packages/core/README.md`](./packages/core/README.md)                     |
+| Components      | [`packages/components/README.md`](./packages/components/README.md)         |
+| React Designer  | [`packages/react-designer/README.md`](./packages/react-designer/README.md) |
+| Export scaffold | [`packages/export/README.md`](./packages/export/README.md)                 |
+| 开发指南        | [`DEVELOPMENT.md`](./DEVELOPMENT.md)                                       |
+| 部署指南        | [`DEPLOYMENT.md`](./DEPLOYMENT.md)                                         |
+| 变更记录        | [`CHANGELOG.md`](./CHANGELOG.md)                                           |
 
 ## 路线图
 
@@ -207,7 +211,7 @@ cd print-template-designer
 2. 让 `apps/web` 接入模板列表、保存、版本历史、恢复和冲突处理。
 3. 重构数据源引用与数据预览流程。
 4. 实现预览、打印、PDF/Word 导出与派生自动分页。
-5. 将 Server、数据库迁移和持久化卷纳入完整容器部署。
+5. 完善备份恢复、监控和多架构容器发布。
 
 图表、签名、条件显示、字体管理、批量打印和多语言属于后续扩展，不应被理解为当前能力。
 

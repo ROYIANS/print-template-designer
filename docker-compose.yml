@@ -1,15 +1,88 @@
-# Pull-only frontend deployment. Images are built by GitHub Actions and published to GHCR.
+# Complete self-hosted stack. Images are pulled from GHCR by default; deploy scripts
+# can build the same services locally with --build / -Build.
 services:
-  web:
-    image: ${IMAGE_REPOSITORY:-ghcr.io/royians/print-template-designer-web}:${IMAGE_TAG:-latest}
-    pull_policy: always
-    container_name: ptd-web
+  postgres:
+    image: postgres:17-alpine
     restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-ptd}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-ptd}
+    volumes:
+      - ptd-pgdata:/var/lib/postgresql/data
+    expose:
+      - '5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 5s
+      timeout: 5s
+      start_period: 5s
+      retries: 12
+
+  migrate:
+    image: ${SERVER_IMAGE_REPOSITORY:-ghcr.io/royians/print-template-designer-server}:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.server
+    restart: 'no'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-ptd}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@postgres:5432/${POSTGRES_DB:-ptd}?schema=public
+    command: ['./node_modules/.bin/prisma', 'migrate', 'deploy']
+    healthcheck:
+      disable: true
+
+  server:
+    image: ${SERVER_IMAGE_REPOSITORY:-ghcr.io/royians/print-template-designer-server}:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.server
+    restart: unless-stopped
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-ptd}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@postgres:5432/${POSTGRES_DB:-ptd}?schema=public
+      PORT: '3000'
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:?Set BETTER_AUTH_URL in .env}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?Set BETTER_AUTH_SECRET in .env}
+      PTD_WEB_ORIGIN: ${PTD_WEB_ORIGIN:?Set PTD_WEB_ORIGIN in .env}
+      PTD_ALLOWED_EMAILS: ${PTD_ALLOWED_EMAILS:?Set PTD_ALLOWED_EMAILS in .env}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:?Set GITHUB_CLIENT_ID in .env}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:?Set GITHUB_CLIENT_SECRET in .env}
+      PTD_TRUST_PROXY: 'true'
+    expose:
+      - '3000'
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'node -e "fetch(''http://127.0.0.1:3000/healthz'').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"',
+        ]
+      interval: 15s
+      timeout: 5s
+      start_period: 30s
+      retries: 8
+
+  web:
+    image: ${WEB_IMAGE_REPOSITORY:-ghcr.io/royians/print-template-designer-web}:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.web
+    restart: unless-stopped
+    depends_on:
+      server:
+        condition: service_healthy
     ports:
-      - '${WEB_PORT:-8080}:80'
+      - '${BIND_ADDRESS:-0.0.0.0}:${WEB_PORT:-8080}:80'
     healthcheck:
       test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1/healthz >/dev/null || exit 1']
       interval: 15s
       timeout: 5s
       start_period: 10s
       retries: 5
+
+volumes:
+  ptd-pgdata:

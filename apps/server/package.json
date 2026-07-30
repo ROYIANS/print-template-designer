@@ -30,6 +30,7 @@
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "pg": "^8.22.0",
+    "prisma": "7.9.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
   },
@@ -41,7 +42,6 @@
     "@types/pg": "^8.20.0",
     "@types/supertest": "^6.0.3",
     "cross-env": "^10.1.0",
-    "prisma": "7.9.1",
     "supertest": "^7.2.2",
     "typescript": "^5.9.3",
     "vitest": "^4.1.10"
