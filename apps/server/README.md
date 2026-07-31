@@ -9,6 +9,7 @@ Allowlist 保护模板 CRUD、不可变版本历史、历史恢复与乐观并�
 - Prisma `7.9.1` 与 `@prisma/adapter-pg`。
 - PostgreSQL 是开发、测试和生产的唯一数据库；`DATABASE_URL` 必填。
 - Better Auth 只启用 GitHub OAuth；浏览器使用 HttpOnly Cookie，不保存 Token。
+- 本地可显式启用仅限 loopback 的固定开发身份；默认关闭，生产环境无法启用。
 - `PTD_ALLOWED_EMAILS` 在服务端控制准入，`Template.ownerId` 隔离所有模板和版本操作。
 - 默认监听 `PORT=3000`。
 - 复用 `@ptd/core` 的 `TemplateSchema` 和序列化逻辑。
@@ -31,6 +32,22 @@ corepack pnpm --filter server start:dev
 http://localhost:3000/api/auth/callback/github
 ```
 
+只调试本地 Web/Server 工作流时，可在 `apps/server/.env` 使用：
+
+```dotenv
+NODE_ENV=development
+BETTER_AUTH_URL=http://localhost:3000
+PTD_WEB_ORIGIN=http://localhost:5173
+PTD_DEV_AUTH_BYPASS=true
+```
+
+该模式不要求 `BETTER_AUTH_SECRET`、`PTD_ALLOWED_EMAILS` 或 GitHub Client 凭据。Server 会在
+PostgreSQL 中幂等准备固定的 `PTD Local Developer` 用户，所有模板 API 仍使用该用户的真实
+`ownerId` 外键。`BETTER_AUTH_URL` 与 `PTD_WEB_ORIGIN` 必须是 `localhost`、`127.0.0.1` 或
+`[::1]` 的 HTTP(S) origin，且 `NODE_ENV=production` 时 Server 会拒绝启动。不要在公网、局域网
+共享地址或生产配置中启用该开关；bypass 模式还会强制 Server 只监听 `BETTER_AUTH_URL` 的 loopback
+主机。它不接受浏览器请求头或 Token 来选择身份。
+
 本地 PostgreSQL 可用 `postgres:17-alpine` 容器启动；测试和 CI 也必须使用 PostgreSQL，不能回退到 SQLite。
 
 验证服务：
@@ -48,8 +65,8 @@ curl http://localhost:3000/healthz
 | 方法     | 路径                                           | 成功语义                       |
 | -------- | ---------------------------------------------- | ------------------------------ |
 | `GET`    | `/healthz`                                     | 服务健康状态                   |
-| `*`      | `/api/auth/*`                                  | Better Auth GitHub OAuth/会话  |
-| `GET`    | `/api/account/me`                              | 当前获准访问的账户             |
+| `*`      | `/api/auth/*`                                  | GitHub 模式的 OAuth/会话       |
+| `GET`    | `/api/account/me`                              | 当前账户及服务端 `authMode`    |
 | `GET`    | `/api/templates`                               | 按更新时间倒序返回模板摘要     |
 | `POST`   | `/api/templates`                               | 创建模板及 version 1 快照      |
 | `GET`    | `/api/templates/:id`                           | 读取当前模板及内容             |
@@ -85,6 +102,10 @@ Content-Type: application/json
 ```
 
 `title` 去除首尾空白后必须为 1–120 个字符。`content` 必须包含有限数值 `_version`、对象 `pageConfig`、至少一个页面、数组 `dataSource` 和对象 `dataSet`。
+
+`GET /api/account/me` 保留既有账户字段，并额外返回服务端权威的
+`authMode: "github" | "dev-bypass"`。Web 只能用这个字段展示本地开发状态，不能通过前端环境变量、
+请求头或浏览器存储自行声明 bypass。
 
 ### 更新模板
 

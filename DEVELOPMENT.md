@@ -78,6 +78,27 @@ GITHUB_CLIENT_ID=replace-me
 GITHUB_CLIENT_SECRET=replace-me
 ```
 
+### 跳过本地 GitHub OAuth
+
+调试 Designer 与模板 API 时，可以使用 Server 权威的固定本地开发身份：
+
+```dotenv
+NODE_ENV=development
+BETTER_AUTH_URL=http://localhost:3000
+PTD_WEB_ORIGIN=http://localhost:5173
+PTD_DEV_AUTH_BYPASS=true
+```
+
+启用后不需要配置 `BETTER_AUTH_SECRET`、`PTD_ALLOWED_EMAILS`、`GITHUB_CLIENT_ID` 或
+`GITHUB_CLIENT_SECRET`。Server 会把受保护请求绑定到 PostgreSQL 中稳定的开发用户，因此模板的
+`ownerId` 外键、版本历史和多用户查询边界没有被前端短路。`/api/account/me` 返回
+`authMode: "dev-bypass"`，供 Web 明确显示“本地开发身份”。
+
+这个开关默认关闭，并且只接受 `localhost`、`127.0.0.1` 或 `[::1]` 的 Web/Auth HTTP(S) origin；
+生产环境或非 loopback origin 会让 Server 启动失败，Server 也会强制只监听 Auth origin 的 loopback
+主机。不要加入自定义身份请求头，也不要在浏览器保存开发 Token。要验证真实认证流程时，关闭该开关并
+恢复 GitHub OAuth、Allowlist 与 Better Auth Secret。
+
 常用 Prisma 命令：
 
 ```bash
