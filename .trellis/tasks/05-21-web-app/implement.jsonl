@@ -7,6 +7,7 @@
 {"file": ".trellis/spec/monorepo/react-designer-contract.md", "reason": "DesignerHost、文档状态、应用命令和 Designer transport-agnostic 边界"}
 {"file": ".trellis/spec/monorepo/server-architecture.md", "reason": "Better Auth、Allowlist、owner 隔离、PostgreSQL 与环境安全约束"}
 {"file": ".trellis/tasks/05-21-web-app/research/vidorra-life-landing-reference.md", "reason": "用户提供的落地页参考分析与 Digital Proof Sheet 转译方向"}
+{"file": ".trellis/tasks/05-21-web-app/research/supply-ascii-reference.md", "reason": "Supply 双层 DOM ASCII 的实证机制与 PTD 纸张主体转译约束"}
 {"file": ".trellis/tasks/archive/2026-07/05-21-integration-hooks/prd.md", "reason": "已确认 Designer Host 命令与文档状态架构决策"}
 {"file": ".trellis/tasks/archive/2026-07/07-30-postgres-github-auth/prd.md", "reason": "现有 GitHub OAuth、Allowlist、Cookie、Guard 与资源授权决策"}
 {"file": ".trellis/tasks/archive/2026-07/07-31-deploy-postgres-auth/prd.md", "reason": "生产 Compose、同源代理和环境变量 fail-closed 边界"}
