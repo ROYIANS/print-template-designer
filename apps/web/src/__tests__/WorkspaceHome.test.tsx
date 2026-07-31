@@ -238,6 +238,177 @@ describe('Workspace Home', () => {
     expect(get).toHaveBeenCalledTimes(4)
   })
 
+  it('renames, duplicates and permanently deletes files through explicit card actions', async () => {
+    const get = vi.fn<TemplateApi['get']>(async () => record(1, '原模板'))
+    const update = vi.fn<TemplateApi['update']>(async (id, input) => ({
+      ...record(id, input.title),
+      version: input.expectedVersion + 1,
+    }))
+    const create = vi.fn<TemplateApi['create']>(async (input) => record(9, input.title))
+    const remove = vi.fn<TemplateApi['delete']>(async () => undefined)
+    await render(
+      fakeApi({
+        list: vi.fn(async () => [summary(1, '原模板')]),
+        get,
+        update,
+        create,
+        delete: remove,
+      }),
+    )
+
+    const openActions = async (title: string) => {
+      const trigger = container.querySelector<HTMLButtonElement>(
+        `button[aria-label="模板操作 ${title}"]`,
+      )
+      await act(async () => trigger?.click())
+    }
+
+    await openActions('原模板')
+    const rename = Array.from(
+      container.querySelectorAll<HTMLButtonElement>('[role="dialog"] button'),
+    ).find((button) => button.textContent === '重命名')
+    await act(async () => rename?.click())
+    const renameInput = container.querySelector<HTMLInputElement>('aside input')!
+    await act(async () => changeInput(renameInput, '采购模板'))
+    const saveName = Array.from(container.querySelectorAll<HTMLButtonElement>('aside button')).find(
+      (button) => button.textContent === '保存名称',
+    )
+    await act(async () => saveName?.click())
+    expect(update).toHaveBeenCalledWith(
+      1,
+      expect.objectContaining({ title: '采购模板', expectedVersion: 1 }),
+      expect.any(AbortSignal),
+    )
+    expect(container.textContent).toContain('已重命名为“采购模板”')
+    expect(get).toHaveBeenCalledTimes(3)
+
+    await openActions('采购模板')
+    const duplicate = Array.from(
+      container.querySelectorAll<HTMLButtonElement>('[role="dialog"] button'),
+    ).find((button) => button.textContent === '创建副本')
+    await act(async () => duplicate?.click())
+    expect(create).toHaveBeenCalledWith(
+      expect.objectContaining({ title: '原模板 副本' }),
+      expect.any(AbortSignal),
+    )
+    expect(container.textContent).toContain('原模板 副本')
+
+    await openActions('采购模板')
+    const deleteAction = Array.from(
+      container.querySelectorAll<HTMLButtonElement>('[role="dialog"] button'),
+    ).find((button) => button.textContent === '删除模板')
+    await act(async () => deleteAction?.click())
+    expect(container.querySelector('[role="alertdialog"]')?.textContent).toContain('无法撤销')
+    const confirmDelete = Array.from(container.querySelectorAll<HTMLButtonElement>('button')).find(
+      (button) => button.textContent === '永久删除',
+    )
+    await act(async () => confirmDelete?.click())
+    expect(remove).toHaveBeenCalledWith(1, expect.any(AbortSignal))
+    expect(document.activeElement).toBe(container.querySelector('#workspace-files'))
+    expect(container.querySelector('[role="menu"]')).toBeNull()
+    expect(container.querySelector('[role="menuitem"]')).toBeNull()
+  })
+
+  it('dismisses the card action popover on Escape or outside pointer and restores trigger focus', async () => {
+    const onOpen = vi.fn()
+    await render(fakeApi({ list: vi.fn(async () => [summary(1, '采购模板')]) }), vi.fn(), onOpen)
+    const trigger = container.querySelector<HTMLButtonElement>(
+      'button[aria-label="模板操作 采购模板"]',
+    )!
+
+    trigger.focus()
+    await act(async () => trigger.click())
+    expect(trigger.getAttribute('aria-haspopup')).toBe('dialog')
+    expect(container.querySelector('[role="dialog"]')).not.toBeNull()
+    expect(onOpen).not.toHaveBeenCalled()
+
+    await act(async () => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' })))
+    expect(container.querySelector('[role="dialog"]')).toBeNull()
+    expect(document.activeElement).toBe(trigger)
+
+    await act(async () => trigger.click())
+    await act(async () =>
+      container
+        .querySelector('#workspace-files')
+        ?.dispatchEvent(new Event('pointerdown', { bubbles: true })),
+    )
+    expect(container.querySelector('[role="dialog"]')).toBeNull()
+    expect(onOpen).not.toHaveBeenCalled()
+  })
+
+  it('keeps a failed rename sheet open with its draft and prevents duplicate submission', async () => {
+    let rejectUpdate: ((reason?: unknown) => void) | undefined
+    const update = vi.fn<TemplateApi['update']>(
+      () =>
+        new Promise<TemplateRecord>((_resolve, reject) => {
+          rejectUpdate = reject
+        }),
+    )
+    await render(
+      fakeApi({
+        list: vi.fn(async () => [summary(1, '原模板')]),
+        get: vi.fn(async () => record(1, '原模板')),
+        update,
+      }),
+    )
+
+    const trigger = container.querySelector<HTMLButtonElement>(
+      'button[aria-label="模板操作 原模板"]',
+    )!
+    await act(async () => trigger.click())
+    const rename = Array.from(
+      container.querySelectorAll<HTMLButtonElement>('[role="dialog"] button'),
+    ).find((button) => button.textContent === '重命名')!
+    await act(async () => rename.click())
+    const input = container.querySelector<HTMLInputElement>('aside input')!
+    await act(async () => changeInput(input, '采购模板'))
+    const form = container.querySelector<HTMLFormElement>('aside form')!
+    await act(async () => form.requestSubmit())
+
+    const pendingSubmit = container.querySelector<HTMLButtonElement>('aside button[type="submit"]')!
+    expect(pendingSubmit.disabled).toBe(true)
+    await act(async () => form.requestSubmit())
+    expect(update).toHaveBeenCalledTimes(1)
+
+    await act(async () => rejectUpdate?.(new TemplateApiError('network', 'offline', undefined)))
+    expect(container.querySelector('aside')).not.toBeNull()
+    expect(container.querySelector<HTMLInputElement>('aside input')?.value).toBe('采购模板')
+    expect(container.querySelector('aside [role="alert"]')?.textContent).toContain('重命名未完成')
+  })
+
+  it('keeps a failed delete dialog open and prevents duplicate destructive requests', async () => {
+    let rejectDelete: ((reason?: unknown) => void) | undefined
+    const remove = vi.fn<TemplateApi['delete']>(
+      () =>
+        new Promise<void>((_resolve, reject) => {
+          rejectDelete = reject
+        }),
+    )
+    await render(fakeApi({ list: vi.fn(async () => [summary(1, '采购模板')]), delete: remove }))
+
+    const trigger = container.querySelector<HTMLButtonElement>(
+      'button[aria-label="模板操作 采购模板"]',
+    )!
+    await act(async () => trigger.click())
+    const removeAction = Array.from(
+      container.querySelectorAll<HTMLButtonElement>('[role="dialog"] button'),
+    ).find((button) => button.textContent === '删除模板')!
+    await act(async () => removeAction.click())
+    const confirm = Array.from(container.querySelectorAll<HTMLButtonElement>('button')).find(
+      (button) => button.textContent === '永久删除',
+    )!
+    await act(async () => confirm.click())
+    expect(confirm.disabled).toBe(true)
+    await act(async () => confirm.click())
+    expect(remove).toHaveBeenCalledTimes(1)
+
+    await act(async () => rejectDelete?.(new TemplateApiError('server', 'failed', 500)))
+    expect(container.querySelector('[role="alertdialog"]')).not.toBeNull()
+    expect(container.querySelector('[role="alertdialog"] [role="alert"]')?.textContent).toContain(
+      '删除未完成',
+    )
+  })
+
   it('aborts bounded detail requests when the recent section is replaced', async () => {
     const signals: AbortSignal[] = []
     const pendingGet = vi.fn<TemplateApi['get']>(

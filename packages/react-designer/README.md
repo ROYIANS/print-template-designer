@@ -31,6 +31,7 @@ export function Editor({ initialValue }: { initialValue: TemplateSchema }) {
           open: {},
           save: { pending: saving },
           saveAs: {},
+          versionHistory: {},
         },
         onCommand: async (command, context) => {
           if (command === 'save') {
@@ -111,7 +112,9 @@ interface DesignerHost {
 - Promise 执行期间 Designer 还会维护实例级 Pending，避免 Host 状态更新前的连续双击。
 - `Ctrl/Cmd+S/N/O` 与 `Ctrl/Cmd+Shift+S` 只在相应 Host 命令当前可执行时拦截。
 - `onCommand` 收到的是执行时的最新 `TemplateSchema`，不是网络记录、Session 或 Token。
-- New/Open/Save/Save As 的确认、API、错误提示、冲突处理和路由均由 Host 负责。
+- New/Open/Save/Save As/Version History/Restore 的确认、API、错误提示、冲突处理和路由均由 Host 负责。
+- File → Version History 只分发 `versionHistory` Host intent；历史列表、真实快照预览、恢复确认和
+  `expectedVersion` 属于 Host，不进入 Designer package。
 - 当前公共 Host ID 还覆盖模板浏览器、版本历史/恢复、模板导入导出、预览、打印、文档导出与帮助入口；
   `DESIGNER_HOST_COMMAND_IDS` 可用于建立穷尽映射。
 

@@ -137,6 +137,9 @@ import '@ptd/react-designer/styles.css'
   Host-owned; Designer must not introduce a template-browser Modal or infer routing from document id.
 - Save may create an unsaved document immediately using Host-selected/default metadata. Save As may
   open a non-modal Host command sheet. Neither interaction surface enters the Designer package.
+- Version History is a File-menu Host intent. The Host owns version list/detail requests, real snapshot
+  preview, restore confirmation, `expectedVersion`, request cancellation and 409 handling; Designer owns
+  no version records and never applies a restore snapshot internally.
 - `Ctrl/Cmd+S/N/O` and `Ctrl/Cmd+Shift+S` execute only a currently enabled, non-pending declared
   Host command and yield to rich text, table cells, form controls and Portal menus.
 - `DesignerDocumentState` exposes optional id/title/version plus
@@ -149,9 +152,10 @@ import '@ptd/react-designer/styles.css'
   View owns ruler and guide assistance without repeating Status Bar zoom; Help dispatches real Host help
   commands. Selection operations such as grouping, locking and layer movement stay in the Context Bar,
   Canvas context menu and keyboard paths rather than creating a duplicate Object category. Window is not
-  used solely to mirror panel toggles. A small number of stable near-term capabilities such as Version
-  History, Template Inspection and Fit Page may appear disabled as `即将提供`, but a category must retain
-  real executable actions and user-visible reasons must never expose internal delivery or integration copy.
+  used solely to mirror panel toggles. Version History is executable when the Host declares a saved document
+  capability. A small number of stable near-term capabilities such as Template Inspection and Fit Page may
+  appear disabled as `即将提供`, but a category must retain real executable actions and user-visible reasons
+  must never expose internal delivery or integration copy.
 
 #### History and gestures
 

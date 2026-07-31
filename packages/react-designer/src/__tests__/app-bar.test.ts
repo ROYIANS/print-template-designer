@@ -261,7 +261,7 @@ describe('AppBar application menu', () => {
     expect(panel().textContent).toContain('保存模板')
     expect(panel().textContent).toContain('另存为')
     expect(panel().textContent).toContain('版本历史')
-    expect(command('版本历史').disabled).toBe(true)
+    expect(command('版本历史').disabled).toBe(false)
 
     act(() => trigger('模板').click())
     expect(panel().textContent).toContain('页面设置')

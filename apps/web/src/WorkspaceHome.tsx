@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { TemplatePreview } from '@ptd/react-designer'
 import {
   TemplateApiError,
@@ -7,6 +7,8 @@ import {
   type TemplateSummary,
 } from './templateApi'
 import { MAX_RECENT_TEMPLATE_PREVIEWS, useRecentTemplateDetails } from './useRecentTemplateDetails'
+import { SaveAsSheet } from './SaveAsSheet'
+import { DeleteTemplateDialog } from './WorkspaceDialogs'
 import styles from './WorkspaceHome.module.css'
 
 type HomeState =
@@ -15,6 +17,7 @@ type HomeState =
   | { kind: 'error'; message: string }
 
 const EMPTY_TEMPLATES: TemplateSummary[] = []
+type FileAction = 'rename' | 'duplicate' | 'delete'
 
 interface WorkspaceHomeProps {
   api?: TemplateApi
@@ -29,6 +32,29 @@ function loadError(error: unknown): string {
   if (error.kind === 'forbidden') return '当前账户没有读取模板的权限。'
   if (error.kind === 'network') return '无法连接模板服务，请检查网络后重试。'
   return error.message
+}
+
+function actionError(error: unknown, action: FileAction): string {
+  const label = action === 'rename' ? '重命名' : action === 'duplicate' ? '创建副本' : '删除'
+  if (!(error instanceof TemplateApiError)) return `${label}模板失败，请稍后重试。`
+  switch (error.kind) {
+    case 'unauthorized':
+      return '登录状态已失效，请重新登录后继续。'
+    case 'forbidden':
+      return `当前账户没有${label}模板的权限。`
+    case 'not-found':
+      return '模板已不存在，请重新载入文件列表。'
+    case 'conflict':
+      return `模板已在其他位置更新，请重新载入后再${label}。`
+    case 'network':
+      return `无法连接模板服务，${label}未完成，请检查网络后重试。`
+    case 'bad-request':
+      return `${label}内容未通过服务端校验，请检查后重试。`
+    case 'invalid-response':
+      return `模板服务返回了异常数据，无法确认${label}结果。`
+    case 'server':
+      return `模板服务暂时不可用，${label}未完成，请稍后重试。`
+  }
 }
 
 function isAbortError(error: unknown): boolean {
@@ -91,6 +117,13 @@ function TemplateGallery({
   details,
   onOpen,
   onRetry,
+  actionMenuId,
+  pendingId,
+  actionsPending,
+  onToggleActions,
+  onRename,
+  onDuplicate,
+  onDelete,
 }: {
   title: string
   templates: TemplateSummary[]
@@ -98,7 +131,39 @@ function TemplateGallery({
   details: ReturnType<typeof useRecentTemplateDetails>
   onOpen(templateId: number): void
   onRetry(): void
+  actionMenuId?: number
+  pendingId?: number
+  actionsPending: boolean
+  onToggleActions(templateId?: number): void
+  onRename(template: TemplateSummary): void
+  onDuplicate(template: TemplateSummary): void
+  onDelete(template: TemplateSummary): void
 }) {
+  const actionRootRefs = useRef(new Map<number, HTMLDivElement>())
+  const actionTriggerRefs = useRef(new Map<number, HTMLButtonElement>())
+
+  useEffect(() => {
+    if (actionMenuId === undefined) return
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target
+      if (target instanceof Node && actionRootRefs.current.get(actionMenuId)?.contains(target))
+        return
+      onToggleActions(undefined)
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return
+      event.preventDefault()
+      onToggleActions(undefined)
+      actionTriggerRefs.current.get(actionMenuId)?.focus()
+    }
+    document.addEventListener('pointerdown', onPointerDown)
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown)
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [actionMenuId, onToggleActions])
+
   return (
     <section className={styles.gallerySection} aria-labelledby="workspace-gallery-title">
       <header className={styles.sectionHeader}>
@@ -159,6 +224,52 @@ function TemplateGallery({
                   重试预览
                 </button>
               ) : null}
+              <div
+                ref={(node) => {
+                  if (node) actionRootRefs.current.set(summary.id, node)
+                  else actionRootRefs.current.delete(summary.id)
+                }}
+                className={styles.cardActions}
+                onClick={(event) => event.stopPropagation()}
+              >
+                <button
+                  ref={(node) => {
+                    if (node) actionTriggerRefs.current.set(summary.id, node)
+                    else actionTriggerRefs.current.delete(summary.id)
+                  }}
+                  type="button"
+                  aria-label={`模板操作 ${summary.title}`}
+                  aria-haspopup="dialog"
+                  aria-expanded={actionMenuId === summary.id}
+                  aria-controls={`template-actions-${summary.id}`}
+                  disabled={actionsPending}
+                  onPointerDown={(event) => event.stopPropagation()}
+                  onClick={() =>
+                    onToggleActions(actionMenuId === summary.id ? undefined : summary.id)
+                  }
+                >
+                  {pendingId === summary.id ? '…' : '•••'}
+                </button>
+                {actionMenuId === summary.id ? (
+                  <div
+                    id={`template-actions-${summary.id}`}
+                    className={styles.actionMenu}
+                    role="dialog"
+                    aria-label={`${summary.title} 操作`}
+                    onPointerDown={(event) => event.stopPropagation()}
+                  >
+                    <button type="button" onClick={() => onRename(summary)}>
+                      重命名
+                    </button>
+                    <button type="button" onClick={() => onDuplicate(summary)}>
+                      创建副本
+                    </button>
+                    <button type="button" data-danger onClick={() => onDelete(summary)}>
+                      删除模板
+                    </button>
+                  </div>
+                ) : null}
+              </div>
             </article>
           )
         })}
@@ -178,6 +289,17 @@ export function WorkspaceHome({
   const [query, setQuery] = useState('')
   const [activeSection, setActiveSection] = useState<'recent' | 'all'>('recent')
   const [state, setState] = useState<HomeState>({ kind: 'loading' })
+  const [actionMenuId, setActionMenuId] = useState<number>()
+  const [pendingAction, setPendingAction] = useState<{ kind: FileAction; templateId: number }>()
+  const [renameTarget, setRenameTarget] = useState<TemplateSummary>()
+  const [renameError, setRenameError] = useState<string>()
+  const [deleteTarget, setDeleteTarget] = useState<TemplateSummary>()
+  const [deleteError, setDeleteError] = useState<string>()
+  const [notice, setNotice] = useState<{ kind: 'success' | 'error'; message: string }>()
+  const actionRequestRef = useRef<AbortController>()
+  const actionPendingRef = useRef(false)
+
+  useEffect(() => () => actionRequestRef.current?.abort(), [])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -195,6 +317,111 @@ export function WorkspaceHome({
     setReloadToken((value) => value + 1)
   }
 
+  const replaceSummary = (record: TemplateSummary) => {
+    setState((current) =>
+      current.kind === 'ready'
+        ? {
+            kind: 'ready',
+            templates: current.templates
+              .map((item) => (item.id === record.id ? record : item))
+              .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt)),
+          }
+        : current,
+    )
+  }
+
+  const runAction = async (
+    kind: FileAction,
+    templateId: number,
+    action: (signal: AbortSignal) => Promise<void>,
+    onError: (message: string) => void,
+  ) => {
+    if (actionPendingRef.current) return false
+    actionPendingRef.current = true
+    const controller = new AbortController()
+    actionRequestRef.current = controller
+    setActionMenuId(undefined)
+    setPendingAction({ kind, templateId })
+    setNotice(undefined)
+    try {
+      await action(controller.signal)
+      return true
+    } catch (error) {
+      if (!isAbortError(error)) onError(actionError(error, kind))
+      return false
+    } finally {
+      if (actionRequestRef.current === controller) {
+        actionPendingRef.current = false
+        actionRequestRef.current = undefined
+        if (!controller.signal.aborted) setPendingAction(undefined)
+      }
+    }
+  }
+
+  const rename = async (target: TemplateSummary, title: string) => {
+    setRenameError(undefined)
+    return runAction(
+      'rename',
+      target.id,
+      async (signal) => {
+        const record = await api.get(target.id, signal)
+        const content = { ...record.content, pageConfig: { ...record.content.pageConfig, title } }
+        const updated = await api.update(
+          target.id,
+          { title, content, expectedVersion: record.version },
+          signal,
+        )
+        replaceSummary(updated)
+        setPreviewRetryToken((value) => value + 1)
+        setRenameTarget(undefined)
+        setNotice({ kind: 'success', message: `已重命名为“${updated.title}”` })
+      },
+      setRenameError,
+    )
+  }
+
+  const duplicate = (target: TemplateSummary) =>
+    runAction(
+      'duplicate',
+      target.id,
+      async (signal) => {
+        const record = await api.get(target.id, signal)
+        const title = `${record.title} 副本`.slice(0, 120)
+        const content = { ...record.content, pageConfig: { ...record.content.pageConfig, title } }
+        const created = await api.create({ title, content }, signal)
+        setState((current) =>
+          current.kind === 'ready'
+            ? { kind: 'ready', templates: [created, ...current.templates] }
+            : current,
+        )
+        setNotice({ kind: 'success', message: `已创建“${created.title}”` })
+      },
+      (message) => setNotice({ kind: 'error', message }),
+    )
+
+  const remove = async (target: TemplateSummary) => {
+    setDeleteError(undefined)
+    return runAction(
+      'delete',
+      target.id,
+      async (signal) => {
+        await api.delete(target.id, signal)
+        setState((current) =>
+          current.kind === 'ready'
+            ? {
+                kind: 'ready',
+                templates: current.templates.filter((item) => item.id !== target.id),
+              }
+            : current,
+        )
+        setDeleteTarget(undefined)
+        setNotice({ kind: 'success', message: `已删除“${target.title}”` })
+        document.getElementById('workspace-files')?.focus()
+      },
+      setDeleteError,
+    )
+  }
+
   const templates = state.kind === 'ready' ? state.templates : EMPTY_TEMPLATES
   const normalizedQuery = query.trim().toLocaleLowerCase('zh-CN')
   const filteredTemplates = useMemo(
@@ -207,10 +434,7 @@ export function WorkspaceHome({
     [normalizedQuery, templates],
   )
   const previewIds = useMemo(
-    () =>
-      filteredTemplates
-        .slice(0, MAX_RECENT_TEMPLATE_PREVIEWS)
-        .map((template) => template.id),
+    () => filteredTemplates.slice(0, MAX_RECENT_TEMPLATE_PREVIEWS).map((template) => template.id),
     [filteredTemplates],
   )
   const details = useRecentTemplateDetails(api, previewIds, previewRetryToken)
@@ -339,10 +563,56 @@ export function WorkspaceHome({
               details={details}
               onOpen={onOpen}
               onRetry={() => setPreviewRetryToken((value) => value + 1)}
+              actionMenuId={actionMenuId}
+              pendingId={pendingAction?.templateId}
+              actionsPending={pendingAction !== undefined}
+              onToggleActions={setActionMenuId}
+              onRename={(template) => {
+                setActionMenuId(undefined)
+                setRenameError(undefined)
+                setRenameTarget(template)
+              }}
+              onDuplicate={(template) => void duplicate(template)}
+              onDelete={(template) => {
+                setActionMenuId(undefined)
+                setDeleteError(undefined)
+                setDeleteTarget(template)
+              }}
             />
           </div>
         ) : null}
       </div>
+      {notice ? (
+        <div
+          className={styles.notice}
+          data-kind={notice.kind}
+          role={notice.kind === 'error' ? 'alert' : 'status'}
+        >
+          {notice.message}
+          <button type="button" aria-label="关闭文件操作提示" onClick={() => setNotice(undefined)}>
+            ×
+          </button>
+        </div>
+      ) : null}
+      {renameTarget ? (
+        <SaveAsSheet
+          mode="rename"
+          defaultValue={renameTarget.title}
+          pending={pendingAction?.kind === 'rename'}
+          error={renameError}
+          onClose={() => setRenameTarget(undefined)}
+          onConfirm={(title) => rename(renameTarget, title).then(() => undefined)}
+        />
+      ) : null}
+      {deleteTarget ? (
+        <DeleteTemplateDialog
+          title={deleteTarget.title}
+          pending={pendingAction?.kind === 'delete'}
+          error={deleteError}
+          onCancel={() => setDeleteTarget(undefined)}
+          onDelete={() => remove(deleteTarget).then(() => undefined)}
+        />
+      ) : null}
     </main>
   )
 }

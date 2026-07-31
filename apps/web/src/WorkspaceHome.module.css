@@ -388,6 +388,74 @@
   min-width: 0;
 }
 
+.cardActions {
+  position: absolute;
+  z-index: 5;
+  top: 9px;
+  right: 9px;
+}
+
+.cardActions > button {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid rgb(0 0 0 / 10%);
+  border-radius: 4px;
+  color: var(--home-ink);
+  background: rgb(255 255 255 / 92%);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 7%);
+  font:
+    11px Outfit,
+    sans-serif;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+}
+
+.cardActions > button:disabled {
+  cursor: wait;
+}
+
+.actionMenu {
+  position: absolute;
+  top: 44px;
+  right: 0;
+  width: 132px;
+  display: grid;
+  gap: 2px;
+  padding: 5px;
+  border: 1px solid var(--home-line-strong);
+  border-radius: 4px;
+  background: var(--home-paper);
+  box-shadow: 0 14px 32px rgb(0 0 0 / 12%);
+}
+
+.actionMenu button {
+  min-height: 30px;
+  padding: 5px 8px;
+  border: 0;
+  border-radius: 6px;
+  color: var(--home-ink-soft);
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.actionMenu button:hover,
+.actionMenu button:focus-visible {
+  background: var(--home-surface-muted);
+}
+
+.cardActions > button:focus-visible,
+.actionMenu button:focus-visible {
+  outline: 2px solid var(--foliq-focus);
+  outline-offset: 2px;
+}
+
+.actionMenu button[data-danger] {
+  color: oklch(46% 0.17 27);
+}
+
 .fileCard > button:first-child {
   width: 100%;
   min-width: 0;
@@ -549,6 +617,39 @@
   transform: translate(-50%, 34px);
 }
 
+.notice {
+  position: fixed;
+  z-index: 1300;
+  right: 20px;
+  bottom: 20px;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 8px 8px 14px;
+  border: 1px solid var(--home-line-strong);
+  border-radius: 9px;
+  color: var(--home-ink-soft);
+  background: var(--home-paper);
+  box-shadow: 0 14px 32px rgb(0 0 0 / 12%);
+}
+
+.notice button {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  color: var(--home-ink-muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.notice[data-kind='error'] {
+  border-color: oklch(70% 0.09 27);
+  color: oklch(46% 0.17 27);
+}
+
 .brand:focus-visible,
 .sidebar nav button:focus-visible,
 .newButton:focus-visible,
@@ -699,7 +800,9 @@
   .systemState > button,
   .noResults button,
   .retryPreview,
-  .fileCard > button {
+  .fileCard > button,
+  .cardActions > button,
+  .actionMenu button {
     min-height: 44px;
   }
 }

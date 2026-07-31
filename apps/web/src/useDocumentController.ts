@@ -27,6 +27,7 @@ export interface DocumentController {
   openDocument(templateId: number): void
   save(template?: TemplateSchema): Promise<boolean>
   saveAs(title: string, template?: TemplateSchema): Promise<boolean>
+  restoreVersion(version: number): Promise<boolean>
 }
 
 function cloneTemplate(template: TemplateSchema): TemplateSchema {
@@ -110,7 +111,16 @@ export function documentHostCommandStates(state: DocumentState): DesignerHostCom
       pending: state.status === 'saving',
       reason: unavailableReason ?? busyReason,
     },
-    versionHistory: { enabled: false, reason: '版本历史将在下一批接入' },
+    versionHistory: {
+      enabled: !busy && !unavailable && state.id !== undefined && state.serverVersion !== undefined,
+      pending: busy,
+      reason:
+        state.id === undefined
+          ? '请先保存模板'
+          : state.serverVersion === undefined
+            ? '模板尚未成功载入'
+            : (unavailableReason ?? busyReason),
+    },
     restoreVersion: { enabled: false, reason: '请先从版本历史选择要恢复的版本' },
   }
 }
@@ -135,7 +145,7 @@ function isAbortError(error: unknown) {
   return error instanceof DOMException && error.name === 'AbortError'
 }
 
-function errorMessage(error: unknown, action: '载入' | '保存'): string {
+function errorMessage(error: unknown, action: '载入' | '保存' | '恢复'): string {
   if (!(error instanceof TemplateApiError)) return `${action}模板时发生未知错误，请重试。`
   switch (error.kind) {
     case 'unauthorized':
@@ -153,7 +163,9 @@ function errorMessage(error: unknown, action: '载入' | '保存'): string {
     case 'server':
       return '模板服务暂时不可用，请稍后重试。'
     case 'conflict':
-      return '服务器上的模板已有更新。为避免覆盖他人修改，本次保存已停止。'
+      return action === '恢复'
+        ? '服务器上的模板已有更新。为避免覆盖新版本，本次恢复已停止；请重新打开模板后再试。'
+        : '服务器上的模板已有更新。为避免覆盖他人修改，本次保存已停止。'
   }
 }
 
@@ -166,6 +178,7 @@ export function useDocumentController({
   const stateRef = useRef(state)
   const operationRef = useRef(0)
   const requestRef = useRef<AbortController>()
+  const restoreOperationRef = useRef<number>()
   const mountedRef = useRef(true)
 
   const commit = useCallback((update: (previous: DocumentState) => DocumentState) => {
@@ -180,6 +193,7 @@ export function useDocumentController({
     operationRef.current += 1
     requestRef.current?.abort()
     requestRef.current = undefined
+    restoreOperationRef.current = undefined
   }, [])
 
   const beginRequest = useCallback(() => {
@@ -408,8 +422,55 @@ export function useDocumentController({
     [persist],
   )
 
+  const restoreVersion = useCallback(
+    async (version: number) => {
+      const previous = stateRef.current
+      if (
+        restoreOperationRef.current !== undefined ||
+        previous.id === undefined ||
+        previous.serverVersion === undefined ||
+        previous.status === 'loading' ||
+        previous.status === 'saving' ||
+        previous.status === 'error' ||
+        previous.status === 'conflict'
+      ) {
+        return false
+      }
+      const { controller, operation } = beginRequest()
+      restoreOperationRef.current = operation
+      commit((current) => ({
+        ...current,
+        status: 'saving',
+        message: `正在将版本 ${version} 恢复为最新版本…`,
+      }))
+      try {
+        const record = await api.restore(
+          previous.id,
+          version,
+          previous.serverVersion,
+          controller.signal,
+        )
+        if (!isCurrentOperation(operation)) return false
+        applyRecord(record, `已从版本 ${version} 恢复 · 当前版本 ${record.version}`)
+        return true
+      } catch (error) {
+        if (isAbortError(error) || !isCurrentOperation(operation)) return false
+        const conflict = error instanceof TemplateApiError && error.kind === 'conflict'
+        commit((current) => ({
+          ...current,
+          status: conflict ? 'conflict' : 'error',
+          message: errorMessage(error, '恢复'),
+        }))
+        return false
+      } finally {
+        if (restoreOperationRef.current === operation) restoreOperationRef.current = undefined
+      }
+    },
+    [api, applyRecord, beginRequest, commit, isCurrentOperation],
+  )
+
   return useMemo(
-    () => ({ state, setCurrentTemplate, newDocument, openDocument, save, saveAs }),
-    [newDocument, openDocument, save, saveAs, setCurrentTemplate, state],
+    () => ({ state, setCurrentTemplate, newDocument, openDocument, save, saveAs, restoreVersion }),
+    [newDocument, openDocument, restoreVersion, save, saveAs, setCurrentTemplate, state],
   )
 }

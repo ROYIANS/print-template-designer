@@ -64,6 +64,15 @@
   line-height: 1.65;
 }
 
+.error {
+  margin: -6px 18px 18px;
+  padding: 10px 12px;
+  border-left: 3px solid oklch(46% 0.17 27);
+  color: oklch(46% 0.17 27);
+  background: oklch(97% 0.025 27);
+  line-height: 1.55;
+}
+
 .dialog footer {
   min-height: 56px;
   display: flex;
@@ -93,9 +102,20 @@
   background: oklch(46% 0.17 27);
 }
 
+.dialog button[data-primary]:not([data-danger]) {
+  border-color: var(--foliq-accent);
+  color: white;
+  background: var(--foliq-accent);
+}
+
 .dialog button:focus-visible {
   outline: 2px solid oklch(54% 0.12 258);
   outline-offset: 2px;
+}
+
+.dialog button:disabled {
+  cursor: not-allowed;
+  opacity: 0.52;
 }
 
 @media (max-width: 520px) {

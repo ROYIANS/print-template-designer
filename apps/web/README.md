@@ -17,14 +17,20 @@ React + Vite 的设计器 Host，也是 GHCR Web 镜像和完整自托管栈的�
    显示“进入本地工作台”，直接访问 `/app` 无需 OAuth 跳转。
 6. 获准后由 Web Document Controller 持有当前模板、服务器保存基线、文档 ID、版本和
    `clean | dirty | saving | loading | error | conflict` 状态，并以 controlled 方式渲染 Designer。
-7. New、Open、Save、Save As 与 Template Browser 通过 `DesignerHost` 接入同源模板 API。Open 与
-   Template Browser 统一返回文件工作台；clean 文档不阻断，dirty/conflict 文档先显示未保存确认。
+7. New、Open、Save、Save As、Template Browser 与 Version History 通过 `DesignerHost` 接入同源
+   模板 API。Open 与 Template Browser 统一返回文件工作台；clean 文档不阻断，dirty/conflict 文档
+   先显示未保存确认。
 8. 第一次 Save 直接使用当前页面标题 POST，不弹命名框；后续保存携带 `expectedVersion`；Save As 使用
    非模态 Command Sheet。409 会停止保存并进入 Conflict，不会自动覆盖。
 9. 首次保存、另存为和文件工作台打开会同步 canonical URL，刷新、前进与后退都会按地址恢复明确的
    Home、新建 Editor 或已保存 Editor 状态。
 10. Home 与 Editor 复用真实账户 Popover；GitHub 身份可从显式菜单项退出，Dev Auth Bypass 只标识本地
     身份而不显示无效退出。最近区最多读取 4 份模板详情并在卸载时取消，全部列表不追加详情请求。
+11. 文件卡片提供轻量操作 Popover：重命名会以 `expectedVersion` 创建新版本，创建副本会建立独立文档，
+    永久删除必须经过明确的风险确认；普通成功与失败反馈不额外打断文件浏览。
+12. File → Version History 打开非模态 Side Sheet，按需读取版本详情并使用真实 `TemplatePreview` 预览；
+    恢复旧快照前明确确认，并把快照写成新的最新版本。恢复携带当前 `expectedVersion`，409 后停止恢复、
+    保留历史浏览并要求重新打开服务器文档，不会静默覆盖。
 
 `src/templateApi.ts` 覆盖模板 CRUD 和版本 list/get/restore 合同，负责 Cookie、AbortSignal、成功响应
 运行时校验和结构化 HTTP/网络错误。`src/useDocumentController.ts` 负责文档状态机和请求竞态；Dirty
@@ -67,13 +73,13 @@ corepack pnpm --filter web build
 
 ## 下一阶段
 
-模板持久化第二批仍需增加：
+当前持久化闭环之后的独立增强包括：
 
-- 文件工作台中的排序、重命名、复制和不可恢复硬删除确认；标题客户端过滤已经完成，服务端全文搜索
-  需要独立 API 合同。
-- Version History Drawer、历史快照查看与 Restore UI；底层 API Client 已提供对应方法。
-- 409 Conflict 的服务器版本对比和可操作解决界面；当前第一批只保证不覆盖并允许另存为/重新打开。
-- 浏览器关闭或离开工作台时的统一未保存保护。
-- 作为独立后续能力设计的本地崩溃恢复草稿与自动保存。
+- 文件排序、服务端全文搜索、收藏、预设模板与真正的最近打开活动；当前只能准确使用 `updatedAt`
+  表达“最近更新”。
+- 409 Conflict 的服务器版本差异对比和更细的解决界面；当前已经保证不覆盖，并允许另存为或返回工作台
+  重新打开服务器版本。
+- 作为独立能力设计的本地崩溃恢复草稿与自动保存。
+- 软删除与回收站；在 Server 仍使用不可恢复硬删除时不提供假的回收站入口。
 
 Datasource、预览、打印、PDF/Word 与 Export 不属于 Web 模板持久化批次。

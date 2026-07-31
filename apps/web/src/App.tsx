@@ -28,8 +28,9 @@ import {
   shouldConfirmDocumentExit,
   useDocumentController,
 } from './useDocumentController'
-import { UnsavedDialog } from './WorkspaceDialogs'
+import { RestoreVersionDialog, UnsavedDialog } from './WorkspaceDialogs'
 import { WorkspaceHome } from './WorkspaceHome'
+import { VersionHistorySheet } from './VersionHistorySheet'
 import styles from './App.module.css'
 
 interface LocationState {
@@ -121,8 +122,7 @@ export function useBrowserLocation() {
         return
       }
 
-      const delta =
-        targetIndex === undefined ? -1 : targetIndex - currentIndexRef.current
+      const delta = targetIndex === undefined ? -1 : targetIndex - currentIndexRef.current
       const proceed = () => {
         bypassPopRef.current = true
         window.history.go(delta)
@@ -245,6 +245,12 @@ function WorkspaceEditor({
   const [helpSheet, setHelpSheet] = useState<HelpSheetView>()
   const [pendingNavigation, setPendingNavigation] = useState<(() => void) | undefined>()
   const [saveAsOpen, setSaveAsOpen] = useState(false)
+  const [saveAsPending, setSaveAsPending] = useState(false)
+  const [saveAsError, setSaveAsError] = useState<string>()
+  const [versionHistoryOpen, setVersionHistoryOpen] = useState(false)
+  const [restoreVersion, setRestoreVersion] = useState<number>()
+  const [restorePending, setRestorePending] = useState(false)
+  const [restoreError, setRestoreError] = useState<string>()
   const allowUnloadRef = useRef(false)
   const requestedTemplateId =
     view.kind === 'template'
@@ -263,12 +269,34 @@ function WorkspaceEditor({
     },
   })
   const hasUnsavedChanges = shouldConfirmDocumentExit(document.state)
+  const restoreDisabledReason =
+    document.state.status === 'conflict'
+      ? '服务器版本已变化，请重新打开模板后再恢复'
+      : document.state.status === 'error'
+        ? '当前模板处于错误状态，请重新打开后再恢复'
+        : document.state.status === 'loading'
+          ? '请等待模板载入完成'
+          : document.state.status === 'saving'
+            ? '请等待当前操作完成'
+            : document.state.id === undefined || document.state.serverVersion === undefined
+              ? '请先保存模板'
+              : undefined
+  const canRestore = restoreDisabledReason === undefined
+
+  const closeTransientSurfaces = useCallback(() => {
+    setSaveAsOpen(false)
+    setSaveAsError(undefined)
+    setHelpSheet(undefined)
+    setVersionHistoryOpen(false)
+    setRestoreVersion(undefined)
+    setRestoreError(undefined)
+  }, [])
 
   useEffect(
     () =>
       registerBlocker((proceed) => {
         if (!hasUnsavedChanges) return false
-        setSaveAsOpen(false)
+        closeTransientSurfaces()
         setPendingNavigation(() => () => {
           allowUnloadRef.current = true
           proceed()
@@ -276,7 +304,7 @@ function WorkspaceEditor({
         setDialog('leave')
         return true
       }),
-    [hasUnsavedChanges, registerBlocker],
+    [closeTransientSurfaces, hasUnsavedChanges, registerBlocker],
   )
 
   useEffect(() => {
@@ -291,9 +319,9 @@ function WorkspaceEditor({
   }, [hasUnsavedChanges])
 
   const requestHome = useCallback(() => {
-    setSaveAsOpen(false)
+    closeTransientSurfaces()
     navigate('/app')
-  }, [navigate])
+  }, [closeTransientSurfaces, navigate])
 
   const host = useMemo<DesignerHost>(
     () => ({
@@ -313,33 +341,36 @@ function WorkspaceEditor({
       onCommand: async (command: DesignerHostCommandId, context) => {
         switch (command) {
           case 'new':
-            setSaveAsOpen(false)
-            setHelpSheet(undefined)
+            closeTransientSurfaces()
             if (hasUnsavedChanges) setDialog('new')
             else document.newDocument()
             return
           case 'open':
           case 'templateBrowser':
-            setHelpSheet(undefined)
             requestHome()
             return
           case 'save':
             await document.save(context.template)
             return
           case 'saveAs':
-            setHelpSheet(undefined)
+            closeTransientSurfaces()
+            setSaveAsError(undefined)
             setSaveAsOpen(true)
             return
+          case 'versionHistory':
+            closeTransientSurfaces()
+            setVersionHistoryOpen(true)
+            return
           case 'keyboardShortcuts':
-            setSaveAsOpen(false)
+            closeTransientSurfaces()
             setHelpSheet('shortcuts')
             return
           case 'documentation':
-            setHelpSheet(undefined)
+            closeTransientSurfaces()
             runGuarded(() => window.location.assign('/#product'))
             return
           case 'about':
-            setSaveAsOpen(false)
+            closeTransientSurfaces()
             setHelpSheet('about')
             return
           default:
@@ -347,7 +378,7 @@ function WorkspaceEditor({
         }
       },
     }),
-    [document, hasUnsavedChanges, requestHome, runGuarded],
+    [closeTransientSurfaces, document, hasUnsavedChanges, requestHome, runGuarded],
   )
 
   return (
@@ -371,14 +402,68 @@ function WorkspaceEditor({
       {saveAsOpen ? (
         <SaveAsSheet
           defaultValue={`${document.state.title} 副本`}
+          pending={saveAsPending}
+          error={saveAsError}
           onClose={() => setSaveAsOpen(false)}
-          onConfirm={(title) => {
-            setSaveAsOpen(false)
-            void document.saveAs(title, document.state.currentTemplate)
+          onConfirm={async (title) => {
+            if (saveAsPending) return
+            setSaveAsPending(true)
+            setSaveAsError(undefined)
+            const saved = await document.saveAs(title, document.state.currentTemplate)
+            setSaveAsPending(false)
+            if (saved) {
+              setSaveAsOpen(false)
+              return
+            }
+            setSaveAsError('另存为失败，请检查文档状态与网络连接后重试。')
           }}
         />
       ) : null}
       {helpSheet ? <HelpSheet view={helpSheet} onClose={() => setHelpSheet(undefined)} /> : null}
+      {versionHistoryOpen && document.state.id && document.state.serverVersion ? (
+        <VersionHistorySheet
+          templateId={document.state.id}
+          currentVersion={document.state.serverVersion}
+          title={document.state.title}
+          canRestore={canRestore}
+          disabledReason={restoreDisabledReason}
+          restorePending={restorePending}
+          suspended={restoreVersion !== undefined}
+          onClose={() => {
+            setVersionHistoryOpen(false)
+            setRestoreVersion(undefined)
+            setRestoreError(undefined)
+          }}
+          onRequestRestore={(version) => {
+            setRestoreError(undefined)
+            setRestoreVersion(version)
+          }}
+        />
+      ) : null}
+      {restoreVersion !== undefined ? (
+        <RestoreVersionDialog
+          version={restoreVersion}
+          hasUnsavedChanges={hasUnsavedChanges}
+          pending={restorePending}
+          error={restoreError}
+          disabled={!canRestore}
+          onCancel={() => setRestoreVersion(undefined)}
+          onRestore={async () => {
+            if (restorePending || !canRestore) return
+            const version = restoreVersion
+            setRestorePending(true)
+            setRestoreError(undefined)
+            const restored = await document.restoreVersion(version)
+            setRestorePending(false)
+            if (restored) {
+              setRestoreVersion(undefined)
+              setVersionHistoryOpen(false)
+              return
+            }
+            setRestoreError('恢复失败，请根据文档状态提示重新打开模板或检查网络后再试。')
+          }}
+        />
+      ) : null}
       {dialog ? (
         <UnsavedDialog
           action={dialog === 'new' ? 'new' : 'home'}

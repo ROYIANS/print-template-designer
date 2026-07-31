@@ -107,8 +107,8 @@ const APP_MENUS: readonly AppMenu[] = [
         shortcut: 'Ctrl+Shift+S',
       },
       {
-        kind: 'planned',
-        reason: '即将提供',
+        kind: 'host',
+        command: 'versionHistory',
         icon: RiPagesLine,
         label: '版本历史',
         description: '查看并恢复服务器历史版本',

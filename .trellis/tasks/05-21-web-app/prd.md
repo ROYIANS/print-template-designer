@@ -2,8 +2,8 @@
 
 ## 状态
 
-本任务处于实现阶段，当前 Trellis task 与分支已经启动。本轮认证与公开落地页批次正在实现和独立检查；
-更广的模板 CRUD、版本历史、恢复与 409 冲突流程仍在同一任务后续范围内。
+本任务处于最终验收阶段。认证、公开落地页、文件工作台、模板持久化、版本历史、恢复与 409 冲突保护
+均已进入同一任务的完整回归；通过自动化和浏览器验收后提交并归档。
 
 ## 背景
 
@@ -199,10 +199,10 @@ favicon 只是临时品牌资产，用户将另行设计正式 Logo，本轮不�
    装版和少量状态动效，但不在落地页伪造另一套 Designer UI。截图由本任务在本地工作台生成并作为
    受版本控制的产品资产交付。
 
-## 当前实现批次
+## 已实现范围
 
-本地 Dev Auth Bypass、公开落地页、`/` 与 `/app` 路由边界以及 Foliq 品牌视觉已经完成。当前进入
-模板持久化第一批，目标是先打通不依赖本地草稿的真实 Server 最小闭环：
+本地 Dev Auth Bypass、公开落地页、`/` 与 `/app` 路由边界、Foliq 品牌视觉以及不依赖本地草稿的
+真实 Server 模板闭环已经完成：
 
 1. Web API Client 覆盖模板 CRUD 与版本 list/get/restore 合同，所有响应经过运行时校验；Cookie 保持
    同源，401、403、404、409、5xx、网络失败和异常成功响应形成结构化错误，并透传 AbortSignal。
@@ -222,27 +222,35 @@ favicon 只是临时品牌资产，用户将另行设计正式 Logo，本轮不�
 7. App Bar 按低频工作流组织为 File/Template/View/Help：删除 Edit、Object 与 Window 分类，Undo/Redo
    留在 Context Bar，对象组合、锁定和层级调整留在选择工具条与右键菜单；Template 连接页面设置、
    页面管理、素材资源和数据源，View 集中标尺与参考线环境控制且不重复 Status Bar 放大/缩小，Help
-   提供真实快捷键、产品介绍和关于入口。Version History、Template Inspection 与 Fit Page 作为少量
-   稳定近期能力显示“即将提供”，不得暴露开发批次或接入文案。顶部“文件工作台”和“保存模板”共享
-   同一控件轮廓家族；Designer 删除假账户占位，Home/Editor 复用 Web Host 的真实账户 Popover。
+   提供真实快捷键、产品介绍和关于入口。Version History 已连接真实 Host 工作流；Template Inspection
+   与 Fit Page 可作为少量稳定近期能力显示“即将提供”，不得暴露开发批次或接入文案。顶部“文件工作台”
+   和“保存模板”共享同一控件轮廓家族；Designer 删除假账户占位，Home/Editor 复用 Web Host 的真实
+   账户 Popover。
 8. Home 不使用无信息价值的英文 eyebrow、文档计数大字、工程编号、规则线或假纸张缩略图。最近区通过
    公共只读 `TemplatePreview` 复用真实 Schema Renderer，最多并发读取 4 份详情并取消过期请求、隔离
    单项错误；全部模板保持 metadata-only。标题搜索仅在已载入列表中做客户端过滤，不冒充全文搜索。
+9. 文件卡片通过轻量 Popover 提供重命名、创建副本和永久删除。重命名先读取最新记录，再使用
+   `expectedVersion` 更新标题与 `pageConfig.title`；副本拥有独立文档和版本链；硬删除必须经过明确
+   Modal 确认，失败保留原文件与决策表面，不制造假的回收站语义。
+10. File → Version History 打开非模态 Side Sheet，按需读取不可变版本列表和历史详情，并通过公共
+    `TemplatePreview` 渲染真实快照。恢复旧版本需要明确确认，dirty 文档会说明当前未保存内容将被替换；
+    Server 把快照写成新的最新版本，原历史保持不变。恢复携带当前 `expectedVersion`，409 后保持历史
+    浏览、禁止重复恢复，并要求重新打开服务器文档。
 
 交互表面门槛：Modal 只用于离开 dirty/conflict 文档、不可恢复硬删除、409/恢复等必须先决策的高风险
-节点；文件浏览是独立 Home，版本历史后续使用 Drawer/Side Sheet，Save As 使用非模态 Command Sheet，
+节点；文件浏览是独立 Home，版本历史使用 Side Sheet，Save As 与重命名使用非模态 Command Sheet，
 一般载入、错误和重试使用 inline 状态。当前 Server 没有 lastOpenedAt，因此不得使用“最近打开”或
 “继续编辑”描述 Home 排序。
 
-本批不实现版本历史/恢复 UI、重命名/复制/删除管理、本地草稿、自动保存、Datasource 或 Export。完成
-最小闭环并独立检查后，再进入模板管理与版本工作流第二批。OAuth 登录后恢复经过校验的 Editor 深链是
-研究发现的后续增强，不在本批强行扩大认证合同。
+本任务仍不实现本地崩溃草稿、自动保存、Datasource、打印/PDF/Word Export、软删除回收站、收藏或团队
+项目空间；这些能力需要独立产品与数据合同。OAuth 登录后恢复经过校验的 Editor 深链也是研究发现的
+后续增强，不在本任务强行扩大认证合同。
 
 ## 待确认决策
 
 - 无。当前实现批次的产品、认证、路由与视觉决策已经确认。
 
-## Definition of Done 方向
+## Definition of Done 验收
 
 获准登录的用户能够从落地页进入应用，新建或打开模板、编辑、保存到 PostgreSQL、刷新浏览器、重新打开
 相同内容、查看并恢复历史版本，并在旧版本保存时得到安全且可操作的冲突状态。未登录、未获准和过期
@@ -250,3 +258,9 @@ Session 继续 fail closed；显式启用且满足 loopback 安全约束的本�
 同一套 Web/Server 模板工作流。公开落地页使用真实产品画面，在 Server 不可用时仍能准确介绍产品；
 当前实现批次结束时，`/`、`/app`、GitHub Auth 与 Dev Auth Bypass 的宽屏、移动端和错误状态均通过
 自动化与浏览器验收。
+
+最终验收已满足上述范围：Core 48、Components 45、React Designer 124、Web 58、Server 27 项测试通过，
+五个 package 的相关 typecheck/build、Frontend ESLint 与 `git diff --check` 通过；真实 loopback Dev Auth
+工作台完成桌面与 390×844 移动端浏览器验收，并实际将历史版本 2 恢复成新的服务器版本 4，确认历史
+Sheet、真实快照、恢复确认、焦点层级和成功后的 clean baseline 均按合同工作。构建只保留既有的大 chunk
+提示，不构成本任务失败。

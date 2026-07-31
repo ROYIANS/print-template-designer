@@ -302,7 +302,7 @@ describe('Web document controller', () => {
     expect(documentHostCommandStates(controller.state)).toMatchObject({
       save: { enabled: false },
       saveAs: { enabled: true },
-      versionHistory: { enabled: false },
+      versionHistory: { enabled: true },
       restoreVersion: { enabled: false },
     })
 
@@ -312,6 +312,67 @@ describe('Web document controller', () => {
       await controller.save()
     })
     expect(update).toHaveBeenCalledTimes(1)
+  })
+
+  it('restores a historical snapshot with expectedVersion and adopts the new baseline', async () => {
+    const restore = vi.fn(async () =>
+      record({
+        title: '历史采购单',
+        content: changedTemplate('历史采购单'),
+        version: 4,
+      }),
+    )
+    await render(fakeApi({ restore }), 7)
+
+    await act(async () => {
+      await controller.restoreVersion(1)
+    })
+
+    expect(restore).toHaveBeenCalledWith(7, 1, 3, expect.any(AbortSignal))
+    expect(controller.state).toMatchObject({
+      title: '历史采购单',
+      serverVersion: 4,
+      status: 'clean',
+    })
+    expect(controller.state.message).toContain('已从版本 1 恢复')
+  })
+
+  it('enters conflict on restore HTTP 409 and rejects later restore attempts without retrying', async () => {
+    const restore = vi.fn<TemplateApi['restore']>(async () => {
+      throw new TemplateApiError('conflict', 'stale', 409)
+    })
+    await render(fakeApi({ restore }), 7)
+
+    await act(async () => {
+      await controller.restoreVersion(1)
+    })
+
+    expect(controller.state.status).toBe('conflict')
+    expect(controller.state.message).toContain('本次恢复已停止')
+    expect(controller.state.message).toContain('重新打开模板')
+    await expect(controller.restoreVersion(2)).resolves.toBe(false)
+    expect(restore).toHaveBeenCalledTimes(1)
+  })
+
+  it('rejects an immediate duplicate restore while the first request is pending', async () => {
+    const pending = deferred<TemplateRecord>()
+    const restore = vi.fn<TemplateApi['restore']>(() => pending.promise)
+    await render(fakeApi({ restore }), 7)
+    let firstRestore: Promise<boolean>
+
+    await act(async () => {
+      firstRestore = controller.restoreVersion(1)
+      await expect(controller.restoreVersion(2)).resolves.toBe(false)
+    })
+
+    expect(controller.state.status).toBe('saving')
+    expect(restore).toHaveBeenCalledTimes(1)
+    expect(restore).toHaveBeenCalledWith(7, 1, 3, expect.any(AbortSignal))
+    await act(async () => {
+      pending.resolve(record({ version: 4 }))
+      await firstRestore!
+    })
+    expect(controller.state.status).toBe('clean')
   })
 
   it('publishes pending command state and rejects duplicate saves while a request is active', async () => {

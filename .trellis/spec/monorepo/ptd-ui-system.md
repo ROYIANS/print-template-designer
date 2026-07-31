@@ -404,6 +404,28 @@ PanelRoot
 - Hover 才出现的次要动作必须提供键盘可达的替代入口。
 - 空状态包含：当前状态、下一步价值和一个明确动作。
 
+### 6.3 Web 文件工作台与文档级表面
+
+- 受保护的 `/app` 默认进入文件工作台，未保存新文档和已保存文档分别使用明确的 Editor URL；文件
+  浏览不能继续作为覆盖画布的大型 Modal。当前只有 `updatedAt` 时必须称为“最近更新”，不得伪称
+  “最近打开”或“继续编辑”。
+- 文件卡片预览复用公共只读 `TemplatePreview` 和真实 `TemplateSchema`；不得绘制假缩略图或维护第二套
+  Renderer。最近区的详情请求有明确上限并取消过期请求，全部文件区保持 metadata-only。
+- 打开文件是卡片主动作；重命名、创建副本和永久删除位于独立轻量 Popover，不与主动作形成嵌套按钮。
+  Popover 使用与实际键盘合同相符的语义，支持 Escape 恢复触发器焦点、外部 pointer 关闭和 coarse
+  pointer 至少 40px 命中区；不能声明 ARIA menu 却缺少 roving focus/方向键合同。
+- 重命名和 Save As 使用非模态 Side Sheet；浏览历史使用非模态 History Side Sheet；离开 dirty/conflict、
+  覆盖未保存内容的恢复以及不可恢复硬删除才使用 Modal。一般成功、失败、载入和重试留在触发表面或
+  inline 状态，错误不能只藏在被 Modal backdrop 遮住的 Toast 后面。
+- 历史列表按需读取历史详情，并用真实 `TemplatePreview` 预览不可变快照。切换选择必须立即隔离旧预览；
+  AbortSignal 和请求身份共同阻止 stale response 覆盖新选择。当前版本不可重复恢复。
+- 恢复旧快照必须说明它会创建新的最新版本而非改写历史；dirty 文档还要说明当前未保存内容会被替换。
+  恢复携带当前 `expectedVersion`；409 后保留历史浏览但禁止使用过期基线重复恢复，直到用户重新打开
+  服务器文档。删除失败保留文件和确认表面，重命名失败保留输入 Sheet，异步确认必须拒绝重复提交。
+- 同一 Host 区域的 Save As、Help、Version History 与顶层确认表面必须互斥；打开新文档、返回工作台或
+  开始受保护导航时关闭不再相关的 Sheet。每个表面只处理自己的 Escape，关闭后恢复到仍连接 DOM 的
+  合理焦点目标。
+
 ## 7. 组件工具选择器与素材面板
 
 - Catalog 使用独立于持久 Schema category 的五组 taxonomy：文本、表格、图像、编码、图形；
