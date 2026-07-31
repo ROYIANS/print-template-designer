@@ -1,3 +1,9 @@
-{"file": ".trellis/spec/monorepo/quality-guidelines.md", "reason": "ESLint/Prettier 规范，检查代码风格合规性"}
-{"file": ".trellis/spec/monorepo/typescript-conventions.md", "reason": "strict TS 合规检查：禁止 as any，@ptd/react-designer 接入类型安全"}
-{"file": ".trellis/spec/monorepo/styling-conventions.md", "reason": "CSS Modules 合规检查：禁止 inline style，global.css 使用规范"}
+{"file": ".trellis/spec/monorepo/quality-guidelines.md", "reason": "独立验证 lint、typecheck、tests、build、浏览器 QA 和敏感信息边界"}
+{"file": ".trellis/spec/monorepo/typescript-conventions.md", "reason": "严格 TS、错误状态和公共合同检查"}
+{"file": ".trellis/spec/monorepo/styling-conventions.md", "reason": "CSS Modules、响应式和样式实现合规检查"}
+{"file": ".trellis/spec/monorepo/ptd-ui-system.md", "reason": "落地页与工作台在品牌语气、色板、字体、结构和可访问性上的一致性检查"}
+{"file": ".trellis/spec/monorepo/react-designer-contract.md", "reason": "确认认证、HTTP 和 Server Record 未泄漏进 Designer"}
+{"file": ".trellis/spec/monorepo/server-architecture.md", "reason": "Dev Auth Bypass fail-closed、loopback、owner ���离和数据库安全检查"}
+{"file": ".trellis/tasks/05-21-web-app/research/vidorra-life-landing-reference.md", "reason": "检查参考只被方法性吸收，没有照搬品牌或虚构产品能力"}
+{"file": ".trellis/tasks/archive/2026-07/07-30-postgres-github-auth/validation.md", "reason": "认证与 PostgreSQL 回归验证权威基线"}
+{"file": ".trellis/tasks/archive/2026-07/07-31-deploy-postgres-auth/validation.md", "reason": "完整部署、同源 Auth 和各包测试的权威基线"}

@@ -1,0 +1,6 @@
+/*
+ * In Vite development, @ptd/react-designer resolves to its source entry and
+ * each component loads its own CSS Module. Keep the public aggregate stylesheet
+ * import stable without depending on the package dist directory while tsup
+ * replaces that directory during a watch rebuild.
+ */
