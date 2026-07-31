@@ -522,9 +522,9 @@ const capabilityItems: CapabilityItem[] = [
   {
     icon: <HistorySealIcon />,
     accent: 'blue',
-    title: '改错了，找回来就好',
+    title: '版本留痕，正在接入工作台',
     description:
-      '每一次保存都留下一份不可篡改的历史记录，随时对比、还原到任意版本。多人同时编辑也不会被悄悄覆盖。',
+      '服务端已经具备不可变版本与冲突保护；工作台里的保存、查看和恢复流程仍在接入，不把半成品当成已经上线。',
   },
 ]
 
@@ -545,7 +545,7 @@ const productCases: ProductCase[] = [
     eyebrow: '物流追溯',
     description: '二维码、条码、温区与复核信息在一张标签里保持清楚。',
     src: '/assets/product/designer-proof-sheet.png',
-    alt: 'PTD 工作台正在编辑冷链出库标签，画布两侧显示组件目录和属性面板',
+    alt: 'Foliq 工作台正在编辑冷链出库标签，画布两侧显示组件目录和属性面板',
     format: 'A5 · 2 pages',
   },
   {
@@ -554,7 +554,7 @@ const productCases: ProductCase[] = [
     eyebrow: '仓储单据',
     description: '供应商、交付批次、明细与签收区域按纸张节奏完整编排。',
     src: '/assets/product/designer-delivery-note.png',
-    alt: 'PTD 工作台正在编辑一张采购送货单，纸张中包含交付信息与商品明细',
+    alt: 'Foliq 工作台正在编辑一张采购送货单，纸张中包含交付信息与商品明细',
     format: 'A4 · fixed layout',
   },
   {
@@ -563,7 +563,7 @@ const productCases: ProductCase[] = [
     eyebrow: '零售标签',
     description: '价格、规格、会员提示与商品条码压缩进小尺寸纸张。',
     src: '/assets/product/designer-price-label.png',
-    alt: 'PTD 工作台正在编辑一张门店商品价签，画布中有价格、规格和条码',
+    alt: 'Foliq 工作台正在编辑一张门店商品价签，画布中有价格、规格和条码',
     format: '100 × 60 mm',
   },
   {
@@ -572,7 +572,7 @@ const productCases: ProductCase[] = [
     eyebrow: '质量管理',
     description: '检验结论、批次信息和项目结果在同一份报告里建立层级。',
     src: '/assets/product/designer-inspection-report.png',
-    alt: 'PTD 工作台正在编辑一张来料检验报告，纸张中包含检验项目和结论印章',
+    alt: 'Foliq 工作台正在编辑一张来料检验报告，纸张中包含检验项目和结论印章',
     format: 'A4 · report',
   },
 ]
@@ -680,7 +680,7 @@ function ProductShowcase() {
         ref={railRef}
         className={`${styles.productRail} ${dragging ? styles.productRailDragging : ''}`}
         role="region"
-        aria-label="真实 PTD 模板案例，可横向滚动"
+        aria-label="真实 Foliq 文档案例，可横向滚动"
         tabIndex={0}
         onScroll={updateActiveCase}
         onPointerDown={startDrag}
@@ -709,7 +709,7 @@ function ProductShowcase() {
               <span />
               <span />
               <span />
-              <p>ptd / {item.title}</p>
+              <p>foliq / {item.title}</p>
             </div>
             <a className={styles.productViewport} href={item.src} target="_blank" rel="noreferrer">
               <img src={item.src} alt={item.alt} width="1600" height="1000" draggable={false} />
@@ -745,12 +745,12 @@ const faqItems: FaqItem[] = [
   {
     question: '改错了模板，还能找回来吗？',
     answer:
-      '能。每一次保存都会留下一份不可修改的历史记录，你可以随时查看、对比、恢复到任意一个版本，不用担心手滑或者改错方向。',
+      '版本历史的服务端基础已经完成，工作台里的保存、查看和恢复流程仍在接入。当前还不能把它当作已经交付的完整流程；接入完成后，旧版本会以不可变记录保留。',
   },
   {
     question: '可以只部署在我们自己的服务器上吗？',
     answer:
-      '可以，而且这正是 PTD 的设计初衷。整个系统都能装进你自己的机房或云主机，模板数据不需要经过任何第三方，谁能用、谁能看，都由你自己掌控。',
+      '可以，而且这正是 Foliq 的设计初衷。整个系统都能装进你自己的机房或云主机，模板数据不需要经过任何第三方，谁能用、谁能看，都由你自己掌控。',
   },
   {
     question: '除了我自己，还能让同事一起用吗？',
@@ -803,10 +803,10 @@ export function LandingPage({ access, notice, onEnterApp, onRetry }: LandingPage
 
       <header className={styles.header}>
         <div className={styles.headerInner}>
-          <a className={styles.headerBrand} href="/" aria-label="PTD 首页">
+          <a className={styles.headerBrand} href="/" aria-label="Foliq 首页">
             <PtdMark className={styles.brandSymbol} />
-            <span className={styles.brandName}>PTD</span>
-            <span className={styles.headerBrandLabel}>打印模板设计器</span>
+            <span className={styles.brandName}>Foliq</span>
+            <span className={styles.headerBrandLabel}>结构化文档设计器</span>
           </a>
 
           <nav className={styles.headerNav} aria-label="首页导航">
@@ -833,14 +833,14 @@ export function LandingPage({ access, notice, onEnterApp, onRetry }: LandingPage
         <AsciiPrintField />
         <div className={styles.main}>
           <h1 id="hero-title" className={styles.heroTitle}>
-            模板改了又改，
+            不是设计一张图，
             <br />
-            版本却越改越乱？
+            而是定义一种文档。
           </h1>
           <p className={styles.heroLede}>
-            PTD 把每一次修改都存成历史，改错了，一键就能找回来。
+            Foliq 从标签、单据和报告开始，让页面结构成为可以持续演进的文档定义。
             <br className={styles.softBreak} />
-            从出库标签到复杂报表，你的每一张纸，都值得被认真设计。
+            目录、期刊与手帐是长期方向；保存与版本流程仍在接入。
           </p>
 
           {notice && <p className={styles.routeNotice}>{noticeCopy[notice]}</p>}
@@ -848,7 +848,7 @@ export function LandingPage({ access, notice, onEnterApp, onRetry }: LandingPage
           <div className={styles.heroMeta}>
             <div className={styles.metaItem}>
               <span className={styles.stateDot} />
-              <span>真实可用的排版画布，不是演示 Demo</span>
+              <span>真实可用的排版画布，从标签、单据和报告开始</span>
             </div>
             <div className={styles.metaItem}>
               <CheckIcon />
@@ -867,7 +867,7 @@ export function LandingPage({ access, notice, onEnterApp, onRetry }: LandingPage
           <div className={styles.main}>
             <h2 id="product-title" className={styles.sectionTitle}>
               <span className={styles.sectionTitleFaint}>不是效果图，是能点的界面。</span>
-              下面这张截图，就是你打开后看到的样子。
+              下面这些截图，就是你打开后看到的样子。
             </h2>
 
             <ProductShowcase />
@@ -905,7 +905,7 @@ export function LandingPage({ access, notice, onEnterApp, onRetry }: LandingPage
               部署在你的服务器上，而不是别人的云端。
             </h2>
             <p className={styles.deploymentLede}>
-              PTD 可以完整部署在你自己的服务器里，模板、历史版本和账户数据都留在你的基础设施上，
+              Foliq 可以完整部署在你自己的服务器里，模板、版本数据和账户数据都留在你的基础设施上，
               不经过任何第三方云服务中转。谁能登录、谁能看到什么，也由你自己的名单说了算。
             </p>
           </div>
@@ -982,8 +982,10 @@ export function LandingPage({ access, notice, onEnterApp, onRetry }: LandingPage
               我们更愿意先把话说清楚。
             </h2>
             <p className={styles.boundaryLede}>
-              打印预览、PDF/Word 导出、数据源绑定与自动分页正在开发中，暂未上线。PTD
-              不会把还没做完的 功能包装成现在就能用的样子——能不能用，我们说的和你看到的一致。
+              工作台保存与版本历史、打印预览、PDF/Word
+              导出、数据源绑定与自动分页仍在开发中，暂未上线。
+              目录、期刊和手帐是长期方向，不是当前功能。Foliq
+              不会把还没做完的能力包装成现在就能用的样子——能不能用，我们说的和你看到的一致。
             </p>
           </div>
         </section>
@@ -1005,11 +1007,11 @@ export function LandingPage({ access, notice, onEnterApp, onRetry }: LandingPage
             <div className={styles.closingIntro}>
               <p className={styles.closingKicker}>
                 <span className={styles.stateDot} />
-                PTD / READY TO DESIGN
+                FOLIQ / LOGIC FOR EVERY PAGE
               </p>
               <h2 id="closing-title">
-                <span>下一张模板，</span>
-                从现在开始认真设计。
+                <span>下一种文档，</span>
+                从这一页开始定义。
               </h2>
               <p className={styles.closingLede}>
                 从一张空白纸开始，把业务里说不清的部分，排成每个人都看得懂的结果。
@@ -1026,12 +1028,12 @@ export function LandingPage({ access, notice, onEnterApp, onRetry }: LandingPage
           </div>
 
           <div className={styles.closingBrand}>
-            <a className={styles.brand} href="/" aria-label="返回 PTD 首页">
+            <a className={styles.brand} href="/" aria-label="返回 Foliq 首页">
               <PtdMark className={styles.brandSymbol} />
-              <span className={styles.brandName}>PTD</span>
+              <span className={styles.brandName}>Foliq</span>
             </a>
             <p className={styles.footerTagline}>
-              专业的 Web 打印模板设计器，部署在你自己的服务器上。
+              面向打印与出版的专业结构化文档设计器，部署在你自己的服务器上。
             </p>
           </div>
 
@@ -1056,7 +1058,7 @@ export function LandingPage({ access, notice, onEnterApp, onRetry }: LandingPage
           </div>
 
           <div className={styles.closingMeta}>
-            <p>© 2026 PTD · ROYIANS</p>
+            <p>© 2026 FOLIQ · ROYIANS</p>
             <p>SELF-HOSTED · MIT LICENSE</p>
           </div>
         </div>

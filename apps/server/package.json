@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Print Template Designer - NestJS Backend Server",
+  "description": "Foliq - NestJS backend server",
   "scripts": {
     "start": "node dist/main.js",
     "start:dev": "prisma generate && nest start --watch",

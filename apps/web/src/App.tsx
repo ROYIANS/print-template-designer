@@ -178,7 +178,7 @@ function ProductCapture({ captureKey }: { captureKey: ProductCaptureKey }) {
   )
 
   return (
-    <main className={styles.capture} aria-label="PTD 产品截图捕获视图">
+    <main className={styles.capture} aria-label="Foliq 产品截图捕获视图">
       <Designer value={template} onChange={setTemplate} host={host} />
     </main>
   )

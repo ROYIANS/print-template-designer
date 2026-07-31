@@ -78,11 +78,11 @@ describe('ComponentRegistry', () => {
       fit: 'contain',
     })
     expect(defaultRegistry.get('RoyQRCode')?.defaultProps).toMatchObject({
-      text: 'PTD-QR-0001',
+      text: 'FOLIQ-QR-0001',
       correctLevel: 'M',
     })
     expect(defaultRegistry.get('RoyBarCode')?.defaultProps).toMatchObject({
-      text: 'PTD-2026-0001',
+      text: 'FOLIQ-2026-0001',
       bcid: 'code128',
       includeText: true,
     })

@@ -1,7 +1,7 @@
 #Requires -Version 7.0
 <#
 .SYNOPSIS
-  Complete self-hosted deployment for Print Template Designer.
+  Complete self-hosted deployment for Foliq.
 
 .DESCRIPTION
   Pulls prebuilt Web/Server images from GHCR by default, starts PostgreSQL,
@@ -212,7 +212,7 @@ if ($Logs) {
 }
 
 if ($Down) {
-  Write-Step 'Stopping PTD containers and keeping PostgreSQL data…'
+  Write-Step 'Stopping Foliq containers and keeping PostgreSQL data…'
   Invoke-Docker @('compose', 'down', '--remove-orphans')
   exit 0
 }
@@ -223,11 +223,11 @@ if ($Yes -and -not $Fresh) {
 
 if ($Fresh) {
   if (-not $Yes) {
-    Write-WarnStep 'This permanently deletes the PostgreSQL volume and every PTD user/template.'
+    Write-WarnStep 'This permanently deletes the PostgreSQL volume and every Foliq user/template.'
     $answer = Read-Host 'Type WIPE_PTD_DATA to continue'
     if ($answer -ne 'WIPE_PTD_DATA') { Stop-WithError 'Fresh deployment cancelled.' }
   }
-  Write-WarnStep 'Removing PTD containers and PostgreSQL volume…'
+  Write-WarnStep 'Removing Foliq containers and PostgreSQL volume…'
   Invoke-Docker @('compose', 'down', '--volumes', '--remove-orphans')
 }
 
@@ -275,7 +275,7 @@ $authUrl = (Get-ConfigValue 'BETTER_AUTH_URL').TrimEnd('/')
 $imageTag = Get-ConfigValue 'IMAGE_TAG' 'latest'
 
 Write-Host ''
-Write-Step 'Print Template Designer is ready.'
+Write-Step 'Foliq is ready.'
 Write-Host "  Web: ${webOrigin}/"
 Write-Host "  Health: ${webOrigin}/healthz"
 Write-Host "  GitHub callback: ${authUrl}/api/auth/callback/github"

@@ -1,6 +1,6 @@
 # 完整自托管部署指南
 
-PTD 的默认 Compose 栈包含四个阶段：
+Foliq 的默认 Compose 栈包含四个阶段：
 
 ```text
 PostgreSQL 17（named volume）
@@ -53,15 +53,15 @@ Copy-Item .env.example .env
 在 <https://github.com/settings/developers> 创建 OAuth App。生产示例：
 
 ```dotenv
-BETTER_AUTH_URL=https://ptd.example.com
-PTD_WEB_ORIGIN=https://ptd.example.com
+BETTER_AUTH_URL=https://foliq.example.com
+PTD_WEB_ORIGIN=https://foliq.example.com
 ```
 
 对应配置：
 
 ```text
-Homepage URL: https://ptd.example.com
-Authorization callback URL: https://ptd.example.com/api/auth/callback/github
+Homepage URL: https://foliq.example.com
+Authorization callback URL: https://foliq.example.com/api/auth/callback/github
 ```
 
 GitHub App callback、`BETTER_AUTH_URL` 和真实浏览器 origin 必须精确一致。Web 和 API 在容器内仍为不同服务，但 Nginx 将 `/api/*` 代理到 Server，所以浏览器看到的是同一个 origin，Better Auth Cookie 不需要暴露给其他域名。
@@ -73,8 +73,8 @@ GitHub App callback、`BETTER_AUTH_URL` 和真实浏览器 origin 必须精确�
 ```dotenv
 BIND_ADDRESS=127.0.0.1
 WEB_PORT=8080
-BETTER_AUTH_URL=https://ptd.example.com
-PTD_WEB_ORIGIN=https://ptd.example.com
+BETTER_AUTH_URL=https://foliq.example.com
+PTD_WEB_ORIGIN=https://foliq.example.com
 ```
 
 上游代理转发到 `http://127.0.0.1:8080`，并保留 `Host`、`X-Forwarded-For` 和 `X-Forwarded-Proto`。容器 Nginx 会继续把这些信息交给启用了受控 `trust proxy` 的 Nest Server。
@@ -222,7 +222,7 @@ Package 是 private，或 Token 没有 `read:packages`。同时配置 `GHCR_USER
 
 ### 端口被占用
 
-修改 `WEB_PORT`。如果宿主机反向代理与 PTD 同机，优先使用 `BIND_ADDRESS=127.0.0.1`。
+修改 `WEB_PORT`。如果宿主机反向代理与 Foliq 同机，优先使用 `BIND_ADDRESS=127.0.0.1`。
 
 ## 当前边界
 

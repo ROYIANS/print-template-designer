@@ -38,7 +38,7 @@ export const DEFAULT_IMAGE_PROPS: Readonly<ImageProps> = Object.freeze({
 })
 
 export const DEFAULT_QR_CODE_PROPS: Readonly<QRCodeProps> = Object.freeze({
-  text: 'PTD-QR-0001',
+  text: 'FOLIQ-QR-0001',
   colorDark: '#1d2735',
   colorLight: '#ffffff',
   correctLevel: 'M',
@@ -46,7 +46,7 @@ export const DEFAULT_QR_CODE_PROPS: Readonly<QRCodeProps> = Object.freeze({
 })
 
 export const DEFAULT_BAR_CODE_PROPS: Readonly<BarCodeProps> = Object.freeze({
-  text: 'PTD-2026-0001',
+  text: 'FOLIQ-2026-0001',
   bcid: 'code128',
   colorDark: '#1d2735',
   includeText: true,

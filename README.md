@@ -1,7 +1,7 @@
 <div align="center">
-  <img src="legacy/README.assets/favicon.ico" alt="Print Template Designer" width="112" />
-  <h1>Print Template Designer</h1>
-  <p><strong>面向报表开发者与设计师的专业 Web 打印模板设计器</strong></p>
+  <img src="legacy/README.assets/favicon.ico" alt="Foliq" width="112" />
+  <h1>Foliq</h1>
+  <p><strong>面向打印与出版的专业结构化文档设计器</strong></p>
   <p>Framework-agnostic core · React designer · Versioned template API</p>
 </div>
 
@@ -10,7 +10,7 @@
 
 ## 项目定位
 
-Print Template Designer（PTD）不是一个只能独立运行的页面 Demo，也没有把技术路线限定为 Web Component。v2 将产品拆成三个可以独立演进的层次：
+Foliq 不是一个只能独立运行的页面 Demo，也没有把技术路线限定为 Web Component。内部工程代号继续沿用 PTD；v2 将产品拆成三个可以独立演进的层次：
 
 - **可嵌入的设计器内核**：Schema、单位换算、序列化、数据绑定和组件注册表不依赖 UI 框架。
 - **专业 React 编辑器**：提供完整的画布工作区、组件目录、属性面板和编辑命令。

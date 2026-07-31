@@ -1,7 +1,7 @@
 {
   "name": "@ptd/react-designer",
   "version": "0.1.0",
-  "description": "React designer component for Print Template Designer",
+  "description": "React designer component for Foliq",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",

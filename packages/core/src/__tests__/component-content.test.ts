@@ -49,7 +49,7 @@ describe('component content contracts', () => {
   it('normalizes barcode content and validates format-specific payloads', () => {
     expect(normalizeBarCodeProps(null)).toEqual(DEFAULT_BAR_CODE_PROPS)
     expect(
-      barCodeContentError(normalizeBarCodeProps({ text: 'PTD-2026', bcid: 'code128' })),
+      barCodeContentError(normalizeBarCodeProps({ text: 'FOLIQ-2026', bcid: 'code128' })),
     ).toBeNull()
     expect(barCodeContentError(normalizeBarCodeProps({ text: 'abc', bcid: 'code39' }))).toContain(
       '大写字母',
