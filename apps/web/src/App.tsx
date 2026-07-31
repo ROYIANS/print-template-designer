@@ -3,7 +3,12 @@ import { Designer, type DesignerHost, type TemplateSchema } from '@ptd/react-des
 import { authClient } from './auth-client'
 import { LandingPage, type AccessState, type AccountUser } from './LandingPage'
 import { landingNoticeFromSearch, landingUrl, routeFromPathname } from './navigation'
-import { INITIAL_TEMPLATE, PRODUCT_CAPTURE_TEMPLATE } from './templates'
+import {
+  INITIAL_TEMPLATE,
+  PRODUCT_CAPTURE_KEYS,
+  PRODUCT_CAPTURE_TEMPLATES,
+  type ProductCaptureKey,
+} from './templates'
 import styles from './App.module.css'
 
 interface LocationState {
@@ -149,13 +154,13 @@ function Workspace({ user }: { user: AccountUser }) {
   )
 }
 
-function ProductCapture() {
-  const [template, setTemplate] = useState<TemplateSchema>(PRODUCT_CAPTURE_TEMPLATE)
+function ProductCapture({ captureKey }: { captureKey: ProductCaptureKey }) {
+  const [template, setTemplate] = useState<TemplateSchema>(PRODUCT_CAPTURE_TEMPLATES[captureKey])
   const host = useMemo<DesignerHost>(
     () => ({
       document: {
-        id: 'product-capture',
-        title: '冷链出库标签 · 华东 07',
+        id: `product-capture-${captureKey}`,
+        title: PRODUCT_CAPTURE_TEMPLATES[captureKey].pageConfig.title,
         version: 7,
         status: 'clean',
       },
@@ -169,7 +174,7 @@ function ProductCapture() {
       },
       onCommand: async () => undefined,
     }),
-    [],
+    [captureKey],
   )
 
   return (
@@ -183,6 +188,9 @@ function App() {
   const { location, navigate } = useBrowserLocation()
   const { access, retry } = useAccountAccess()
   const route = routeFromPathname(location.pathname)
+  const captureTemplate = new URLSearchParams(location.search).get('template')
+  const captureKey =
+    PRODUCT_CAPTURE_KEYS.find((key) => key === captureTemplate) ?? PRODUCT_CAPTURE_KEYS[0]
   const captureMode =
     import.meta.env.DEV &&
     route === 'workspace' &&
@@ -195,7 +203,7 @@ function App() {
     if (access.kind === 'error') navigate(landingUrl('unavailable'), true)
   }, [access.kind, captureMode, navigate, route])
 
-  if (captureMode) return <ProductCapture />
+  if (captureMode) return <ProductCapture captureKey={captureKey} />
 
   if (route === 'workspace') {
     if (access.kind === 'allowed') return <Workspace user={access.user} />

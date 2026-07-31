@@ -1,4 +1,10 @@
-import { useState, type ReactNode } from 'react'
+import {
+  useEffect,
+  useRef,
+  useState,
+  type PointerEvent as ReactPointerEvent,
+  type ReactNode,
+} from 'react'
 import { authClient } from './auth-client'
 import type { LandingNotice } from './navigation'
 import styles from './LandingPage.module.css'
@@ -66,90 +72,257 @@ function CheckIcon() {
   )
 }
 
-function RulerIcon() {
+function PrecisionMarkIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
-      <rect
-        x="3"
-        y="8"
-        width="18"
-        height="8"
-        rx="1.5"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-      />
       <path
-        d="M7 8v3M11 8v3M15 8v3M19 8v3"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
+        fill="currentColor"
+        d="M10.7 1h2.6v6.1h-2.6zM10.7 16.9h2.6V23h-2.6zM1 10.7h6.1v2.6H1zM16.9 10.7H23v2.6h-6.1zM3.45 5.29l1.84-1.84 4.31 4.31L7.76 9.6zM14.4 16.24l1.84-1.84 4.31 4.31-1.84 1.84zM3.45 18.71l4.31-4.31 1.84 1.84-4.31 4.31zM14.4 7.76l4.31-4.31 1.84 1.84-4.31 4.31z"
+      />
+      <circle cx="12" cy="12" r="3.6" fill="currentColor" />
+    </svg>
+  )
+}
+
+function ComponentBloomIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path fill="currentColor" d="M12 1.5 16 8l6.5 4-6.5 4-4 6.5L8 16l-6.5-4L8 8z" />
+      <circle cx="12" cy="12" r="3.1" fill="var(--canvas)" />
+      <circle cx="12" cy="12" r="1.25" fill="currentColor" />
+    </svg>
+  )
+}
+
+function PageStackIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path fill="currentColor" opacity=".35" d="m2.2 6.2 12.7-3.4 4 15-12.7 3.4z" />
+      <path fill="currentColor" opacity=".65" d="M5.2 3.1h13.5v16.3H5.2z" />
+      <path fill="currentColor" d="m8.4 4.8 13.1 3.5-4.1 15.2-13-3.5z" />
+      <path
+        fill="var(--canvas)"
+        d="m10.1 9.1 8.2 2.2-.5 1.7-8.2-2.2zm-1 3.5 8.2 2.2-.5 1.7-8.2-2.2zm-1 3.6 5.4 1.4-.5 1.7-5.4-1.5z"
       />
     </svg>
   )
 }
 
-function LayersIcon() {
+function HistorySealIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <path
-        d="M12 3.5 20.5 8 12 12.5 3.5 8Z"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinejoin="round"
+        fill="currentColor"
+        d="m12 1.4 2.1 2 2.8-.5.9 2.7 2.7.9-.5 2.8 2 2.1-2 2.1.5 2.8-2.7.9-.9 2.7-2.8-.5-2.1 2-2.1-2-2.8.5-.9-2.7-2.7-.9.5-2.8-2-2.1 2-2.1-.5-2.8 2.7-.9.9-2.7 2.8.5z"
       />
-      <path
-        d="M3.5 12 12 16.5 20.5 12M3.5 16 12 20.5 20.5 16"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <path fill="var(--canvas)" d="M11 6.7h2v5.1l3.2 2.1-1.1 1.7-4.1-2.7z" />
     </svg>
   )
 }
 
-function PagesIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <rect
-        x="6"
-        y="3.5"
-        width="12"
-        height="15"
-        rx="1.4"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.7"
-      />
-      <path
-        d="M3.5 7v11.5M20.5 7v11.5"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-      />
-    </svg>
-  )
+const ASCII_GLYPHS = ['·', ':', '+', '=', '%', '#', '0', '1'] as const
+
+interface AsciiPointer {
+  x: number
+  y: number
+  targetX: number
+  targetY: number
+  strength: number
+  targetStrength: number
 }
 
-function HistoryIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <circle cx="12" cy="12.5" r="8" fill="none" stroke="currentColor" strokeWidth="1.7" />
-      <path
-        d="M12 8v5l3.5 2M6 4l2 3"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value))
+}
+
+function drawAsciiTerrain(
+  context: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  time: number,
+  pointer: AsciiPointer,
+) {
+  const phase = time / 1000
+  const compact = width < 520
+  const columns = Math.min(compact ? 62 : 118, Math.ceil(width / (compact ? 8 : 11)))
+  const rows = compact ? 19 : 25
+
+  context.clearRect(0, 0, width, height)
+  context.textAlign = 'center'
+  context.textBaseline = 'middle'
+
+  for (let row = 0; row < rows; row += 1) {
+    const depth = row / (rows - 1)
+    const perspective = 0.66 + depth * 0.48
+    const fontSize = (compact ? 6.4 : 7.5) + depth * (compact ? 2.8 : 4.2)
+    context.font = `600 ${fontSize}px "JetBrains Mono", "SFMono-Regular", Consolas, monospace`
+
+    for (let column = 0; column < columns; column += 1) {
+      const horizontal = column / (columns - 1) - 0.5
+      const noise = (Math.sin(column * 12.9898 + row * 78.233) + 1) / 2
+      const slowWave = Math.sin(horizontal * 10.5 + phase * 0.85 + row * 0.15)
+      const crossWave = Math.cos(horizontal * 19 - phase * 0.55 - row * 0.09)
+      const projectedX = width / 2 + horizontal * width * perspective * 1.04
+      const baseY = height * (0.05 + depth * 0.9)
+
+      const pointerDx = (projectedX - pointer.x * width) / width
+      const pointerDy = (baseY - pointer.y * height) / height
+      const pointerDistance = Math.sqrt(pointerDx * pointerDx + pointerDy * pointerDy)
+      const magneticField =
+        Math.exp(-(pointerDx * pointerDx * 52 + pointerDy * pointerDy * 38)) * pointer.strength
+      const cursorRipple = Math.sin(pointerDistance * 54 - phase * 8) * magneticField
+
+      const sheetX = horizontal + (depth - 0.7) * 0.52 - Math.sin(phase * 0.42) * 0.025
+      const sheetY = depth - 0.68
+      const insideSheet = Math.abs(sheetX) < 0.15 && Math.abs(sheetY) < 0.15
+      const sheetEdge = insideSheet && (Math.abs(sheetX) > 0.132 || Math.abs(sheetY) > 0.125)
+      const sheetRule = insideSheet && row % 3 === 0 && sheetX > -0.105 && sheetX < 0.08
+      const sheetLift = insideSheet ? -20 - Math.cos(sheetX * 18 + phase) * 4 : 0
+
+      const x = projectedX + pointerDx * magneticField * 48
+      const y =
+        baseY +
+        slowWave * (7 + depth * 17) +
+        crossWave * (2 + depth * 5) -
+        magneticField * 58 +
+        cursorRipple * 18 +
+        sheetLift
+
+      const glyphIndex = clamp(
+        Math.floor(noise * 3 + depth * 4 + (slowWave + 1) * 0.5),
+        0,
+        ASCII_GLYPHS.length - 1,
+      )
+      const glyph = sheetEdge
+        ? '#'
+        : sheetRule
+          ? '='
+          : insideSheet
+            ? noise > 0.54
+              ? '0'
+              : '1'
+            : ASCII_GLYPHS[glyphIndex]
+      const alpha = clamp(
+        0.1 + depth * 0.42 + magneticField * 0.35 + (insideSheet ? 0.25 : 0),
+        0,
+        0.88,
+      )
+
+      context.fillStyle = `rgb(10 10 10 / ${alpha})`
+      context.fillText(glyph, x, y)
+    }
+  }
+}
+
+function AsciiPrintField() {
+  const fieldRef = useRef<HTMLCanvasElement>(null)
+
+  useEffect(() => {
+    const field = fieldRef.current
+    const context = field?.getContext('2d')
+    if (!field || !context) return
+
+    const motion = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const pointer: AsciiPointer = {
+      x: 0.5,
+      y: 0.58,
+      targetX: 0.5,
+      targetY: 0.58,
+      strength: 0,
+      targetStrength: 0,
+    }
+    let animationFrame = 0
+    let lastDraw = 0
+    let visible = true
+    let width = 0
+    let height = 0
+
+    const draw = (time: number) => {
+      pointer.x += (pointer.targetX - pointer.x) * 0.09
+      pointer.y += (pointer.targetY - pointer.y) * 0.09
+      pointer.strength += (pointer.targetStrength - pointer.strength) * 0.08
+      drawAsciiTerrain(context, width, height, time, pointer)
+    }
+
+    const resize = () => {
+      const rect = field.getBoundingClientRect()
+      const ratio = Math.min(window.devicePixelRatio || 1, 2)
+      width = Math.max(1, rect.width)
+      height = Math.max(1, rect.height)
+      field.width = Math.round(width * ratio)
+      field.height = Math.round(height * ratio)
+      context.setTransform(ratio, 0, 0, ratio, 0, 0)
+      draw(motion.matches ? 0 : performance.now())
+    }
+
+    const stop = () => {
+      window.cancelAnimationFrame(animationFrame)
+      animationFrame = 0
+    }
+
+    const tick = (time: number) => {
+      if (time - lastDraw > 22) {
+        draw(time)
+        lastDraw = time
+      }
+      animationFrame = window.requestAnimationFrame(tick)
+    }
+
+    const sync = () => {
+      stop()
+      if (motion.matches || document.hidden || !visible) {
+        draw(0)
+        return
+      }
+      animationFrame = window.requestAnimationFrame(tick)
+    }
+
+    const observer = new IntersectionObserver(([entry]) => {
+      visible = entry?.isIntersecting ?? false
+      sync()
+    })
+    const onVisibilityChange = () => sync()
+    const onMotionChange = () => sync()
+    const onPointerMove = (event: PointerEvent) => {
+      const hero = field.parentElement
+      if (!hero) return
+      const rect = hero.getBoundingClientRect()
+      const inside =
+        event.clientX >= rect.left &&
+        event.clientX <= rect.right &&
+        event.clientY >= rect.top &&
+        event.clientY <= rect.bottom
+      pointer.targetStrength = inside ? 1 : 0
+      if (!inside) return
+      pointer.targetX = clamp((event.clientX - rect.left) / rect.width, 0, 1)
+      pointer.targetY = clamp((event.clientY - rect.top) / rect.height, 0.05, 0.95)
+    }
+    const onPointerLeave = () => {
+      pointer.targetStrength = 0
+    }
+    const resizeObserver = new ResizeObserver(resize)
+
+    resize()
+    observer.observe(field)
+    resizeObserver.observe(field)
+    document.addEventListener('visibilitychange', onVisibilityChange)
+    window.addEventListener('pointermove', onPointerMove, { passive: true })
+    window.addEventListener('blur', onPointerLeave)
+    motion.addEventListener('change', onMotionChange)
+    sync()
+
+    return () => {
+      stop()
+      observer.disconnect()
+      resizeObserver.disconnect()
+      document.removeEventListener('visibilitychange', onVisibilityChange)
+      window.removeEventListener('pointermove', onPointerMove)
+      window.removeEventListener('blur', onPointerLeave)
+      motion.removeEventListener('change', onMotionChange)
+    }
+  }, [])
+
+  return <canvas ref={fieldRef} className={styles.asciiField} aria-hidden="true" />
 }
 
 function AccessAction({ access, onEnterApp, onRetry }: Omit<LandingPageProps, 'notice'>) {
@@ -274,33 +447,236 @@ interface CapabilityItem {
 
 const capabilityItems: CapabilityItem[] = [
   {
-    icon: <RulerIcon />,
+    icon: <PrecisionMarkIcon />,
     accent: 'teal',
     title: '像素级的精确排版',
     description:
       '真实纸张尺寸、标尺与对齐线，毫米和像素随时切换。移动、缩放、旋转都能精确到个位数。',
   },
   {
-    icon: <LayersIcon />,
+    icon: <ComponentBloomIcon />,
     accent: 'rose',
     title: '一页纸装下所有信息',
     description:
       '文本、图片、二维码、条形码、表格与基础图形自由组合。表格支持合并单元格、增删行列，像 Excel 一样直接编辑。',
   },
   {
-    icon: <PagesIcon />,
+    icon: <PageStackIcon />,
     accent: 'amber',
     title: '多页面文档，整份管理',
     description: '新增、复制、删除、排序页面，标签、说明书、多联单据都能在一份模板里管理完整。',
   },
   {
-    icon: <HistoryIcon />,
+    icon: <HistorySealIcon />,
     accent: 'blue',
     title: '改错了，找回来就好',
     description:
       '每一次保存都留下一份不可篡改的历史记录，随时对比、还原到任意版本。多人同时编辑也不会被悄悄覆盖。',
   },
 ]
+
+interface ProductCase {
+  key: string
+  title: string
+  eyebrow: string
+  description: string
+  src: string
+  alt: string
+  format: string
+}
+
+const productCases: ProductCase[] = [
+  {
+    key: 'cold-chain',
+    title: '冷链出库标签',
+    eyebrow: '物流追溯',
+    description: '二维码、条码、温区与复核信息在一张标签里保持清楚。',
+    src: '/assets/product/designer-proof-sheet.png',
+    alt: 'PTD 工作台正在编辑冷链出库标签，画布两侧显示组件目录和属性面板',
+    format: 'A5 · 2 pages',
+  },
+  {
+    key: 'delivery-note',
+    title: '采购送货单',
+    eyebrow: '仓储单据',
+    description: '供应商、交付批次、明细与签收区域按纸张节奏完整编排。',
+    src: '/assets/product/designer-delivery-note.png',
+    alt: 'PTD 工作台正在编辑一张采购送货单，纸张中包含交付信息与商品明细',
+    format: 'A4 · fixed layout',
+  },
+  {
+    key: 'price-label',
+    title: '门店商品价签',
+    eyebrow: '零售标签',
+    description: '价格、规格、会员提示与商品条码压缩进小尺寸纸张。',
+    src: '/assets/product/designer-price-label.png',
+    alt: 'PTD 工作台正在编辑一张门店商品价签，画布中有价格、规格和条码',
+    format: '100 × 60 mm',
+  },
+  {
+    key: 'inspection-report',
+    title: '来料检验报告',
+    eyebrow: '质量管理',
+    description: '检验结论、批次信息和项目结果在同一份报告里建立层级。',
+    src: '/assets/product/designer-inspection-report.png',
+    alt: 'PTD 工作台正在编辑一张来料检验报告，纸张中包含检验项目和结论印章',
+    format: 'A4 · report',
+  },
+]
+
+function ProductShowcase() {
+  const railRef = useRef<HTMLDivElement>(null)
+  const dragRef = useRef<{
+    pointerId: number
+    startX: number
+    scrollLeft: number
+    moved: boolean
+  }>()
+  const suppressClickRef = useRef(false)
+  const [activeIndex, setActiveIndex] = useState(0)
+  const [dragging, setDragging] = useState(false)
+
+  const scrollToCase = (index: number) => {
+    const rail = railRef.current
+    const item = rail?.children.item(index)
+    if (!(item instanceof HTMLElement) || !rail) return
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    rail.scrollTo({
+      left: item.offsetLeft - (rail.clientWidth - item.clientWidth) / 2,
+      behavior: reducedMotion ? 'auto' : 'smooth',
+    })
+  }
+
+  const updateActiveCase = () => {
+    const rail = railRef.current
+    if (!rail) return
+    const center = rail.scrollLeft + rail.clientWidth / 2
+    let nextIndex = 0
+    let nearestDistance = Number.POSITIVE_INFINITY
+    Array.from(rail.children).forEach((child, index) => {
+      if (!(child instanceof HTMLElement)) return
+      const childCenter = child.offsetLeft + child.clientWidth / 2
+      const distance = Math.abs(childCenter - center)
+      if (distance < nearestDistance) {
+        nearestDistance = distance
+        nextIndex = index
+      }
+    })
+    setActiveIndex(nextIndex)
+  }
+
+  const startDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (event.pointerType !== 'mouse' || event.button !== 0) return
+    dragRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      scrollLeft: event.currentTarget.scrollLeft,
+      moved: false,
+    }
+    event.currentTarget.setPointerCapture(event.pointerId)
+    setDragging(true)
+  }
+
+  const moveDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const drag = dragRef.current
+    if (!drag || drag.pointerId !== event.pointerId) return
+    const distance = event.clientX - drag.startX
+    if (Math.abs(distance) > 4) drag.moved = true
+    event.currentTarget.scrollLeft = drag.scrollLeft - distance
+  }
+
+  const endDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const drag = dragRef.current
+    if (!drag || drag.pointerId !== event.pointerId) return
+    suppressClickRef.current = drag.moved
+    dragRef.current = undefined
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId)
+    }
+    setDragging(false)
+  }
+
+  return (
+    <div className={styles.productShowcase}>
+      <div className={styles.productRailHeader}>
+        <p aria-live="polite">
+          <span>{String(activeIndex + 1).padStart(2, '0')}</span>
+          {productCases[activeIndex]?.title}
+        </p>
+        <div className={styles.railActions} aria-label="切换模板案例">
+          <button
+            type="button"
+            aria-label="上一个案例"
+            disabled={activeIndex === 0}
+            onClick={() => scrollToCase(activeIndex - 1)}
+          >
+            <ArrowIcon />
+          </button>
+          <button
+            type="button"
+            aria-label="下一个案例"
+            disabled={activeIndex === productCases.length - 1}
+            onClick={() => scrollToCase(activeIndex + 1)}
+          >
+            <ArrowIcon />
+          </button>
+        </div>
+      </div>
+
+      <div
+        ref={railRef}
+        className={`${styles.productRail} ${dragging ? styles.productRailDragging : ''}`}
+        role="region"
+        aria-label="真实 PTD 模板案例，可横向滚动"
+        tabIndex={0}
+        onScroll={updateActiveCase}
+        onPointerDown={startDrag}
+        onPointerMove={moveDrag}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+        onClickCapture={(event) => {
+          if (!suppressClickRef.current) return
+          event.preventDefault()
+          suppressClickRef.current = false
+        }}
+        onKeyDown={(event) => {
+          if (event.key === 'ArrowLeft') {
+            event.preventDefault()
+            scrollToCase(Math.max(0, activeIndex - 1))
+          }
+          if (event.key === 'ArrowRight') {
+            event.preventDefault()
+            scrollToCase(Math.min(productCases.length - 1, activeIndex + 1))
+          }
+        }}
+      >
+        {productCases.map((item) => (
+          <figure key={item.key} className={styles.productWindow}>
+            <div className={styles.windowBar} aria-hidden="true">
+              <span />
+              <span />
+              <span />
+              <p>ptd / {item.title}</p>
+            </div>
+            <a className={styles.productViewport} href={item.src} target="_blank" rel="noreferrer">
+              <img src={item.src} alt={item.alt} width="1600" height="1000" draggable={false} />
+            </a>
+            <figcaption>
+              <span>
+                <strong>{item.eyebrow}</strong>
+                {item.description}
+              </span>
+              <span>{item.format}</span>
+              <span>real schema</span>
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+
+      <p className={styles.productRailHint}>拖动或横滑查看案例 · 点击截图打开高清原图</p>
+    </div>
+  )
+}
 
 interface FaqItem {
   question: string
@@ -405,7 +781,7 @@ export function LandingPage({ access, notice, onEnterApp, onRetry }: LandingPage
       </header>
 
       <section className={styles.hero} id="start" aria-labelledby="hero-title">
-        <div className={styles.heroPattern} aria-hidden="true" />
+        <AsciiPrintField />
         <div className={styles.main}>
           <h1 id="hero-title" className={styles.heroTitle}>
             模板改了又改，
@@ -445,27 +821,7 @@ export function LandingPage({ access, notice, onEnterApp, onRetry }: LandingPage
               下面这张截图，就是你打开后看到的样子。
             </h2>
 
-            <figure className={styles.productWindow}>
-              <div className={styles.windowBar} aria-hidden="true">
-                <span />
-                <span />
-                <span />
-                <p>ptd / 冷链出库标签 · 华东 07</p>
-              </div>
-              <div className={styles.productViewport}>
-                <img
-                  src="/assets/product/designer-proof-sheet.png"
-                  alt="PTD 工作台正在编辑一张冷链出库标签，画布两侧显示组件目录和属性面板"
-                  width="1600"
-                  height="1000"
-                />
-              </div>
-              <figcaption>
-                <span>真实 PTD Designer</span>
-                <span>A5 · 148 × 210 mm</span>
-                <span>2 pages · real schema</span>
-              </figcaption>
-            </figure>
+            <ProductShowcase />
           </div>
         </section>
 
