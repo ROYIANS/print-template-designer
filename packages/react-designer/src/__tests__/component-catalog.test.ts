@@ -279,9 +279,9 @@ describe('component catalog', () => {
         ['cell-3', 'cell-4'],
       ],
     })
-    expect(qr?.propValue).toMatchObject({ text: 'PTD-QR-0001', correctLevel: 'M', margin: 4 })
+    expect(qr?.propValue).toMatchObject({ text: 'FOLIQ-QR-0001', correctLevel: 'M', margin: 4 })
     expect(barcode?.propValue).toMatchObject({
-      text: 'PTD-2026-0001',
+      text: 'FOLIQ-2026-0001',
       bcid: 'code128',
       includeText: true,
     })

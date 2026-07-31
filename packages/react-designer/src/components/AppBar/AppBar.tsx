@@ -102,7 +102,7 @@ const APP_MENUS: readonly AppMenu[] = [
         command: 'new',
         icon: RiFileLine,
         label: '新建模板',
-        description: '创建一个空白打印模板',
+        description: '创建一个空白结构化文档',
         shortcut: 'Ctrl+N',
       },
       {
@@ -329,14 +329,14 @@ const APP_MENUS: readonly AppMenu[] = [
         command: 'documentation',
         icon: RiBookOpenLine,
         label: '使用文档',
-        description: '打开 PTD 使用指南',
+        description: '打开 Foliq 使用指南',
         shortcut: 'F1',
       },
       {
         kind: 'host',
         command: 'about',
         icon: RiInformationLine,
-        label: '关于 PTD',
+        label: '关于 Foliq',
         description: '版本、许可与项目信息',
       },
     ],
@@ -495,10 +495,10 @@ export function AppBar({ hostCommands, workspace }: AppBarProps) {
       }}
     >
       <div className={styles.topBar}>
-        <div className={styles.brand} aria-label="Print Template Designer">
+        <div className={styles.brand} aria-label="Foliq 结构化文档设计器">
           <span className={styles.legacyLogo} aria-hidden="true" />
-          <span className={styles.wordmark}>PTD</span>
-          <span className={styles.productName}>打印模板设计器</span>
+          <span className={styles.wordmark}>Foliq</span>
+          <span className={styles.productName}>结构化文档设计器</span>
         </div>
 
         <nav className={styles.menuBar} aria-label="应用菜单">

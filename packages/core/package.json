@@ -1,7 +1,7 @@
 {
   "name": "@ptd/core",
   "version": "0.1.0",
-  "description": "Framework-agnostic core engine for Print Template Designer",
+  "description": "Framework-agnostic core engine for Foliq",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",

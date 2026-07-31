@@ -153,7 +153,7 @@ export const PRODUCT_CAPTURE_TEMPLATE: TemplateSchema = {
           fontSize: 9,
           fontWeight: '600',
         }),
-        component('capture-order', 'RoySimpleText', '订单编号', 'PTD-20260731-0842', {
+        component('capture-order', 'RoySimpleText', '订单编号', 'FQ-20260731-0842', {
           left: 50,
           top: 158,
           width: 290,
@@ -171,7 +171,7 @@ export const PRODUCT_CAPTURE_TEMPLATE: TemplateSchema = {
           'RoyQRCode',
           '追溯二维码',
           {
-            text: 'https://ptd.dev/trace/PTD-20260731-0842',
+            text: 'https://example.com/trace/FQ-20260731-0842',
             colorDark: '#1d2735',
             colorLight: '#ffffff',
             correctLevel: 'M',
@@ -286,7 +286,7 @@ export const PRODUCT_CAPTURE_TEMPLATE: TemplateSchema = {
           'RoyBarCode',
           '出库条形码',
           {
-            text: 'PTD202607310842',
+            text: 'FQ202607310842',
             bcid: 'code128',
             colorDark: '#1d2735',
             includeText: true,
@@ -309,7 +309,7 @@ export const PRODUCT_CAPTURE_TEMPLATE: TemplateSchema = {
           },
           'shape',
         ),
-        component('capture-footer', 'RoySimpleText', '页脚', '打印模板设计器 · 版本化校样', {
+        component('capture-footer', 'RoySimpleText', '页脚', 'Foliq · 结构化文档校样', {
           left: 50,
           top: 618,
           width: 240,
@@ -674,18 +674,24 @@ const DELIVERY_NOTE_CAPTURE_TEMPLATE: TemplateSchema = {
             fontSize: 9,
           },
         ),
-        component('delivery-footer', 'RoySimpleText', '页脚', 'PTD / PURCHASE DELIVERY NOTE · 01', {
-          left: 70,
-          top: 1020,
-          width: 638,
-          height: 18,
-          rotate: 0,
-          opacity: 1,
-          color: '#7a8591',
-          fontFamily: UI_FONT,
-          fontSize: 8,
-          letterSpacing: '0.8px',
-        }),
+        component(
+          'delivery-footer',
+          'RoySimpleText',
+          '页脚',
+          'FOLIQ / PURCHASE DELIVERY NOTE · 01',
+          {
+            left: 70,
+            top: 1020,
+            width: 638,
+            height: 18,
+            rotate: 0,
+            opacity: 1,
+            color: '#7a8591',
+            fontFamily: UI_FONT,
+            fontSize: 8,
+            letterSpacing: '0.8px',
+          },
+        ),
       ],
     },
   ],
@@ -1117,7 +1123,7 @@ const INSPECTION_REPORT_CAPTURE_TEMPLATE: TemplateSchema = {
           'inspection-footer',
           'RoySimpleText',
           '页脚',
-          'PTD / INCOMING QUALITY CONTROL · 01',
+          'FOLIQ / INCOMING QUALITY CONTROL · 01',
           {
             left: 64,
             top: 1020,

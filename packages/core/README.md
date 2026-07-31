@@ -1,6 +1,6 @@
 # `@ptd/core`
 
-Print Template Designer 的框架无关核心包。它只包含 TypeScript 数据模型与纯逻辑，不依赖 React、NestJS 或浏览器 UI。
+Foliq 的框架无关核心包。它只包含 TypeScript 数据模型与纯逻辑，不依赖 React、NestJS 或浏览器 UI。
 
 > v2 package 当前只在本仓库 workspace 中使用，尚未发布到 npm。
 

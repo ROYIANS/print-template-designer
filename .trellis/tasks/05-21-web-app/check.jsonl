@@ -5,5 +5,6 @@
 {"file": ".trellis/spec/monorepo/react-designer-contract.md", "reason": "确认认证、HTTP 和 Server Record 未泄漏进 Designer"}
 {"file": ".trellis/spec/monorepo/server-architecture.md", "reason": "Dev Auth Bypass fail-closed、loopback、owner ���离和数据库安全检查"}
 {"file": ".trellis/tasks/05-21-web-app/research/vidorra-life-landing-reference.md", "reason": "检查参考只被方法性吸收，没有照搬品牌或虚构产品能力"}
+{"file": ".trellis/tasks/05-21-web-app/research/supply-ascii-reference.md", "reason": "检查动画已替换为可识别纸张主体、具备暂停与 reduced-motion 行为且没有复制品牌图形"}
 {"file": ".trellis/tasks/archive/2026-07/07-30-postgres-github-auth/validation.md", "reason": "认证与 PostgreSQL 回归验证权威基线"}
 {"file": ".trellis/tasks/archive/2026-07/07-31-deploy-postgres-auth/validation.md", "reason": "完整部署、同源 Auth 和各包测试的权威基线"}

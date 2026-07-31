@@ -1,6 +1,6 @@
 # `@ptd/react-designer`
 
-Print Template Designer 的 React 专业编辑器。它把 `@ptd/core` 的模板模型和 `@ptd/components` 的 DOM 渲染器组合成可嵌入的 Canvas-first 工作区。
+Foliq 的 React 专业编辑器。它把 `@ptd/core` 的模板模型和 `@ptd/components` 的 DOM 渲染器组合成可嵌入的 Canvas-first 工作区。
 
 > v2 package 当前只在本仓库 workspace 中使用，尚未发布到 npm。
 

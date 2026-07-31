@@ -1,7 +1,7 @@
 {
   "name": "@ptd/export",
   "version": "0.1.0",
-  "description": "PDF/Word export utilities for Print Template Designer",
+  "description": "PDF/Word export utilities for Foliq",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",

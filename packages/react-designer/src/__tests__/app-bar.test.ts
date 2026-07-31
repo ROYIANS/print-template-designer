@@ -94,6 +94,13 @@ describe('AppBar application menu', () => {
     document.body.replaceChildren()
   })
 
+  it('uses the public Foliq brand without changing technical DOM contracts', () => {
+    const brand = container.querySelector('[aria-label="Foliq 结构化文档设计器"]')
+    expect(brand?.textContent).toContain('Foliq')
+    expect(brand?.textContent).toContain('结构化文档设计器')
+    expect(panel().id).toBe('ptd-application-menu')
+  })
+
   it('ignores hover and focus until a menu trigger is clicked', () => {
     const file = trigger('文件')
 

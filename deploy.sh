@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# One-click self-hosted deployment for Print Template Designer.
+# One-click self-hosted deployment for Foliq.
 # Default: pull prebuilt GHCR images, run migrations and recreate the stack.
 set -Eeuo pipefail
 
@@ -209,7 +209,7 @@ confirm_fresh() {
     return
   fi
   [[ -t 0 ]] || fail "--fresh requires an interactive confirmation or the additional --yes flag."
-  warn "This permanently deletes the PostgreSQL volume and every PTD user/template."
+  warn "This permanently deletes the PostgreSQL volume and every Foliq user/template."
   read -r -p "Type WIPE_PTD_DATA to continue: " answer
   [[ "$answer" == "WIPE_PTD_DATA" ]] || fail "Fresh deployment cancelled."
 }
@@ -254,7 +254,7 @@ case "$ACTION" in
     exit 0
     ;;
   down)
-    info "Stopping PTD containers and keeping PostgreSQL data…"
+    info "Stopping Foliq containers and keeping PostgreSQL data…"
     docker compose down --remove-orphans
     exit 0
     ;;
@@ -262,7 +262,7 @@ esac
 
 if (( FRESH == 1 )); then
   confirm_fresh
-  warn "Removing PTD containers and PostgreSQL volume…"
+  warn "Removing Foliq containers and PostgreSQL volume…"
   docker compose down --volumes --remove-orphans
 fi
 
@@ -303,7 +303,7 @@ image_tag="$(read_env_value IMAGE_TAG)"
 image_tag="${image_tag:-latest}"
 
 printf '\n'
-info "Print Template Designer is ready."
+info "Foliq is ready."
 printf '  Web: %s\n' "${web_origin%/}/"
 printf '  Health: %s/healthz\n' "${web_origin%/}"
 printf '  GitHub callback: %s/api/auth/callback/github\n' "${auth_url%/}"
