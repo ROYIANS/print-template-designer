@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
 
 @font-face {
@@ -9,6 +10,20 @@
 }
 
 :root {
+  --foliq-font-brand: 'Cherry Bomb One', 'Outfit', sans-serif;
+  --foliq-canvas: #ffffff;
+  --foliq-surface: #f5f5f3;
+  --foliq-surface-raised: #ffffff;
+  --foliq-surface-muted: #ececea;
+  --foliq-ink: #0a0a0a;
+  --foliq-ink-soft: #3d3d3d;
+  --foliq-muted: #6b6b6b;
+  --foliq-faint: #9a9a9a;
+  --foliq-line: rgb(0 0 0 / 8%);
+  --foliq-line-strong: rgb(0 0 0 / 14%);
+  --foliq-accent: #0a0a0a;
+  --foliq-accent-hover: #262626;
+  --foliq-focus: #3c5fd9;
   color-scheme: light;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -23,7 +38,8 @@ body,
 }
 
 body {
-  background: #ffffff;
+  color: var(--foliq-ink);
+  background: var(--foliq-surface);
 }
 
 html {

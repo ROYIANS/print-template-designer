@@ -1,0 +1,216 @@
+.sheet {
+  position: absolute;
+  z-index: 1200;
+  top: 50px;
+  right: 14px;
+  bottom: 30px;
+  width: min(620px, calc(100vw - 28px));
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  overflow: hidden;
+  border: 1px solid var(--foliq-line);
+  border-radius: 12px;
+  color: var(--foliq-ink-soft);
+  background: var(--foliq-surface-raised);
+  box-shadow: 0 18px 48px rgb(0 0 0 / 12%);
+  font:
+    12px 'Sarasa UI SC',
+    'Microsoft YaHei UI',
+    sans-serif;
+}
+
+.sheet[data-suspended] {
+  pointer-events: none;
+}
+
+.sheet > header {
+  min-height: 62px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 14px 10px 18px;
+  border-bottom: 1px solid var(--foliq-line);
+}
+
+.sheet h2,
+.sheet p {
+  margin: 0;
+}
+
+.sheet h2 {
+  color: var(--foliq-ink);
+  font-size: 16px;
+}
+
+.sheet header p,
+.sheet footer span {
+  margin-top: 2px;
+  color: var(--foliq-muted);
+  font-size: 11px;
+}
+
+.sheet header button {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 7px;
+  color: var(--foliq-muted);
+  background: transparent;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.body {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+}
+
+.body nav {
+  min-height: 0;
+  overflow: auto;
+  padding: 8px;
+  border-right: 1px solid var(--foliq-line);
+  background: var(--foliq-surface);
+}
+
+.body nav > p,
+.preview > p {
+  padding: 12px;
+  color: var(--foliq-muted);
+  line-height: 1.6;
+}
+
+.stateMessage {
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+  padding: 12px;
+}
+
+.stateMessage p {
+  margin: 0;
+  color: var(--foliq-muted);
+  line-height: 1.6;
+}
+
+.stateMessage button {
+  min-height: 32px;
+  padding: 5px 10px;
+  border: 1px solid var(--foliq-line-strong);
+  border-radius: 4px;
+  color: var(--foliq-ink-soft);
+  background: var(--foliq-surface-raised);
+  font: inherit;
+  cursor: pointer;
+}
+
+.body nav button {
+  width: 100%;
+  display: grid;
+  gap: 3px;
+  padding: 10px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--foliq-ink-soft);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.body nav button:hover {
+  background: var(--foliq-surface-raised);
+}
+
+.body nav button[aria-pressed='true'] {
+  border-color: var(--foliq-line-strong);
+  background: var(--foliq-surface-raised);
+}
+
+.body nav button > span:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.body nav small {
+  color: var(--foliq-muted);
+  font-size: 9px;
+}
+
+.body nav time {
+  color: var(--foliq-muted);
+  font:
+    10px Outfit,
+    sans-serif;
+}
+
+.preview {
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  padding: 20px;
+  background: var(--foliq-surface-muted);
+}
+
+.templatePreview {
+  width: 100%;
+  height: 100%;
+}
+
+.sheet > footer {
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 9px 14px 9px 18px;
+  border-top: 1px solid var(--foliq-line);
+}
+
+.sheet footer button {
+  min-height: 34px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 8px;
+  color: white;
+  background: var(--foliq-accent);
+  cursor: pointer;
+}
+
+.sheet footer button:disabled {
+  color: var(--foliq-faint);
+  background: var(--foliq-surface-muted);
+  cursor: not-allowed;
+}
+
+.sheet header button:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
+.sheet button:focus-visible {
+  outline: 2px solid var(--foliq-focus);
+  outline-offset: 2px;
+}
+
+@media (max-width: 620px) {
+  .sheet {
+    top: 44px;
+    right: 8px;
+    bottom: 28px;
+    width: calc(100vw - 16px);
+  }
+
+  .body {
+    grid-template-columns: 132px minmax(0, 1fr);
+  }
+
+  .preview {
+    padding: 10px;
+  }
+}

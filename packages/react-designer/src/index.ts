@@ -1,5 +1,7 @@
 export { Designer } from './components/Designer'
 export type { DesignerProps } from './components/Designer'
+export { TemplatePreview } from './components/TemplatePreview'
+export type { TemplatePreviewProps } from './components/TemplatePreview'
 export { DESIGNER_HOST_COMMAND_IDS } from './host'
 export type {
   DesignerDocumentState,

@@ -2,60 +2,41 @@ import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { useSignals } from '@preact/signals-react/runtime'
 import {
   RiArrowDownSLine,
-  RiArrowGoBackLine,
-  RiArrowGoForwardLine,
   RiBookOpenLine,
-  RiBringToFront,
-  RiClipboardLine,
   RiCloseLine,
-  RiFileCopyLine,
+  RiDatabase2Line,
+  RiDeleteBinLine,
   RiFileLine,
+  RiFileSearchLine,
   RiFolderOpenLine,
   RiFullscreenLine,
-  RiGroupLine,
   RiGuideLine,
   RiInformationLine,
   RiKeyboardBoxLine,
   RiLayoutLine,
   RiLoader4Line,
-  RiLock2Line,
+  RiLockUnlockLine,
   RiMenuLine,
   RiPagesLine,
   RiRulerLine,
   RiSave2Line,
   RiSave3Line,
-  RiScissorsCutLine,
-  RiSendToBack,
-  RiSideBarLine,
-  RiStackLine,
-  RiUser3Line,
-  RiZoomInLine,
-  RiZoomOutLine,
+  RiSettings3Line,
   type RemixiconComponentType,
 } from '@remixicon/react'
 import type { DesignerHostCommandController, DesignerHostCommandId } from '../../host'
+import type { ResourcePanelId } from '../../hooks/useWorkspaceLayout'
 import type { EditorStore } from '../../state'
 import { useEditorStore } from '../../state'
-import type { ResourcePanelId } from '../../hooks/useWorkspaceLayout'
 import styles from './AppBar.module.css'
 
 type EditorCommandId =
-  | 'undo'
-  | 'redo'
-  | 'cut'
-  | 'copy'
-  | 'paste'
-  | 'group'
-  | 'ungroup'
-  | 'toggleLock'
-  | 'moveForward'
-  | 'moveBackward'
   | 'toggleRuler'
   | 'toggleGuides'
-  | 'zoomIn'
-  | 'zoomOut'
+  | 'toggleGuidesLock'
+  | 'clearGuides'
 
-type WorkspaceCommandId = ResourcePanelId | 'inspector'
+type WorkspaceCommandId = 'pageSettings' | Extract<ResourcePanelId, 'assets' | 'pages' | 'data'>
 
 interface AppMenuItemBase {
   icon: RemixiconComponentType
@@ -73,22 +54,18 @@ type AppMenuItem = AppMenuItemBase &
   )
 
 interface AppMenu {
-  id: 'file' | 'edit' | 'object' | 'view' | 'window' | 'help'
+  id: 'file' | 'template' | 'view' | 'help'
   label: string
   mnemonic: string
   items: readonly AppMenuItem[]
 }
 
-interface AppBarWorkspaceCommands {
-  resourcesOpen: boolean
-  inspectorOpen: boolean
-  openResource: (panel: ResourcePanelId) => void
-  toggleInspector: () => void
-}
-
 interface AppBarProps {
   hostCommands?: DesignerHostCommandController
-  workspace?: AppBarWorkspaceCommands
+  workspace?: {
+    openResource: (panel: ResourcePanelId) => void
+    openInspector: () => void
+  }
 }
 
 const APP_MENUS: readonly AppMenu[] = [
@@ -110,7 +87,7 @@ const APP_MENUS: readonly AppMenu[] = [
         command: 'open',
         icon: RiFolderOpenLine,
         label: '打开模板',
-        description: '从模板库或文件打开模板',
+        description: '返回文件工作台并选择模板',
         shortcut: 'Ctrl+O',
       },
       {
@@ -129,99 +106,54 @@ const APP_MENUS: readonly AppMenu[] = [
         description: '以新文档保存模板副本',
         shortcut: 'Ctrl+Shift+S',
       },
-    ],
-  },
-  {
-    id: 'edit',
-    label: '编辑',
-    mnemonic: 'E',
-    items: [
       {
-        kind: 'editor',
-        command: 'undo',
-        icon: RiArrowGoBackLine,
-        label: '撤销',
-        description: '撤销上一步编辑',
-        shortcut: 'Ctrl+Z',
-      },
-      {
-        kind: 'editor',
-        command: 'redo',
-        icon: RiArrowGoForwardLine,
-        label: '重做',
-        description: '恢复刚刚撤销的编辑',
-        shortcut: 'Ctrl+Shift+Z',
-      },
-      {
-        kind: 'editor',
-        command: 'cut',
-        icon: RiScissorsCutLine,
-        label: '剪切',
-        description: '剪切当前选择',
-        shortcut: 'Ctrl+X',
-      },
-      {
-        kind: 'editor',
-        command: 'copy',
-        icon: RiFileCopyLine,
-        label: '复制',
-        description: '复制当前选择',
-        shortcut: 'Ctrl+C',
-      },
-      {
-        kind: 'editor',
-        command: 'paste',
-        icon: RiClipboardLine,
-        label: '粘贴',
-        description: '粘贴剪贴板内容',
-        shortcut: 'Ctrl+V',
+        kind: 'host',
+        command: 'versionHistory',
+        icon: RiPagesLine,
+        label: '版本历史',
+        description: '查看并恢复服务器历史版本',
       },
     ],
   },
   {
-    id: 'object',
-    label: '对象',
-    mnemonic: 'O',
+    id: 'template',
+    label: '模板',
+    mnemonic: 'T',
     items: [
       {
-        kind: 'editor',
-        command: 'group',
-        icon: RiGroupLine,
-        label: '组合',
-        description: '将多个组件组合编辑',
-        shortcut: 'Ctrl+G',
+        kind: 'workspace',
+        command: 'pageSettings',
+        icon: RiSettings3Line,
+        label: '页面设置',
+        description: '配置纸张、方向、边距和页面外观',
       },
       {
-        kind: 'editor',
-        command: 'ungroup',
+        kind: 'workspace',
+        command: 'pages',
+        icon: RiPagesLine,
+        label: '页面管理',
+        description: '新增、复制、排序和删除模板页面',
+      },
+      {
+        kind: 'workspace',
+        command: 'assets',
         icon: RiLayoutLine,
-        label: '拆分',
-        description: '拆分当前组件组合',
-        shortcut: 'Ctrl+Shift+G',
+        label: '素材资源',
+        description: '浏览可插入模板的组件与素材',
       },
       {
-        kind: 'editor',
-        command: 'toggleLock',
-        icon: RiLock2Line,
-        label: '锁定 / 解锁',
-        description: '切换当前选择的锁定状态',
-        shortcut: 'Ctrl+L',
+        kind: 'workspace',
+        command: 'data',
+        icon: RiDatabase2Line,
+        label: '数据源',
+        description: '管理字段、示例数据与内容绑定',
       },
       {
-        kind: 'editor',
-        command: 'moveForward',
-        icon: RiBringToFront,
-        label: '上移一层',
-        description: '调整对象堆叠顺序',
-        shortcut: 'Ctrl+]',
-      },
-      {
-        kind: 'editor',
-        command: 'moveBackward',
-        icon: RiSendToBack,
-        label: '下移一层',
-        description: '调整对象堆叠顺序',
-        shortcut: 'Ctrl+[',
+        kind: 'planned',
+        reason: '即将提供',
+        icon: RiFileSearchLine,
+        label: '模板检查',
+        description: '检查越界、缺失数据与打印风险',
       },
     ],
   },
@@ -248,66 +180,25 @@ const APP_MENUS: readonly AppMenu[] = [
       },
       {
         kind: 'editor',
-        command: 'zoomIn',
-        icon: RiZoomInLine,
-        label: '放大',
-        description: '放大当前画布',
-        shortcut: 'Ctrl++',
+        command: 'toggleGuidesLock',
+        icon: RiLockUnlockLine,
+        label: '锁定 / 解锁参考线',
+        description: '保护参考线位置，避免误操作',
       },
       {
         kind: 'editor',
-        command: 'zoomOut',
-        icon: RiZoomOutLine,
-        label: '缩小',
-        description: '缩小当前画布',
-        shortcut: 'Ctrl+-',
+        command: 'clearGuides',
+        icon: RiDeleteBinLine,
+        label: '清除全部参考线',
+        description: '移除当前页面上的全部参考线',
       },
       {
         kind: 'planned',
-        reason: '等待画布可视区域测量合同',
+        reason: '即将提供',
         icon: RiFullscreenLine,
         label: '适合页面',
-        description: '让页面适配工作区',
+        description: '让页面完整适配当前工作区',
         shortcut: 'Ctrl+0',
-      },
-    ],
-  },
-  {
-    id: 'window',
-    label: '窗口',
-    mnemonic: 'W',
-    items: [
-      {
-        kind: 'workspace',
-        command: 'assets',
-        icon: RiLayoutLine,
-        label: '素材面板',
-        description: '浏览图片与组件素材',
-        shortcut: 'F6',
-      },
-      {
-        kind: 'workspace',
-        command: 'pages',
-        icon: RiPagesLine,
-        label: '页面面板',
-        description: '管理模板页面',
-        shortcut: 'F7',
-      },
-      {
-        kind: 'workspace',
-        command: 'layers',
-        icon: RiStackLine,
-        label: '图层面板',
-        description: '查看对象与层级',
-        shortcut: 'F8',
-      },
-      {
-        kind: 'workspace',
-        command: 'inspector',
-        icon: RiSideBarLine,
-        label: '属性面板',
-        description: '打开或收起属性面板',
-        shortcut: 'F9',
       },
     ],
   },
@@ -321,23 +212,22 @@ const APP_MENUS: readonly AppMenu[] = [
         command: 'keyboardShortcuts',
         icon: RiKeyboardBoxLine,
         label: '快捷键',
-        description: '查看完整快捷键表',
+        description: '查看设计器快捷键列表',
         shortcut: 'Ctrl+/',
       },
       {
         kind: 'host',
         command: 'documentation',
         icon: RiBookOpenLine,
-        label: '使用文档',
-        description: '打开 Foliq 使用指南',
-        shortcut: 'F1',
+        label: '产品介绍',
+        description: '了解 Foliq 的设计与工作方式',
       },
       {
         kind: 'host',
         command: 'about',
         icon: RiInformationLine,
         label: '关于 Foliq',
-        description: '版本、许可与项目信息',
+        description: '查看产品版本与项目说明',
       },
     ],
   },
@@ -351,32 +241,12 @@ interface CommandState {
   reason?: string
 }
 
-const UNAVAILABLE: CommandState = { enabled: false, pending: false, reason: '功能待接入' }
-
-function hasLockedSelection(store: EditorStore): boolean {
-  return store.selectedComponents.value.some((component) => component.isLock)
-}
+const UNAVAILABLE: CommandState = { enabled: false, pending: false, reason: '暂不可用' }
 
 function getEditorCommandState(store: EditorStore, command: EditorCommandId): CommandState {
-  const selected = store.selectedComponents.value
-  const locked = hasLockedSelection(store)
   let enabled = true
 
-  if (command === 'undo') enabled = store.canUndo.value
-  if (command === 'redo') enabled = store.canRedo.value
-  if (command === 'copy') enabled = selected.length > 0
-  if (command === 'cut') enabled = selected.length > 0 && !locked
-  if (command === 'paste') enabled = Boolean(store.clipboard.value)
-  if (command === 'group') enabled = selected.length > 1 && !locked
-  if (command === 'ungroup') {
-    enabled = !locked && selected.some((component) => component.component === 'RoyGroup')
-  }
-  if (command === 'toggleLock') enabled = selected.length > 0
-  if (command === 'moveForward' || command === 'moveBackward') {
-    enabled = selected.length > 0 && !locked
-  }
-  if (command === 'zoomIn') enabled = store.scale.value < 2
-  if (command === 'zoomOut') enabled = store.scale.value > 0.25
+  if (command === 'clearGuides') enabled = store.guides.value.length > 0 && !store.guidesLocked.value
 
   return enabled
     ? { enabled: true, pending: false }
@@ -384,20 +254,10 @@ function getEditorCommandState(store: EditorStore, command: EditorCommandId): Co
 }
 
 function runEditorCommand(store: EditorStore, command: EditorCommandId): void {
-  if (command === 'undo') store.undo()
-  if (command === 'redo') store.redo()
-  if (command === 'cut') store.cut()
-  if (command === 'copy') store.copy()
-  if (command === 'paste') store.paste()
-  if (command === 'group') store.group()
-  if (command === 'ungroup') store.ungroup()
-  if (command === 'toggleLock') store.toggleLock()
-  if (command === 'moveForward') store.moveLayer('forward')
-  if (command === 'moveBackward') store.moveLayer('backward')
   if (command === 'toggleRuler') store.toggleRuler()
   if (command === 'toggleGuides') store.toggleGuidesVisible()
-  if (command === 'zoomIn') store.setZoom(store.scale.value + 0.25)
-  if (command === 'zoomOut') store.setZoom(store.scale.value - 0.25)
+  if (command === 'toggleGuidesLock') store.toggleGuidesLocked()
+  if (command === 'clearGuides') store.clearGuides()
 }
 
 export function AppBar({ hostCommands, workspace }: AppBarProps) {
@@ -436,7 +296,7 @@ export function AppBar({ hostCommands, workspace }: AppBarProps) {
     if (item.kind === 'workspace') {
       return workspace
         ? { enabled: true, pending: false }
-        : { enabled: false, pending: false, reason: '工作区控制器未接入' }
+        : { enabled: false, pending: false, reason: '当前工作区不可用' }
     }
     return { enabled: false, pending: false, reason: item.reason }
   }
@@ -447,8 +307,12 @@ export function AppBar({ hostCommands, workspace }: AppBarProps) {
     if (item.kind === 'host') return (await hostCommands?.execute(item.command)) ?? false
     if (item.kind === 'editor') runEditorCommand(store, item.command)
     if (item.kind === 'workspace' && workspace) {
-      if (item.command === 'inspector') workspace.toggleInspector()
-      else workspace.openResource(item.command)
+      if (item.command === 'pageSettings') {
+        store.clearSelection()
+        workspace.openInspector()
+      } else {
+        workspace.openResource(item.command)
+      }
     }
     return item.kind !== 'planned'
   }
@@ -544,6 +408,8 @@ export function AppBar({ hostCommands, workspace }: AppBarProps) {
               <button
                 type="button"
                 className={styles.quietAction}
+                data-ptd-control-family="document-action"
+                data-variant="secondary"
                 disabled={!openState.enabled || openState.pending}
                 aria-busy={openState.pending}
                 title={openState.reason}
@@ -554,11 +420,13 @@ export function AppBar({ hostCommands, workspace }: AppBarProps) {
                 ) : (
                   <RiFolderOpenLine aria-hidden="true" />
                 )}
-                <span>{openState.pending ? '正在打开' : '打开模板'}</span>
+                <span>{openState.pending ? '正在返回' : '文件工作台'}</span>
               </button>
               <button
                 type="button"
                 className={styles.primaryAction}
+                data-ptd-control-family="document-action"
+                data-variant="primary"
                 disabled={!saveState.enabled || saveState.pending}
                 aria-busy={saveState.pending}
                 title={saveState.reason}
@@ -573,16 +441,6 @@ export function AppBar({ hostCommands, workspace }: AppBarProps) {
               </button>
             </>
           )}
-          <button
-            type="button"
-            className={styles.userPlaceholder}
-            aria-disabled="true"
-            aria-label="用户账户（由宿主应用提供）"
-            title="用户账户由宿主应用提供"
-            onClick={(event) => event.preventDefault()}
-          >
-            <RiUser3Line aria-hidden="true" />
-          </button>
         </div>
       </div>
 

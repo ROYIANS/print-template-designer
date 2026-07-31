@@ -29,9 +29,10 @@
 Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有纸张与校样工具的触感**。品牌核心定位
 是“不是设计一张图，而是定义一种文档”；对外完整描述为“面向打印与出版的专业结构化文档设计器”。
 
-- 主体是冷纸白与带蓝相的石墨灰，不使用纯白和纯黑铺满界面。
+- 主体是与落地页一致的暖纸灰与近中性暖石墨；`#f5f5f3` 是跨官网与工作台的标准暖灰基准，
+  纯白只保留给模板纸张和需要清晰抬升的局部表面，不铺满整个界面。
 - 当前 Logo 仅作为待替换品牌资产复用，不参与主题 token 推导；正式 Logo 由独立品牌批次确定。
-- 克制钴蓝用于主要操作、选中、焦点和工具图标；它只表达明确交互状态，不得退化为
+- 克制的档案墨蓝用于主要操作、选中、焦点和工具图标；它只表达明确交互状态，不得退化为
   大面积通用后台蓝。校样朱红只用于出血、校样与印刷提醒，必须稀少。
 - 视觉记忆点是“纸张、标尺、套准与校样”，不是玻璃、霓虹、渐变或 SaaS 卡片。
 
@@ -67,22 +68,22 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
 
 ```css
 .ptdTheme {
-  /* Cool paper */
-  --ptd-paper-0: oklch(99.2% 0.004 255);
-  --ptd-paper-1: oklch(98.2% 0.006 255);
-  --ptd-paper-2: oklch(96.5% 0.008 255);
-  --ptd-paper-3: oklch(93.7% 0.011 255);
-  --ptd-paper-4: oklch(89.5% 0.014 255);
+  /* Warm paper — paper-2 perceptually matches the landing-page #f5f5f3 baseline */
+  --ptd-paper-0: oklch(99.35% 0.003 106);
+  --ptd-paper-1: oklch(98.45% 0.003 106);
+  --ptd-paper-2: oklch(96.96% 0.003 106);
+  --ptd-paper-3: oklch(94.8% 0.004 100);
+  --ptd-paper-4: oklch(89.5% 0.009 85);
 
-  /* Blue graphite */
-  --ptd-graphite-950: oklch(21% 0.02 258);
-  --ptd-graphite-900: oklch(27% 0.021 258);
-  --ptd-graphite-800: oklch(35% 0.02 258);
-  --ptd-graphite-700: oklch(44% 0.018 258);
-  --ptd-graphite-600: oklch(53% 0.016 258);
-  --ptd-graphite-500: oklch(62% 0.014 258);
-  --ptd-graphite-400: oklch(71% 0.012 258);
-  --ptd-graphite-300: oklch(82% 0.01 258);
+  /* Near-neutral warm graphite */
+  --ptd-graphite-950: oklch(21% 0.006 70);
+  --ptd-graphite-900: oklch(27% 0.007 70);
+  --ptd-graphite-800: oklch(35% 0.008 70);
+  --ptd-graphite-700: oklch(44% 0.008 70);
+  --ptd-graphite-600: oklch(53% 0.007 75);
+  --ptd-graphite-500: oklch(62% 0.006 80);
+  --ptd-graphite-400: oklch(71% 0.006 85);
+  --ptd-graphite-300: oklch(82% 0.006 90);
 
   /* Proof vermilion */
   --ptd-vermilion-700: oklch(45% 0.16 35);
@@ -90,15 +91,15 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
   --ptd-vermilion-500: oklch(59% 0.17 35);
   --ptd-vermilion-100: oklch(94% 0.035 35);
 
-  /* Editor cobalt */
-  --ptd-cobalt-700: oklch(48% 0.22 265);
-  --ptd-cobalt-600: oklch(57% 0.245 265);
-  --ptd-cobalt-100: oklch(94.5% 0.04 260);
+  /* Archival ink blue */
+  --ptd-ink-blue-700: oklch(44% 0.1 258);
+  --ptd-ink-blue-600: oklch(54% 0.12 258);
+  --ptd-ink-blue-100: oklch(95% 0.025 258);
 }
 ```
 
-钴蓝与校样朱红均不得大面积铺底。中性 surface 应占视觉重量约 90%，明确状态色不超过
-10%。钴蓝统一操作、选中与焦点；朱红仅保留印刷校样语义。Logo 的自身颜色不定义 UI
+档案墨蓝与校样朱红均不得大面积铺底。中性 surface 应占视觉重量约 90%，明确状态色不超过
+10%。档案墨蓝统一操作、选中与焦点；朱红仅保留印刷校样语义。Logo 的自身颜色不定义 UI
 状态，也不要求组件跟随 Logo 换色。
 
 ### 4.2 语义颜色
@@ -109,8 +110,8 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
   --ptd-surface-panel: var(--ptd-paper-0);
   --ptd-surface-raised: var(--ptd-paper-0);
   --ptd-surface-sunken: var(--ptd-paper-2);
-  --ptd-surface-canvas: oklch(91.5% 0.012 255);
-  --ptd-surface-paper: var(--ptd-paper-0);
+  --ptd-surface-canvas: oklch(91.5% 0.008 85);
+  --ptd-surface-paper: oklch(100% 0 0);
 
   --ptd-text-strong: var(--ptd-graphite-950);
   --ptd-text: var(--ptd-graphite-800);
@@ -121,19 +122,20 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
   --ptd-border: var(--ptd-graphite-300);
   --ptd-border-subtle: var(--ptd-paper-4);
 
-  --ptd-action: var(--ptd-cobalt-600);
-  --ptd-action-hover: var(--ptd-cobalt-700);
-  --ptd-action-subtle: var(--ptd-cobalt-100);
-  --ptd-selection: var(--ptd-cobalt-600);
-  --ptd-selection-strong: var(--ptd-cobalt-700);
-  --ptd-selection-subtle: var(--ptd-cobalt-100);
+  --ptd-action: var(--ptd-ink-blue-600);
+  --ptd-action-hover: var(--ptd-ink-blue-700);
+  --ptd-action-subtle: var(--ptd-ink-blue-100);
+  --ptd-selection: var(--ptd-ink-blue-600);
+  --ptd-selection-strong: var(--ptd-ink-blue-700);
+  --ptd-selection-subtle: var(--ptd-ink-blue-100);
+  --ptd-selection-border: oklch(74% 0.055 258);
   --ptd-proof: var(--ptd-vermilion-600);
   --ptd-proof-subtle: var(--ptd-vermilion-100);
 
   --ptd-success: oklch(47% 0.105 145);
   --ptd-warning: oklch(58% 0.13 72);
   --ptd-danger: oklch(46% 0.17 27);
-  --ptd-focus: var(--ptd-cobalt-600);
+  --ptd-focus: var(--ptd-ink-blue-600);
 }
 ```
 
@@ -141,11 +143,15 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
 - 图标、边框、焦点环和选中指示至少达到 3:1。
 - Placeholder 不是标签，且颜色同样要满足正文对比度要求。
 - 错误状态使用 `--ptd-danger`；校样朱红不能代替错误语义。
+- 彩色状态与暖中性边框组合时优先使用显式语义 token；不得直接在 OKLCH 中混合两种带不同色相的
+  颜色来生成状态边框，否则低彩度暖灰的隐藏色相可能把墨蓝插值为绿色。需要动态混色时应明确选择
+  不产生色相绕行的插值空间，并通过实际浏览器检查结果。
 - Context Bar、Resource Panel、Inspector 与 Status Bar 使用接近白色的 `surface-panel`，让长时间
   工作的主 Chrome 保持清洁；`surface-app` 只承担框架底色，`surface-sunken` 只用于局部凹槽、
   hover 和禁用状态。不得把多个深浅相近的灰 surface 反复嵌套成暗淡的整屏底色。
-- 深色 App Bar、冷灰 Pasteboard 和冷白 Paper 继续形成三个明确层级；“提高 Panel 明度”不等于
-  将 Canvas 或整页宿主铺成纯白。
+- 黑色 App Bar、较深的暖灰 Pasteboard 和纯白 Paper 继续形成三个明确层级；“提高 Panel 明度”
+  不等于将 Canvas 或整页宿主铺成纯白。Pasteboard 保持与旧版相近的明度，只把冷蓝偏色收敛为
+  暖纸灰，避免与落地页割裂。
 
 ### 4.3 间距、尺寸与圆角
 
@@ -182,9 +188,11 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
 
 ```css
 .ptdTheme {
-  --ptd-shadow-paper: 0 1px 2px oklch(22% 0.014 48 / 12%), 0 8px 24px oklch(22% 0.014 48 / 8%);
-  --ptd-shadow-floating: 0 8px 24px oklch(22% 0.014 48 / 16%);
-  --ptd-shadow-modal: 0 20px 56px oklch(22% 0.014 48 / 22%);
+  --ptd-shadow-paper:
+    0 0 0 1px oklch(71% 0.006 85 / 78%), 4px 4px 0 oklch(21% 0.006 70 / 10%),
+    0 18px 38px oklch(21% 0.006 70 / 10%);
+  --ptd-shadow-floating: 0 8px 24px oklch(21% 0.006 70 / 16%);
+  --ptd-shadow-modal: 0 20px 56px oklch(21% 0.006 70 / 22%);
 
   --ptd-layer-canvas: 0;
   --ptd-layer-guide: 20;
@@ -212,6 +220,7 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
   --ptd-font-metric:
     'Outfit', 'Outfit Variable', 'Sarasa UI SC', 'Sarasa Gothic SC', 'Microsoft YaHei UI',
     sans-serif;
+  --ptd-font-brand: var(--foliq-font-brand, 'Cherry Bomb One', 'Outfit', sans-serif);
   --ptd-font-serif: 'Noto Serif SC', 'Noto Serif CJK SC', 'Source Han Serif SC', 'Songti SC', serif;
 
   --ptd-text-10: 0.625rem;
@@ -224,11 +233,13 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
 ```
 
 - 产品 UI 使用固定字号，避免流式字号破坏工具布局。
-- 中文操作 UI 以 Sarasa UI SC 为主；Outfit 负责拉丁字母、数字和产品字标。两者在同一行
-  按 glyph fallback 组合，不把等宽字体当作“工程感”。
+- 中文操作 UI 以 Sarasa UI SC 为主；Outfit 负责普通拉丁字母和数字。作为品牌字标单独出现的
+  `Foliq` 使用 Cherry Bomb One 400，并通过共享 `--foliq-font-brand` / `--ptd-font-brand` Token
+  覆盖落地页、文件工作台、帮助面板与设计器 App Bar；正文或“关于 Foliq”等普通菜单文案不整行
+  切换展示字体，也不把等宽字体当作“工程感”。
 - 衬线内容统一使用 Noto Serif SC 系列，仅用于模板叙事、预览标题或明确要求衬线的内容；
   表单、工具栏、坐标和快捷键仍使用 UI sans。
-- Outfit 与 Noto Serif SC 由宿主通过 Google Fonts 或等价 Web Font 服务引入；离线部署必须
+- Cherry Bomb One、Outfit 与 Noto Serif SC 由宿主通过 Google Fonts 或等价 Web Font 服务引入；离线部署必须
   提供可控的本地镜像或依赖系统 fallback。Sarasa UI SC 没有可靠的通用 Web 服务版本，示例 Web
   通过 `@font-face` 自托管完整 `SarasaUiSC.ttf`。可复用设计器包只提供字体栈，不强制注入大型
   CJK 字体资产。
@@ -242,14 +253,14 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
 - 当前阶段 App Bar 复用 Legacy 的圆形 PTD Logo，不以临时字母块、Emoji 或套准框替代；
   后续可以直接替换正式品牌资产，而不修改主题色与交互状态。
 - Logo 保持资产本身的透明底和颜色，不通过 CSS mask 强行重染；标准视觉尺寸为 24–28px。
-- `PTD` 拉丁字标使用 Outfit 650–700；中文产品名使用 UI 字体，二者是一个品牌单元。
+- `Foliq` 拉丁字标使用 Cherry Bomb One 400；中文产品名使用 UI 字体，二者是一个品牌单元。
 - 朱红套准、裁切或校样符号可以出现在功能场景，但不能冒充产品 Logo。
 
 ### 5.2 结构装饰语汇
 
 从 Vidorra Blueprint、Zed 与 Workshop 只吸收适合密集工具台的结构原子：
 
-- **Hairline**：App Bar、Command Bar、Panel 与 Status Bar 使用贯穿区域的 1px 冷蓝灰细线。
+- **Hairline**：App Bar、Command Bar、Panel 与 Status Bar 使用贯穿区域的 1px 暖中性细线。
 - **Engineering grid**：Pasteboard 可使用极淡工程纸网格；纸张本身保持干净，网格不能穿入模板。
 - **Mount texture**：Pasteboard 可叠加低对比 135° 斜线，表达纸张装配区而非真实打印材质；
   斜线、工程网格、工作区内框和节点均必须 `pointer-events: none`。
@@ -263,6 +274,33 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
 - 禁止 `PRO / 01`、坐标角标、伪图纸编号、无意义英文缩写等装饰性工程文字。
 
 ## 6. 工作区布局合同
+
+### 6.0 文件工作台 Home 与 Editor
+
+- 受保护应用包含两个一级空间：`/app` 是文件工作台 Home，`/app?template=<id>` 是已保存文档
+  Editor，明确的新建 URL（当前为 `/app?new=blank`）是未保存文档 Editor。裸 `/app` 不得隐式创建
+  空白模板，文件浏览也不得作为覆盖 Editor 的大型 Modal。
+- Home 使用与 Editor 相同的暖纸灰、暖石墨和档案墨蓝体系。宽屏采用稳定侧栏与文件主区，窄屏重组为
+  真正的 compact top shell；不能只隐藏桌面元素，也不能用营销页大标题、无意义英文 eyebrow、工程编号、
+  规则线或矩形框装饰制造“专业感”。专业感来自真实信息架构、内容、层级、对齐与状态。
+- “最近更新”使用真实 `TemplateSchema` 与包内只读 Renderer 生成第一页内容预览；不得用静态纸张占位或
+  假组件冒充缩略图。“全部模板”使用准确标题、版本和更新时间的高效列表。Host 最多并发读取 4 份最近
+  模板详情，必须传递 AbortSignal、在卸载/刷新时取消、隔离单项失败；全部列表不得产生无界 N+1 请求。
+- 当前 Server 只有 `updatedAt`，因此默认区必须命名为“最近更新”，并显示标题、版本和更新时间；在增加
+  owner/user 维度的 `lastOpenedAt` 前，不得称为“最近打开”“继续编辑”或暗示跨设备活动历史。
+- Home 至少提供新建空白、最近更新、全部模板、真实标题过滤、清除/无结果、loading、empty、error/retry
+  和打开文档路径。标题过滤不得声称为正文全文搜索；排序、重命名、复制和硬删除在真实能力接入后留在
+  Home，不进入 Canvas Toolbar 或 Inspector。
+- Home 与 Editor 复用 Web Host 提供的真实账户 Popover。头像/身份触发器只负责展开和收起菜单，不能
+  直接执行退出等破坏性动作；GitHub 身份才显示显式退出，本地 Dev Bypass 不显示无效退出入口。
+- Editor 的 Open/Template Browser 用户语义统一为“文件工作台”：clean 文档直接返回 `/app`；dirty 或
+  conflict 文档先进入未保存决策。兼容 Host command 可以暂时保留 alias，但不得显示两个等价入口或分叉
+  状态合同。
+- Modal 只用于用户必须先决策才能安全继续的节点，例如离开 dirty/conflict 文档、不可恢复硬删除、409
+  覆盖/重新载入或恢复会丢弃当前内容。Home/文件浏览、一般 loading/error、Save As、搜索、排序和版本查看
+  不使用 Modal；Save As 使用非模态 Command Sheet，版本历史使用 Drawer/Side Sheet，普通反馈使用 inline
+  status 或 Toast。Modal 必须 trap focus、支持 Escape、提供文本风险说明并在关闭后恢复焦点。应用内的
+  Modal、Sheet 和 Popover 也不得使用仅作装饰的英文 eyebrow；标题应直接说明当前任务或风险。
 
 ### 6.1 桌面结构
 
@@ -299,22 +337,28 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
   工作台语境将高度收紧为 42px、底角收紧为 14px。
 - App Bar 折叠时高 42px，第一行轨道使用内容高度；展开菜单必须参与 Designer Grid 布局并真实
   下压 Context Bar、Canvas 和 Panel，禁止使用 fixed/absolute 覆盖工作区。
-- App Bar 保留品牌与真实载入/保存动作；账户入口在认证功能接入前可以显示明确的用户占位，但不
-  重复展示当前模板标题、页码、纸张方向和尺寸，这些信息由 Context Bar、Inspector 与 Status Bar
-  承担。不存在的云保存、同步或运行状态不得占位。
-- 应用菜单分类统一为文件(F)、编辑(E)、对象(O)、视图(V)、窗口(W)、帮助(H)，靠左排列在品牌
-  之后并提供 `accessKey`/`aria-keyshortcuts` 助记键语义。展开区直接显示命令名称、简短用途与
-  Windows 风格快捷键，不增加“应用命令”“界面预览”等解释性标题；尚未实现的命令不得执行
-  业务动作，必须保留为明确 Disabled 并通过可访问名称和 Tooltip 明示“功能待接入”，不能点击后
-  仅关闭披露层伪装执行。Host 命令通过统一能力表声明 Enabled/Pending/Reason；编辑器命令必须复用
-  Toolbar、快捷键和上下文菜单使用的同一 EditorStore 方法。
+- App Bar 保留品牌与真实载入/保存动作；认证账户由 Web Host 在 Designer 外层提供，Designer 内不得
+  再渲染假账户占位或引入 Auth 客户端。App Bar 不重复展示当前模板标题、页码、纸张方向和尺寸，这些
+  信息由 Context Bar、Inspector 与 Status Bar 承担。不存在的云保存、同步或运行状态不得占位。
+- 同一 Header 中的“文件工作台”和“保存模板”属于同一文档动作控件家族，必须使用相同高度、圆角、
+  边框轮廓、字重和状态节奏，只通过填充与明度表达主次，不得把一个做成普通矩形、另一个做成 Pill。
+- 当前应用菜单按低频工作流组织为文件(F)、模板(T)、视图(V)、帮助(H)，靠左排列在品牌之后并提供
+  `accessKey`/`aria-keyshortcuts` 助记键语义。File 集中 New/Open/Save/Save As 与版本历史；Template
+  承载页面设置、页面管理、素材资源、数据源与模板检查；View 聚焦标尺、参考线显隐/锁定/清空和页面
+  适配；Help 提供快捷键、产品介绍与关于信息。高频对象命令只保留在选择 Context Bar、画布右键菜单
+  和键盘路径，不再建立 Object 分类形成第三份重复入口；同理不建立 Window 分类堆叠面板开关，也不
+  重复 Status Bar 的放大/缩小。展开区直接显示命令名称、简短用途与 Windows 风格快捷键，不增加
+  “应用命令”“界面预览”等解释性标题。稳定且已进入近期产品合同的少量能力可用“即将提供”Disabled
+  状态预告，但不得出现开发批次、等待合同或接入状态等内部文案，也不得让一个分类全部由占位项组成。
+  Host 命令通过统一能力表声明 Enabled/Pending/Reason；编辑器与工作区命令必须复用 Toolbar、快捷键、
+  面板和上下文菜单使用的同一 EditorStore/layout 方法。
 - 桌面应用菜单只能通过触发器 click/键盘激活显式展开；hover 只提供视觉反馈，Tab focus 不得自动
   展开。点击已打开的同一分类收起，点击另一分类保持面板打开并切换内容；点击 Header 外部、焦点
   移出 Header 或 Escape 收起。左右方向键/Home/End 在关闭时只移动焦点，在展开时同时切换分类。
   App Bar 必须声明编辑器交互边界，禁止 Designer 根节点在菜单 pointer down 时抢回画布焦点。
   Touch/Pen 不依赖任何 hover 自动开合，避免触摸浏览器合成 mouse/hover 事件扰动菜单状态。
   `prefers-reduced-motion` 下取消轨道和位移动画。
-- 窄容器将六个桌面分类折叠为汉堡按钮；点击在原位展开菜单，并在展开区顶部显示可横向滚动的
+- 窄容器将四个桌面分类折叠为汉堡按钮；点击在原位展开菜单，并在展开区顶部显示可横向滚动的
   分类条。Touch/Pen 下汉堡按钮显式切换开合，分类点击只切换内容并保持打开，命令点击或 Escape
   收起。载入、保存、账户等关键入口适配成紧凑图标，不因响应式布局被删除。
 - Host 提供文档元数据时，Status Bar 显示标题、版本和中文状态文本；状态可以同时使用语义色点，
@@ -327,11 +371,11 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
 - Tool Dock 在语义上分为工具和资源面板两区，但不常驻显示“工具”“面板”文字；使用分区位置、
   `role="group"` 与 `aria-label` 保持可理解性。Select/Hand/Text/Shape/Image/Table/More 属于操作入口，
   Assets/Pages/Layers/Data 只负责披露资源面板。它使用与面板相连的中性纸灰/石墨 surface；
-  常态图标中性，键盘 Focus 才固定使用钴蓝。Document Bar 承担深色视觉锚点，Dock 不应表现成
+  常态图标中性，键盘 Focus 才固定使用墨蓝。Document Bar 承担深色视觉锚点，Dock 不应表现成
   与画布割裂的第二套导航产品。
-- 精细指针下 Persistent Tool 激活使用轻中性 paper 底、钴蓝图标与靠 Dock 外缘的短几何标记；
+- 精细指针下 Persistent Tool 激活使用轻中性 paper 底、墨蓝图标与靠 Dock 外缘的短几何标记；
   打开的资源面板入口把短标记放在邻近 Panel 的一侧。两种状态不得改变按钮尺寸，也不使用三边
-  inset、负 margin、keycap 底边或外投影。禁止用“长钴蓝竖线 + 大面积浅钴蓝底”同时表达状态。
+  inset、负 margin、keycap 底边或外投影。禁止用“长墨蓝竖线 + 大面积浅墨蓝底”同时表达状态。
 - Resource Panel 默认宽 280px、限制在 240–360px；Inspector 默认 304px、限制在 280–420px。
   两者均可折叠和拖动调整，最后宽度在当前 Designer 实例中保留。
 - 无组件选择时 Inspector 必须展示真实 Page Inspector，而不是空状态；只读信息不得伪装成输入框。
@@ -356,9 +400,31 @@ PanelRoot
 - `PanelHeader` 高 40px，不能在内容区重复同名标题。
 - 列表使用平面行或紧凑 tile；不使用卡片套卡片。
 - 左侧 Resource Panel 的当前 Page/Layer 使用中性 raised surface、上下 hairline 与字重表达；不得
-  使用钴蓝左竖线叠加浅蓝底。Canvas 对象选择仍使用专属钴蓝 overlay，两者不能混为后台导航态。
+  使用墨蓝左竖线叠加浅蓝底。Canvas 对象选择仍使用专属墨蓝 overlay，两者不能混为后台导航态。
 - Hover 才出现的次要动作必须提供键盘可达的替代入口。
 - 空状态包含：当前状态、下一步价值和一个明确动作。
+
+### 6.3 Web 文件工作台与文档级表面
+
+- 受保护的 `/app` 默认进入文件工作台，未保存新文档和已保存文档分别使用明确的 Editor URL；文件
+  浏览不能继续作为覆盖画布的大型 Modal。当前只有 `updatedAt` 时必须称为“最近更新”，不得伪称
+  “最近打开”或“继续编辑”。
+- 文件卡片预览复用公共只读 `TemplatePreview` 和真实 `TemplateSchema`；不得绘制假缩略图或维护第二套
+  Renderer。最近区的详情请求有明确上限并取消过期请求，全部文件区保持 metadata-only。
+- 打开文件是卡片主动作；重命名、创建副本和永久删除位于独立轻量 Popover，不与主动作形成嵌套按钮。
+  Popover 使用与实际键盘合同相符的语义，支持 Escape 恢复触发器焦点、外部 pointer 关闭和 coarse
+  pointer 至少 40px 命中区；不能声明 ARIA menu 却缺少 roving focus/方向键合同。
+- 重命名和 Save As 使用非模态 Side Sheet；浏览历史使用非模态 History Side Sheet；离开 dirty/conflict、
+  覆盖未保存内容的恢复以及不可恢复硬删除才使用 Modal。一般成功、失败、载入和重试留在触发表面或
+  inline 状态，错误不能只藏在被 Modal backdrop 遮住的 Toast 后面。
+- 历史列表按需读取历史详情，并用真实 `TemplatePreview` 预览不可变快照。切换选择必须立即隔离旧预览；
+  AbortSignal 和请求身份共同阻止 stale response 覆盖新选择。当前版本不可重复恢复。
+- 恢复旧快照必须说明它会创建新的最新版本而非改写历史；dirty 文档还要说明当前未保存内容会被替换。
+  恢复携带当前 `expectedVersion`；409 后保留历史浏览但禁止使用过期基线重复恢复，直到用户重新打开
+  服务器文档。删除失败保留文件和确认表面，重命名失败保留输入 Sheet，异步确认必须拒绝重复提交。
+- 同一 Host 区域的 Save As、Help、Version History 与顶层确认表面必须互斥；打开新文档、返回工作台或
+  开始受保护导航时关闭不再相关的 Sheet。每个表面只处理自己的 Escape，关闭后恢复到仍连接 DOM 的
+  合理焦点目标。
 
 ## 7. 组件工具选择器与素材面板
 
@@ -379,8 +445,8 @@ PanelRoot
   空态和真实可执行的图片框入口，不创建刷新即丢失的伪上传、收藏、文件夹或服务端同步。
 - 所有可用组件点击后只激活对应创作工具，不得立即在页面中心插入，也不得通过 Sidebar native
   drag 绕过拖框。用户必须在 Paper 上拖动定义组件 Frame；无效短拖和取消不创建组件。
-- 新建 Shape 必须在取消选中时仍然可见：Line 默认使用 2px 蓝石墨填充，Rect/Circle 默认透明填充
-  与 1px 蓝石墨实线描边，Star 默认蓝石墨填充。默认值来自 Core Registry，不能只在 Designer
+- 新建 Shape 必须在取消选中时仍然可见：Line 默认使用 2px 暖石墨填充，Rect/Circle 默认透明填充
+  与 1px 暖石墨实线描边，Star 默认暖石墨填充。默认值来自 Core Registry，不能只在 Designer
   preview 或 React Overlay 中补视觉假象。
 - Shape Renderer 必须自包含实际几何；Star 等轮廓使用包内 SVG，不能依赖宿主是否加载某套图标
   字体来决定画布内容是否可见。
@@ -394,7 +460,7 @@ PanelRoot
 - 四种 Shape 完成后保持连续绘制；文本、富文本、图像、编码和表格完成一次后回到 Select。
   普通文本和富文本创建完成立即进入内容编辑，其他一次性工具保留新组件选中态供属性配置。
 - 自由表格对象第一次点击仍只选择组件；选中后单元格表面接管精细操作。单击/拖动/Shift 扩展建立
-  单元格选区，双击或 Enter/F2 原位编辑纯文本，Arrow/Tab 导航。选区使用浅钴蓝蒙版和精确描边，
+  单元格选区，双击或 Enter/F2 原位编辑纯文本，Arrow/Tab 导航。选区使用浅墨蓝蒙版和精确描边，
   不能用不透明填充遮住单元格内容。
 - 行列分隔线 hover 才显示细窄拖动命中区，拖动即时改变相邻轨道且形成一个 Gesture 历史节点。
   高频增删、合并、拆分与单元格排版位于 Inspector；不为表格打开遮断画布的大型 Modal。
@@ -478,14 +544,16 @@ PanelRoot
 
 ## 10. 画布视觉合同
 
-- Pasteboard 使用 `--ptd-surface-canvas`；纸张使用冷白 `--ptd-surface-paper` 和唯一的 paper shadow。
-- Starter/Demo Schema 也必须使用冷中性纸白，不能通过 `pageConfig.background` 把默认纸张覆盖为
-  奶油色或暖白；示例内容的正文中性色使用蓝石墨，朱红仅保留真实校样语义。
+- Pasteboard 使用较深的暖纸灰 `--ptd-surface-canvas`；模板纸张使用纯白
+  `--ptd-surface-paper` 和唯一的 paper shadow。
+- Starter/Demo Schema 也必须使用中性白，不能通过 `pageConfig.background` 把默认纸张覆盖为
+  奶油色或暖白；示例内容的正文使用近中性暖石墨，朱红仅保留真实校样语义。
 - Paper shadow 由 1px 硬边框、约 4px 右下实体偏移与一层柔和长阴影组成，表达装配在工作台上的
   纸张；阴影不能复制到面板或组件卡片。
 - Pasteboard 可以同时包含低对比斜线材质和 24px 工程网格；不使用包围标尺的工作区外框、
   菱形、纸张角点或无语义边缘刻线。所有装饰必须停留在应用 Chrome/Pasteboard，绝不能进入
-  Paper 内容或导出结果。
+  Paper 内容或导出结果。斜线和网格只承担接近不可察觉的装配区质感，其对比度必须明显低于标尺的
+  次刻度、主刻度和数字；两层纹理叠加处也不得形成抢夺标尺读数的深色交点。
 - 标尺打开时，在 Paper 顶部与左侧显示真实物理标尺。默认毫米模式使用 5mm 次刻度、10mm 主刻度、
   20mm 数字标签；px 模式以等价的 25/50/100 PTD Canvas px 标签显示。两种模式始终显示 `0`、
   实际页面终点和当前单位；横竖方向随 `pageDirection` 交换，切换不改变物理位置。
@@ -497,13 +565,13 @@ PanelRoot
 - 指针在水平或垂直标尺移动时，应以当前新建颜色显示一条低透明临时参考线和 `X/Y + 0.1mm`
   位置标签；该预览只存在于组件本地状态，点击后才写入参考线会话。固定参考线的位置标签在
   选中或 Hover 该线时显示，不能要求先选中才能读取位置。
-- 参考线提供钴蓝、朱红、翠绿、琥珀四种颜色，并支持整体显隐、锁定和清空。颜色既是新建默认色，
+- 参考线提供墨蓝、朱红、翠绿、琥珀四种颜色，并支持整体显隐、锁定和清空。颜色既是新建默认色，
   也可修改当前选中参考线；锁定后禁止创建、移动、换色、删除和清空。
 - 参考线位置必须被限制在当前页面物理边界内；普通方向键按 0.1mm 微调，Shift + 方向键按 1mm
   微调。页面方向变化时，超出新边界的参考线必须收回页面内。
 - 参考线属于宿主编辑会话的 UI 状态，不写入 `TemplateSchema`、不进入打印/导出结果，也不创建
   模板撤销历史节点。后续若需持久化，应由宿主保存独立的编辑会话数据。
-- 页面边距使用弱朱红虚线；选中框与控制点使用主题钴蓝。钴蓝只服务于交互，不作为面板或画布
+- 页面边距使用弱朱红虚线；选中框与控制点使用主题墨蓝。墨蓝只服务于交互，不作为面板或画布
   的大面积底色；朱红参考线是用户显式选择的编辑标记，不等同于固定校样装饰。
 - 校样朱红可用于出血/危险边界、套准裁切标记和关键提醒，不用于普通选中框。
 - 旋转、缩放和移动反馈不得改变组件本身的 Schema 样式。
@@ -527,8 +595,8 @@ PanelRoot
 
 ### 10.1 单选组件快捷条
 
-- 单选组件时，选中框与 Selection Quick Bar 共享同一钴蓝语义；未激活组件常态不显示边界，
-  Hover 才显示弱钴蓝虚线和不超过 5% 的钴蓝透明蒙版。Hover/选中边界必须由不参与盒模型的
+- 单选组件时，选中框与 Selection Quick Bar 共享同一墨蓝语义；未激活组件常态不显示边界，
+  Hover 才显示弱墨蓝虚线和不超过 5% 的墨蓝透明蒙版。Hover/选中边界必须由不参与盒模型的
   Overlay 绘制，不能用实体 `border` 缩小组件内容区域；多选只显示一套多选移动入口，不能为
   每个对象重复浮条。
 - Quick Bar 显示组件名称，并提供拖动、锁定/解锁、复制、上移一层和删除五个高频动作；

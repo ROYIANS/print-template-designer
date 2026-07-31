@@ -149,7 +149,7 @@
 
 .toolButton[aria-pressed='true'] {
   color: var(--ptd-selection-strong);
-  border-color: color-mix(in oklch, var(--ptd-selection) 34%, var(--ptd-border));
+  border-color: var(--ptd-selection-border);
   background: var(--ptd-selection-subtle);
 }
 

@@ -1,29 +1,31 @@
 .theme {
-  --ptd-paper-0: oklch(99.2% 0.004 255);
-  --ptd-paper-1: oklch(98.2% 0.006 255);
-  --ptd-paper-2: oklch(96.5% 0.008 255);
-  --ptd-paper-3: oklch(93.7% 0.011 255);
-  --ptd-paper-4: oklch(89.5% 0.014 255);
-  --ptd-graphite-950: oklch(21% 0.02 258);
-  --ptd-graphite-900: oklch(27% 0.021 258);
-  --ptd-graphite-800: oklch(35% 0.02 258);
-  --ptd-graphite-700: oklch(44% 0.018 258);
-  --ptd-graphite-600: oklch(53% 0.016 258);
-  --ptd-graphite-500: oklch(62% 0.014 258);
-  --ptd-graphite-400: oklch(71% 0.012 258);
-  --ptd-graphite-300: oklch(82% 0.01 258);
+  --ptd-paper-0: var(--foliq-surface-raised, #ffffff);
+  --ptd-paper-1: var(--foliq-surface, #f5f5f3);
+  --ptd-paper-2: var(--foliq-surface, #f5f5f3);
+  --ptd-paper-3: var(--foliq-surface-muted, #ececea);
+  --ptd-paper-4: var(--foliq-line-strong, rgb(0 0 0 / 14%));
+  --ptd-graphite-950: oklch(21% 0.006 70);
+  --ptd-graphite-900: oklch(27% 0.007 70);
+  --ptd-graphite-800: oklch(35% 0.008 70);
+  --ptd-graphite-700: oklch(44% 0.008 70);
+  --ptd-graphite-600: oklch(53% 0.007 75);
+  --ptd-graphite-500: oklch(62% 0.006 80);
+  --ptd-graphite-400: oklch(71% 0.006 85);
+  --ptd-graphite-300: oklch(82% 0.006 90);
   --ptd-vermilion-700: oklch(45% 0.16 35);
   --ptd-vermilion-600: oklch(52% 0.175 35);
   --ptd-vermilion-100: oklch(94% 0.035 35);
-  --ptd-cobalt-700: oklch(48% 0.22 265);
-  --ptd-cobalt-600: oklch(57% 0.245 265);
-  --ptd-cobalt-100: oklch(94.5% 0.04 260);
-  --ptd-surface-app: var(--ptd-paper-1);
+  --ptd-ink-blue-700: oklch(44% 0.1 258);
+  --ptd-ink-blue-600: oklch(54% 0.12 258);
+  --ptd-ink-blue-100: oklch(95% 0.025 258);
+  --ptd-surface-app: var(--foliq-surface, #f5f5f3);
   --ptd-surface-panel: var(--ptd-paper-0);
   --ptd-surface-raised: var(--ptd-paper-0);
   --ptd-surface-sunken: var(--ptd-paper-2);
-  --ptd-surface-canvas: oklch(91.5% 0.012 255);
-  --ptd-surface-paper: var(--ptd-paper-0);
+  --ptd-surface-canvas: var(--foliq-surface-muted, #ececea);
+  --ptd-surface-paper: oklch(100% 0 0);
+  --ptd-canvas-grid: rgb(10 10 10 / 1.35%);
+  --ptd-canvas-hatch: rgb(10 10 10 / 0.75%);
   --ptd-text-strong: var(--ptd-graphite-950);
   --ptd-text: var(--ptd-graphite-800);
   --ptd-text-muted: var(--ptd-graphite-600);
@@ -31,21 +33,22 @@
   --ptd-border-strong: var(--ptd-graphite-400);
   --ptd-border: var(--ptd-graphite-300);
   --ptd-border-subtle: var(--ptd-paper-4);
-  --ptd-action: var(--ptd-cobalt-600);
-  --ptd-action-hover: var(--ptd-cobalt-700);
-  --ptd-action-subtle: var(--ptd-cobalt-100);
-  --ptd-selection: var(--ptd-cobalt-600);
-  --ptd-selection-strong: var(--ptd-cobalt-700);
-  --ptd-selection-subtle: var(--ptd-cobalt-100);
+  --ptd-action: var(--ptd-ink-blue-600);
+  --ptd-action-hover: var(--ptd-ink-blue-700);
+  --ptd-action-subtle: var(--ptd-ink-blue-100);
+  --ptd-selection: var(--ptd-ink-blue-600);
+  --ptd-selection-strong: var(--ptd-ink-blue-700);
+  --ptd-selection-subtle: var(--ptd-ink-blue-100);
+  --ptd-selection-border: oklch(74% 0.055 258);
   --ptd-proof: var(--ptd-vermilion-600);
   --ptd-proof-subtle: var(--ptd-vermilion-100);
-  --ptd-guide-cobalt: var(--ptd-cobalt-600);
+  --ptd-guide-cobalt: var(--ptd-ink-blue-600);
   --ptd-guide-vermilion: var(--ptd-vermilion-600);
   --ptd-guide-emerald: oklch(53% 0.14 155);
   --ptd-guide-amber: oklch(66% 0.15 82);
   --ptd-success: oklch(47% 0.105 145);
   --ptd-danger: oklch(46% 0.17 27);
-  --ptd-focus: var(--ptd-cobalt-600);
+  --ptd-focus: var(--ptd-ink-blue-600);
   --ptd-space-1: 4px;
   --ptd-space-2: 8px;
   --ptd-space-3: 12px;
@@ -60,12 +63,12 @@
   --ptd-radius-2: 4px;
   --ptd-radius-round: 999px;
   --ptd-shadow-paper:
-    0 0 0 1px oklch(71% 0.012 258 / 78%), 4px 4px 0 oklch(21% 0.02 258 / 10%),
-    0 18px 38px oklch(21% 0.02 258 / 10%);
-  --ptd-shadow-control: 0 2px 8px oklch(21% 0.02 258 / 20%);
+    0 0 0 1px oklch(71% 0.006 85 / 78%), 4px 4px 0 oklch(21% 0.006 70 / 10%),
+    0 18px 38px oklch(21% 0.006 70 / 10%);
+  --ptd-shadow-control: 0 2px 8px oklch(21% 0.006 70 / 20%);
   --ptd-shadow-deck:
-    0 1px 2px oklch(21% 0.02 258 / 10%), inset 0 1px 0 oklch(99.2% 0.004 255 / 88%);
-  --ptd-shadow-floating: 0 8px 24px oklch(21% 0.02 258 / 16%);
+    0 1px 2px oklch(21% 0.006 70 / 10%), inset 0 1px 0 oklch(99.35% 0.003 106 / 88%);
+  --ptd-shadow-floating: 0 8px 24px oklch(21% 0.006 70 / 16%);
   --ptd-header-bg: rgb(0 0 0 / 88%);
   --ptd-header-border: rgb(255 255 255 / 6%);
   --ptd-header-hover: rgb(255 255 255 / 5%);
@@ -107,6 +110,7 @@
     'Outfit', 'Outfit Variable', 'Sarasa UI SC', 'Sarasa Gothic SC', 'Microsoft YaHei UI',
     sans-serif;
   --ptd-font-serif: 'Noto Serif SC', 'Noto Serif CJK SC', 'Source Han Serif SC', 'Songti SC', serif;
+  --ptd-font-brand: var(--foliq-font-brand, 'Cherry Bomb One', 'Outfit', sans-serif);
   --ptd-text-10: 0.625rem;
   --ptd-text-11: 0.6875rem;
   --ptd-text-12: 0.75rem;

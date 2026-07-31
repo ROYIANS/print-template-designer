@@ -30,6 +30,13 @@ interface DesignerHost {
   ) => void | Promise<void>
   onCommandError?: (command: DesignerHostCommandId, error: unknown) => void
 }
+
+interface TemplatePreviewProps {
+  template: TemplateSchema
+  pageIndex?: number
+  label?: string
+  className?: string
+}
 ```
 
 Internal command boundary:
@@ -89,21 +96,50 @@ import '@ptd/react-designer/styles.css'
 - When the host returns the exact emitted object as `value`, history is preserved.
 - A genuinely external template object creates a new history baseline and clears invalid selection.
 
+#### Read-only template preview
+
+- `<TemplatePreview>` is a narrow, non-interactive public surface for rendering one real manual page.
+  It accepts a `TemplateSchema`, optional page index/accessibility label/class name, and owns no HTTP,
+  persistence, thumbnail generation or cache behavior. The Host fetches template content.
+- Preview rendering must reuse the same `ComponentRenderer` and framework-independent component
+  implementations as Canvas. It must not copy render logic, draw fake placeholders for valid content or
+  maintain a second renderer registry.
+- Each Preview owns an isolated EditorStore only to satisfy renderer context. It never emits Host changes,
+  creates history, selection, editing handles or pointer interaction; its rendered component tree is hidden
+  from accessibility APIs behind one outer `role="img"` and cannot receive pointer input.
+- `pageIndex` clamps to a valid manual page. The page fits its container while preserving physical aspect
+  ratio and component geometry. A new `template` synchronizes the isolated store without remounting the
+  public Preview surface.
+- ResizeObserver and every component renderer/editor instance must be disconnected or destroyed on unmount.
+  Preview is not a bitmap-thumbnail generator and must never persist a derived image into TemplateSchema.
+
 #### Host application commands and document state
 
 - `host` is the single application integration surface. Do not add top-level `onSave`, `onLoad`,
   `onExport`, HTTP client, router or authentication props back to Designer.
 - New/Open/Save/Save As, template browser, version history/restore, template import/export,
   preview/print/document export and Help intents use stable `DesignerHostCommandId` values.
+- `open` is the canonical user-visible cross-file command and may navigate the Host to its protected
+  file workspace rather than opening an Editor overlay. `templateBrowser` remains a compatibility
+  capability for existing hosts, but when both reach the same file workspace they must share state
+  and handling rather than appearing as two distinct product actions.
 - A command is a declared capability only when its key exists in `host.commands` and
-  `host.onCommand` exists. Undeclared future commands remain visible where appropriate but are
-  disabled and explicitly described as unavailable.
+  `host.onCommand` exists. Undeclared future commands resolve as unavailable for shortcut/integration
+  callers; product menus must not synthesize roadmap placeholders merely because a stable command ID exists.
 - `enabled` defaults true. Host `pending` and Designer's local Promise pending both reject duplicate
   execution; local pending is instance-only and cannot leak between two Designers.
 - Command context contains the exact current `TemplateSchema` plus optional read-only Host document
   metadata. It must never contain API records, cookies, Session/JWT values or database types.
 - New/Open are Host-owned. After confirmations, routes or API work complete, the Host updates the
   controlled `value`; a command handler does not return a Template to mutate internally.
+- A Host may distinguish its file-workspace route, saved-document route and explicit unsaved-new
+  route. Navigating away from dirty/conflict content and deciding whether to discard it remains
+  Host-owned; Designer must not introduce a template-browser Modal or infer routing from document id.
+- Save may create an unsaved document immediately using Host-selected/default metadata. Save As may
+  open a non-modal Host command sheet. Neither interaction surface enters the Designer package.
+- Version History is a File-menu Host intent. The Host owns version list/detail requests, real snapshot
+  preview, restore confirmation, `expectedVersion`, request cancellation and 409 handling; Designer owns
+  no version records and never applies a restore snapshot internally.
 - `Ctrl/Cmd+S/N/O` and `Ctrl/Cmd+Shift+S` execute only a currently enabled, non-pending declared
   Host command and yield to rich text, table cells, form controls and Portal menus.
 - `DesignerDocumentState` exposes optional id/title/version plus
@@ -111,6 +147,15 @@ import '@ptd/react-designer/styles.css'
   every state; `message` may provide Host-owned detail without creating a package Toast system.
 - Existing editor and workspace menu items call the same EditorStore/layout commands as Toolbar,
   keyboard and panels. A menu must not duplicate template mutations or close as a fake execution.
+- App Bar organizes low-frequency workflows as File/Template/View/Help. File owns document lifecycle;
+  Template opens the existing page settings, page/assets/data workspaces and future template inspection;
+  View owns ruler and guide assistance without repeating Status Bar zoom; Help dispatches real Host help
+  commands. Selection operations such as grouping, locking and layer movement stay in the Context Bar,
+  Canvas context menu and keyboard paths rather than creating a duplicate Object category. Window is not
+  used solely to mirror panel toggles. Version History is executable when the Host declares a saved document
+  capability. A small number of stable near-term capabilities such as Template Inspection and Fit Page may
+  appear disabled as `即将提供`, but a category must retain real executable actions and user-visible reasons
+  must never expose internal delivery or integration copy.
 
 #### History and gestures
 
@@ -315,6 +360,8 @@ import '@ptd/react-designer/styles.css'
 | Save handler executes                     | Receive exact current template and optional document metadata       |
 | New/Open handler completes                | Wait for Host to replace controlled `value`; do not sync internally |
 | Document status is conflict/error         | Render explicit text status; never rely on color alone              |
+| Preview page index is out of bounds       | Clamp to an existing manual page                                    |
+| Preview receives a new TemplateSchema     | Update real renderer content; no Host/history/selection mutation    |
 | First user mutation then undo             | Restore initial `value`                                             |
 | Gesture emits many transient updates      | One final history entry                                             |
 | Gesture is cancelled                      | Restore the exact gesture-start value; add no history entry         |
@@ -371,6 +418,8 @@ import '@ptd/react-designer/styles.css'
   local Promise duplicate prevention and two-Designer pending isolation.
 - App Bar/keyboard tests: real EditorStore/workspace execution, Host Save/New/Open shortcuts,
   planned command disabled state and document title/version/status Chrome.
+- Preview tests: real ComponentRenderer output, external Schema synchronization, non-interactive semantics
+  and page-index clamping without Host changes or history.
 - Store/Core unit tests: measurement preferences are instance-local and history-free; conversion,
   formatting, parsing, precision and stepping preserve canonical Canvas geometry.
 - Core/Store tests: legacy page config gains left/right margins; invalid content areas are rejected;

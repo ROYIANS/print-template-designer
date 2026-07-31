@@ -1,0 +1,278 @@
+.account {
+  position: relative;
+  z-index: 1300;
+  font:
+    12px 'Sarasa UI SC',
+    'Microsoft YaHei UI',
+    sans-serif;
+}
+
+.account[data-surface='home'] {
+  width: 100%;
+}
+
+.account[data-surface='editor'] {
+  position: absolute;
+  top: 6px;
+  right: 16px;
+}
+
+.trigger {
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  max-width: 156px;
+  padding: 0 8px 0 4px;
+  border: 1px solid oklch(71% 0.006 85);
+  border-radius: 6px;
+  color: oklch(35% 0.008 70);
+  background: oklch(99.35% 0.003 106);
+  font: inherit;
+  cursor: pointer;
+}
+
+.account[data-surface='home'] .trigger {
+  width: 100%;
+  max-width: none;
+  justify-content: flex-start;
+  padding-right: 9px;
+  border-color: transparent;
+  border-radius: 8px;
+  color: var(--foliq-ink-soft);
+  background: transparent;
+}
+
+.account[data-surface='home'] .triggerName {
+  min-width: 0;
+  flex: 1;
+  text-align: left;
+}
+
+.account[data-surface='editor'] .trigger {
+  border-color: rgb(255 255 255 / 18%);
+  color: rgb(255 255 255 / 84%);
+  background: rgb(255 255 255 / 7%);
+}
+
+.trigger:hover,
+.trigger[aria-expanded='true'] {
+  border-color: oklch(74% 0.055 258);
+  background: oklch(95% 0.025 258);
+}
+
+.account[data-surface='home'] .trigger:hover,
+.account[data-surface='home'] .trigger[aria-expanded='true'] {
+  border-color: var(--foliq-line);
+  background: var(--foliq-surface-raised);
+}
+
+.account[data-surface='editor'] .trigger:hover,
+.account[data-surface='editor'] .trigger[aria-expanded='true'] {
+  border-color: rgb(255 255 255 / 30%);
+  background: rgb(255 255 255 / 13%);
+}
+
+.avatar {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  flex: none;
+  border-radius: 50%;
+  color: white;
+  background: oklch(44% 0.1 258);
+  font-family: Outfit, sans-serif;
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.triggerName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chevron {
+  color: currentColor;
+  font-size: 8px;
+  opacity: 0.64;
+}
+
+.popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: min(282px, calc(100vw - 28px));
+  overflow: hidden;
+  border: 1px solid oklch(82% 0.006 90);
+  border-radius: 4px;
+  color: oklch(35% 0.008 70);
+  background: oklch(99.35% 0.003 106);
+  box-shadow: 0 8px 24px oklch(21% 0.006 70 / 16%);
+  animation: popoverIn 150ms ease-out;
+}
+
+.account[data-surface='home'] .popover {
+  top: auto;
+  bottom: calc(100% + 8px);
+  right: auto;
+  left: 0;
+  width: 100%;
+  border-color: var(--foliq-line);
+  border-radius: 10px;
+  color: var(--foliq-ink-soft);
+  background: var(--foliq-surface);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 10%);
+}
+
+.account[data-surface='home'] .popover header,
+.account[data-surface='home'] .actions {
+  border-color: var(--foliq-line);
+}
+
+.account[data-surface='home'] .actions a,
+.account[data-surface='home'] .actions button {
+  border-radius: 6px;
+}
+
+.popover header {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 14px;
+  border-bottom: 1px solid oklch(89.5% 0.009 85);
+}
+
+.popover header .avatar {
+  width: 32px;
+  height: 32px;
+  font-size: 12px;
+}
+
+.popover header div {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.popover header strong,
+.popover header span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.popover header strong {
+  color: oklch(27% 0.007 70);
+  font-size: 12px;
+}
+
+.popover header div span {
+  color: oklch(53% 0.007 75);
+  font-family: Outfit, sans-serif;
+  font-size: 10px;
+}
+
+.identity {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  padding: 9px 14px;
+  color: oklch(44% 0.008 70);
+  font-size: 10px;
+}
+
+.identity > span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: oklch(54% 0.12 258);
+}
+
+.actions {
+  display: grid;
+  padding: 5px;
+  border-top: 1px solid oklch(89.5% 0.009 85);
+}
+
+.actions a,
+.actions button {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  padding: 6px 9px;
+  border: 0;
+  border-radius: 2px;
+  color: oklch(35% 0.008 70);
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.actions a:hover,
+.actions button:hover {
+  color: oklch(44% 0.1 258);
+  background: oklch(95% 0.025 258);
+}
+
+.trigger:focus-visible,
+.actions a:focus-visible,
+.actions button:focus-visible {
+  outline: 2px solid oklch(54% 0.12 258);
+  outline-offset: 2px;
+}
+
+@keyframes popoverIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@media (pointer: coarse) {
+  .trigger {
+    height: 40px;
+  }
+
+  .actions a,
+  .actions button {
+    min-height: 40px;
+  }
+
+  .account[data-surface='editor'] {
+    top: 1px;
+  }
+}
+
+@media (max-width: 520px) {
+  .account[data-surface='editor'] {
+    right: 8px;
+  }
+
+  .triggerName {
+    max-width: 74px;
+  }
+
+  .account[data-surface='home'] .popover {
+    top: calc(100% + 8px);
+    bottom: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .popover {
+    animation: none;
+  }
+}

@@ -1,0 +1,133 @@
+.backdrop {
+  position: fixed;
+  z-index: 1400;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgb(26 24 21 / 42%);
+  backdrop-filter: blur(3px);
+}
+
+.dialog {
+  width: min(440px, calc(100vw - 32px));
+  overflow: hidden;
+  border: 1px solid oklch(82% 0.006 90);
+  border-radius: 4px;
+  color: oklch(27% 0.007 70);
+  background: oklch(99.35% 0.003 106);
+  box-shadow: 0 20px 56px oklch(21% 0.006 70 / 22%);
+  font:
+    12px 'Sarasa UI SC',
+    'Microsoft YaHei UI',
+    sans-serif;
+}
+
+.dialog > header {
+  padding: 17px 18px 14px;
+  border-bottom: 1px solid oklch(89.5% 0.009 85);
+}
+
+.dialog h2 {
+  margin: 0;
+  color: oklch(21% 0.006 70);
+  font-size: 17px;
+}
+
+.notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 18px;
+  padding: 13px;
+  border: 1px solid oklch(84% 0.045 72);
+  border-radius: 2px;
+  background: oklch(97% 0.018 72);
+}
+
+.notice > span {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  flex: none;
+  border-radius: 50%;
+  color: white;
+  background: oklch(58% 0.13 72);
+  font-family: Outfit, sans-serif;
+  font-weight: 700;
+}
+
+.notice p {
+  margin: 0;
+  color: oklch(44% 0.008 70);
+  line-height: 1.65;
+}
+
+.error {
+  margin: -6px 18px 18px;
+  padding: 10px 12px;
+  border-left: 3px solid oklch(46% 0.17 27);
+  color: oklch(46% 0.17 27);
+  background: oklch(97% 0.025 27);
+  line-height: 1.55;
+}
+
+.dialog footer {
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 10px 18px;
+  border-top: 1px solid oklch(89.5% 0.009 85);
+  background: oklch(98.45% 0.003 106);
+}
+
+.dialog button {
+  min-height: 32px;
+  padding: 6px 12px;
+  border: 1px solid oklch(71% 0.006 85);
+  border-radius: 2px;
+  color: oklch(35% 0.008 70);
+  background: white;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dialog button[data-danger] {
+  border-color: oklch(46% 0.17 27);
+  color: white;
+  background: oklch(46% 0.17 27);
+}
+
+.dialog button[data-primary]:not([data-danger]) {
+  border-color: var(--foliq-accent);
+  color: white;
+  background: var(--foliq-accent);
+}
+
+.dialog button:focus-visible {
+  outline: 2px solid oklch(54% 0.12 258);
+  outline-offset: 2px;
+}
+
+.dialog button:disabled {
+  cursor: not-allowed;
+  opacity: 0.52;
+}
+
+@media (max-width: 520px) {
+  .backdrop {
+    align-items: end;
+    padding: 0;
+  }
+
+  .dialog {
+    width: 100%;
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
+  }
+}

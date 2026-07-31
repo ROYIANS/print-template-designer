@@ -1,0 +1,124 @@
+.sheet {
+  position: absolute;
+  z-index: 1200;
+  top: 50px;
+  right: 14px;
+  width: min(380px, calc(100vw - 28px));
+  overflow: hidden;
+  border: 1px solid var(--foliq-line);
+  border-radius: 12px;
+  color: var(--foliq-ink-soft);
+  background: var(--foliq-surface-raised);
+  box-shadow: 0 18px 48px rgb(0 0 0 / 12%);
+  font: 12px 'Sarasa UI SC', 'Microsoft YaHei UI', sans-serif;
+}
+
+.sheet > header {
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--foliq-line);
+}
+
+.sheet h2 {
+  margin: 0;
+  color: var(--foliq-ink);
+  font-size: 16px;
+}
+
+.brandWord {
+  font-family: var(--foliq-font-brand);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+.sheet header button {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  color: var(--foliq-muted);
+  background: transparent;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.sheet header button:hover {
+  color: var(--foliq-ink);
+  background: var(--foliq-surface);
+}
+
+.shortcuts {
+  margin: 0;
+  padding: 8px;
+}
+
+.shortcuts > div,
+.about dl > div {
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 0 10px;
+  border-radius: 7px;
+}
+
+.shortcuts > div:hover {
+  background: var(--foliq-surface);
+}
+
+.shortcuts dt,
+.shortcuts dd,
+.about dt,
+.about dd {
+  margin: 0;
+}
+
+.shortcuts dd {
+  color: var(--foliq-muted);
+  font-family: Outfit, sans-serif;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.about {
+  padding: 22px 18px 18px;
+}
+
+.about > strong {
+  color: var(--foliq-ink);
+  font-size: 22px;
+}
+
+.about > p {
+  margin: 7px 0 18px;
+  color: var(--foliq-muted);
+  line-height: 1.65;
+}
+
+.about dl {
+  margin: 0;
+  padding-top: 8px;
+  border-top: 1px solid var(--foliq-line);
+}
+
+.about dd {
+  color: var(--foliq-muted);
+  font-family: Outfit, sans-serif;
+}
+
+.sheet button:focus-visible {
+  outline: 2px solid var(--foliq-focus);
+  outline-offset: 2px;
+}
+
+@media (max-width: 520px) {
+  .sheet {
+    top: 44px;
+    right: 8px;
+  }
+}

@@ -59,10 +59,11 @@
 
 .wordmark {
   color: var(--ptd-header-text);
-  font-family: var(--ptd-font-metric);
+  font-family: var(--ptd-font-brand);
   font-size: 15px;
-  font-weight: 650;
+  font-weight: 400;
   letter-spacing: -0.025em;
+  line-height: 1;
 }
 
 .productName {
@@ -123,6 +124,7 @@
   min-width: 0;
   justify-self: end;
   gap: var(--ptd-space-2);
+  padding-right: var(--ptd-host-account-space, 0px);
 }
 
 .mobileMenuTrigger {
@@ -131,7 +133,6 @@
 
 .quietAction,
 .primaryAction,
-.userPlaceholder,
 .mobileMenuTrigger {
   height: 28px;
   display: inline-flex;
@@ -153,18 +154,17 @@
 .primaryAction {
   gap: 6px;
   padding: 0 11px;
+  border-radius: 6px;
 }
 
 .quietAction svg,
 .primaryAction svg,
-.userPlaceholder svg,
 .mobileMenuTrigger svg {
   width: 16px;
   height: 16px;
 }
 
 .quietAction {
-  border-radius: 8px;
   color: var(--ptd-header-text-muted);
   background: var(--ptd-header-hover);
 }
@@ -175,28 +175,13 @@
 }
 
 .primaryAction {
-  border-color: transparent;
-  border-radius: var(--ptd-header-radius-round);
+  border-color: var(--ptd-header-cta-bg);
   color: var(--ptd-header-cta-text);
   background: var(--ptd-header-cta-bg);
 }
 
 .primaryAction:hover:not(:disabled) {
   opacity: 0.85;
-}
-
-.userPlaceholder {
-  width: 28px;
-  padding: 0;
-  border-radius: var(--ptd-header-radius-round);
-  color: var(--ptd-header-text-dim);
-  background: var(--ptd-header-hover);
-  cursor: default;
-}
-
-.userPlaceholder:hover {
-  color: var(--ptd-header-text);
-  border-color: var(--ptd-header-control-border-hover);
 }
 
 .mobileMenuTrigger {
@@ -215,7 +200,6 @@
 
 .quietAction:focus-visible,
 .primaryAction:focus-visible,
-.userPlaceholder:focus-visible,
 .mobileMenuTrigger:focus-visible,
 .menuTrigger:focus-visible,
 .commandItem:focus-visible {
@@ -465,15 +449,10 @@
   .menuTrigger,
   .quietAction,
   .primaryAction,
-  .userPlaceholder,
   .mobileMenuTrigger,
   .mobileCategories button {
     min-width: 40px;
     height: 40px;
-  }
-
-  .userPlaceholder {
-    width: 40px;
   }
 
   .mobileMenuTrigger {
@@ -503,7 +482,6 @@
 
   .quietAction,
   .primaryAction,
-  .userPlaceholder,
   .mobileMenuTrigger {
     min-width: 32px;
     width: 32px;
@@ -512,7 +490,6 @@
 
   .quietAction svg,
   .primaryAction svg,
-  .userPlaceholder svg,
   .mobileMenuTrigger svg {
     width: 15px;
     height: 15px;
@@ -547,7 +524,6 @@
 
   .topBar .quietAction,
   .topBar .primaryAction,
-  .topBar .userPlaceholder,
   .topBar .mobileMenuTrigger {
     min-width: 32px;
     width: 32px;
@@ -556,7 +532,6 @@
 
   .topBar .quietAction svg,
   .topBar .primaryAction svg,
-  .topBar .userPlaceholder svg,
   .topBar .mobileMenuTrigger svg {
     width: 15px;
     height: 15px;
@@ -577,7 +552,6 @@
   .menuTrigger svg,
   .quietAction,
   .primaryAction,
-  .userPlaceholder,
   .mobileMenuTrigger,
   .mobileCategories button,
   .commandItem {

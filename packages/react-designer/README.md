@@ -31,6 +31,7 @@ export function Editor({ initialValue }: { initialValue: TemplateSchema }) {
           open: {},
           save: { pending: saving },
           saveAs: {},
+          versionHistory: {},
         },
         onCommand: async (command, context) => {
           if (command === 'save') {
@@ -50,6 +51,20 @@ export function Editor({ initialValue }: { initialValue: TemplateSchema }) {
 ```
 
 Host 需要为设计器提供一个具有明确高度的容器，并显式加载 `styles.css`。React、React DOM 和 `@preact/signals-react` 是 peer dependencies，使用方必须自行声明。
+
+### 只读模板预览
+
+需要在 Host 的文件列表中展示真实模板内容时，可使用同一公共包中的只读预览：
+
+```tsx
+import { TemplatePreview } from '@ptd/react-designer'
+
+;<TemplatePreview template={template} pageIndex={0} label="出库交接单预览" />
+```
+
+`TemplatePreview` 复用 Canvas 的真实 `ComponentRenderer`，按容器等比缩放一个手工页面。它不提供
+选择、编辑、历史、HTTP、缓存或位图缩略图生成；Host 负责取得 `TemplateSchema`。越界 `pageIndex`
+会收敛到有效页面，组件 DOM 对可访问树隐藏，由外层单一 `role="img"` 提供名称。
 
 ## `DesignerProps`
 
@@ -97,7 +112,9 @@ interface DesignerHost {
 - Promise 执行期间 Designer 还会维护实例级 Pending，避免 Host 状态更新前的连续双击。
 - `Ctrl/Cmd+S/N/O` 与 `Ctrl/Cmd+Shift+S` 只在相应 Host 命令当前可执行时拦截。
 - `onCommand` 收到的是执行时的最新 `TemplateSchema`，不是网络记录、Session 或 Token。
-- New/Open/Save/Save As 的确认、API、错误提示、冲突处理和路由均由 Host 负责。
+- New/Open/Save/Save As/Version History/Restore 的确认、API、错误提示、冲突处理和路由均由 Host 负责。
+- File → Version History 只分发 `versionHistory` Host intent；历史列表、真实快照预览、恢复确认和
+  `expectedVersion` 属于 Host，不进入 Designer package。
 - 当前公共 Host ID 还覆盖模板浏览器、版本历史/恢复、模板导入导出、预览、打印、文档导出与帮助入口；
   `DESIGNER_HOST_COMMAND_IDS` 可用于建立穷尽映射。
 

@@ -2,8 +2,8 @@
 
 ## 状态
 
-本任务处于实现阶段，当前 Trellis task 与分支已经启动。本轮认证与公开落地页批次正在实现和独立检查；
-更广的模板 CRUD、版本历史、恢复与 409 冲突流程仍在同一任务后续范围内。
+本任务处于最终验收阶段。认证、公开落地页、文件工作台、模板持久化、版本历史、恢复与 409 冲突保护
+均已进入同一任务的完整回归；通过自动化和浏览器验收后提交并归档。
 
 ## 背景
 
@@ -160,6 +160,17 @@ GitHub 之外的正式登录方式，应作为独立认证产品决策评估；�
 设计器”。核心定位语为“不是设计一张图，而是定义一种文档”，英文品牌句可使用
 `Logic for every page.`。
 
+### 2026-07-31 官网与工作台暖灰统一
+
+用户确认当前浅色落地页的暖灰色调是 Foliq 的标准中性色方向。官网 Hero 使用的 `#f5f5f3` 作为
+跨官网与工作台的暖纸灰基准；工作台 Pasteboard 保持原有较深明度，但从冷蓝灰调整为低彩度暖灰，
+Panel 继续接近白色，模板 Paper 使用纯白，以保留清晰的界面、外场与纸张三层关系。
+
+本批次只统一纸灰、石墨、Hairline 与阴影等中性色 token，不改变落地页现有视觉、工作台布局和交互；
+黑色 App Bar 与朱红校样色继续保留。操作、选中和焦点色从高饱和钴蓝收敛为低彩度档案墨蓝，既和
+暖纸灰形成必要的冷暖对比，也避免状态色显得荧光。选中边框使用显式墨蓝 token，不再将墨蓝与带暖相
+边框通过 OKLCH 插值，防止中间色相意外漂移为绿色。
+
 本轮只修改用户可见或公开传播的品牌文案，包括落地页、工作台、浏览器 metadata、可访问名称、示例
 成品、README、包描述与部署输出。内部工程代号继续使用 `PTD`：`@ptd/*` 包名、环境变量、MIME、
 CSS token、`data-ptd-*` 属性、Schema/API/数据库合同和现有技术测试命名均不迁移。当前 `PtdMark` 与
@@ -188,21 +199,58 @@ favicon 只是临时品牌资产，用户将另行设计正式 Logo，本轮不�
    装版和少量状态动效，但不在落地页伪造另一套 Designer UI。截图由本任务在本地工作台生成并作为
    受版本控制的产品资产交付。
 
-## 当前实现批次
+## 已实现范围
 
-用户要求先解决以下两个问题，按此顺序推进：
+本地 Dev Auth Bypass、公开落地页、`/` 与 `/app` 路由边界、Foliq 品牌视觉以及不依赖本地草稿的
+真实 Server 模板闭环已经完成：
 
-1. 实现并验证严格受限的本地 Dev Auth Bypass，包括隔离数据库上的固定开发用户和 `/app` 访问路径。
-2. 将现有登录页重构为公开产品落地页，接入 `/` 与 `/app` 边界、真实 Designer 截图和完整认证状态。
+1. Web API Client 覆盖模板 CRUD 与版本 list/get/restore 合同，所有响应经过运行时校验；Cookie 保持
+   同源，401、403、404、409、5xx、网络失败和异常成功响应形成结构化错误，并透传 AbortSignal。
+2. Web Document Controller 维护 ID、标题、Server version、saved/current TemplateSchema 与完整 Host
+   状态；Dirty 由 Core `serialize()` 后的保存基线比较得出，因此 Undo 回保存值会恢复 Clean。
+3. `/app` 是独立文件工作台 Home，准确展示基于 `updatedAt` 的“最近更新”和全部模板，以及
+   loading/empty/error/retry、新建和打开入口；宽屏使用稳定侧栏与文件主区，窄屏重组为 compact top
+   shell，不把文件浏览继续覆盖为 Editor 内大型 Modal。
+4. 当前文档地址采用 `/app?template=<id>`，新建未保存 Editor 采用 `/app?new=blank`；首次保存、另存为
+   和打开后同步 canonical URL，刷新与前进/后退按 URL 恢复明确状态。DEV product capture route 保持
+   原行为，不把测试模板 Key 误作 Server ID。
+5. 已有模板保存必须发送 `expectedVersion`。409 后进入 Conflict，Save 禁用且不自动重试/覆盖；用户仍可
+   另存为，或返回文件工作台重新载入服务器版本。
+6. File → Open 与 Template Browser 兼容命令统一解释为“文件工作台”，clean Editor 直接返回 `/app`；
+   dirty/conflict Editor 只通过真正的未保存决策 Modal 阻断。第一次 Save 直接使用当前
+   `pageConfig.title` 创建，不再弹命名 Modal；Save As 使用非模态 Command Side Sheet。
+7. App Bar 按低频工作流组织为 File/Template/View/Help：删除 Edit、Object 与 Window 分类，Undo/Redo
+   留在 Context Bar，对象组合、锁定和层级调整留在选择工具条与右键菜单；Template 连接页面设置、
+   页面管理、素材资源和数据源，View 集中标尺与参考线环境控制且不重复 Status Bar 放大/缩小，Help
+   提供真实快捷键、产品介绍和关于入口。Version History 已连接真实 Host 工作流；Template Inspection
+   与 Fit Page 可作为少量稳定近期能力显示“即将提供”，不得暴露开发批次或接入文案。顶部“文件工作台”
+   和“保存模板”共享同一控件轮廓家族；Designer 删除假账户占位，Home/Editor 复用 Web Host 的真实
+   账户 Popover。
+8. Home 不使用无信息价值的英文 eyebrow、文档计数大字、工程编号、规则线或假纸张缩略图。最近区通过
+   公共只读 `TemplatePreview` 复用真实 Schema Renderer，最多并发读取 4 份详情并取消过期请求、隔离
+   单项错误；全部模板保持 metadata-only。标题搜索仅在已载入列表中做客户端过滤，不冒充全文搜索。
+9. 文件卡片通过轻量 Popover 提供重命名、创建副本和永久删除。重命名先读取最新记录，再使用
+   `expectedVersion` 更新标题与 `pageConfig.title`；副本拥有独立文档和版本链；硬删除必须经过明确
+   Modal 确认，失败保留原文件与决策表面，不制造假的回收站语义。
+10. File → Version History 打开非模态 Side Sheet，按需读取不可变版本列表和历史详情，并通过公共
+    `TemplatePreview` 渲染真实快照。恢复旧版本需要明确确认，dirty 文档会说明当前未保存内容将被替换；
+    Server 把快照写成新的最新版本，原历史保持不变。恢复携带当前 `expectedVersion`，409 后保持历史
+    浏览、禁止重复恢复，并要求重新打开服务器文档。
 
-完成这一批次并独立检查后，再继续同一任务中的模板 CRUD、版本历史和冲突工作流，不把 Datasource 或
-Export 混入当前批次。
+交互表面门槛：Modal 只用于离开 dirty/conflict 文档、不可恢复硬删除、409/恢复等必须先决策的高风险
+节点；文件浏览是独立 Home，版本历史使用 Side Sheet，Save As 与重命名使用非模态 Command Sheet，
+一般载入、错误和重试使用 inline 状态。当前 Server 没有 lastOpenedAt，因此不得使用“最近打开”或
+“继续编辑”描述 Home 排序。
+
+本任务仍不实现本地崩溃草稿、自动保存、Datasource、打印/PDF/Word Export、软删除回收站、收藏或团队
+项目空间；这些能力需要独立产品与数据合同。OAuth 登录后恢复经过校验的 Editor 深链也是研究发现的
+后续增强，不在本任务强行扩大认证合同。
 
 ## 待确认决策
 
 - 无。当前实现批次的产品、认证、路由与视觉决策已经确认。
 
-## Definition of Done 方向
+## Definition of Done 验收
 
 获准登录的用户能够从落地页进入应用，新建或打开模板、编辑、保存到 PostgreSQL、刷新浏览器、重新打开
 相同内容、查看并恢复历史版本，并在旧版本保存时得到安全且可操作的冲突状态。未登录、未获准和过期
@@ -210,3 +258,9 @@ Session 继续 fail closed；显式启用且满足 loopback 安全约束的本�
 同一套 Web/Server 模板工作流。公开落地页使用真实产品画面，在 Server 不可用时仍能准确介绍产品；
 当前实现批次结束时，`/`、`/app`、GitHub Auth 与 Dev Auth Bypass 的宽屏、移动端和错误状态均通过
 自动化与浏览器验收。
+
+最终验收已满足上述范围：Core 48、Components 45、React Designer 124、Web 58、Server 27 项测试通过，
+五个 package 的相关 typecheck/build、Frontend ESLint 与 `git diff --check` 通过；真实 loopback Dev Auth
+工作台完成桌面与 390×844 移动端浏览器验收，并实际将历史版本 2 恢复成新的服务器版本 4，确认历史
+Sheet、真实快照、恢复确认、焦点层级和成功后的 clean baseline 均按合同工作。构建只保留既有的大 chunk
+提示，不构成本任务失败。
