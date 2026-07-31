@@ -590,3 +590,42 @@ Added PostgreSQL, migration, Server and Web Compose lifecycle; hardened Bash/Pow
 ### Next Steps
 
 - None - task complete
+
+
+## Session 18: 完成 Web App 模板生命周期
+
+**Date**: 2026-07-31
+**Task**: 完成 Web App 模板生命周期
+**Branch**: `feature/refc`
+
+### Summary
+
+完成持久化文件工作台、未保存导航保护、模板重命名/复制/永久删除、真实版本历史预览与 expectedVersion 恢复；全包自动化和真实桌面/移动浏览器验收通过。
+
+### Main Changes
+
+- 完成受保护文件工作台、真实模板预览、canonical URL 与未保存导航保护。
+- 接入模板重命名、创建副本、永久删除及其 pending、错误和焦点合同。
+- 接入真实版本列表/快照预览、恢复确认、expectedVersion、409 与重复请求保护。
+- 同步落地页能力文案、Web/Designer README 和 UI/Host 规范。
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `88c505c` | (see git log) |
+| `d4dee02` | (see git log) |
+
+### Testing
+
+- [OK] Core 48、Components 45、React Designer 124、Web 58、Server 27 项测试通过。
+- [OK] 相关 typecheck/build、Frontend ESLint、Trellis context validation 与 `git diff --check` 通过。
+- [OK] 真实 Dev Auth 工作台完成桌面和 390×844 浏览器验收；历史版本 2 成功恢复为版本 4。
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
