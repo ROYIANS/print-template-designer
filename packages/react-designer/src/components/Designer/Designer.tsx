@@ -71,12 +71,7 @@ export function Designer({ value, onChange, host }: DesignerProps) {
       >
         <AppBar
           hostCommands={hostCommands}
-          workspace={{
-            resourcesOpen: layout.resourcesOpen,
-            inspectorOpen: layout.inspectorOpen,
-            openResource: layout.openResource,
-            toggleInspector: layout.toggleInspector,
-          }}
+          workspace={{ openResource: layout.openResource, openInspector: layout.openInspector }}
         />
         <Toolbar
           resourcesOpen={layout.resourcesOpen}

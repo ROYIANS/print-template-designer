@@ -12,6 +12,10 @@
   height: 100dvh;
 }
 
+.designerHost {
+  --ptd-host-account-space: 166px;
+}
+
 .workspaceSkipLink {
   position: absolute;
   z-index: 1800;
@@ -54,51 +58,6 @@
   animation: spin 800ms linear infinite;
 }
 
-.accountButton {
-  position: absolute;
-  z-index: 101;
-  top: 7px;
-  right: 20px;
-  width: 28px;
-  height: 28px;
-  display: grid;
-  place-items: center;
-  overflow: visible;
-  padding: 0;
-  border: 1px solid rgb(255 255 255 / 20%);
-  border-radius: 50%;
-  color: #f8fafc;
-  background: oklch(44% 0.1 258);
-  font-size: 11px;
-  cursor: pointer;
-}
-
-.accountButton:disabled {
-  cursor: default;
-}
-
-.accountButton img {
-  width: 100%;
-  height: 100%;
-  border-radius: inherit;
-  object-fit: cover;
-}
-
-.devBadge {
-  position: absolute;
-  top: 17px;
-  right: -8px;
-  padding: 1px 3px;
-  border: 1px solid rgb(255 255 255 / 28%);
-  border-radius: 2px;
-  color: #f8fafc;
-  background: oklch(45% 0.16 35);
-  font-size: 7px;
-  font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: 0.04em;
-}
-
 @keyframes spin {
   to {
     transform: rotate(360deg);
@@ -106,10 +65,8 @@
 }
 
 @media (max-width: 520px) {
-  .accountButton {
-    right: 8px;
-    width: 32px;
-    height: 32px;
+  .designerHost {
+    --ptd-host-account-space: 118px;
   }
 }
 

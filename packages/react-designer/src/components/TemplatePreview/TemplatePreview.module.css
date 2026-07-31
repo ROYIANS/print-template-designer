@@ -1,0 +1,36 @@
+.preview {
+  position: relative;
+  width: 100%;
+  aspect-ratio: var(--preview-page-ratio);
+  overflow: hidden;
+  color: var(--preview-page-color);
+  background: transparent;
+  font-family: var(--preview-page-font-family);
+  font-size: var(--preview-page-font-size);
+  line-height: var(--preview-page-line-height);
+  pointer-events: none;
+  user-select: none;
+  contain: layout paint style;
+}
+
+.paper {
+  position: absolute;
+  top: var(--preview-page-top);
+  left: var(--preview-page-left);
+  width: var(--preview-page-width);
+  height: var(--preview-page-height);
+  overflow: hidden;
+  background: var(--preview-page-background);
+  transform: scale(var(--preview-page-scale));
+  transform-origin: top left;
+}
+
+.component {
+  position: absolute;
+  top: var(--preview-component-top);
+  left: var(--preview-component-left);
+  width: var(--preview-component-width);
+  height: var(--preview-component-height);
+  transform: rotate(var(--preview-component-rotate));
+  transform-origin: center;
+}

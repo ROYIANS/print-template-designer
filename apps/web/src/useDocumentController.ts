@@ -1,0 +1,415 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { deserialize, serialize, type TemplateSchema } from '@ptd/core'
+import type { DesignerDocumentStatus, DesignerHostCommandStates } from '@ptd/react-designer'
+import { INITIAL_TEMPLATE } from './templates'
+import { TemplateApiError, templateApi, type TemplateApi, type TemplateRecord } from './templateApi'
+
+export interface DocumentState {
+  id?: number
+  title: string
+  serverVersion?: number
+  savedTemplate: TemplateSchema
+  currentTemplate: TemplateSchema
+  status: DesignerDocumentStatus
+  message?: string
+}
+
+interface UseDocumentControllerOptions {
+  requestedTemplateId?: number | 'invalid'
+  api?: TemplateApi
+  onLocationChange: (templateId: number | undefined, replace: boolean) => void
+}
+
+export interface DocumentController {
+  state: DocumentState
+  setCurrentTemplate(template: TemplateSchema): void
+  newDocument(): void
+  openDocument(templateId: number): void
+  save(template?: TemplateSchema): Promise<boolean>
+  saveAs(title: string, template?: TemplateSchema): Promise<boolean>
+}
+
+function cloneTemplate(template: TemplateSchema): TemplateSchema {
+  return deserialize(serialize(template))
+}
+
+function blankTemplate(): TemplateSchema {
+  return cloneTemplate(INITIAL_TEMPLATE)
+}
+
+function initialState(): DocumentState {
+  const template = blankTemplate()
+  return {
+    title: template.pageConfig.title,
+    savedTemplate: template,
+    currentTemplate: template,
+    status: 'clean',
+    message: '尚未保存到服务器',
+  }
+}
+
+function loadingState(templateId: number): DocumentState {
+  const template = blankTemplate()
+  return {
+    id: templateId,
+    title: `模板 #${templateId}`,
+    savedTemplate: template,
+    currentTemplate: template,
+    status: 'loading',
+    message: `正在载入模板 #${templateId}…`,
+  }
+}
+
+function invalidRouteState(): DocumentState {
+  const template = blankTemplate()
+  return {
+    title: template.pageConfig.title,
+    savedTemplate: template,
+    currentTemplate: template,
+    status: 'error',
+    message: '地址中的模板编号无效，请从模板库重新选择。',
+  }
+}
+
+export function isDocumentDirty(state: Pick<DocumentState, 'savedTemplate' | 'currentTemplate'>) {
+  return serialize(state.savedTemplate) !== serialize(state.currentTemplate)
+}
+
+export function shouldConfirmDocumentExit(state: DocumentState): boolean {
+  return isDocumentDirty(state) || state.status === 'conflict'
+}
+
+export function documentHostCommandStates(state: DocumentState): DesignerHostCommandStates {
+  const busy = state.status === 'loading' || state.status === 'saving'
+  const busyReason = busy ? '请等待当前操作完成' : undefined
+  const unavailable = state.status === 'error'
+  const unavailableReason = unavailable ? '当前模板未成功载入，无法保存' : undefined
+  return {
+    new: { enabled: !busy, pending: busy, reason: busyReason },
+    open: { enabled: !busy, pending: busy, reason: busyReason },
+    templateBrowser: { enabled: !busy, pending: busy, reason: busyReason },
+    save: {
+      enabled:
+        !busy &&
+        !unavailable &&
+        state.status !== 'conflict' &&
+        (state.id === undefined || (state.serverVersion !== undefined && state.status !== 'clean')),
+      pending: state.status === 'saving',
+      reason: unavailable
+        ? unavailableReason
+        : state.status === 'conflict'
+          ? '服务器版本已变化，请另存为或重新打开'
+          : state.id !== undefined && state.serverVersion === undefined
+            ? '模板尚未成功载入'
+            : state.id !== undefined && state.status === 'clean'
+              ? '没有需要保存的更改'
+              : busyReason,
+    },
+    saveAs: {
+      enabled: !busy && !unavailable,
+      pending: state.status === 'saving',
+      reason: unavailableReason ?? busyReason,
+    },
+    versionHistory: { enabled: false, reason: '版本历史将在下一批接入' },
+    restoreVersion: { enabled: false, reason: '请先从版本历史选择要恢复的版本' },
+  }
+}
+
+function settledStatus(state: Pick<DocumentState, 'savedTemplate' | 'currentTemplate'>) {
+  return isDocumentDirty(state) ? ('dirty' as const) : ('clean' as const)
+}
+
+function titleFromTemplate(template: TemplateSchema, fallback: string): string {
+  const title = template.pageConfig.title.trim()
+  return title || fallback
+}
+
+function templateWithTitle(template: TemplateSchema, title: string): TemplateSchema {
+  return {
+    ...template,
+    pageConfig: { ...template.pageConfig, title },
+  }
+}
+
+function isAbortError(error: unknown) {
+  return error instanceof DOMException && error.name === 'AbortError'
+}
+
+function errorMessage(error: unknown, action: '载入' | '保存'): string {
+  if (!(error instanceof TemplateApiError)) return `${action}模板时发生未知错误，请重试。`
+  switch (error.kind) {
+    case 'unauthorized':
+      return '登录状态已失效，请重新登录后继续。'
+    case 'forbidden':
+      return '当前账户没有执行此操作的权限。'
+    case 'not-found':
+      return '模板不存在，或当前账户无权访问。'
+    case 'bad-request':
+      return `模板数据未通过服务端校验：${error.message}`
+    case 'network':
+      return '无法连接模板服务，请检查网络后重试。'
+    case 'invalid-response':
+      return error.message
+    case 'server':
+      return '模板服务暂时不可用，请稍后重试。'
+    case 'conflict':
+      return '服务器上的模板已有更新。为避免覆盖他人修改，本次保存已停止。'
+  }
+}
+
+export function useDocumentController({
+  requestedTemplateId,
+  api = templateApi,
+  onLocationChange,
+}: UseDocumentControllerOptions): DocumentController {
+  const [state, setState] = useState<DocumentState>(initialState)
+  const stateRef = useRef(state)
+  const operationRef = useRef(0)
+  const requestRef = useRef<AbortController>()
+  const mountedRef = useRef(true)
+
+  const commit = useCallback((update: (previous: DocumentState) => DocumentState) => {
+    setState((previous) => {
+      const next = update(previous)
+      stateRef.current = next
+      return next
+    })
+  }, [])
+
+  const cancelRequest = useCallback(() => {
+    operationRef.current += 1
+    requestRef.current?.abort()
+    requestRef.current = undefined
+  }, [])
+
+  const beginRequest = useCallback(() => {
+    cancelRequest()
+    const controller = new AbortController()
+    requestRef.current = controller
+    return { controller, operation: operationRef.current }
+  }, [cancelRequest])
+
+  const isCurrentOperation = useCallback((operation: number) => {
+    return mountedRef.current && operationRef.current === operation
+  }, [])
+
+  useEffect(() => {
+    mountedRef.current = true
+    return () => {
+      mountedRef.current = false
+      requestRef.current?.abort()
+    }
+  }, [])
+
+  const applyRecord = useCallback(
+    (record: TemplateRecord, message: string) => {
+      const template = cloneTemplate(record.content)
+      commit(() => ({
+        id: record.id,
+        title: record.title,
+        serverVersion: record.version,
+        savedTemplate: template,
+        currentTemplate: template,
+        status: 'clean',
+        message,
+      }))
+    },
+    [commit],
+  )
+
+  const load = useCallback(
+    async (templateId: number) => {
+      const { controller, operation } = beginRequest()
+      commit(() => loadingState(templateId))
+      try {
+        const record = await api.get(templateId, controller.signal)
+        if (!isCurrentOperation(operation)) return
+        applyRecord(record, `已载入版本 ${record.version}`)
+      } catch (error) {
+        if (isAbortError(error) || !isCurrentOperation(operation)) return
+        commit((previous) => ({
+          ...previous,
+          status: 'error',
+          message: errorMessage(error, '载入'),
+        }))
+      }
+    },
+    [api, applyRecord, beginRequest, commit, isCurrentOperation],
+  )
+
+  useEffect(() => {
+    if (requestedTemplateId === 'invalid') {
+      cancelRequest()
+      commit(() => invalidRouteState())
+      return
+    }
+    if (requestedTemplateId === undefined) {
+      if (stateRef.current.id !== undefined || stateRef.current.status === 'error') {
+        const next = initialState()
+        cancelRequest()
+        commit(() => next)
+      }
+      return
+    }
+    if (stateRef.current.id === requestedTemplateId) {
+      if (
+        stateRef.current.status === 'loading' &&
+        (!requestRef.current || requestRef.current.signal.aborted)
+      ) {
+        void load(requestedTemplateId)
+      }
+      return
+    }
+    void load(requestedTemplateId)
+  }, [cancelRequest, commit, load, requestedTemplateId])
+
+  const setCurrentTemplate = useCallback(
+    (template: TemplateSchema) => {
+      commit((previous) => {
+        if (previous.status === 'loading' || previous.status === 'error') return previous
+        const next = {
+          ...previous,
+          title: titleFromTemplate(template, previous.title),
+          currentTemplate: template,
+        }
+        if (previous.status === 'saving' || previous.status === 'conflict') {
+          return next
+        }
+        const status = settledStatus(next)
+        return {
+          ...next,
+          status,
+          message:
+            status === 'dirty'
+              ? '有未保存的更改'
+              : previous.id
+                ? `所有更改已保存 · 版本 ${previous.serverVersion}`
+                : '尚未保存到服务器',
+        }
+      })
+    },
+    [commit],
+  )
+
+  const newDocument = useCallback(() => {
+    cancelRequest()
+    commit(() => initialState())
+    onLocationChange(undefined, false)
+  }, [cancelRequest, commit, onLocationChange])
+
+  const openDocument = useCallback(
+    (templateId: number) => {
+      if (stateRef.current.id === templateId) {
+        if (stateRef.current.status === 'error') void load(templateId)
+        return
+      }
+      cancelRequest()
+      commit(() => loadingState(templateId))
+      onLocationChange(templateId, false)
+    },
+    [cancelRequest, commit, load, onLocationChange],
+  )
+
+  const persist = useCallback(
+    async (mode: 'save' | 'saveAs', requestedTitle?: string, template?: TemplateSchema) => {
+      const previous = stateRef.current
+      if (
+        previous.status === 'saving' ||
+        previous.status === 'loading' ||
+        previous.status === 'error'
+      ) {
+        return false
+      }
+      if (mode === 'save' && previous.status === 'conflict') return false
+      if (mode === 'save' && previous.id !== undefined && previous.serverVersion === undefined) {
+        return false
+      }
+
+      const source = template ?? previous.currentTemplate
+      const title = (requestedTitle ?? titleFromTemplate(source, previous.title)).trim()
+      if (!title) {
+        commit((current) => ({
+          ...current,
+          status: 'error',
+          message: '模板名称不能为空。',
+        }))
+        return false
+      }
+      const content = templateWithTitle(source, title)
+      const create = mode === 'saveAs' || previous.id === undefined
+      const { controller, operation } = beginRequest()
+
+      commit((current) => ({
+        ...current,
+        title,
+        currentTemplate: content,
+        status: 'saving',
+        message: create ? '正在创建服务器模板…' : `正在保存版本 ${previous.serverVersion}…`,
+      }))
+
+      try {
+        let record: TemplateRecord
+        if (create) {
+          record = await api.create({ title, content }, controller.signal)
+        } else {
+          const id = previous.id
+          const expectedVersion = previous.serverVersion
+          if (id === undefined || expectedVersion === undefined) return false
+          record = await api.update(id, { title, content, expectedVersion }, controller.signal)
+        }
+        if (!isCurrentOperation(operation)) return false
+
+        const savedTemplate = cloneTemplate(record.content)
+        commit((latest) => {
+          const unchangedWhileSaving = serialize(latest.currentTemplate) === serialize(content)
+          const currentTemplate = unchangedWhileSaving ? savedTemplate : latest.currentTemplate
+          const next = {
+            ...latest,
+            id: record.id,
+            title: unchangedWhileSaving
+              ? record.title
+              : titleFromTemplate(currentTemplate, record.title),
+            serverVersion: record.version,
+            savedTemplate,
+            currentTemplate,
+          }
+          const status = settledStatus(next)
+          return {
+            ...next,
+            status,
+            message:
+              status === 'clean'
+                ? `所有更改已保存 · 版本 ${record.version}`
+                : `版本 ${record.version} 已保存，另有新的未保存更改`,
+          }
+        })
+        if (create) onLocationChange(record.id, mode === 'save')
+        return true
+      } catch (error) {
+        if (isAbortError(error) || !isCurrentOperation(operation)) return false
+        const conflict = error instanceof TemplateApiError && error.kind === 'conflict'
+        commit((current) => ({
+          ...current,
+          status: conflict ? 'conflict' : 'error',
+          message: errorMessage(error, '保存'),
+        }))
+        return false
+      }
+    },
+    [api, beginRequest, commit, isCurrentOperation, onLocationChange],
+  )
+
+  const save = useCallback(
+    (template?: TemplateSchema) => persist('save', undefined, template),
+    [persist],
+  )
+  const saveAs = useCallback(
+    (title: string, template?: TemplateSchema) => persist('saveAs', title, template),
+    [persist],
+  )
+
+  return useMemo(
+    () => ({ state, setCurrentTemplate, newDocument, openDocument, save, saveAs }),
+    [newDocument, openDocument, save, saveAs, setCurrentTemplate, state],
+  )
+}

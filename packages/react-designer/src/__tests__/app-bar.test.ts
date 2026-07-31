@@ -99,6 +99,28 @@ describe('AppBar application menu', () => {
     expect(brand?.textContent).toContain('Foliq')
     expect(brand?.textContent).toContain('结构化文档设计器')
     expect(panel().id).toBe('ptd-application-menu')
+    expect(container.textContent).not.toContain('用户账户（由宿主应用提供）')
+  })
+
+  it('uses one control family for workspace and save while preserving hierarchy', () => {
+    const hostCommands: DesignerHostCommandController = {
+      configured: true,
+      document: { id: 'template-1', status: 'clean' },
+      getState: () => ({ enabled: true, pending: false }),
+      execute: vi.fn(async () => true),
+    }
+    renderAppBar({ hostCommands })
+
+    const actions = Array.from(
+      container.querySelectorAll<HTMLButtonElement>('[data-ptd-control-family="document-action"]'),
+    )
+    expect(actions).toHaveLength(2)
+    expect(actions.map((action) => action.dataset.ptdControlFamily)).toEqual([
+      'document-action',
+      'document-action',
+    ])
+    expect(actions.map((action) => action.dataset.variant)).toEqual(['secondary', 'primary'])
+    expect(container.querySelector('[aria-label="用户账户（由宿主应用提供）"]')).toBeNull()
   })
 
   it('ignores hover and focus until a menu trigger is clicked', () => {
@@ -114,40 +136,40 @@ describe('AppBar application menu', () => {
 
   it('opens, switches and closes desktop menus by click', () => {
     const file = trigger('文件')
-    const edit = trigger('编辑')
+    const templateMenu = trigger('模板')
 
     act(() => file.click())
     expect(file.getAttribute('aria-expanded')).toBe('true')
     expect(panel().getAttribute('aria-hidden')).toBe('false')
 
-    act(() => edit.click())
+    act(() => templateMenu.click())
     expect(file.getAttribute('aria-expanded')).toBe('false')
-    expect(edit.getAttribute('aria-expanded')).toBe('true')
-    expect(panel().textContent).toContain('撤销')
+    expect(templateMenu.getAttribute('aria-expanded')).toBe('true')
+    expect(panel().textContent).toContain('页面设置')
 
-    act(() => edit.click())
-    expect(edit.getAttribute('aria-expanded')).toBe('false')
+    act(() => templateMenu.click())
+    expect(templateMenu.getAttribute('aria-expanded')).toBe('false')
     expect(panel().getAttribute('aria-hidden')).toBe('true')
   })
 
   it('moves keyboard focus without opening, then switches categories while open', () => {
     const file = trigger('文件')
-    const edit = trigger('编辑')
+    const templateMenu = trigger('模板')
 
     act(() => {
       file.focus()
       file.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }))
     })
-    expect(document.activeElement).toBe(edit)
+    expect(document.activeElement).toBe(templateMenu)
     expect(panel().getAttribute('aria-hidden')).toBe('true')
 
     act(() => file.click())
     act(() => {
       file.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }))
     })
-    expect(document.activeElement).toBe(edit)
-    expect(edit.getAttribute('aria-expanded')).toBe('true')
-    expect(panel().textContent).toContain('撤销')
+    expect(document.activeElement).toBe(templateMenu)
+    expect(templateMenu.getAttribute('aria-expanded')).toBe('true')
+    expect(panel().textContent).toContain('页面管理')
   })
 
   it('closes through outside pointer input, focus leaving the header and Escape', () => {
@@ -175,17 +197,23 @@ describe('AppBar application menu', () => {
     outside.remove()
   })
 
-  it('executes real EditorStore commands and disables unavailable ones', async () => {
-    act(() => store.addPage())
-    expect(store.template.value.pages).toHaveLength(2)
+  it('executes real workspace and canvas-assistance commands', async () => {
+    const openResource = vi.fn()
+    const openInspector = vi.fn()
+    renderAppBar({ workspace: { openResource, openInspector } })
 
-    act(() => trigger('编辑').click())
-    expect(command('撤销').disabled).toBe(false)
-    expect(command('剪切').disabled).toBe(true)
-
-    await act(async () => command('撤销').click())
-    expect(store.template.value.pages).toHaveLength(1)
+    act(() => trigger('模板').click())
+    await act(async () => command('数据源').click())
+    expect(openResource).toHaveBeenCalledWith('data')
     expect(panel().getAttribute('aria-hidden')).toBe('true')
+
+    act(() => {
+      store.addGuide('x', 20)
+      trigger('视图').click()
+    })
+    expect(command('清除全部参考线').disabled).toBe(false)
+    await act(async () => command('清除全部参考线').click())
+    expect(store.guides.value).toHaveLength(0)
   })
 
   it('dispatches declared Host commands and exposes pending state', async () => {
@@ -210,23 +238,48 @@ describe('AppBar application menu', () => {
     expect(panel().getAttribute('aria-hidden')).toBe('true')
   })
 
-  it('opens real workspace panels and leaves planned commands disabled', async () => {
-    const openResource = vi.fn()
-    renderAppBar({
-      workspace: {
-        resourcesOpen: false,
-        inspectorOpen: false,
-        openResource,
-        toggleInspector: vi.fn(),
-      },
-    })
+  it('organizes low-frequency workflows without duplicating object commands', () => {
+    const hostCommands: DesignerHostCommandController = {
+      configured: true,
+      document: { id: 'template-1', status: 'clean' },
+      getState: () => ({ enabled: true, pending: false }),
+      execute: vi.fn(async () => true),
+    }
+    renderAppBar({ hostCommands })
 
-    act(() => trigger('窗口').click())
-    await act(async () => command('页面面板').click())
-    expect(openResource).toHaveBeenCalledWith('pages')
+    const menuLabels = Array.from(
+      container.querySelectorAll<HTMLButtonElement>('nav[aria-label="应用菜单"] > button'),
+    ).map((button) => button.textContent)
+    expect(menuLabels.some((label) => label?.startsWith('编辑'))).toBe(false)
+    expect(menuLabels.some((label) => label?.startsWith('对象'))).toBe(false)
+    expect(menuLabels.some((label) => label?.startsWith('窗口'))).toBe(false)
+    expect(menuLabels.some((label) => label?.startsWith('模板'))).toBe(true)
+    expect(menuLabels.some((label) => label?.startsWith('帮助'))).toBe(true)
+
+    act(() => trigger('文件').click())
+    expect(panel().textContent).toContain('打开模板')
+    expect(panel().textContent).toContain('保存模板')
+    expect(panel().textContent).toContain('另存为')
+    expect(panel().textContent).toContain('版本历史')
+    expect(command('版本历史').disabled).toBe(true)
+
+    act(() => trigger('模板').click())
+    expect(panel().textContent).toContain('页面设置')
+    expect(panel().textContent).toContain('页面管理')
+    expect(panel().textContent).toContain('素材资源')
+    expect(panel().textContent).toContain('数据源')
+    expect(command('模板检查').disabled).toBe(true)
 
     act(() => trigger('视图').click())
+    expect(panel().textContent).toContain('显示标尺')
+    expect(panel().textContent).toContain('显示参考线')
+    expect(panel().textContent).toContain('锁定 / 解锁参考线')
+    expect(panel().textContent).toContain('清除全部参考线')
     expect(command('适合页面').disabled).toBe(true)
-    expect(command('适合页面').getAttribute('aria-label')).toContain('等待画布可视区域测量合同')
+
+    act(() => trigger('帮助').click())
+    expect(panel().textContent).toContain('快捷键')
+    expect(panel().textContent).toContain('产品介绍')
+    expect(panel().textContent).toContain('关于 Foliq')
   })
 })

@@ -1,20 +1,45 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Designer, type DesignerHost, type TemplateSchema } from '@ptd/react-designer'
-import { authClient } from './auth-client'
-import { LandingPage, type AccessState, type AccountUser } from './LandingPage'
-import { landingNoticeFromSearch, landingUrl, routeFromPathname } from './navigation'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
-  INITIAL_TEMPLATE,
+  Designer,
+  type DesignerHost,
+  type DesignerHostCommandId,
+  type TemplateSchema,
+} from '@ptd/react-designer'
+import { AccountMenu } from './AccountMenu'
+import { authClient } from './auth-client'
+import { HelpSheet, type HelpSheetView } from './HelpSheet'
+import { LandingPage, type AccessState, type AccountUser } from './LandingPage'
+import {
+  isProductCaptureSearch,
+  landingNoticeFromSearch,
+  landingUrl,
+  routeFromPathname,
+  workspaceViewFromSearch,
+  type WorkspaceView,
+} from './navigation'
+import { SaveAsSheet } from './SaveAsSheet'
+import {
   PRODUCT_CAPTURE_KEYS,
   PRODUCT_CAPTURE_TEMPLATES,
   type ProductCaptureKey,
 } from './templates'
+import {
+  documentHostCommandStates,
+  shouldConfirmDocumentExit,
+  useDocumentController,
+} from './useDocumentController'
+import { UnsavedDialog } from './WorkspaceDialogs'
+import { WorkspaceHome } from './WorkspaceHome'
 import styles from './App.module.css'
 
 interface LocationState {
   pathname: string
   search: string
 }
+
+type NavigationBlocker = (proceed: () => void) => boolean
+
+const HISTORY_INDEX_KEY = '__foliqNavigationIndex'
 
 function currentLocation(): LocationState {
   return { pathname: window.location.pathname, search: window.location.search }
@@ -43,22 +68,109 @@ function parseAccountUser(value: unknown): AccountUser {
   }
 }
 
-function useBrowserLocation() {
+function historyIndex(state: unknown): number | undefined {
+  if (typeof state !== 'object' || state === null || Array.isArray(state)) return undefined
+  const value = (state as Record<string, unknown>)[HISTORY_INDEX_KEY]
+  return typeof value === 'number' && Number.isSafeInteger(value) ? value : undefined
+}
+
+function historyState(index: number): Record<string, unknown> {
+  const current = window.history.state
+  const base =
+    typeof current === 'object' && current !== null && !Array.isArray(current)
+      ? (current as Record<string, unknown>)
+      : {}
+  return { ...base, [HISTORY_INDEX_KEY]: index }
+}
+
+export function useBrowserLocation() {
+  const initialIndex = historyIndex(window.history.state) ?? 0
   const [location, setLocation] = useState(currentLocation)
+  const currentIndexRef = useRef(initialIndex)
+  const blockerRef = useRef<NavigationBlocker>()
+  const restoringPopRef = useRef(false)
+  const bypassPopRef = useRef(false)
+
+  if (historyIndex(window.history.state) === undefined) {
+    window.history.replaceState(historyState(initialIndex), '', window.location.href)
+  }
 
   useEffect(() => {
-    const sync = () => setLocation(currentLocation())
-    window.addEventListener('popstate', sync)
-    return () => window.removeEventListener('popstate', sync)
-  }, [])
+    const onPopState = (event: PopStateEvent) => {
+      const target = currentLocation()
+      const current = location
+      const targetIndex = historyIndex(event.state)
 
-  const navigate = useCallback((href: string, replace = false) => {
-    window.history[replace ? 'replaceState' : 'pushState']({}, '', href)
+      if (restoringPopRef.current) {
+        restoringPopRef.current = false
+        setLocation(current)
+        return
+      }
+
+      if (bypassPopRef.current) {
+        bypassPopRef.current = false
+        if (targetIndex !== undefined) currentIndexRef.current = targetIndex
+        setLocation(target)
+        window.scrollTo({ top: 0, behavior: 'auto' })
+        return
+      }
+
+      if (target.pathname === current.pathname && target.search === current.search) {
+        if (targetIndex !== undefined) currentIndexRef.current = targetIndex
+        setLocation(target)
+        return
+      }
+
+      const delta =
+        targetIndex === undefined ? -1 : targetIndex - currentIndexRef.current
+      const proceed = () => {
+        bypassPopRef.current = true
+        window.history.go(delta)
+      }
+      if (delta !== 0 && blockerRef.current?.(proceed)) {
+        restoringPopRef.current = true
+        window.history.go(-delta)
+        return
+      }
+
+      if (targetIndex !== undefined) currentIndexRef.current = targetIndex
+      setLocation(target)
+      window.scrollTo({ top: 0, behavior: 'auto' })
+    }
+    window.addEventListener('popstate', onPopState)
+    return () => window.removeEventListener('popstate', onPopState)
+  }, [location])
+
+  const commitNavigation = useCallback((href: string, replace: boolean) => {
+    const nextIndex = replace ? currentIndexRef.current : currentIndexRef.current + 1
+    window.history[replace ? 'replaceState' : 'pushState'](historyState(nextIndex), '', href)
+    currentIndexRef.current = nextIndex
     setLocation(currentLocation())
     window.scrollTo({ top: 0, behavior: 'auto' })
   }, [])
 
-  return { location, navigate }
+  const navigate = useCallback(
+    (href: string, replace = false, force = false) => {
+      const proceed = () => commitNavigation(href, replace)
+      if (!force && blockerRef.current?.(proceed)) return
+      proceed()
+    },
+    [commitNavigation],
+  )
+
+  const runGuarded = useCallback((action: () => void) => {
+    if (blockerRef.current?.(action)) return
+    action()
+  }, [])
+
+  const registerBlocker = useCallback((blocker: NavigationBlocker) => {
+    blockerRef.current = blocker
+    return () => {
+      if (blockerRef.current === blocker) blockerRef.current = undefined
+    }
+  }, [])
+
+  return { location, navigate, registerBlocker, runGuarded }
 }
 
 function useAccountAccess() {
@@ -110,13 +222,132 @@ function useAccountAccess() {
   return { access, retry }
 }
 
-function Workspace({ user }: { user: AccountUser }) {
-  const [template, setTemplate] = useState(INITIAL_TEMPLATE)
+type WorkspaceDialog = 'new' | 'leave'
+
+function signOut() {
+  return authClient.signOut().then(() => window.location.assign('/'))
+}
+
+function WorkspaceEditor({
+  user,
+  view,
+  navigate,
+  registerBlocker,
+  runGuarded,
+}: {
+  user: AccountUser
+  view: Exclude<WorkspaceView, { kind: 'home' }>
+  navigate(href: string, replace?: boolean, force?: boolean): void
+  registerBlocker(blocker: NavigationBlocker): () => void
+  runGuarded(action: () => void): void
+}) {
+  const [dialog, setDialog] = useState<WorkspaceDialog>()
+  const [helpSheet, setHelpSheet] = useState<HelpSheetView>()
+  const [pendingNavigation, setPendingNavigation] = useState<(() => void) | undefined>()
+  const [saveAsOpen, setSaveAsOpen] = useState(false)
+  const allowUnloadRef = useRef(false)
+  const requestedTemplateId =
+    view.kind === 'template'
+      ? view.templateId
+      : view.kind === 'invalid-template'
+        ? ('invalid' as const)
+        : undefined
+  const document = useDocumentController({
+    requestedTemplateId,
+    onLocationChange: (templateId, replace) => {
+      navigate(
+        templateId === undefined ? '/app?new=blank' : `/app?template=${templateId}`,
+        replace,
+        true,
+      )
+    },
+  })
+  const hasUnsavedChanges = shouldConfirmDocumentExit(document.state)
+
+  useEffect(
+    () =>
+      registerBlocker((proceed) => {
+        if (!hasUnsavedChanges) return false
+        setSaveAsOpen(false)
+        setPendingNavigation(() => () => {
+          allowUnloadRef.current = true
+          proceed()
+        })
+        setDialog('leave')
+        return true
+      }),
+    [hasUnsavedChanges, registerBlocker],
+  )
+
+  useEffect(() => {
+    if (!hasUnsavedChanges) return
+    const onBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (allowUnloadRef.current) return
+      event.preventDefault()
+      event.returnValue = ''
+    }
+    window.addEventListener('beforeunload', onBeforeUnload)
+    return () => window.removeEventListener('beforeunload', onBeforeUnload)
+  }, [hasUnsavedChanges])
+
+  const requestHome = useCallback(() => {
+    setSaveAsOpen(false)
+    navigate('/app')
+  }, [navigate])
+
   const host = useMemo<DesignerHost>(
     () => ({
-      document: { title: template.pageConfig.title, status: 'clean' },
+      document: {
+        id: document.state.id?.toString(),
+        title: document.state.title,
+        version: document.state.serverVersion,
+        status: document.state.status,
+        message: document.state.message,
+      },
+      commands: {
+        ...documentHostCommandStates(document.state),
+        keyboardShortcuts: { enabled: true },
+        documentation: { enabled: true },
+        about: { enabled: true },
+      },
+      onCommand: async (command: DesignerHostCommandId, context) => {
+        switch (command) {
+          case 'new':
+            setSaveAsOpen(false)
+            setHelpSheet(undefined)
+            if (hasUnsavedChanges) setDialog('new')
+            else document.newDocument()
+            return
+          case 'open':
+          case 'templateBrowser':
+            setHelpSheet(undefined)
+            requestHome()
+            return
+          case 'save':
+            await document.save(context.template)
+            return
+          case 'saveAs':
+            setHelpSheet(undefined)
+            setSaveAsOpen(true)
+            return
+          case 'keyboardShortcuts':
+            setSaveAsOpen(false)
+            setHelpSheet('shortcuts')
+            return
+          case 'documentation':
+            setHelpSheet(undefined)
+            runGuarded(() => window.location.assign('/#product'))
+            return
+          case 'about':
+            setSaveAsOpen(false)
+            setHelpSheet('about')
+            return
+          default:
+            return
+        }
+      },
     }),
-    [template.pageConfig.title],
+    [document, hasUnsavedChanges, requestHome, runGuarded],
   )
 
   return (
@@ -125,31 +356,50 @@ function Workspace({ user }: { user: AccountUser }) {
         跳到设计器
       </a>
       <div id="designer-workspace" className={styles.designerHost} tabIndex={-1}>
-        <Designer value={template} onChange={setTemplate} host={host} />
+        <Designer
+          value={document.state.currentTemplate}
+          onChange={document.setCurrentTemplate}
+          host={host}
+        />
       </div>
-      {user.authMode === 'dev-bypass' ? (
-        <div
-          className={styles.accountButton}
-          role="status"
-          aria-label={`${user.name} · 本地开发身份`}
-          title={`${user.name} · 本地开发身份`}
-        >
-          {user.image ? <img src={user.image} alt="" /> : user.name.slice(0, 1)}
-          <span className={styles.devBadge}>DEV</span>
-        </div>
-      ) : (
-        <button
-          type="button"
-          className={styles.accountButton}
-          aria-label={`退出登录（${user.email}）`}
-          title={`${user.name} · ${user.email} · 点击退出`}
-          onClick={() => {
-            void authClient.signOut().then(() => window.location.assign('/'))
+      <AccountMenu
+        user={user}
+        surface="editor"
+        onReturnHome={() => navigate('/')}
+        onSignOut={user.authMode === 'github' ? () => runGuarded(signOut) : undefined}
+      />
+      {saveAsOpen ? (
+        <SaveAsSheet
+          defaultValue={`${document.state.title} 副本`}
+          onClose={() => setSaveAsOpen(false)}
+          onConfirm={(title) => {
+            setSaveAsOpen(false)
+            void document.saveAs(title, document.state.currentTemplate)
           }}
-        >
-          {user.image ? <img src={user.image} alt="" /> : user.name.slice(0, 1)}
-        </button>
-      )}
+        />
+      ) : null}
+      {helpSheet ? <HelpSheet view={helpSheet} onClose={() => setHelpSheet(undefined)} /> : null}
+      {dialog ? (
+        <UnsavedDialog
+          action={dialog === 'new' ? 'new' : 'home'}
+          onCancel={() => {
+            setDialog(undefined)
+            setPendingNavigation(undefined)
+          }}
+          onDiscard={() => {
+            const action = dialog
+            setDialog(undefined)
+            if (action === 'new') {
+              setPendingNavigation(undefined)
+              document.newDocument()
+              return
+            }
+            const proceed = pendingNavigation
+            setPendingNavigation(undefined)
+            proceed?.()
+          }}
+        />
+      ) : null}
     </main>
   )
 }
@@ -185,16 +435,14 @@ function ProductCapture({ captureKey }: { captureKey: ProductCaptureKey }) {
 }
 
 function App() {
-  const { location, navigate } = useBrowserLocation()
+  const { location, navigate, registerBlocker, runGuarded } = useBrowserLocation()
   const { access, retry } = useAccountAccess()
   const route = routeFromPathname(location.pathname)
   const captureTemplate = new URLSearchParams(location.search).get('template')
   const captureKey =
     PRODUCT_CAPTURE_KEYS.find((key) => key === captureTemplate) ?? PRODUCT_CAPTURE_KEYS[0]
   const captureMode =
-    import.meta.env.DEV &&
-    route === 'workspace' &&
-    new URLSearchParams(location.search).get('capture') === 'product'
+    route === 'workspace' && isProductCaptureSearch(location.search, import.meta.env.DEV)
 
   useEffect(() => {
     if (captureMode || route !== 'workspace' || access.kind === 'checking') return
@@ -206,7 +454,34 @@ function App() {
   if (captureMode) return <ProductCapture captureKey={captureKey} />
 
   if (route === 'workspace') {
-    if (access.kind === 'allowed') return <Workspace user={access.user} />
+    if (access.kind === 'allowed') {
+      const view = workspaceViewFromSearch(location.search)
+      if (view.kind === 'home') {
+        return (
+          <WorkspaceHome
+            accountControl={
+              <AccountMenu
+                user={access.user}
+                surface="home"
+                onReturnHome={() => navigate('/')}
+                onSignOut={access.user.authMode === 'github' ? signOut : undefined}
+              />
+            }
+            onNew={() => navigate('/app?new=blank')}
+            onOpen={(templateId) => navigate(`/app?template=${templateId}`)}
+          />
+        )
+      }
+      return (
+        <WorkspaceEditor
+          user={access.user}
+          view={view}
+          navigate={navigate}
+          registerBlocker={registerBlocker}
+          runGuarded={runGuarded}
+        />
+      )
+    }
     return (
       <main className={styles.workspaceLoading} role="status">
         <span aria-hidden="true" />

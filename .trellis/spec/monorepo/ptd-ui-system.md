@@ -220,6 +220,7 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
   --ptd-font-metric:
     'Outfit', 'Outfit Variable', 'Sarasa UI SC', 'Sarasa Gothic SC', 'Microsoft YaHei UI',
     sans-serif;
+  --ptd-font-brand: var(--foliq-font-brand, 'Cherry Bomb One', 'Outfit', sans-serif);
   --ptd-font-serif: 'Noto Serif SC', 'Noto Serif CJK SC', 'Source Han Serif SC', 'Songti SC', serif;
 
   --ptd-text-10: 0.625rem;
@@ -232,11 +233,13 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
 ```
 
 - 产品 UI 使用固定字号，避免流式字号破坏工具布局。
-- 中文操作 UI 以 Sarasa UI SC 为主；Outfit 负责拉丁字母、数字和产品字标。两者在同一行
-  按 glyph fallback 组合，不把等宽字体当作“工程感”。
+- 中文操作 UI 以 Sarasa UI SC 为主；Outfit 负责普通拉丁字母和数字。作为品牌字标单独出现的
+  `Foliq` 使用 Cherry Bomb One 400，并通过共享 `--foliq-font-brand` / `--ptd-font-brand` Token
+  覆盖落地页、文件工作台、帮助面板与设计器 App Bar；正文或“关于 Foliq”等普通菜单文案不整行
+  切换展示字体，也不把等宽字体当作“工程感”。
 - 衬线内容统一使用 Noto Serif SC 系列，仅用于模板叙事、预览标题或明确要求衬线的内容；
   表单、工具栏、坐标和快捷键仍使用 UI sans。
-- Outfit 与 Noto Serif SC 由宿主通过 Google Fonts 或等价 Web Font 服务引入；离线部署必须
+- Cherry Bomb One、Outfit 与 Noto Serif SC 由宿主通过 Google Fonts 或等价 Web Font 服务引入；离线部署必须
   提供可控的本地镜像或依赖系统 fallback。Sarasa UI SC 没有可靠的通用 Web 服务版本，示例 Web
   通过 `@font-face` 自托管完整 `SarasaUiSC.ttf`。可复用设计器包只提供字体栈，不强制注入大型
   CJK 字体资产。
@@ -250,7 +253,7 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
 - 当前阶段 App Bar 复用 Legacy 的圆形 PTD Logo，不以临时字母块、Emoji 或套准框替代；
   后续可以直接替换正式品牌资产，而不修改主题色与交互状态。
 - Logo 保持资产本身的透明底和颜色，不通过 CSS mask 强行重染；标准视觉尺寸为 24–28px。
-- `PTD` 拉丁字标使用 Outfit 650–700；中文产品名使用 UI 字体，二者是一个品牌单元。
+- `Foliq` 拉丁字标使用 Cherry Bomb One 400；中文产品名使用 UI 字体，二者是一个品牌单元。
 - 朱红套准、裁切或校样符号可以出现在功能场景，但不能冒充产品 Logo。
 
 ### 5.2 结构装饰语汇
@@ -271,6 +274,33 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
 - 禁止 `PRO / 01`、坐标角标、伪图纸编号、无意义英文缩写等装饰性工程文字。
 
 ## 6. 工作区布局合同
+
+### 6.0 文件工作台 Home 与 Editor
+
+- 受保护应用包含两个一级空间：`/app` 是文件工作台 Home，`/app?template=<id>` 是已保存文档
+  Editor，明确的新建 URL（当前为 `/app?new=blank`）是未保存文档 Editor。裸 `/app` 不得隐式创建
+  空白模板，文件浏览也不得作为覆盖 Editor 的大型 Modal。
+- Home 使用与 Editor 相同的暖纸灰、暖石墨和档案墨蓝体系。宽屏采用稳定侧栏与文件主区，窄屏重组为
+  真正的 compact top shell；不能只隐藏桌面元素，也不能用营销页大标题、无意义英文 eyebrow、工程编号、
+  规则线或矩形框装饰制造“专业感”。专业感来自真实信息架构、内容、层级、对齐与状态。
+- “最近更新”使用真实 `TemplateSchema` 与包内只读 Renderer 生成第一页内容预览；不得用静态纸张占位或
+  假组件冒充缩略图。“全部模板”使用准确标题、版本和更新时间的高效列表。Host 最多并发读取 4 份最近
+  模板详情，必须传递 AbortSignal、在卸载/刷新时取消、隔离单项失败；全部列表不得产生无界 N+1 请求。
+- 当前 Server 只有 `updatedAt`，因此默认区必须命名为“最近更新”，并显示标题、版本和更新时间；在增加
+  owner/user 维度的 `lastOpenedAt` 前，不得称为“最近打开”“继续编辑”或暗示跨设备活动历史。
+- Home 至少提供新建空白、最近更新、全部模板、真实标题过滤、清除/无结果、loading、empty、error/retry
+  和打开文档路径。标题过滤不得声称为正文全文搜索；排序、重命名、复制和硬删除在真实能力接入后留在
+  Home，不进入 Canvas Toolbar 或 Inspector。
+- Home 与 Editor 复用 Web Host 提供的真实账户 Popover。头像/身份触发器只负责展开和收起菜单，不能
+  直接执行退出等破坏性动作；GitHub 身份才显示显式退出，本地 Dev Bypass 不显示无效退出入口。
+- Editor 的 Open/Template Browser 用户语义统一为“文件工作台”：clean 文档直接返回 `/app`；dirty 或
+  conflict 文档先进入未保存决策。兼容 Host command 可以暂时保留 alias，但不得显示两个等价入口或分叉
+  状态合同。
+- Modal 只用于用户必须先决策才能安全继续的节点，例如离开 dirty/conflict 文档、不可恢复硬删除、409
+  覆盖/重新载入或恢复会丢弃当前内容。Home/文件浏览、一般 loading/error、Save As、搜索、排序和版本查看
+  不使用 Modal；Save As 使用非模态 Command Sheet，版本历史使用 Drawer/Side Sheet，普通反馈使用 inline
+  status 或 Toast。Modal 必须 trap focus、支持 Escape、提供文本风险说明并在关闭后恢复焦点。应用内的
+  Modal、Sheet 和 Popover 也不得使用仅作装饰的英文 eyebrow；标题应直接说明当前任务或风险。
 
 ### 6.1 桌面结构
 
@@ -307,22 +337,28 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
   工作台语境将高度收紧为 42px、底角收紧为 14px。
 - App Bar 折叠时高 42px，第一行轨道使用内容高度；展开菜单必须参与 Designer Grid 布局并真实
   下压 Context Bar、Canvas 和 Panel，禁止使用 fixed/absolute 覆盖工作区。
-- App Bar 保留品牌与真实载入/保存动作；账户入口在认证功能接入前可以显示明确的用户占位，但不
-  重复展示当前模板标题、页码、纸张方向和尺寸，这些信息由 Context Bar、Inspector 与 Status Bar
-  承担。不存在的云保存、同步或运行状态不得占位。
-- 应用菜单分类统一为文件(F)、编辑(E)、对象(O)、视图(V)、窗口(W)、帮助(H)，靠左排列在品牌
-  之后并提供 `accessKey`/`aria-keyshortcuts` 助记键语义。展开区直接显示命令名称、简短用途与
-  Windows 风格快捷键，不增加“应用命令”“界面预览”等解释性标题；尚未实现的命令不得执行
-  业务动作，必须保留为明确 Disabled 并通过可访问名称和 Tooltip 明示“功能待接入”，不能点击后
-  仅关闭披露层伪装执行。Host 命令通过统一能力表声明 Enabled/Pending/Reason；编辑器命令必须复用
-  Toolbar、快捷键和上下文菜单使用的同一 EditorStore 方法。
+- App Bar 保留品牌与真实载入/保存动作；认证账户由 Web Host 在 Designer 外层提供，Designer 内不得
+  再渲染假账户占位或引入 Auth 客户端。App Bar 不重复展示当前模板标题、页码、纸张方向和尺寸，这些
+  信息由 Context Bar、Inspector 与 Status Bar 承担。不存在的云保存、同步或运行状态不得占位。
+- 同一 Header 中的“文件工作台”和“保存模板”属于同一文档动作控件家族，必须使用相同高度、圆角、
+  边框轮廓、字重和状态节奏，只通过填充与明度表达主次，不得把一个做成普通矩形、另一个做成 Pill。
+- 当前应用菜单按低频工作流组织为文件(F)、模板(T)、视图(V)、帮助(H)，靠左排列在品牌之后并提供
+  `accessKey`/`aria-keyshortcuts` 助记键语义。File 集中 New/Open/Save/Save As 与版本历史；Template
+  承载页面设置、页面管理、素材资源、数据源与模板检查；View 聚焦标尺、参考线显隐/锁定/清空和页面
+  适配；Help 提供快捷键、产品介绍与关于信息。高频对象命令只保留在选择 Context Bar、画布右键菜单
+  和键盘路径，不再建立 Object 分类形成第三份重复入口；同理不建立 Window 分类堆叠面板开关，也不
+  重复 Status Bar 的放大/缩小。展开区直接显示命令名称、简短用途与 Windows 风格快捷键，不增加
+  “应用命令”“界面预览”等解释性标题。稳定且已进入近期产品合同的少量能力可用“即将提供”Disabled
+  状态预告，但不得出现开发批次、等待合同或接入状态等内部文案，也不得让一个分类全部由占位项组成。
+  Host 命令通过统一能力表声明 Enabled/Pending/Reason；编辑器与工作区命令必须复用 Toolbar、快捷键、
+  面板和上下文菜单使用的同一 EditorStore/layout 方法。
 - 桌面应用菜单只能通过触发器 click/键盘激活显式展开；hover 只提供视觉反馈，Tab focus 不得自动
   展开。点击已打开的同一分类收起，点击另一分类保持面板打开并切换内容；点击 Header 外部、焦点
   移出 Header 或 Escape 收起。左右方向键/Home/End 在关闭时只移动焦点，在展开时同时切换分类。
   App Bar 必须声明编辑器交互边界，禁止 Designer 根节点在菜单 pointer down 时抢回画布焦点。
   Touch/Pen 不依赖任何 hover 自动开合，避免触摸浏览器合成 mouse/hover 事件扰动菜单状态。
   `prefers-reduced-motion` 下取消轨道和位移动画。
-- 窄容器将六个桌面分类折叠为汉堡按钮；点击在原位展开菜单，并在展开区顶部显示可横向滚动的
+- 窄容器将四个桌面分类折叠为汉堡按钮；点击在原位展开菜单，并在展开区顶部显示可横向滚动的
   分类条。Touch/Pen 下汉堡按钮显式切换开合，分类点击只切换内容并保持打开，命令点击或 Escape
   收起。载入、保存、账户等关键入口适配成紧凑图标，不因响应式布局被删除。
 - Host 提供文档元数据时，Status Bar 显示标题、版本和中文状态文本；状态可以同时使用语义色点，
@@ -494,7 +530,8 @@ PanelRoot
   纸张；阴影不能复制到面板或组件卡片。
 - Pasteboard 可以同时包含低对比斜线材质和 24px 工程网格；不使用包围标尺的工作区外框、
   菱形、纸张角点或无语义边缘刻线。所有装饰必须停留在应用 Chrome/Pasteboard，绝不能进入
-  Paper 内容或导出结果。
+  Paper 内容或导出结果。斜线和网格只承担接近不可察觉的装配区质感，其对比度必须明显低于标尺的
+  次刻度、主刻度和数字；两层纹理叠加处也不得形成抢夺标尺读数的深色交点。
 - 标尺打开时，在 Paper 顶部与左侧显示真实物理标尺。默认毫米模式使用 5mm 次刻度、10mm 主刻度、
   20mm 数字标签；px 模式以等价的 25/50/100 PTD Canvas px 标签显示。两种模式始终显示 `0`、
   实际页面终点和当前单位；横竖方向随 `pageDirection` 交换，切换不改变物理位置。

@@ -14,13 +14,13 @@
   background-image:
     repeating-linear-gradient(
       135deg,
-      color-mix(in oklch, var(--ptd-border) 32%, transparent) 0,
-      color-mix(in oklch, var(--ptd-border) 32%, transparent) 1px,
+      var(--ptd-canvas-hatch) 0,
+      var(--ptd-canvas-hatch) 1px,
       transparent 1px,
       transparent 7px
     ),
-    linear-gradient(var(--ptd-border-subtle) 1px, transparent 1px),
-    linear-gradient(90deg, var(--ptd-border-subtle) 1px, transparent 1px);
+    linear-gradient(var(--ptd-canvas-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--ptd-canvas-grid) 1px, transparent 1px);
   background-position: -1px -1px;
   background-size: 24px 24px;
 }

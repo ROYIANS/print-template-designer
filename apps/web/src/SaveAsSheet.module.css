@@ -1,0 +1,151 @@
+.sheet {
+  position: absolute;
+  z-index: 1200;
+  top: 50px;
+  right: 14px;
+  width: min(360px, calc(100vw - 28px));
+  border: 1px solid oklch(71% 0.006 85);
+  border-radius: 4px;
+  color: oklch(27% 0.007 70);
+  background: oklch(99.35% 0.003 106);
+  box-shadow: 0 8px 24px oklch(21% 0.006 70 / 16%);
+  font:
+    12px 'Sarasa UI SC',
+    'Microsoft YaHei UI',
+    sans-serif;
+}
+
+.sheet > header {
+  min-height: 58px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 13px 14px 10px;
+  border-bottom: 1px solid oklch(89.5% 0.009 85);
+}
+
+.sheet h2 {
+  margin: 4px 0 0;
+  color: oklch(21% 0.006 70);
+  font-size: 16px;
+}
+
+.sheet header button {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  color: oklch(44% 0.008 70);
+  background: transparent;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.sheet header button:hover {
+  border-color: oklch(82% 0.006 90);
+  background: oklch(96.96% 0.003 106);
+}
+
+.description {
+  margin: 0;
+  padding: 12px 14px 0;
+  color: oklch(44% 0.008 70);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.sheet form {
+  display: grid;
+  gap: 7px;
+  padding: 14px;
+}
+
+.sheet label {
+  color: oklch(35% 0.008 70);
+  font-weight: 600;
+}
+
+.inputShell {
+  height: 38px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 0 9px 0 11px;
+  border: 1px solid oklch(71% 0.006 85);
+  border-radius: 2px;
+  background: white;
+}
+
+.inputShell:focus-within {
+  outline: 2px solid oklch(54% 0.12 258);
+  outline-offset: 2px;
+}
+
+.inputShell input {
+  min-width: 0;
+  padding: 8px 0;
+  border: 0;
+  outline: 0;
+  color: oklch(21% 0.006 70);
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+}
+
+.inputShell span,
+.sheet small {
+  color: oklch(62% 0.006 80);
+  font-family: Outfit, 'Sarasa UI SC', sans-serif;
+  font-size: 10px;
+}
+
+.sheet small[data-error] {
+  color: oklch(46% 0.17 27);
+}
+
+.sheet footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin: 8px -14px -14px;
+  padding: 10px 14px;
+  border-top: 1px solid oklch(89.5% 0.009 85);
+  background: oklch(98.45% 0.003 106);
+}
+
+.sheet footer button {
+  min-height: 30px;
+  padding: 5px 11px;
+  border: 1px solid oklch(71% 0.006 85);
+  border-radius: 2px;
+  color: oklch(35% 0.008 70);
+  background: white;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sheet footer button[type='submit'] {
+  border-color: oklch(44% 0.1 258);
+  color: white;
+  background: oklch(54% 0.12 258);
+}
+
+.sheet footer button:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
+.sheet button:focus-visible {
+  outline: 2px solid oklch(54% 0.12 258);
+  outline-offset: 2px;
+}
+
+@media (max-width: 520px) {
+  .sheet {
+    top: 44px;
+    right: 8px;
+  }
+}

@@ -107,3 +107,4 @@ export type {
 } from './registry'
 
 export { serialize, deserialize } from './serialization'
+export { isTemplateSchema } from './schema-validation'

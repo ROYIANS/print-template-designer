@@ -1,14 +1,14 @@
 .landing {
-  --ink: #0a0a0a;
-  --ink-soft: #3d3d3d;
-  --muted: #6b6b6b;
-  --faint: #9a9a9a;
-  --canvas: #ffffff;
-  --surface: #f5f5f3;
-  --surface-raised: #ffffff;
-  --line: rgb(0 0 0 / 8%);
-  --line-strong: rgb(0 0 0 / 14%);
-  --accent: #0a0a0a;
+  --ink: var(--foliq-ink);
+  --ink-soft: var(--foliq-ink-soft);
+  --muted: var(--foliq-muted);
+  --faint: var(--foliq-faint);
+  --canvas: var(--foliq-canvas);
+  --surface: var(--foliq-surface);
+  --surface-raised: var(--foliq-surface-raised);
+  --line: var(--foliq-line);
+  --line-strong: var(--foliq-line-strong);
+  --accent: var(--foliq-accent);
   --teal: #1a9c6f;
   --rose: #d5477a;
   --amber: #c8781f;
@@ -73,9 +73,11 @@
 }
 
 .brandName {
+  font-family: var(--foliq-font-brand);
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 400;
   letter-spacing: -0.02em;
+  line-height: 1;
 }
 
 /* Header */

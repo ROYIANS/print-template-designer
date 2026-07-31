@@ -201,13 +201,42 @@ favicon 只是临时品牌资产，用户将另行设计正式 Logo，本轮不�
 
 ## 当前实现批次
 
-用户要求先解决以下两个问题，按此顺序推进：
+本地 Dev Auth Bypass、公开落地页、`/` 与 `/app` 路由边界以及 Foliq 品牌视觉已经完成。当前进入
+模板持久化第一批，目标是先打通不依赖本地草稿的真实 Server 最小闭环：
 
-1. 实现并验证严格受限的本地 Dev Auth Bypass，包括隔离数据库上的固定开发用户和 `/app` 访问路径。
-2. 将现有登录页重构为公开产品落地页，接入 `/` 与 `/app` 边界、真实 Designer 截图和完整认证状态。
+1. Web API Client 覆盖模板 CRUD 与版本 list/get/restore 合同，所有响应经过运行时校验；Cookie 保持
+   同源，401、403、404、409、5xx、网络失败和异常成功响应形成结构化错误，并透传 AbortSignal。
+2. Web Document Controller 维护 ID、标题、Server version、saved/current TemplateSchema 与完整 Host
+   状态；Dirty 由 Core `serialize()` 后的保存基线比较得出，因此 Undo 回保存值会恢复 Clean。
+3. `/app` 是独立文件工作台 Home，准确展示基于 `updatedAt` 的“最近更新”和全部模板，以及
+   loading/empty/error/retry、新建和打开入口；宽屏使用稳定侧栏与文件主区，窄屏重组为 compact top
+   shell，不把文件浏览继续覆盖为 Editor 内大型 Modal。
+4. 当前文档地址采用 `/app?template=<id>`，新建未保存 Editor 采用 `/app?new=blank`；首次保存、另存为
+   和打开后同步 canonical URL，刷新与前进/后退按 URL 恢复明确状态。DEV product capture route 保持
+   原行为，不把测试模板 Key 误作 Server ID。
+5. 已有模板保存必须发送 `expectedVersion`。409 后进入 Conflict，Save 禁用且不自动重试/覆盖；用户仍可
+   另存为，或返回文件工作台重新载入服务器版本。
+6. File → Open 与 Template Browser 兼容命令统一解释为“文件工作台”，clean Editor 直接返回 `/app`；
+   dirty/conflict Editor 只通过真正的未保存决策 Modal 阻断。第一次 Save 直接使用当前
+   `pageConfig.title` 创建，不再弹命名 Modal；Save As 使用非模态 Command Side Sheet。
+7. App Bar 按低频工作流组织为 File/Template/View/Help：删除 Edit、Object 与 Window 分类，Undo/Redo
+   留在 Context Bar，对象组合、锁定和层级调整留在选择工具条与右键菜单；Template 连接页面设置、
+   页面管理、素材资源和数据源，View 集中标尺与参考线环境控制且不重复 Status Bar 放大/缩小，Help
+   提供真实快捷键、产品介绍和关于入口。Version History、Template Inspection 与 Fit Page 作为少量
+   稳定近期能力显示“即将提供”，不得暴露开发批次或接入文案。顶部“文件工作台”和“保存模板”共享
+   同一控件轮廓家族；Designer 删除假账户占位，Home/Editor 复用 Web Host 的真实账户 Popover。
+8. Home 不使用无信息价值的英文 eyebrow、文档计数大字、工程编号、规则线或假纸张缩略图。最近区通过
+   公共只读 `TemplatePreview` 复用真实 Schema Renderer，最多并发读取 4 份详情并取消过期请求、隔离
+   单项错误；全部模板保持 metadata-only。标题搜索仅在已载入列表中做客户端过滤，不冒充全文搜索。
 
-完成这一批次并独立检查后，再继续同一任务中的模板 CRUD、版本历史和冲突工作流，不把 Datasource 或
-Export 混入当前批次。
+交互表面门槛：Modal 只用于离开 dirty/conflict 文档、不可恢复硬删除、409/恢复等必须先决策的高风险
+节点；文件浏览是独立 Home，版本历史后续使用 Drawer/Side Sheet，Save As 使用非模态 Command Sheet，
+一般载入、错误和重试使用 inline 状态。当前 Server 没有 lastOpenedAt，因此不得使用“最近打开”或
+“继续编辑”描述 Home 排序。
+
+本批不实现版本历史/恢复 UI、重命名/复制/删除管理、本地草稿、自动保存、Datasource 或 Export。完成
+最小闭环并独立检查后，再进入模板管理与版本工作流第二批。OAuth 登录后恢复经过校验的 Editor 深链是
+研究发现的后续增强，不在本批强行扩大认证合同。
 
 ## 待确认决策
 

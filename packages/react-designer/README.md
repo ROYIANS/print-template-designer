@@ -51,6 +51,20 @@ export function Editor({ initialValue }: { initialValue: TemplateSchema }) {
 
 Host 需要为设计器提供一个具有明确高度的容器，并显式加载 `styles.css`。React、React DOM 和 `@preact/signals-react` 是 peer dependencies，使用方必须自行声明。
 
+### 只读模板预览
+
+需要在 Host 的文件列表中展示真实模板内容时，可使用同一公共包中的只读预览：
+
+```tsx
+import { TemplatePreview } from '@ptd/react-designer'
+
+;<TemplatePreview template={template} pageIndex={0} label="出库交接单预览" />
+```
+
+`TemplatePreview` 复用 Canvas 的真实 `ComponentRenderer`，按容器等比缩放一个手工页面。它不提供
+选择、编辑、历史、HTTP、缓存或位图缩略图生成；Host 负责取得 `TemplateSchema`。越界 `pageIndex`
+会收敛到有效页面，组件 DOM 对可访问树隐藏，由外层单一 `role="img"` 提供名称。
+
 ## `DesignerProps`
 
 ```ts
