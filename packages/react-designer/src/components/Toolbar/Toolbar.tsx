@@ -54,7 +54,7 @@ interface ToolButtonProps {
 }
 
 const GUIDE_COLORS: Array<{ value: GuideColor; label: string }> = [
-  { value: 'cobalt', label: '钴蓝参考线' },
+  { value: 'cobalt', label: '墨蓝参考线' },
   { value: 'vermilion', label: '朱红参考线' },
   { value: 'emerald', label: '翠绿参考线' },
   { value: 'amber', label: '琥珀参考线' },

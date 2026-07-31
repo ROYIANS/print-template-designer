@@ -19,7 +19,7 @@
   left: 8px;
   padding: 8px 12px;
   color: #f8fafc;
-  background: oklch(48% 0.22 265);
+  background: oklch(44% 0.1 258);
   font:
     12px 'Sarasa UI SC',
     sans-serif;
@@ -38,8 +38,8 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  color: oklch(44% 0.018 258);
-  background: oklch(96.5% 0.008 255);
+  color: oklch(44% 0.008 70);
+  background: oklch(96.96% 0.003 106);
   font:
     12px 'Sarasa UI SC',
     sans-serif;
@@ -48,8 +48,8 @@
 .workspaceLoading span {
   width: 14px;
   height: 14px;
-  border: 1px solid oklch(71% 0.012 258);
-  border-top-color: oklch(48% 0.22 265);
+  border: 1px solid oklch(71% 0.006 85);
+  border-top-color: oklch(44% 0.1 258);
   border-radius: 50%;
   animation: spin 800ms linear infinite;
 }
@@ -68,7 +68,7 @@
   border: 1px solid rgb(255 255 255 / 20%);
   border-radius: 50%;
   color: #f8fafc;
-  background: oklch(48% 0.22 265);
+  background: oklch(44% 0.1 258);
   font-size: 11px;
   cursor: pointer;
 }

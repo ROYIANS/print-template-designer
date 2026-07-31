@@ -29,9 +29,10 @@
 Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有纸张与校样工具的触感**。品牌核心定位
 是“不是设计一张图，而是定义一种文档”；对外完整描述为“面向打印与出版的专业结构化文档设计器”。
 
-- 主体是冷纸白与带蓝相的石墨灰，不使用纯白和纯黑铺满界面。
+- 主体是与落地页一致的暖纸灰与近中性暖石墨；`#f5f5f3` 是跨官网与工作台的标准暖灰基准，
+  纯白只保留给模板纸张和需要清晰抬升的局部表面，不铺满整个界面。
 - 当前 Logo 仅作为待替换品牌资产复用，不参与主题 token 推导；正式 Logo 由独立品牌批次确定。
-- 克制钴蓝用于主要操作、选中、焦点和工具图标；它只表达明确交互状态，不得退化为
+- 克制的档案墨蓝用于主要操作、选中、焦点和工具图标；它只表达明确交互状态，不得退化为
   大面积通用后台蓝。校样朱红只用于出血、校样与印刷提醒，必须稀少。
 - 视觉记忆点是“纸张、标尺、套准与校样”，不是玻璃、霓虹、渐变或 SaaS 卡片。
 
@@ -67,22 +68,22 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
 
 ```css
 .ptdTheme {
-  /* Cool paper */
-  --ptd-paper-0: oklch(99.2% 0.004 255);
-  --ptd-paper-1: oklch(98.2% 0.006 255);
-  --ptd-paper-2: oklch(96.5% 0.008 255);
-  --ptd-paper-3: oklch(93.7% 0.011 255);
-  --ptd-paper-4: oklch(89.5% 0.014 255);
+  /* Warm paper — paper-2 perceptually matches the landing-page #f5f5f3 baseline */
+  --ptd-paper-0: oklch(99.35% 0.003 106);
+  --ptd-paper-1: oklch(98.45% 0.003 106);
+  --ptd-paper-2: oklch(96.96% 0.003 106);
+  --ptd-paper-3: oklch(94.8% 0.004 100);
+  --ptd-paper-4: oklch(89.5% 0.009 85);
 
-  /* Blue graphite */
-  --ptd-graphite-950: oklch(21% 0.02 258);
-  --ptd-graphite-900: oklch(27% 0.021 258);
-  --ptd-graphite-800: oklch(35% 0.02 258);
-  --ptd-graphite-700: oklch(44% 0.018 258);
-  --ptd-graphite-600: oklch(53% 0.016 258);
-  --ptd-graphite-500: oklch(62% 0.014 258);
-  --ptd-graphite-400: oklch(71% 0.012 258);
-  --ptd-graphite-300: oklch(82% 0.01 258);
+  /* Near-neutral warm graphite */
+  --ptd-graphite-950: oklch(21% 0.006 70);
+  --ptd-graphite-900: oklch(27% 0.007 70);
+  --ptd-graphite-800: oklch(35% 0.008 70);
+  --ptd-graphite-700: oklch(44% 0.008 70);
+  --ptd-graphite-600: oklch(53% 0.007 75);
+  --ptd-graphite-500: oklch(62% 0.006 80);
+  --ptd-graphite-400: oklch(71% 0.006 85);
+  --ptd-graphite-300: oklch(82% 0.006 90);
 
   /* Proof vermilion */
   --ptd-vermilion-700: oklch(45% 0.16 35);
@@ -90,15 +91,15 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
   --ptd-vermilion-500: oklch(59% 0.17 35);
   --ptd-vermilion-100: oklch(94% 0.035 35);
 
-  /* Editor cobalt */
-  --ptd-cobalt-700: oklch(48% 0.22 265);
-  --ptd-cobalt-600: oklch(57% 0.245 265);
-  --ptd-cobalt-100: oklch(94.5% 0.04 260);
+  /* Archival ink blue */
+  --ptd-ink-blue-700: oklch(44% 0.1 258);
+  --ptd-ink-blue-600: oklch(54% 0.12 258);
+  --ptd-ink-blue-100: oklch(95% 0.025 258);
 }
 ```
 
-钴蓝与校样朱红均不得大面积铺底。中性 surface 应占视觉重量约 90%，明确状态色不超过
-10%。钴蓝统一操作、选中与焦点；朱红仅保留印刷校样语义。Logo 的自身颜色不定义 UI
+档案墨蓝与校样朱红均不得大面积铺底。中性 surface 应占视觉重量约 90%，明确状态色不超过
+10%。档案墨蓝统一操作、选中与焦点；朱红仅保留印刷校样语义。Logo 的自身颜色不定义 UI
 状态，也不要求组件跟随 Logo 换色。
 
 ### 4.2 语义颜色
@@ -109,8 +110,8 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
   --ptd-surface-panel: var(--ptd-paper-0);
   --ptd-surface-raised: var(--ptd-paper-0);
   --ptd-surface-sunken: var(--ptd-paper-2);
-  --ptd-surface-canvas: oklch(91.5% 0.012 255);
-  --ptd-surface-paper: var(--ptd-paper-0);
+  --ptd-surface-canvas: oklch(91.5% 0.008 85);
+  --ptd-surface-paper: oklch(100% 0 0);
 
   --ptd-text-strong: var(--ptd-graphite-950);
   --ptd-text: var(--ptd-graphite-800);
@@ -121,19 +122,20 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
   --ptd-border: var(--ptd-graphite-300);
   --ptd-border-subtle: var(--ptd-paper-4);
 
-  --ptd-action: var(--ptd-cobalt-600);
-  --ptd-action-hover: var(--ptd-cobalt-700);
-  --ptd-action-subtle: var(--ptd-cobalt-100);
-  --ptd-selection: var(--ptd-cobalt-600);
-  --ptd-selection-strong: var(--ptd-cobalt-700);
-  --ptd-selection-subtle: var(--ptd-cobalt-100);
+  --ptd-action: var(--ptd-ink-blue-600);
+  --ptd-action-hover: var(--ptd-ink-blue-700);
+  --ptd-action-subtle: var(--ptd-ink-blue-100);
+  --ptd-selection: var(--ptd-ink-blue-600);
+  --ptd-selection-strong: var(--ptd-ink-blue-700);
+  --ptd-selection-subtle: var(--ptd-ink-blue-100);
+  --ptd-selection-border: oklch(74% 0.055 258);
   --ptd-proof: var(--ptd-vermilion-600);
   --ptd-proof-subtle: var(--ptd-vermilion-100);
 
   --ptd-success: oklch(47% 0.105 145);
   --ptd-warning: oklch(58% 0.13 72);
   --ptd-danger: oklch(46% 0.17 27);
-  --ptd-focus: var(--ptd-cobalt-600);
+  --ptd-focus: var(--ptd-ink-blue-600);
 }
 ```
 
@@ -141,11 +143,15 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
 - 图标、边框、焦点环和选中指示至少达到 3:1。
 - Placeholder 不是标签，且颜色同样要满足正文对比度要求。
 - 错误状态使用 `--ptd-danger`；校样朱红不能代替错误语义。
+- 彩色状态与暖中性边框组合时优先使用显式语义 token；不得直接在 OKLCH 中混合两种带不同色相的
+  颜色来生成状态边框，否则低彩度暖灰的隐藏色相可能把墨蓝插值为绿色。需要动态混色时应明确选择
+  不产生色相绕行的插值空间，并通过实际浏览器检查结果。
 - Context Bar、Resource Panel、Inspector 与 Status Bar 使用接近白色的 `surface-panel`，让长时间
   工作的主 Chrome 保持清洁；`surface-app` 只承担框架底色，`surface-sunken` 只用于局部凹槽、
   hover 和禁用状态。不得把多个深浅相近的灰 surface 反复嵌套成暗淡的整屏底色。
-- 深色 App Bar、冷灰 Pasteboard 和冷白 Paper 继续形成三个明确层级；“提高 Panel 明度”不等于
-  将 Canvas 或整页宿主铺成纯白。
+- 黑色 App Bar、较深的暖灰 Pasteboard 和纯白 Paper 继续形成三个明确层级；“提高 Panel 明度”
+  不等于将 Canvas 或整页宿主铺成纯白。Pasteboard 保持与旧版相近的明度，只把冷蓝偏色收敛为
+  暖纸灰，避免与落地页割裂。
 
 ### 4.3 间距、尺寸与圆角
 
@@ -182,9 +188,11 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
 
 ```css
 .ptdTheme {
-  --ptd-shadow-paper: 0 1px 2px oklch(22% 0.014 48 / 12%), 0 8px 24px oklch(22% 0.014 48 / 8%);
-  --ptd-shadow-floating: 0 8px 24px oklch(22% 0.014 48 / 16%);
-  --ptd-shadow-modal: 0 20px 56px oklch(22% 0.014 48 / 22%);
+  --ptd-shadow-paper:
+    0 0 0 1px oklch(71% 0.006 85 / 78%), 4px 4px 0 oklch(21% 0.006 70 / 10%),
+    0 18px 38px oklch(21% 0.006 70 / 10%);
+  --ptd-shadow-floating: 0 8px 24px oklch(21% 0.006 70 / 16%);
+  --ptd-shadow-modal: 0 20px 56px oklch(21% 0.006 70 / 22%);
 
   --ptd-layer-canvas: 0;
   --ptd-layer-guide: 20;
@@ -249,7 +257,7 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
 
 从 Vidorra Blueprint、Zed 与 Workshop 只吸收适合密集工具台的结构原子：
 
-- **Hairline**：App Bar、Command Bar、Panel 与 Status Bar 使用贯穿区域的 1px 冷蓝灰细线。
+- **Hairline**：App Bar、Command Bar、Panel 与 Status Bar 使用贯穿区域的 1px 暖中性细线。
 - **Engineering grid**：Pasteboard 可使用极淡工程纸网格；纸张本身保持干净，网格不能穿入模板。
 - **Mount texture**：Pasteboard 可叠加低对比 135° 斜线，表达纸张装配区而非真实打印材质；
   斜线、工程网格、工作区内框和节点均必须 `pointer-events: none`。
@@ -327,11 +335,11 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
 - Tool Dock 在语义上分为工具和资源面板两区，但不常驻显示“工具”“面板”文字；使用分区位置、
   `role="group"` 与 `aria-label` 保持可理解性。Select/Hand/Text/Shape/Image/Table/More 属于操作入口，
   Assets/Pages/Layers/Data 只负责披露资源面板。它使用与面板相连的中性纸灰/石墨 surface；
-  常态图标中性，键盘 Focus 才固定使用钴蓝。Document Bar 承担深色视觉锚点，Dock 不应表现成
+  常态图标中性，键盘 Focus 才固定使用墨蓝。Document Bar 承担深色视觉锚点，Dock 不应表现成
   与画布割裂的第二套导航产品。
-- 精细指针下 Persistent Tool 激活使用轻中性 paper 底、钴蓝图标与靠 Dock 外缘的短几何标记；
+- 精细指针下 Persistent Tool 激活使用轻中性 paper 底、墨蓝图标与靠 Dock 外缘的短几何标记；
   打开的资源面板入口把短标记放在邻近 Panel 的一侧。两种状态不得改变按钮尺寸，也不使用三边
-  inset、负 margin、keycap 底边或外投影。禁止用“长钴蓝竖线 + 大面积浅钴蓝底”同时表达状态。
+  inset、负 margin、keycap 底边或外投影。禁止用“长墨蓝竖线 + 大面积浅墨蓝底”同时表达状态。
 - Resource Panel 默认宽 280px、限制在 240–360px；Inspector 默认 304px、限制在 280–420px。
   两者均可折叠和拖动调整，最后宽度在当前 Designer 实例中保留。
 - 无组件选择时 Inspector 必须展示真实 Page Inspector，而不是空状态；只读信息不得伪装成输入框。
@@ -356,7 +364,7 @@ PanelRoot
 - `PanelHeader` 高 40px，不能在内容区重复同名标题。
 - 列表使用平面行或紧凑 tile；不使用卡片套卡片。
 - 左侧 Resource Panel 的当前 Page/Layer 使用中性 raised surface、上下 hairline 与字重表达；不得
-  使用钴蓝左竖线叠加浅蓝底。Canvas 对象选择仍使用专属钴蓝 overlay，两者不能混为后台导航态。
+  使用墨蓝左竖线叠加浅蓝底。Canvas 对象选择仍使用专属墨蓝 overlay，两者不能混为后台导航态。
 - Hover 才出现的次要动作必须提供键盘可达的替代入口。
 - 空状态包含：当前状态、下一步价值和一个明确动作。
 
@@ -379,8 +387,8 @@ PanelRoot
   空态和真实可执行的图片框入口，不创建刷新即丢失的伪上传、收藏、文件夹或服务端同步。
 - 所有可用组件点击后只激活对应创作工具，不得立即在页面中心插入，也不得通过 Sidebar native
   drag 绕过拖框。用户必须在 Paper 上拖动定义组件 Frame；无效短拖和取消不创建组件。
-- 新建 Shape 必须在取消选中时仍然可见：Line 默认使用 2px 蓝石墨填充，Rect/Circle 默认透明填充
-  与 1px 蓝石墨实线描边，Star 默认蓝石墨填充。默认值来自 Core Registry，不能只在 Designer
+- 新建 Shape 必须在取消选中时仍然可见：Line 默认使用 2px 暖石墨填充，Rect/Circle 默认透明填充
+  与 1px 暖石墨实线描边，Star 默认暖石墨填充。默认值来自 Core Registry，不能只在 Designer
   preview 或 React Overlay 中补视觉假象。
 - Shape Renderer 必须自包含实际几何；Star 等轮廓使用包内 SVG，不能依赖宿主是否加载某套图标
   字体来决定画布内容是否可见。
@@ -394,7 +402,7 @@ PanelRoot
 - 四种 Shape 完成后保持连续绘制；文本、富文本、图像、编码和表格完成一次后回到 Select。
   普通文本和富文本创建完成立即进入内容编辑，其他一次性工具保留新组件选中态供属性配置。
 - 自由表格对象第一次点击仍只选择组件；选中后单元格表面接管精细操作。单击/拖动/Shift 扩展建立
-  单元格选区，双击或 Enter/F2 原位编辑纯文本，Arrow/Tab 导航。选区使用浅钴蓝蒙版和精确描边，
+  单元格选区，双击或 Enter/F2 原位编辑纯文本，Arrow/Tab 导航。选区使用浅墨蓝蒙版和精确描边，
   不能用不透明填充遮住单元格内容。
 - 行列分隔线 hover 才显示细窄拖动命中区，拖动即时改变相邻轨道且形成一个 Gesture 历史节点。
   高频增删、合并、拆分与单元格排版位于 Inspector；不为表格打开遮断画布的大型 Modal。
@@ -478,9 +486,10 @@ PanelRoot
 
 ## 10. 画布视觉合同
 
-- Pasteboard 使用 `--ptd-surface-canvas`；纸张使用冷白 `--ptd-surface-paper` 和唯一的 paper shadow。
-- Starter/Demo Schema 也必须使用冷中性纸白，不能通过 `pageConfig.background` 把默认纸张覆盖为
-  奶油色或暖白；示例内容的正文中性色使用蓝石墨，朱红仅保留真实校样语义。
+- Pasteboard 使用较深的暖纸灰 `--ptd-surface-canvas`；模板纸张使用纯白
+  `--ptd-surface-paper` 和唯一的 paper shadow。
+- Starter/Demo Schema 也必须使用中性白，不能通过 `pageConfig.background` 把默认纸张覆盖为
+  奶油色或暖白；示例内容的正文使用近中性暖石墨，朱红仅保留真实校样语义。
 - Paper shadow 由 1px 硬边框、约 4px 右下实体偏移与一层柔和长阴影组成，表达装配在工作台上的
   纸张；阴影不能复制到面板或组件卡片。
 - Pasteboard 可以同时包含低对比斜线材质和 24px 工程网格；不使用包围标尺的工作区外框、
@@ -497,13 +506,13 @@ PanelRoot
 - 指针在水平或垂直标尺移动时，应以当前新建颜色显示一条低透明临时参考线和 `X/Y + 0.1mm`
   位置标签；该预览只存在于组件本地状态，点击后才写入参考线会话。固定参考线的位置标签在
   选中或 Hover 该线时显示，不能要求先选中才能读取位置。
-- 参考线提供钴蓝、朱红、翠绿、琥珀四种颜色，并支持整体显隐、锁定和清空。颜色既是新建默认色，
+- 参考线提供墨蓝、朱红、翠绿、琥珀四种颜色，并支持整体显隐、锁定和清空。颜色既是新建默认色，
   也可修改当前选中参考线；锁定后禁止创建、移动、换色、删除和清空。
 - 参考线位置必须被限制在当前页面物理边界内；普通方向键按 0.1mm 微调，Shift + 方向键按 1mm
   微调。页面方向变化时，超出新边界的参考线必须收回页面内。
 - 参考线属于宿主编辑会话的 UI 状态，不写入 `TemplateSchema`、不进入打印/导出结果，也不创建
   模板撤销历史节点。后续若需持久化，应由宿主保存独立的编辑会话数据。
-- 页面边距使用弱朱红虚线；选中框与控制点使用主题钴蓝。钴蓝只服务于交互，不作为面板或画布
+- 页面边距使用弱朱红虚线；选中框与控制点使用主题墨蓝。墨蓝只服务于交互，不作为面板或画布
   的大面积底色；朱红参考线是用户显式选择的编辑标记，不等同于固定校样装饰。
 - 校样朱红可用于出血/危险边界、套准裁切标记和关键提醒，不用于普通选中框。
 - 旋转、缩放和移动反馈不得改变组件本身的 Schema 样式。
@@ -527,8 +536,8 @@ PanelRoot
 
 ### 10.1 单选组件快捷条
 
-- 单选组件时，选中框与 Selection Quick Bar 共享同一钴蓝语义；未激活组件常态不显示边界，
-  Hover 才显示弱钴蓝虚线和不超过 5% 的钴蓝透明蒙版。Hover/选中边界必须由不参与盒模型的
+- 单选组件时，选中框与 Selection Quick Bar 共享同一墨蓝语义；未激活组件常态不显示边界，
+  Hover 才显示弱墨蓝虚线和不超过 5% 的墨蓝透明蒙版。Hover/选中边界必须由不参与盒模型的
   Overlay 绘制，不能用实体 `border` 缩小组件内容区域；多选只显示一套多选移动入口，不能为
   每个对象重复浮条。
 - Quick Bar 显示组件名称，并提供拖动、锁定/解锁、复制、上移一层和删除五个高频动作；
