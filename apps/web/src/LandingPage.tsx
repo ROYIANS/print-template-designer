@@ -72,6 +72,20 @@ function CheckIcon() {
   )
 }
 
+function PtdMark({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 28 28" aria-hidden="true">
+      <path fill="currentColor" opacity=".16" d="M1 7h17v20H1z" />
+      <path fill="currentColor" opacity=".38" d="M4 4h18v21H4z" />
+      <path
+        fill="currentColor"
+        fillRule="evenodd"
+        d="M7 1h13l5 5v17H7V1Zm4 4v15h3v-5.5h4c3.5 0 5.5-1.8 5.5-4.75S21.5 5 18 5h-7Zm3 3h4c1.5 0 2.4.65 2.4 1.75S19.5 11.5 18 11.5h-4V8Z"
+      />
+    </svg>
+  )
+}
+
 function PrecisionMarkIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -120,161 +134,156 @@ function HistorySealIcon() {
   )
 }
 
-const ASCII_GLYPHS = ['·', ':', '+', '=', '%', '#', '0', '1'] as const
-
-interface AsciiPointer {
-  x: number
-  y: number
-  targetX: number
-  targetY: number
-  strength: number
-  targetStrength: number
-}
+const ASCII_NOISE_GLYPHS = ".,':;~-`"
+const ASCII_DENSE_GLYPHS = '&_=!#$@%01'
+const ASCII_BACKGROUND_ROWS = 34
+const ASCII_SUBJECT_COLUMNS = 84
+const ASCII_SUBJECT_ROWS = 40
+const ASCII_MEASURE_TEXT = '00000000000000000000'
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value))
 }
 
-function drawAsciiTerrain(
-  context: CanvasRenderingContext2D,
-  width: number,
-  height: number,
-  time: number,
-  pointer: AsciiPointer,
-) {
-  const phase = time / 1000
-  const compact = width < 520
-  const columns = Math.min(compact ? 62 : 118, Math.ceil(width / (compact ? 8 : 11)))
-  const rows = compact ? 19 : 25
+function asciiNoise(column: number, row: number, frame: number, salt = 0): number {
+  const value = Math.sin(column * 12.9898 + row * 78.233 + frame * 4.173 + salt * 19.19)
+  return value * 43758.5453 - Math.floor(value * 43758.5453)
+}
 
-  context.clearRect(0, 0, width, height)
-  context.textAlign = 'center'
-  context.textBaseline = 'middle'
+function buildAsciiBackground(frame: number, revealedRows: number, columns: number): string {
+  const lines: string[] = []
 
-  for (let row = 0; row < rows; row += 1) {
-    const depth = row / (rows - 1)
-    const perspective = 0.66 + depth * 0.48
-    const fontSize = (compact ? 6.4 : 7.5) + depth * (compact ? 2.8 : 4.2)
-    context.font = `600 ${fontSize}px "JetBrains Mono", "SFMono-Regular", Consolas, monospace`
+  for (let row = 0; row < ASCII_BACKGROUND_ROWS; row += 1) {
+    const depth = row / (ASCII_BACKGROUND_ROWS - 1)
+    const isRevealed = row >= ASCII_BACKGROUND_ROWS - revealedRows
+    const density = isRevealed ? 0.34 * Math.pow(depth, 2.5) : 0
+    let line = ''
 
     for (let column = 0; column < columns; column += 1) {
-      const horizontal = column / (columns - 1) - 0.5
-      const noise = (Math.sin(column * 12.9898 + row * 78.233) + 1) / 2
-      const slowWave = Math.sin(horizontal * 10.5 + phase * 0.85 + row * 0.15)
-      const crossWave = Math.cos(horizontal * 19 - phase * 0.55 - row * 0.09)
-      const projectedX = width / 2 + horizontal * width * perspective * 1.04
-      const baseY = height * (0.05 + depth * 0.9)
-
-      const pointerDx = (projectedX - pointer.x * width) / width
-      const pointerDy = (baseY - pointer.y * height) / height
-      const pointerDistance = Math.sqrt(pointerDx * pointerDx + pointerDy * pointerDy)
-      const magneticField =
-        Math.exp(-(pointerDx * pointerDx * 52 + pointerDy * pointerDy * 38)) * pointer.strength
-      const cursorRipple = Math.sin(pointerDistance * 54 - phase * 8) * magneticField
-
-      const sheetX = horizontal + (depth - 0.7) * 0.52 - Math.sin(phase * 0.42) * 0.025
-      const sheetY = depth - 0.68
-      const insideSheet = Math.abs(sheetX) < 0.15 && Math.abs(sheetY) < 0.15
-      const sheetEdge = insideSheet && (Math.abs(sheetX) > 0.132 || Math.abs(sheetY) > 0.125)
-      const sheetRule = insideSheet && row % 3 === 0 && sheetX > -0.105 && sheetX < 0.08
-      const sheetLift = insideSheet ? -20 - Math.cos(sheetX * 18 + phase) * 4 : 0
-
-      const x = projectedX + pointerDx * magneticField * 48
-      const y =
-        baseY +
-        slowWave * (7 + depth * 17) +
-        crossWave * (2 + depth * 5) -
-        magneticField * 58 +
-        cursorRipple * 18 +
-        sheetLift
-
-      const glyphIndex = clamp(
-        Math.floor(noise * 3 + depth * 4 + (slowWave + 1) * 0.5),
-        0,
-        ASCII_GLYPHS.length - 1,
-      )
-      const glyph = sheetEdge
-        ? '#'
-        : sheetRule
-          ? '='
-          : insideSheet
-            ? noise > 0.54
-              ? '0'
-              : '1'
-            : ASCII_GLYPHS[glyphIndex]
-      const alpha = clamp(
-        0.1 + depth * 0.42 + magneticField * 0.35 + (insideSheet ? 0.25 : 0),
-        0,
-        0.88,
-      )
-
-      context.fillStyle = `rgb(10 10 10 / ${alpha})`
-      context.fillText(glyph, x, y)
+      const noise = asciiNoise(column, row, frame)
+      const glyphIndex = Math.floor(asciiNoise(column, row, frame, 2) * ASCII_NOISE_GLYPHS.length)
+      line += noise < density ? ASCII_NOISE_GLYPHS[glyphIndex] : ' '
     }
+    lines.push(line)
   }
+
+  return lines.join('\n')
+}
+
+function rectangleDensity(
+  x: number,
+  y: number,
+  centerX: number,
+  centerY: number,
+  halfWidth: number,
+  halfHeight: number,
+): number {
+  const localX = x - centerX
+  const localY = y - centerY
+  const edgeDistance = Math.min(halfWidth - Math.abs(localX), halfHeight - Math.abs(localY))
+  if (edgeDistance < 0) return 0
+  return edgeDistance < 0.028 ? 0.92 : 0.18
+}
+
+function isNegativeP(localX: number, localY: number): boolean {
+  const stem = localX > -0.29 && localX < -0.14 && localY > -0.4 && localY < 0.4
+  const ellipseX = (localX + 0.015) / 0.3
+  const ellipseY = (localY + 0.18) / 0.28
+  const innerX = (localX + 0.015) / 0.14
+  const innerY = (localY + 0.18) / 0.13
+  const outerBowl = ellipseX * ellipseX + ellipseY * ellipseY < 1 && localX > -0.22
+  const innerBowl = innerX * innerX + innerY * innerY < 1
+  return stem || (outerBowl && !innerBowl)
+}
+
+function markDensity(x: number, y: number): number {
+  const frontCenterX = 0.08
+  const frontCenterY = -0.08
+  const halfWidth = 0.5
+  const halfHeight = 0.58
+  const localX = x - frontCenterX
+  const localY = y - frontCenterY
+  const edgeDistance = Math.min(halfWidth - Math.abs(localX), halfHeight - Math.abs(localY))
+
+  if (edgeDistance >= 0) {
+    const foldedCorner = localX > 0.28 && localY < -0.36 && localX - localY > 0.82
+    if (foldedCorner) return 0
+    if (isNegativeP(localX, localY)) return 0
+    return edgeDistance < 0.03 ? 0.99 : 0.84
+  }
+
+  return Math.max(
+    rectangleDensity(x, y, -0.2, 0.13, halfWidth, halfHeight),
+    rectangleDensity(x, y, -0.06, 0.03, halfWidth, halfHeight),
+  )
+}
+
+function buildAsciiSubject(frame: number): string {
+  const lines: string[] = []
+
+  for (let row = 0; row < ASCII_SUBJECT_ROWS; row += 1) {
+    const y = (row / (ASCII_SUBJECT_ROWS - 1)) * 2 - 1
+    let line = ''
+
+    for (let column = 0; column < ASCII_SUBJECT_COLUMNS; column += 1) {
+      const x = (column / (ASCII_SUBJECT_COLUMNS - 1)) * 2 - 1
+      const density = markDensity(x, y)
+      const noise = asciiNoise(column, row, frame, 5)
+      const glyphIndex = clamp(
+        Math.floor(asciiNoise(column, row, frame, 9) * ASCII_DENSE_GLYPHS.length),
+        0,
+        ASCII_DENSE_GLYPHS.length - 1,
+      )
+      line += noise < density ? ASCII_DENSE_GLYPHS[glyphIndex] : ' '
+    }
+    lines.push(line)
+  }
+
+  return lines.join('\n')
 }
 
 function AsciiPrintField() {
-  const fieldRef = useRef<HTMLCanvasElement>(null)
+  const fieldRef = useRef<HTMLDivElement>(null)
+  const measureRef = useRef<HTMLSpanElement>(null)
+  const backgroundColumnsRef = useRef(160)
+  const [frame, setFrame] = useState(0)
+  const [revealedRows, setRevealedRows] = useState(4)
+  const [backgroundColumns, setBackgroundColumns] = useState(160)
+  const [running, setRunning] = useState(true)
+  const [reducedMotion, setReducedMotion] = useState(false)
 
   useEffect(() => {
     const field = fieldRef.current
-    const context = field?.getContext('2d')
-    if (!field || !context) return
+    const measure = measureRef.current
+    if (!field || !measure) return
 
     const motion = window.matchMedia('(prefers-reduced-motion: reduce)')
-    const pointer: AsciiPointer = {
-      x: 0.5,
-      y: 0.58,
-      targetX: 0.5,
-      targetY: 0.58,
-      strength: 0,
-      targetStrength: 0,
-    }
-    let animationFrame = 0
-    let lastDraw = 0
     let visible = true
-    let width = 0
-    let height = 0
-
-    const draw = (time: number) => {
-      pointer.x += (pointer.targetX - pointer.x) * 0.09
-      pointer.y += (pointer.targetY - pointer.y) * 0.09
-      pointer.strength += (pointer.targetStrength - pointer.strength) * 0.08
-      drawAsciiTerrain(context, width, height, time, pointer)
-    }
-
-    const resize = () => {
-      const rect = field.getBoundingClientRect()
-      const ratio = Math.min(window.devicePixelRatio || 1, 2)
-      width = Math.max(1, rect.width)
-      height = Math.max(1, rect.height)
-      field.width = Math.round(width * ratio)
-      field.height = Math.round(height * ratio)
-      context.setTransform(ratio, 0, 0, ratio, 0, 0)
-      draw(motion.matches ? 0 : performance.now())
-    }
+    let interval = 0
 
     const stop = () => {
-      window.cancelAnimationFrame(animationFrame)
-      animationFrame = 0
-    }
-
-    const tick = (time: number) => {
-      if (time - lastDraw > 22) {
-        draw(time)
-        lastDraw = time
-      }
-      animationFrame = window.requestAnimationFrame(tick)
+      window.clearInterval(interval)
+      interval = 0
     }
 
     const sync = () => {
       stop()
-      if (motion.matches || document.hidden || !visible) {
-        draw(0)
+      const reduced = motion.matches
+      const active = !reduced && !document.hidden && visible
+      setReducedMotion(reduced)
+      setRunning(active)
+      if (reduced) {
+        setFrame(0)
+        setRevealedRows(ASCII_BACKGROUND_ROWS)
+        field.style.setProperty('--ascii-shift-x', '0px')
+        field.style.setProperty('--ascii-shift-y', '0px')
         return
       }
-      animationFrame = window.requestAnimationFrame(tick)
+      if (!active) return
+      interval = window.setInterval(() => {
+        setFrame((current) => current + 1)
+        setRevealedRows((current) => Math.min(ASCII_BACKGROUND_ROWS, current + 4))
+      }, 100)
     }
 
     const observer = new IntersectionObserver(([entry]) => {
@@ -284,6 +293,7 @@ function AsciiPrintField() {
     const onVisibilityChange = () => sync()
     const onMotionChange = () => sync()
     const onPointerMove = (event: PointerEvent) => {
+      if (motion.matches) return
       const hero = field.parentElement
       if (!hero) return
       const rect = hero.getBoundingClientRect()
@@ -292,23 +302,39 @@ function AsciiPrintField() {
         event.clientX <= rect.right &&
         event.clientY >= rect.top &&
         event.clientY <= rect.bottom
-      pointer.targetStrength = inside ? 1 : 0
-      if (!inside) return
-      pointer.targetX = clamp((event.clientX - rect.left) / rect.width, 0, 1)
-      pointer.targetY = clamp((event.clientY - rect.top) / rect.height, 0.05, 0.95)
+      if (!inside) {
+        field.style.setProperty('--ascii-shift-x', '0px')
+        field.style.setProperty('--ascii-shift-y', '0px')
+        return
+      }
+      const horizontal = (event.clientX - rect.left) / rect.width - 0.5
+      const vertical = (event.clientY - rect.top) / rect.height - 0.5
+      field.style.setProperty('--ascii-shift-x', `${(horizontal * 14).toFixed(2)}px`)
+      field.style.setProperty('--ascii-shift-y', `${(vertical * 9).toFixed(2)}px`)
     }
     const onPointerLeave = () => {
-      pointer.targetStrength = 0
+      field.style.setProperty('--ascii-shift-x', '0px')
+      field.style.setProperty('--ascii-shift-y', '0px')
     }
-    const resizeObserver = new ResizeObserver(resize)
 
-    resize()
+    const measureColumns = () => {
+      const characterWidth = measure.getBoundingClientRect().width / ASCII_MEASURE_TEXT.length
+      if (characterWidth <= 0) return
+      const nextColumns = Math.ceil(field.getBoundingClientRect().width / characterWidth) + 2
+      if (nextColumns === backgroundColumnsRef.current) return
+      backgroundColumnsRef.current = nextColumns
+      setBackgroundColumns(nextColumns)
+    }
+    const resizeObserver = new ResizeObserver(measureColumns)
+
     observer.observe(field)
     resizeObserver.observe(field)
+    resizeObserver.observe(measure)
     document.addEventListener('visibilitychange', onVisibilityChange)
     window.addEventListener('pointermove', onPointerMove, { passive: true })
     window.addEventListener('blur', onPointerLeave)
     motion.addEventListener('change', onMotionChange)
+    measureColumns()
     sync()
 
     return () => {
@@ -322,10 +348,33 @@ function AsciiPrintField() {
     }
   }, [])
 
-  return <canvas ref={fieldRef} className={styles.asciiField} aria-hidden="true" />
+  return (
+    <div
+      ref={fieldRef}
+      className={styles.asciiField}
+      aria-hidden="true"
+      data-reduced-motion={reducedMotion}
+      data-running={running}
+    >
+      <span ref={measureRef} className={styles.asciiMeasure}>
+        {ASCII_MEASURE_TEXT}
+      </span>
+      <pre className={styles.asciiNoise}>
+        {buildAsciiBackground(frame, revealedRows, backgroundColumns)}
+      </pre>
+      <div className={styles.asciiSubjectStage}>
+        <pre className={styles.asciiSubject}>{buildAsciiSubject(frame)}</pre>
+      </div>
+    </div>
+  )
 }
 
-function AccessAction({ access, onEnterApp, onRetry }: Omit<LandingPageProps, 'notice'>) {
+function AccessAction({
+  access,
+  onEnterApp,
+  onRetry,
+  announceStatus = true,
+}: Omit<LandingPageProps, 'notice'> & { announceStatus?: boolean }) {
   const [signingIn, setSigningIn] = useState(false)
   const [message, setMessage] = useState<string>()
 
@@ -397,7 +446,11 @@ function AccessAction({ access, onEnterApp, onRetry }: Omit<LandingPageProps, 'n
 
   if (access.kind === 'checking') {
     return (
-      <div className={styles.accessAction} data-state="checking" role="status">
+      <div
+        className={styles.accessAction}
+        data-state="checking"
+        role={announceStatus ? 'status' : undefined}
+      >
         <p className={styles.accessState}>
           <span className={styles.checkingMark} aria-hidden="true" />
           正在校验工作台访问状态
@@ -751,11 +804,7 @@ export function LandingPage({ access, notice, onEnterApp, onRetry }: LandingPage
       <header className={styles.header}>
         <div className={styles.headerInner}>
           <a className={styles.headerBrand} href="/" aria-label="PTD 首页">
-            <span className={styles.brandSymbol} aria-hidden="true">
-              <i />
-              <i />
-              <i />
-            </span>
+            <PtdMark className={styles.brandSymbol} />
             <span className={styles.brandName}>PTD</span>
             <span className={styles.headerBrandLabel}>打印模板设计器</span>
           </a>
@@ -948,24 +997,37 @@ export function LandingPage({ access, notice, onEnterApp, onRetry }: LandingPage
             <FaqAccordion />
           </div>
         </section>
-
-        <section className={styles.finalCta} aria-labelledby="final-title">
-          <div className={styles.main}>
-            <h2 id="final-title">下一张模板，从现在开始认真设计。</h2>
-            <AccessAction access={access} onEnterApp={onEnterApp} onRetry={onRetry} />
-          </div>
-        </section>
       </main>
 
-      <footer className={styles.footer}>
-        <div className={styles.main}>
-          <div className={styles.footerTop}>
+      <footer className={styles.closingField} aria-labelledby="closing-title">
+        <div className={styles.closingInner}>
+          <div className={styles.closingLead}>
+            <div className={styles.closingIntro}>
+              <p className={styles.closingKicker}>
+                <span className={styles.stateDot} />
+                PTD / READY TO DESIGN
+              </p>
+              <h2 id="closing-title">
+                <span>下一张模板，</span>
+                从现在开始认真设计。
+              </h2>
+              <p className={styles.closingLede}>
+                从一张空白纸开始，把业务里说不清的部分，排成每个人都看得懂的结果。
+              </p>
+            </div>
+            <div className={styles.closingAction}>
+              <AccessAction
+                access={access}
+                onEnterApp={onEnterApp}
+                onRetry={onRetry}
+                announceStatus={false}
+              />
+            </div>
+          </div>
+
+          <div className={styles.closingBrand}>
             <a className={styles.brand} href="/" aria-label="返回 PTD 首页">
-              <span className={styles.brandSymbol} aria-hidden="true">
-                <i />
-                <i />
-                <i />
-              </span>
+              <PtdMark className={styles.brandSymbol} />
               <span className={styles.brandName}>PTD</span>
             </a>
             <p className={styles.footerTagline}>
@@ -973,15 +1035,16 @@ export function LandingPage({ access, notice, onEnterApp, onRetry }: LandingPage
             </p>
           </div>
 
-          <nav className={styles.footerNav} aria-label="产品导航">
-            <a href="#product">产品截图</a>
-            <a href="#capabilities">功能</a>
-            <a href="#deployment">部署方式</a>
-            <a href="#pricing">价格</a>
-            <a href="#faq">常见问题</a>
+          <nav className={styles.closingNav} aria-label="产品导航">
+            <p>产品</p>
+            <a href="#product">真实界面</a>
+            <a href="#capabilities">设计能力</a>
+            <a href="#deployment">自有部署</a>
+            <a href="#pricing">价格与支持</a>
           </nav>
 
-          <div className={styles.footerContact}>
+          <div className={styles.closingContact}>
+            <p>联系与源码</p>
             <a href="mailto:royians@vidorra.life">royians@vidorra.life</a>
             <a
               href="https://github.com/ROYIANS/print-template-designer"
@@ -992,7 +1055,10 @@ export function LandingPage({ access, notice, onEnterApp, onRetry }: LandingPage
             </a>
           </div>
 
-          <p className={styles.footerCopyright}>© 2026 PTD · ROYIANS · MIT License</p>
+          <div className={styles.closingMeta}>
+            <p>© 2026 PTD · ROYIANS</p>
+            <p>SELF-HOSTED · MIT LICENSE</p>
+          </div>
         </div>
       </footer>
     </div>
