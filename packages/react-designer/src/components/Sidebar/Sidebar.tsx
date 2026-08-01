@@ -41,9 +41,10 @@ import {
 } from '../../catalog'
 import type { ResourcePanelId, WorkspaceMode } from '../../hooks/useWorkspaceLayout'
 import { useEditorStore } from '../../state'
-import { PanelBody, PanelFooter, PanelHeader, PanelRoot, PanelTools } from '../Panel'
+import { PanelBody, PanelFooter, PanelHeader, PanelRoot } from '../Panel'
 import { ptdThemeClass } from '../Theme'
 import { ComponentToolPicker } from './ComponentToolPicker'
+import { DataPanel } from '../DataPanel/DataPanel'
 import styles from './Sidebar.module.css'
 
 interface SidebarProps {
@@ -687,36 +688,6 @@ function LayersPanel({ onClose }: { onClose: () => void }) {
         )}
       </PanelBody>
       <PanelFooter>列表顶部对应纸张最上层</PanelFooter>
-    </PanelRoot>
-  )
-}
-
-function DataPanel({ onClose }: { onClose: () => void }) {
-  useSignals()
-  const fields = useEditorStore().template.value.dataSource
-  return (
-    <PanelRoot data-ptd-region="data-panel">
-      <PanelHeader title="数据" meta={`${fields.length} 个字段`}>
-        <PanelCloseButton label="关闭数据面板" onClick={onClose} />
-      </PanelHeader>
-      <PanelTools>
-        <div className={styles.panelHint}>字段将在数据阶段支持拖拽绑定与表达式校样</div>
-      </PanelTools>
-      <PanelBody>
-        {fields.length ? (
-          <dl className={styles.dataList}>
-            {fields.map((field) => (
-              <div key={field.id}>
-                <dt>{field.title}</dt>
-                <dd>{field.field}</dd>
-                <span>{field.typeName}</span>
-              </div>
-            ))}
-          </dl>
-        ) : (
-          <PanelEmpty title="还没有数据字段" detail="数据字段将连接业务数据、文本、条码与表格。" />
-        )}
-      </PanelBody>
     </PanelRoot>
   )
 }

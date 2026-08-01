@@ -88,6 +88,19 @@ describe('ComponentRegistry', () => {
     })
   })
 
+  it('owns the bindable target matrix instead of leaving it to renderers', () => {
+    expect(defaultRegistry.getBindingTargets('RoySimpleText')).toEqual([
+      expect.objectContaining({ kind: 'text', supportsInterpolation: true }),
+    ])
+    expect(defaultRegistry.getBindingTargets('RoyImage')).toEqual([
+      expect.objectContaining({ kind: 'image-source', acceptedTypes: ['string'] }),
+    ])
+    expect(defaultRegistry.getBindingTargets('RoySimpleTable')).toEqual([
+      expect.objectContaining({ kind: 'table-cell-text' }),
+    ])
+    expect(defaultRegistry.getBindingTargets('RoyRect')).toEqual([])
+  })
+
   it('gives a new free table a real independent 2 x 2 cell model', () => {
     const value = defaultRegistry.get('RoySimpleTable')?.defaultProps
     expect(value).toMatchObject({

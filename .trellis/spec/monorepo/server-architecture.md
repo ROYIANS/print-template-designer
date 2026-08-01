@@ -45,7 +45,9 @@
 ## Authentication and Resource Authorization
 
 - Better Auth is mounted at `/api/auth/*` before Express JSON body parsing and reuses the same Nest
-  `PrismaService`; do not create a second Prisma Client for auth.
+  `PrismaService`; do not create a second Prisma Client for auth. This middleware order is required so
+  Better Auth consumes and validates its own auth request bodies rather than receiving a stream already
+  consumed by the global parser.
 - The first release enables GitHub OAuth only. Email/password, OTP, SMTP, Passkey and browser-stored
   bearer tokens are outside this contract.
 - `PTD_ALLOWED_EMAILS` is parsed server-side, normalized to lowercase and fails closed. New identities
@@ -63,11 +65,23 @@
 - PostgreSQL stores template content as native `JsonB` through Prisma `Json`, while normalizing every
   read/write through `@ptd/core.serialize` and `deserialize` so template schema migration remains
   centralized.
+- Server template contracts must reuse Core `serialize`, `deserialize` and `isTemplateSchema`; do not
+  introduce a shallow Server-only validator that accepts a shape Core would reject or loses v2 data and
+  binding normalization.
+- Core `DATA_SOURCE_LIMITS.maxBytes` limits canonical `TemplateDataDefinition.sampleRecords` to
+  **512 KiB**. This is an internal budget for persisted sample records, not the complete HTTP request limit;
+  a full template also contains pages, components, image Data URLs and bindings.
 - Do not use unchecked `any` or an unchecked assertion to force application objects into Prisma JSON.
   Validate the recursive JSON value and require an object at the top-level.
 
 ## HTTP and Concurrency Contract
 
+- The template API accepts complete template JSON bodies up to **4 MiB**. Express JSON parsing and Nginx
+  `client_max_body_size` must both use that value, and every outer reverse proxy, ingress or CDN must allow
+  at least **4 MiB** rather than becoming a smaller undocumented limit.
+- Web preflight, Nginx and Server limits must remain synchronized so a template cannot pass locally and
+  then drift into proxy 413 or application 400 behavior. The 4 MiB transport limit does not weaken Core's
+  independent 512 KiB `sampleRecords` validation.
 - Controllers accept request bodies as `unknown`; pure contract parsers enforce the runtime shape.
 - IDs and version route parameters must be positive integers within Prisma `Int` range
   (`1..2_147_483_647`).
@@ -92,6 +106,11 @@ For Server persistence changes, verify at minimum:
    and exactly one new snapshot exists.
 6. Start the compiled Server and smoke-test `/healthz`.
 7. Run Prettier, `git diff --check`, forbidden-pattern scans and tracked-artifact checks.
+8. Create and update a canonical v2 template below 4 MiB; verify a request above 4 MiB is rejected with
+   413 or an equivalently explicit payload-too-large response.
+9. Verify Core schema validation rejects `sampleRecords` above 512 KiB even when the complete request is
+   below 4 MiB, and that no Server-only shallow validation path can accept it.
+10. Regression-test GitHub login and callback requests with Better Auth mounted before the JSON parser.
 
 `prisma migrate reset --force` is destructive even for an isolated PostgreSQL test database. Agents must not bypass
 Prisma's safety gate; run it only after explicit user authorization identifies the exact isolated

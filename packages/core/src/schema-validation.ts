@@ -1,7 +1,17 @@
 import { pageConfigError, type PageConfig } from './types/page-config'
 import type { ComponentSchema, ComponentStyle, ComponentType } from './types/component-schema'
-import type { DataSourceField, DataFieldType } from './types/data-source'
+import type {
+  BindingExpression,
+  ComponentBinding,
+  DataFieldDefinition,
+  DataFormatter,
+  DataSourceField,
+  DataFieldType,
+  TemplateDataDefinition,
+} from './types/data-source'
 import type { TemplatePage, TemplateSchema } from './types/template-schema'
+import { isDataPath } from './data-binding/path'
+import { validateRuntimeRecords } from './data-binding/validation'
 
 const COMPONENT_TYPES: ReadonlySet<string> = new Set<ComponentType>([
   'RoySimpleText',
@@ -157,6 +167,18 @@ function isComponentSchema(value: unknown, depth = 0): value is ComponentSchema 
     return false
   }
   if (!hasOptionalType(value, 'isLock', (item) => typeof item === 'boolean')) return false
+  if (
+    !hasOptionalType(
+      value,
+      'bindings',
+      (item) =>
+        Array.isArray(item) &&
+        item.every(isComponentBinding) &&
+        new Set(item.map((binding) => binding.id)).size === item.length,
+    )
+  ) {
+    return false
+  }
   if (!hasOptionalType(value['position'], 'x', isFiniteNumber)) return false
   if (!hasOptionalType(value['position'], 'y', isFiniteNumber)) return false
   if (value['component'] === 'RoyGroup') {
@@ -166,6 +188,84 @@ function isComponentSchema(value: unknown, depth = 0): value is ComponentSchema 
     )
   }
   return true
+}
+
+function isFormatter(value: unknown): value is DataFormatter {
+  if (!isRecord(value) || typeof value['kind'] !== 'string') return false
+  switch (value['kind']) {
+    case 'none':
+    case 'json':
+      return true
+    case 'chinese-number':
+    case 'chinese-currency':
+      return hasOptionalType(value, 'coerceNumericString', (item) => typeof item === 'boolean')
+    case 'number':
+      return (
+        hasOptionalType(value, 'minimumFractionDigits', isNonNegativeInteger) &&
+        hasOptionalType(value, 'maximumFractionDigits', isNonNegativeInteger) &&
+        hasOptionalType(value, 'useGrouping', (item) => typeof item === 'boolean') &&
+        hasOptionalType(value, 'coerceNumericString', (item) => typeof item === 'boolean')
+      )
+    case 'currency':
+      return (
+        isNonEmptyString(value['currency']) &&
+        hasOptionalType(value, 'minimumFractionDigits', isNonNegativeInteger) &&
+        hasOptionalType(value, 'maximumFractionDigits', isNonNegativeInteger) &&
+        hasOptionalType(value, 'coerceNumericString', (item) => typeof item === 'boolean')
+      )
+    case 'date':
+      return (
+        hasOptionalType(value, 'pattern', (item) => typeof item === 'string') &&
+        hasOptionalType(value, 'source', (item) => item === 'value' || item === 'now') &&
+        hasOptionalType(value, 'numerals', (item) => item === 'arabic' || item === 'chinese')
+      )
+    default:
+      return false
+  }
+}
+
+function isNonNegativeInteger(value: unknown): boolean {
+  return typeof value === 'number' && Number.isInteger(value) && value >= 0 && value <= 20
+}
+
+function isBindingExpression(value: unknown): value is BindingExpression {
+  if (!isRecord(value)) return false
+  if (value['kind'] === 'field') {
+    return (
+      isNonEmptyString(value['fieldId']) &&
+      hasOptionalType(value, 'formatter', isFormatter) &&
+      hasOptionalType(value, 'fallback', (item) => typeof item === 'string')
+    )
+  }
+  if (value['kind'] !== 'text' || !Array.isArray(value['segments'])) return false
+  return value['segments'].every(
+    (segment) =>
+      isRecord(segment) &&
+      ((segment['kind'] === 'literal' && typeof segment['value'] === 'string') ||
+        (segment['kind'] === 'field' &&
+          isNonEmptyString(segment['fieldId']) &&
+          hasOptionalType(segment, 'formatter', isFormatter) &&
+          hasOptionalType(segment, 'fallback', (item) => typeof item === 'string'))),
+  )
+}
+
+function isComponentBinding(value: unknown): value is ComponentBinding {
+  if (
+    !isRecord(value) ||
+    !isNonEmptyString(value['id']) ||
+    !isRecord(value['target']) ||
+    !isBindingExpression(value['expression'])
+  ) {
+    return false
+  }
+  const kind = value['target']['kind']
+  return (
+    kind === 'text' ||
+    kind === 'rich-text' ||
+    kind === 'image-source' ||
+    kind === 'code-content' ||
+    (kind === 'table-cell-text' && isNonEmptyString(value['target']['cellId']))
+  )
 }
 
 function isTemplatePage(value: unknown): value is TemplatePage {
@@ -188,9 +288,71 @@ function isDataSourceField(value: unknown): value is DataSourceField {
   )
 }
 
-export function isTemplateSchema(value: unknown): value is TemplateSchema {
+const DATA_VALUE_TYPES = new Set([
+  'string',
+  'number',
+  'boolean',
+  'date',
+  'object',
+  'array',
+  'unknown',
+])
+
+function isDataFieldDefinition(
+  value: unknown,
+  ids: Set<string>,
+  depth = 0,
+): value is DataFieldDefinition {
+  if (
+    depth > 100 ||
+    !isRecord(value) ||
+    !isNonEmptyString(value['id']) ||
+    ids.has(value['id']) ||
+    !isNonEmptyString(value['name']) ||
+    !isDataPath(value['path']) ||
+    typeof value['valueType'] !== 'string' ||
+    !DATA_VALUE_TYPES.has(value['valueType']) ||
+    !hasOptionalType(value, 'formatter', isFormatter)
+  ) {
+    return false
+  }
+  ids.add(value['id'])
   return (
-    isRecord(value) &&
+    value['children'] === undefined ||
+    (Array.isArray(value['children']) &&
+      value['children'].every((child) => isDataFieldDefinition(child, ids, depth + 1)))
+  )
+}
+
+function isTemplateDataDefinition(value: unknown): value is TemplateDataDefinition {
+  if (!isRecord(value) || value['version'] !== 1 || !Array.isArray(value['fields'])) {
+    return false
+  }
+  const allIds = new Set<string>()
+  if (!value['fields'].every((field) => isDataFieldDefinition(field, allIds))) return false
+  if (value['sampleRecords'] === undefined) return true
+  if (!Array.isArray(value['sampleRecords'])) return false
+  return validateRuntimeRecords(value['sampleRecords']).ok
+}
+
+function isEmptyRecord(value: unknown): boolean {
+  return isRecord(value) && Object.keys(value).length === 0
+}
+
+export function isTemplateSchema(value: unknown): value is TemplateSchema {
+  if (!isRecord(value)) return false
+  const canonical =
+    value['data'] !== undefined &&
+    isTemplateDataDefinition(value['data']) &&
+    (value['dataSource'] === undefined ||
+      (Array.isArray(value['dataSource']) && value['dataSource'].length === 0)) &&
+    (value['dataSet'] === undefined || isEmptyRecord(value['dataSet']))
+  const legacy =
+    value['data'] === undefined &&
+    Array.isArray(value['dataSource']) &&
+    value['dataSource'].every(isDataSourceField) &&
+    isRecord(value['dataSet'])
+  return (
     Number.isInteger(value['_version']) &&
     typeof value['_version'] === 'number' &&
     value['_version'] >= 0 &&
@@ -198,8 +360,6 @@ export function isTemplateSchema(value: unknown): value is TemplateSchema {
     Array.isArray(value['pages']) &&
     value['pages'].length > 0 &&
     value['pages'].every(isTemplatePage) &&
-    Array.isArray(value['dataSource']) &&
-    value['dataSource'].every(isDataSourceField) &&
-    isRecord(value['dataSet'])
+    (canonical || legacy)
   )
 }

@@ -14,4 +14,4 @@ export type {
   DesignerHostCommandStates,
 } from './host'
 
-export type { TemplateSchema, ComponentSchema, PageConfig } from '@ptd/core'
+export type { TemplateSchema, ComponentSchema, PageConfig, RenderContext } from '@ptd/core'

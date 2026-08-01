@@ -31,10 +31,18 @@ React + Vite 的设计器 Host，也是 GHCR Web 镜像和完整自托管栈的�
 12. File → Version History 打开非模态 Side Sheet，按需读取版本详情并使用真实 `TemplatePreview` 预览；
     恢复旧快照前明确确认，并把快照写成新的最新版本。恢复携带当前 `expectedVersion`，409 后停止恢复、
     保留历史浏览并要求重新打开服务器文档，不会静默覆盖。
+13. Designer 数据面板支持拖入、选择或粘贴 JSON object/object array，在应用前展示记录数、字段推断、
+    共享限制诊断和现有绑定影响；应用后可搜索嵌套字段树、编辑字段名称/格式化、绑定当前组件属性、
+    切换样例记录并在“设计内容 / 数据校样”之间切换。
+14. Web 持久化 `TemplateSchema.data` canonical v2、组件结构化 bindings 与受限 sample records。旧
+    `dataSource/dataSet/[::field::]` 可兼容读取，并只在显式保存边界迁移；单纯打开、缩略图或版本预览
+    不会偷偷改写模板。
 
 `src/templateApi.ts` 覆盖模板 CRUD 和版本 list/get/restore 合同，负责 Cookie、AbortSignal、成功响应
 运行时校验和结构化 HTTP/网络错误。`src/useDocumentController.ts` 负责文档状态机和请求竞态；Dirty
 通过 `@ptd/core` 的规范化序列化与保存基线比较，因此 Undo 回已保存内容会准确恢复 Clean。
+Datasource 字段、样例和绑定属于模板更改，会自然进入 Dirty/History 和不可变版本；校样模式、字段搜索、
+展开状态与当前记录索引是 Designer 实例状态，不写入模板或版本。
 
 落地页中的产品画面来自真实 Designer 和真实 `TemplateSchema`。仅在 Vite DEV 模式下，
 `/app?capture=product` 会跳过认证壳并渲染确定性的产品捕获文档；该入口不会进入生产构建的运行路径，
@@ -68,6 +76,13 @@ corepack pnpm --filter web build
 - Web 可以组合应用级路由、API client、身份与通知，但不应把这些职责塞进 `@ptd/react-designer`。
 - 认证使用同源 `/api` 和 HttpOnly Cookie；不在浏览器存储 Token。
 - Host 必须持有 `TemplateSchema`，并决定何时保存、载入和处理错误。
+- Web/Server 持久化的是 canonical Datasource v2 定义、结构化绑定和用户明确保存的受限 sample records；
+  临时 Host 运行时记录默认不写入模板。
+- `<Designer renderContext={...}>` 是 Host 注入临时运行时数据、当前记录、locale、timeZone 和显式 `now`
+  的类型安全入口。文件工作台与历史 `TemplatePreview` 默认不继承当前 Editor 的临时上下文；只有 Host
+  明确传入时才渲染对应数据。
+- 数据连接 Secret、Token、Cookie 和认证头不得进入 `TemplateSchema`、Web Local Storage 或模板版本；
+  未来 REST 连接器必须由 Server 代理并独立设计安全合同。
 - Host 需要声明 React、React DOM 和 `@preact/signals-react`，因为 peer dependency 不会经 `@ptd/react-designer` 传递。
 - 本 Host 已在 `src/main.tsx` 显式导入设计器样式；其他 consumer 同样必须导入 `@ptd/react-designer/styles.css`。
 
@@ -82,4 +97,11 @@ corepack pnpm --filter web build
 - 作为独立能力设计的本地崩溃恢复草稿与自动保存。
 - 软删除与回收站；在 Server 仍使用不可恢复硬删除时不提供假的回收站入口。
 
-Datasource、预览、打印、PDF/Word 与 Export 不属于 Web 模板持久化批次。
+打印预览、浏览器打印、PDF/Word 与 Export 不属于 Web 模板持久化批次。
+
+Datasource v2 的 JSON 导入、字段树、组件绑定和实时校样现已完成。尚未实现的相邻能力包括：
+
+- Excel/XLS/XLSX 与 CSV 本地文件解析。
+- REST、GraphQL、SQL、Webhook 或其他 Server 数据源代理。
+- 重复明细、数据表格自动扩行和派生自动分页。
+- 打印预览、浏览器打印、PDF/Word 与批量导出。

@@ -9,7 +9,7 @@ Foliq 的框架无关核心包。它只包含 TypeScript 数据模型与纯逻�
 - `TemplateSchema`、`TemplatePage`、`PageConfig` 和组件 Schema 类型。
 - 页面尺寸、缩放常量与毫米/像素换算。
 - 模板 JSON 序列化与反序列化。
-- 数据绑定解析与基础类型转换。
+- Datasource v2 的 JSON 边界验证、字段推断、安全路径、格式化、结构化绑定与确定性校样求值。
 - 组件定义注册表和组件目录元数据。
 - 可直接用于创建的 canonical 默认样式；基础图形默认使用可见的蓝石墨描边或填充。
 - 图片、二维码与条形码的公开内容类型、默认值、运行时守卫、规范化和纯校验。
@@ -24,11 +24,14 @@ Foliq 的框架无关核心包。它只包含 TypeScript 数据模型与纯逻�
 | Schema             | `TemplateSchema`、`TemplatePage`、`PageConfig`、`ComponentSchema`、`ComponentStyle`、数据源与目录类型 |
 | Defaults/constants | `DEFAULT_PAGE_CONFIG`、`PAGE_SIZES`、`COMMON_SCALE`、`AUTO_PAGE_COMPONENTS`                           |
 | Units              | `MeasurementUnit`、集中式格式化/解析/步进/吸附、`mmToPx`、`pxToMm`、页面尺寸工具                      |
-| Data binding       | `DataBindingEngine`、`convertByType`                                                                  |
-| Registry           | `ComponentRegistry`、`defaultRegistry` 及组件定义类型                                                 |
+| Data contract      | `TemplateDataDefinition`、`DataFieldDefinition`、`DataFormatter`、`ComponentBinding`、`RenderContext` |
+| Data input         | `DATA_SOURCE_LIMITS`、`parseRuntimeRecordsJson`、`validateRuntimeRecords`、`inferDataDefinition`      |
+| Data evaluation    | 安全路径工具、`evaluateBinding`、`resolveComponentBindings`、结构化诊断以及 v1 兼容 normalizer        |
+| Legacy binding     | `DataBindingEngine`、`convertByType`；只用于读取仍未经过保存边界的 v1 调用方                          |
+| Registry           | `ComponentRegistry`、`defaultRegistry`、`getComponentBindingTargets` 及组件定义类型                   |
 | Component content  | `ImageProps`、`QRCodeProps`、`BarCodeProps`，对应默认值、守卫、规范化与校验函数                       |
 | Free table         | `SimpleTableProps`、`TableCellStyle`、2×2 默认值、增删行列、合并拆分、尺寸与样式纯函数命令            |
-| Serialization      | `serialize`、`deserialize`                                                                            |
+| Serialization      | `CURRENT_TEMPLATE_VERSION`、`serialize`、`deserialize`                                                |
 
 示例：
 
@@ -42,6 +45,23 @@ const tenMillimeters = mmToPx(10)
 ```
 
 `serialize` / `deserialize` 是模板跨应用、Server 与存储层传递时的规范化入口，不应由各 Host 自行维护另一套 Schema 转换。
+当前 canonical 模板版本为 2：`TemplateSchema.data` 是唯一可编辑数据定义，`dataSource` / `dataSet`
+仅是 v0/v1 兼容输入。`deserialize` 会验证并保留旧字段，不会因为打开或预览模板而偷偷迁移；
+`normalizeTemplateData` 提供不修改输入的 canonical 读取视图；只有显式 `serialize` 保存边界会写入
+`data` 并移除旧字段。旧内容中的 `[::field::]` 也由 `resolveComponentBindings` 走相同求值和诊断路径，
+因此保存成 v2 后仍能稳定校样，而不需要把 token 悄悄写回为另一种内容。
+
+Datasource v2 只接受 JSON object 或 object array。解析、Host 数据与模板示例数据应复用
+`DATA_SOURCE_LIMITS` 和 `validateRuntimeRecords`，避免不同层维护不同体积、记录数、深度、字段数和
+字符串限制。`inferDataDefinition` 生成带稳定 ID 的嵌套字段树；路径是无代码执行能力的 segment 数组，
+数组项使用 `{ kind: 'array-item' }`，不会与真实对象 key 冲突，并明确拒绝 `__proto__`、`prototype`
+和 `constructor`。
+
+`RenderContext` 必须显式提供 `data`、`locale`、`timeZone`、ISO `now` 与 mode。日期求值只消费这个
+上下文，不读取系统时钟。Host 临时记录不进入 `TemplateSchema`；只有用户明确保存的受限记录才进入
+`TemplateDataDefinition.sampleRecords`。`resolveComponentBindings` 返回派生的 ComponentSchema 和
+结构化诊断，不修改模板、数据定义或记录，也不会自行访问网络。富文本字段值按文本编码，不能注入
+运行时 HTML。
 
 PTD 的几何真值使用既有 Canvas 坐标，固定为 `1 mm = 5 PTD Canvas px`。`formatMeasurement`、
 `parseMeasurement`、`toDisplayMeasurement`、`fromDisplayMeasurement` 和 `getMeasurementStep`

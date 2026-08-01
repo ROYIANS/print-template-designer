@@ -1,6 +1,12 @@
-import { useEffect, useRef, type CSSProperties } from 'react'
+import { useEffect, useId, useRef, type CSSProperties } from 'react'
 import { useSignals } from '@preact/signals-react/runtime'
-import type { ComponentSchema } from '@ptd/core'
+import {
+  resolveComponentBindings,
+  type ComponentBindingResolution,
+  type ComponentSchema,
+  type DataDiagnostic,
+  type RenderContext,
+} from '@ptd/core'
 import {
   RoyBarCode,
   RoyCircle,
@@ -40,27 +46,40 @@ const COMPONENT_MAP: Partial<Record<ComponentSchema['component'], ComponentConst
 
 interface ComponentRendererProps {
   schema: ComponentSchema
+  renderContext?: RenderContext
 }
 
-export function ComponentRenderer({ schema }: ComponentRendererProps) {
+export function ComponentRenderer({ schema, renderContext }: ComponentRendererProps) {
   useSignals()
   const store = useEditorStore()
-  if (schema.component === 'RoyGroup') return <GroupRenderer schema={schema} />
+  const activeContext = renderContext ?? store.proofRenderContext.value
+  const resolution = activeContext
+    ? resolveComponentBindings(schema, store.normalizedTemplateData.value.data, activeContext)
+    : null
+  const renderedSchema = resolution?.component ?? schema
+  if (renderedSchema.component === 'RoyGroup') {
+    return <GroupRenderer schema={renderedSchema} renderContext={activeContext} />
+  }
   if (
-    schema.component === 'RoySimpleTable' &&
-    !schema.isLock &&
+    !activeContext &&
+    renderedSchema.component === 'RoySimpleTable' &&
+    !renderedSchema.isLock &&
     store.selectedIds.value.length === 1 &&
-    store.selectedIds.value[0] === schema.id
+    store.selectedIds.value[0] === renderedSchema.id
   ) {
-    return <TableEditor schema={schema} />
+    return <TableEditor schema={renderedSchema} />
   }
-  if (store.editingComponentId.value === schema.id && isDirectlyEditableComponent(schema)) {
-    return <ContentEditor schema={schema} />
+  if (
+    !activeContext &&
+    store.editingComponentId.value === renderedSchema.id &&
+    isDirectlyEditableComponent(renderedSchema)
+  ) {
+    return <ContentEditor schema={renderedSchema} />
   }
-  return <VanillaRenderer schema={schema} />
+  return <VanillaRenderer schema={renderedSchema} resolution={resolution} />
 }
 
-function GroupRenderer({ schema }: ComponentRendererProps) {
+function GroupRenderer({ schema, renderContext }: ComponentRendererProps) {
   const children = getScaledGroupChildren(schema)
   return (
     <div className={styles.renderer} role="group" aria-label={schema.name ?? '组合组件'}>
@@ -74,7 +93,7 @@ function GroupRenderer({ schema }: ComponentRendererProps) {
         }
         return (
           <div key={child.id} className={styles.groupChild} style={variables}>
-            <ComponentRenderer schema={child} />
+            <ComponentRenderer schema={child} renderContext={renderContext} />
           </div>
         )
       })}
@@ -82,9 +101,13 @@ function GroupRenderer({ schema }: ComponentRendererProps) {
   )
 }
 
-function VanillaRenderer({ schema }: ComponentRendererProps) {
+function VanillaRenderer({
+  schema,
+  resolution,
+}: ComponentRendererProps & { resolution: ComponentBindingResolution | null }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const instanceRef = useRef<BaseComponent | null>(null)
+  const diagnosticId = useId()
 
   useEffect(() => {
     const element = containerRef.current
@@ -105,7 +128,48 @@ function VanillaRenderer({ schema }: ComponentRendererProps) {
     instanceRef.current?.update(withoutOuterTransform(schema))
   }, [schema])
 
-  return <div ref={containerRef} className={styles.renderer} />
+  const diagnosticLabel = bindingDiagnosticLabel(resolution)
+  const diagnosticMessages = resolution?.diagnostics.map((item) => item.message).join('\n')
+
+  return (
+    <div
+      ref={containerRef}
+      className={styles.renderer}
+      data-binding-status={resolution?.status}
+      data-binding-diagnostics={diagnosticMessages || undefined}
+      aria-describedby={resolution && resolution.status !== 'ready' ? diagnosticId : undefined}
+    >
+      {resolution && resolution.status !== 'ready' && (
+        <span
+          id={diagnosticId}
+          className={styles.bindingDiagnostic}
+          data-status={resolution.status}
+          data-ptd-binding-diagnostic
+          title={diagnosticMessages}
+          role="status"
+        >
+          {diagnosticLabel}
+        </span>
+      )}
+    </div>
+  )
+}
+
+function bindingDiagnosticLabel(
+  resolution: Pick<ComponentBindingResolution, 'status' | 'diagnostics'> | null,
+): string {
+  if (!resolution || resolution.status === 'ready') return '数据已就绪'
+  return resolution.status === 'missing' ? '字段缺失' : diagnosticSummary(resolution.diagnostics)
+}
+
+function diagnosticSummary(diagnostics: readonly DataDiagnostic[]): string {
+  if (diagnostics.some((diagnostic) => diagnostic.code === 'invalid-binding-target')) {
+    return '绑定已失效'
+  }
+  if (diagnostics.some((diagnostic) => diagnostic.code === 'type-mismatch')) {
+    return '字段类型不匹配'
+  }
+  return '数据无效'
 }
 
 function withoutOuterTransform(schema: ComponentSchema): ComponentSchema {

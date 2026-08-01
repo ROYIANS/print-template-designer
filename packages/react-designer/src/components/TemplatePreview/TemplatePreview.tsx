@@ -1,5 +1,10 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
-import { getPageDimensions, type ComponentSchema, type TemplateSchema } from '@ptd/core'
+import {
+  getPageDimensions,
+  type ComponentSchema,
+  type RenderContext,
+  type TemplateSchema,
+} from '@ptd/core'
 import { createEditorStore, EditorStoreProvider } from '../../state'
 import { ComponentRenderer } from '../Canvas/ComponentRenderer'
 import styles from './TemplatePreview.module.css'
@@ -11,6 +16,7 @@ export interface TemplatePreviewProps {
   pageIndex?: number
   label?: string
   className?: string
+  renderContext?: RenderContext
 }
 
 function componentVariables(component: ComponentSchema): PreviewVariables {
@@ -28,6 +34,7 @@ export function TemplatePreview({
   pageIndex = 0,
   label = `${template.pageConfig.title} 模板预览`,
   className,
+  renderContext,
 }: TemplatePreviewProps) {
   const rootRef = useRef<HTMLDivElement>(null)
   const [store] = useState(() => createEditorStore(template))
@@ -94,7 +101,7 @@ export function TemplatePreview({
               className={styles.component}
               style={componentVariables(component)}
             >
-              <ComponentRenderer schema={component} />
+              <ComponentRenderer schema={component} renderContext={renderContext} />
             </div>
           ))}
         </div>

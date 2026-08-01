@@ -1,16 +1,27 @@
 import { computed, signal } from '@preact/signals-react'
 import {
   getPageDimensions,
+  getComponentBindingTargets,
   getTableCellAt,
   getTableCellBounds,
+  normalizeTemplateData,
   normalizeSimpleTableProps,
   pageConfigError,
   updateTableCellText,
+  validateRuntimeRecords,
+  type BindingExpression,
+  type ComponentBinding,
+  type ComponentBindingTarget,
   type ComponentSchema,
   type ComponentStyle,
+  type DataFieldDefinition,
+  type DataFormatter,
+  type DataRecord,
   type MeasurementUnit,
   type PageConfig,
   type PageDirection,
+  type RenderContext,
+  type TemplateDataDefinition,
   type TemplatePage,
   type TemplateSchema,
 } from '@ptd/core'
@@ -68,6 +79,19 @@ interface ClipboardData {
 interface EditorStoreOptions {
   onChange?: (template: TemplateSchema) => void
   idFactory?: () => string
+  renderContext?: RenderContext
+}
+
+export interface ProofEnvironment {
+  now?: string
+  locale?: string
+  timeZone?: string
+}
+
+export interface DataFieldPatch {
+  readonly name?: string
+  readonly formatter?: DataFormatter
+  readonly removeFormatter?: boolean
 }
 
 function clone<T>(value: T): T {
@@ -144,6 +168,15 @@ export class EditorStore {
   readonly editingComponentId = signal<string | null>(null)
   readonly tableCellSelection = signal<TableCellSelection | null>(null)
   readonly editingTableCell = signal<EditingTableCell | null>(null)
+  readonly proofMode = signal(false)
+  readonly proofRecordIndex = signal(0)
+  readonly proofRecordSelectionTouched = signal(false)
+  readonly hostRenderContext = signal<RenderContext | undefined>(undefined)
+  readonly proofNow = signal(new Date().toISOString())
+  readonly proofLocale = signal('zh-CN')
+  readonly proofTimeZone = signal('Asia/Shanghai')
+  /** Advances only when the controlled Host supplies a genuinely external template object. */
+  readonly externalTemplateRevision = signal(0)
 
   readonly currentPage = computed(() => this.template.value.pages[this.currentPageIndex.value])
   readonly components = computed(() => this.currentPage.value?.componentData ?? [])
@@ -173,6 +206,36 @@ export class EditorStore {
   )
   readonly canUndo = computed(() => this.historyIndex.value > 0)
   readonly canRedo = computed(() => this.historyIndex.value < this.history.value.length - 1)
+  readonly normalizedTemplateData = computed(() => normalizeTemplateData(this.template.value))
+  readonly sampleRecords = computed(
+    () => this.normalizedTemplateData.value.data.sampleRecords ?? [],
+  )
+  readonly proofRecords = computed<readonly DataRecord[]>(() => {
+    const hostContext = this.hostRenderContext.value
+    if (!hostContext) return this.sampleRecords.value
+    const validated = validateRuntimeRecords(hostContext.data)
+    if (validated.ok) return validated.records
+    return hostContext.record ? [hostContext.record] : []
+  })
+  readonly proofRenderContext = computed<RenderContext | undefined>(() => {
+    if (!this.proofMode.value) return undefined
+    const hostContext = this.hostRenderContext.value
+    const records = this.proofRecords.value
+    const recordIndex = clampRecordIndex(this.proofRecordIndex.value, records.length)
+    const record =
+      hostContext?.record && !this.proofRecordSelectionTouched.value
+        ? hostContext.record
+        : (records[recordIndex] ?? hostContext?.record)
+    return {
+      data: hostContext?.data ?? (records.length === 1 ? records[0]! : [...records]),
+      ...(record ? { record } : {}),
+      recordIndex,
+      locale: hostContext?.locale ?? this.proofLocale.value,
+      timeZone: hostContext?.timeZone ?? this.proofTimeZone.value,
+      now: hostContext?.now ?? this.proofNow.value,
+      mode: 'proof',
+    }
+  })
 
   private onChange?: (template: TemplateSchema) => void
   private readonly idFactory: () => string
@@ -184,10 +247,141 @@ export class EditorStore {
     this.history.value = [initialTemplate]
     this.onChange = options.onChange
     this.idFactory = options.idFactory ?? randomId
+    this.hostRenderContext.value = options.renderContext
+    if (options.renderContext?.recordIndex !== undefined) {
+      this.proofRecordIndex.value = options.renderContext.recordIndex
+    }
+    this.repairProofRecordIndex()
   }
 
   setOnChange(onChange?: (template: TemplateSchema) => void): void {
     this.onChange = onChange
+  }
+
+  setHostRenderContext(renderContext?: RenderContext): void {
+    if (this.hostRenderContext.value === renderContext) return
+    this.hostRenderContext.value = renderContext
+    this.proofRecordSelectionTouched.value = false
+    this.proofRecordIndex.value = renderContext?.recordIndex ?? 0
+    this.repairProofRecordIndex()
+  }
+
+  setProofMode(active: boolean): void {
+    if (this.proofMode.value === active) return
+    this.proofMode.value = active
+    if (active) {
+      this.editingComponentId.value = null
+      this.clearTableSession()
+      this.repairProofRecordIndex()
+    }
+  }
+
+  setProofRecordIndex(index: number): void {
+    if (!Number.isInteger(index) || index < 0) return
+    const next = clampRecordIndex(index, this.proofRecords.value.length)
+    this.proofRecordSelectionTouched.value = true
+    if (this.proofRecordIndex.value !== next) this.proofRecordIndex.value = next
+  }
+
+  setProofEnvironment(environment: ProofEnvironment): void {
+    if (environment.now !== undefined) this.proofNow.value = environment.now
+    if (environment.locale !== undefined) this.proofLocale.value = environment.locale
+    if (environment.timeZone !== undefined) this.proofTimeZone.value = environment.timeZone
+  }
+
+  /** Replaces the canonical field model and samples as one undoable template mutation. */
+  replaceTemplateData(data: TemplateDataDefinition): boolean {
+    if (
+      this.template.value.data &&
+      this.template.value.dataSource === undefined &&
+      this.template.value.dataSet === undefined &&
+      structurallyEqual(this.template.value.data, data)
+    )
+      return false
+    const { dataSource: _legacyFields, dataSet: _legacyDataSet, ...canonical } = this.template.value
+    void _legacyFields
+    void _legacyDataSet
+    this.commit({ ...canonical, data })
+    return true
+  }
+
+  /** Edits presentation metadata while preserving a field's stable id, path and child structure. */
+  updateDataField(fieldId: string, patch: DataFieldPatch): boolean {
+    const normalized = this.normalizedTemplateData.value.data
+    let changed = false
+    const update = (fields: readonly DataFieldDefinition[]): readonly DataFieldDefinition[] =>
+      fields.map((field) => {
+        const children = field.children ? update(field.children) : undefined
+        let next = children === field.children ? field : { ...field, children }
+        if (field.id !== fieldId) return next
+        const name = patch.name?.trim()
+        const nextName = name ? name : field.name
+        const formatter = patch.removeFormatter ? undefined : (patch.formatter ?? field.formatter)
+        if (nextName === field.name && structurallyEqual(formatter, field.formatter)) return next
+        changed = true
+        const { formatter: _currentFormatter, ...withoutFormatter } = next
+        void _currentFormatter
+        next = {
+          ...withoutFormatter,
+          name: nextName,
+          ...(formatter ? { formatter } : {}),
+        }
+        return next
+      })
+    const fields = update(normalized.fields)
+    if (!changed) return false
+    return this.replaceTemplateData({ ...normalized, fields })
+  }
+
+  setComponentBinding(
+    componentId: string,
+    target: ComponentBindingTarget,
+    expression: BindingExpression,
+  ): boolean {
+    const component = this.components.value.find((item) => item.id === componentId)
+    if (!component || component.isLock) return false
+    if (
+      !getComponentBindingTargets(component.component).some((item) => item.kind === target.kind)
+    ) {
+      return false
+    }
+    if (
+      target.kind === 'table-cell-text' &&
+      (component.component !== 'RoySimpleTable' ||
+        !normalizeSimpleTableProps(component.propValue).cells[target.cellId])
+    )
+      return false
+    const bindings = component.bindings ?? []
+    const index = bindings.findIndex((binding) => sameBindingTarget(binding.target, target))
+    const binding: ComponentBinding =
+      index >= 0
+        ? { ...bindings[index]!, expression }
+        : { id: this.idFactory(), target, expression }
+    if (index >= 0 && structurallyEqual(bindings[index]!.expression, expression)) return false
+    const next = [...bindings]
+    if (index >= 0) next[index] = binding
+    else next.push(binding)
+    this.updateComponent(componentId, { bindings: next })
+    return true
+  }
+
+  removeComponentBinding(componentId: string, target: ComponentBindingTarget): boolean {
+    const component = this.components.value.find((item) => item.id === componentId)
+    if (!component || component.isLock || !component.bindings) return false
+    const bindings = component.bindings.filter(
+      (binding) => !sameBindingTarget(binding.target, target),
+    )
+    if (bindings.length === component.bindings.length) return false
+    this.updateComponent(componentId, { bindings })
+    return true
+  }
+
+  removeSampleRecords(): boolean {
+    const normalized = this.normalizedTemplateData.value.data
+    if (!normalized.sampleRecords) return false
+    const { sampleRecords: _samples, ...data } = normalized
+    void _samples
+    return this.replaceTemplateData(data)
   }
 
   recordRecentColor(color: string): void {
@@ -217,6 +411,11 @@ export class EditorStore {
     this.editingComponentId.value = null
     this.tableCellSelection.value = null
     this.editingTableCell.value = null
+    this.proofMode.value = false
+    this.proofRecordSelectionTouched.value = false
+    this.proofRecordIndex.value = this.hostRenderContext.value?.recordIndex ?? 0
+    this.externalTemplateRevision.value += 1
+    this.repairProofRecordIndex()
     this.gestureStart = null
   }
 
@@ -292,6 +491,7 @@ export class EditorStore {
   startContentEditing(id: string): boolean {
     const component = this.components.value.find((item) => item.id === id)
     if (
+      this.proofMode.value ||
       !component ||
       component.isLock ||
       (component.component !== 'RoySimpleText' && component.component !== 'RoyText')
@@ -316,6 +516,7 @@ export class EditorStore {
   }
 
   selectTableCell(componentId: string, row: number, column: number, extend = false): boolean {
+    if (this.proofMode.value) return false
     const component = this.components.value.find((item) => item.id === componentId)
     if (!component || component.component !== 'RoySimpleTable' || component.isLock) return false
     const value = normalizeSimpleTableProps(component.propValue)
@@ -340,6 +541,7 @@ export class EditorStore {
   }
 
   startTableCellEditing(componentId: string, cellId: string): boolean {
+    if (this.proofMode.value) return false
     const component = this.components.value.find((item) => item.id === componentId)
     if (!component || component.component !== 'RoySimpleTable' || component.isLock) return false
     const value = normalizeSimpleTableProps(component.propValue)
@@ -931,6 +1133,7 @@ export class EditorStore {
     if (template === this.template.value) return
     const previousPageId = this.currentPage.value?.id
     this.template.value = template
+    this.repairProofRecordIndex()
     this.repairCurrentPage(preferredPageId)
     this.lastEmitted = template
     this.onChange?.(template)
@@ -953,6 +1156,7 @@ export class EditorStore {
     if (!template) return
     const previousPageId = this.currentPage.value?.id
     this.template.value = template
+    this.repairProofRecordIndex()
     this.repairCurrentPage(previousPageId)
     this.lastEmitted = template
     this.onChange?.(template)
@@ -995,6 +1199,11 @@ export class EditorStore {
     this.editingTableCell.value = null
   }
 
+  private repairProofRecordIndex(): void {
+    const next = clampRecordIndex(this.proofRecordIndex.value, this.proofRecords.value.length)
+    if (this.proofRecordIndex.value !== next) this.proofRecordIndex.value = next
+  }
+
   private hasLockedSelection(): boolean {
     return this.selectedComponents.value.some((component) => component.isLock)
   }
@@ -1005,6 +1214,24 @@ export class EditorStore {
     const height = pageDirection === 'l' ? number(pageWidth) : number(pageHeight)
     return Math.min(axis === 'x' ? width : height, Math.max(0, positionMm))
   }
+}
+
+function clampRecordIndex(index: number, recordCount: number): number {
+  if (recordCount <= 0) return 0
+  return Math.min(Math.max(0, index), recordCount - 1)
+}
+
+function sameBindingTarget(left: ComponentBindingTarget, right: ComponentBindingTarget): boolean {
+  if (left.kind !== right.kind) return false
+  if (left.kind === 'table-cell-text' && right.kind === 'table-cell-text') {
+    return left.cellId === right.cellId
+  }
+  return true
+}
+
+function structurallyEqual(left: unknown, right: unknown): boolean {
+  if (left === right) return true
+  return JSON.stringify(left) === JSON.stringify(right)
 }
 
 function hasChanges<T extends object>(source: T, patch: Partial<T>): boolean {

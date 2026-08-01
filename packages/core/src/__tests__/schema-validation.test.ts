@@ -59,4 +59,84 @@ describe('TemplateSchema runtime validation', () => {
       }),
     ).toBe(false)
   })
+
+  it('accepts canonical v2 without legacy keys and validates bindings deeply', () => {
+    const canonical = template()
+    delete (canonical as Partial<typeof canonical>).dataSource
+    delete (canonical as Partial<typeof canonical>).dataSet
+    const value = {
+      ...canonical,
+      _version: 2,
+      data: {
+        version: 1,
+        fields: [{ id: 'code', name: '编号', path: ['order', 'code'], valueType: 'string' }],
+        sampleRecords: [{ order: { code: 'SO-001' } }],
+      },
+      pages: [
+        {
+          ...canonical.pages[0]!,
+          componentData: [
+            {
+              ...canonical.pages[0]!.componentData[0]!,
+              bindings: [
+                {
+                  id: 'text-binding',
+                  target: { kind: 'text' },
+                  expression: { kind: 'field', fieldId: 'code' },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    }
+    expect(isTemplateSchema(value)).toBe(true)
+    expect(
+      isTemplateSchema({
+        ...value,
+        data: { ...value.data, fields: [{ ...value.data.fields[0], path: ['__proto__'] }] },
+      }),
+    ).toBe(false)
+    expect(
+      isTemplateSchema({
+        ...value,
+        data: {
+          ...value.data,
+          fields: [{ ...value.data.fields[0] }, { ...value.data.fields[0], path: ['other'] }],
+        },
+      }),
+    ).toBe(false)
+    expect(
+      isTemplateSchema({
+        ...value,
+        pages: [
+          {
+            ...value.pages[0],
+            componentData: [
+              {
+                ...value.pages[0]!.componentData[0],
+                bindings: [
+                  {
+                    id: 'invalid',
+                    target: { kind: 'table-cell-text' },
+                    expression: { kind: 'field', fieldId: 'code' },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      }),
+    ).toBe(false)
+  })
+
+  it('rejects two editable data sources in one template', () => {
+    expect(
+      isTemplateSchema({
+        ...template(),
+        data: { version: 1, fields: [] },
+        dataSource: [{ id: 'legacy', title: '旧字段', field: 'old', typeName: 'String' }],
+      }),
+    ).toBe(false)
+  })
 })

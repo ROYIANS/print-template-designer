@@ -12,7 +12,7 @@ Allowlist 保护模板 CRUD、不可变版本历史、历史恢复与乐观并�
 - 本地可显式启用仅限 loopback 的固定开发身份；默认关闭，生产环境无法启用。
 - `PTD_ALLOWED_EMAILS` 在服务端控制准入，`Template.ownerId` 隔离所有模板和版本操作。
 - 默认监听 `PORT=3000`。
-- 复用 `@ptd/core` 的 `TemplateSchema` 和序列化逻辑。
+- 复用 `@ptd/core` 的 `TemplateSchema`、运行时验证和序列化逻辑。
 
 完整工作区推荐 Node 22.12+。
 
@@ -87,7 +87,7 @@ Content-Type: application/json
 {
   "title": "出库交接单",
   "content": {
-    "_version": 1,
+    "_version": 2,
     "pageConfig": {},
     "pages": [
       {
@@ -95,13 +95,25 @@ Content-Type: application/json
         "componentData": []
       }
     ],
-    "dataSource": [],
-    "dataSet": {}
+    "data": {
+      "version": 1,
+      "fields": [],
+      "sampleRecords": []
+    }
   }
 }
 ```
 
-`title` 去除首尾空白后必须为 1–120 个字符。`content` 必须包含有限数值 `_version`、对象 `pageConfig`、至少一个页面、数组 `dataSource` 和对象 `dataSet`。
+`title` 去除首尾空白后必须为 1–120 个字符。`content` 通过 `@ptd/core` 的单一
+`TemplateSchema` 权威进行深层验证。Server 接受合法的 legacy v0/v1
+`dataSource`/`dataSet` 输入以及 canonical v2 `data`，并在持久化边界统一写为 canonical v2；canonical
+内容不能同时携带非空 legacy 数据，绑定、字段和示例记录无效时返回 400。连接配置、Token、Cookie 和
+其他 Secret 不属于 `TemplateSchema`，也不会由模板 API 保存。
+
+Nest JSON parser 与默认容器 Nginx 对完整请求体统一设置 **4 MiB** 上限。该值覆盖 title、页面、组件、
+绑定、示例数据和请求信封；canonical `data.sampleRecords` 仍受 Core 更小的 **512 KiB** 数据上限约束。
+如果公网入口前还有 CDN 或宿主机反向代理，其请求体上限也不能低于 4 MiB，否则请求会在到达 Foliq
+之前被代理拒绝。
 
 `GET /api/account/me` 保留既有账户字段，并额外返回服务端权威的
 `authMode: "github" | "dev-bypass"`。Web 只能用这个字段展示本地开发状态，不能通过前端环境变量、
@@ -118,7 +130,7 @@ Content-Type: application/json
 {
   "title": "出库交接单 · 修订",
   "content": {
-    "_version": 1,
+    "_version": 2,
     "pageConfig": {},
     "pages": [
       {
@@ -126,8 +138,10 @@ Content-Type: application/json
         "componentData": []
       }
     ],
-    "dataSource": [],
-    "dataSet": {}
+    "data": {
+      "version": 1,
+      "fields": []
+    }
   },
   "expectedVersion": 1
 }

@@ -15,12 +15,21 @@
 - 建立 NestJS 11 + Prisma 7 + PostgreSQL 多用户模板服务，支持 GitHub OAuth、Allowlist、owner 隔离、不可变版本历史、恢复与乐观并发。
 - 建立 GitHub Actions → GHCR → Docker Compose 的完整 Web/Server/PostgreSQL 发布链路。
 - 建立中文项目、开发、部署、App 与 Package 文档体系。
+- 完成 Web 文件工作台与文档持久化闭环：真实模板预览、CRUD、另存为、重命名、复制、永久删除、
+  不可变版本历史、恢复和 `expectedVersion` 冲突保护。
+- 建立 Datasource v2 canonical 合同：受限 JSON object/object array 验证、确定性嵌套字段推断、稳定字段
+  ID、安全路径读取、类型与格式化分离、结构化组件绑定、显式 `RenderContext` 和结构化诊断。
+- 数据面板支持拖入/选择/粘贴 JSON、应用前摘要与绑定影响、可搜索字段树、字段格式化、文本混合插值、
+  图片/二维码/条形码/自由表格绑定、记录切换和非破坏性实时校样。
 
 ### Changed
 
 - 从 Vue 2 单体组件重写为 pnpm Monorepo，不再让 v2 运行时代码依赖 `legacy/`。
 - 产品边界调整为“框架无关 Core/Renderer + React Designer + 可演进的 Web/Server 应用”。
-- Designer 使用 controlled `value` / `onChange` 协议，Host 通过 `onSave` / `onLoad` 接入持久化。
+- Designer 使用 controlled `value` / `onChange` 协议，应用能力通过 `DesignerHost` 命令合同接入；临时
+  数据校样可由 Host 通过显式 `RenderContext` 注入。
+- 模板序列化升级到 canonical v2：`TemplateSchema.data` 是数据定义唯一事实来源；v0/v1
+  `dataSource/dataSet/[::field::]` 保持兼容读取，只在显式保存边界迁移且保存后仍可求值。
 - UI 重构为面向报表开发者与设计师的高密度专业工作区，并支持响应式面板布局。
 
 ### Infrastructure
@@ -33,9 +42,11 @@
 ### Current boundaries
 
 - v2 workspace packages 尚未发布到 npm。
-- `apps/web` 已连接 Server 认证，但模板仍使用内存示例，尚未接入模板 CRUD。
+- `apps/web` 已连接 Server 认证、模板 CRUD、文件工作台、版本历史、恢复和冲突保护。
 - `@ptd/export` 仍是空脚手架；PDF、打印、Word 和自动溢出分页尚未实现。
-- 邮箱登录、上传、数据源代理和完整数据预览尚未实现。
+- Datasource v2 的 JSON 导入、字段树、绑定与单记录实时校样已经实现；Excel/CSV、REST/其他数据源代理、
+  Secret 管理、重复明细、自动分页和批量输出仍未实现。
+- 认证当前只提供 GitHub OAuth；邮箱登录与上传服务尚未实现。
 
 ## Legacy v1 history
 

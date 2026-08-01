@@ -8,17 +8,27 @@ Foliq 的 React 专业编辑器。它把 `@ptd/core` 的模板模型和 `@ptd/co
 
 ```tsx
 import { useState } from 'react'
-import { Designer, type TemplateSchema } from '@ptd/react-designer'
+import { Designer, type RenderContext, type TemplateSchema } from '@ptd/react-designer'
 import '@ptd/react-designer/styles.css'
 
 export function Editor({ initialValue }: { initialValue: TemplateSchema }) {
   const [value, setValue] = useState(initialValue)
   const [saving, setSaving] = useState(false)
+  const renderContext: RenderContext = {
+    data: [{ orderNo: 'CC-2026-0815' }],
+    record: { orderNo: 'CC-2026-0815' },
+    recordIndex: 0,
+    locale: 'zh-CN',
+    timeZone: 'Asia/Shanghai',
+    now: '2026-08-01T02:00:00.000Z',
+    mode: 'proof',
+  }
 
   return (
     <Designer
       value={value}
       onChange={setValue}
+      renderContext={renderContext}
       host={{
         document: {
           id: 'template-42',
@@ -58,13 +68,19 @@ Host 需要为设计器提供一个具有明确高度的容器，并显式加载
 
 ```tsx
 import { TemplatePreview } from '@ptd/react-designer'
-
 ;<TemplatePreview template={template} pageIndex={0} label="出库交接单预览" />
 ```
 
 `TemplatePreview` 复用 Canvas 的真实 `ComponentRenderer`，按容器等比缩放一个手工页面。它不提供
 选择、编辑、历史、HTTP、缓存或位图缩略图生成；Host 负责取得 `TemplateSchema`。越界 `pageIndex`
 会收敛到有效页面，组件 DOM 对可访问树隐藏，由外层单一 `role="img"` 提供名称。
+
+默认 Preview 只渲染模板保存的静态内容，不会自动选择示例记录，也不会继承当前 Editor 的临时校样。
+只有 Host 明确传入 `renderContext` 时才解析绑定：
+
+```tsx
+;<TemplatePreview template={template} renderContext={renderContext} label="出库交接单数据校样" />
+```
 
 ## `DesignerProps`
 
@@ -73,17 +89,25 @@ export interface DesignerProps {
   value: TemplateSchema
   onChange?: (value: TemplateSchema) => void
   host?: DesignerHost
+  renderContext?: RenderContext
 }
 ```
 
-| 属性       | 约定                                                               |
-| ---------- | ------------------------------------------------------------------ |
-| `value`    | 必填。Host 持有的模板真值；外部替换时编辑器会同步。                |
-| `onChange` | 模板命令产生新值时通知 Host；交互 UI 状态不会触发。                |
-| `host`     | 可选。统一承载文档元数据、应用命令能力、异步状态和应用命令处理器。 |
+| 属性            | 约定                                                                      |
+| --------------- | ------------------------------------------------------------------------- |
+| `value`         | 必填。Host 持有的模板真值；外部替换时编辑器会同步。                       |
+| `onChange`      | 模板命令产生新值时通知 Host；交互 UI 状态不会触发。                       |
+| `host`          | 可选。统一承载文档元数据、应用命令能力、异步状态和应用命令处理器。        |
+| `renderContext` | 可选。Host 临时运行时数据与确定性 locale/timeZone/now；不会自动写入模板。 |
 
 旧的 `onSave` / `onLoad` 已被统一 Host 合同替代，也不会继续增加 `onExport` 或
 `onDataSource` 顶层回调。打开或新建完成后，Host 更新受控 `value`；Designer 不直接载入 API 记录。
+
+`renderContext` 是受控渲染输入，不属于命令式 `DesignerHost`。更新它、切换校样模式或切换样例记录都只
+改变当前 Designer 实例的派生视图，不触发 `onChange`，不增加 History，也不令 Host 文档变 Dirty。
+Designer 在没有 Host context 时使用稳定的 Foliq 默认校样环境 `zh-CN` / `Asia/Shanghai`，并在实例
+创建时固定 `now`；面向其他地区的 Host 应始终显式传入 locale、timeZone 和 now，Core 不读取浏览器环境
+或系统时钟来求值。
 
 ### Host 应用命令
 
@@ -143,6 +167,16 @@ interface DesignerHost {
 - Hand Tool 与按住 Space 的临时抓手。
 - 位置稳定的高频 Tool Dock、文本/图形工具组，以及带搜索、最近使用和键盘导航的完整组件 Picker。
 - 页面、图层、数据与素材资源面板；素材面板当前提供真实图片框入口，资产持久化留待后续阶段。
+- 数据面板支持拖入、选择或在专用表面粘贴 JSON；先复用 Core 上限、校验与字段推断展示记录数、
+  字段数、体积、深度和诊断，只有明确“应用字段与样例”才产生一次模板变更。失败与超限输入保留草稿，
+  不会静默替换字段模型。
+- 可搜索的嵌套字段树显示名称、路径和值类型；字段显示名和类型相关默认格式可原位编辑，同时保持
+  字段 ID/path 稳定。导入替换会说明保留与失效引用数量，失效绑定保留为可诊断信息而不被删除。
+- 当前单选组件的绑定能力只来自 Core Registry。普通文本提供 literal 与多个 field token 的结构化
+  组合编辑；富文本、图片、二维码、条形码和自由表格活动单元格支持直接字段绑定。锁定、多选、无选择、
+  未选表格单元格和不支持组件均有明确状态，完整点击/键盘路径不依赖拖拽。
+- “设计内容 / 数据校样”和样例前后切换属于实例 UI 状态，不触发 `onChange` 或 History。Host
+  `renderContext` 优先于模板样例且默认永不持久化；移除样例会保留字段与组件绑定。
 - wide / standard / compact 响应式工作区。
 
 组件目录按文本、表格、图像、编码、图形分组。画布中的“更多组件”Picker 只展示 `available`，
@@ -160,12 +194,19 @@ Host value ──► Designer store ──► 用户命令
     └──────── onChange ────────────┘
 
 Host document + commands ──► Designer intent ──► Host application
+
+Host RenderContext ──► proof UI state ──► Core binding resolution ──► derived component view
 ```
 
 - Host 负责 API、保存状态、错误提示、冲突处理和身份信息。
 - Designer 的 Host 合同不包含 HTTP、Cookie、Better Auth、数据库记录或路由类型。
 - Designer 不应直接 import `apps/web` 或 `apps/server`。
 - 外部 `value` 同步必须避免把纯 Host 回显制造成新的用户历史。
+- 外部 `value` 替换会退出当前校样并修复记录索引；受控 `renderContext` 本身仍由 Host 持有。
+- 示例记录来自 `normalizeTemplateData(value)`；Host 临时数据不会因校样或 Preview 被持久化。
+- 字段、样例和组件绑定命令会在显式编辑边界 canonicalize 旧 `dataSource/dataSet`；只读打开、字段搜索、
+  展开树、导入预检和校样不会偷偷迁移模板。真正的外部 `value` 替换会清理尚未应用的导入/字段草稿，
+  Designer 内部字段或绑定提交不会打断仍在进行的面板工作流。
 - `TemplateSchema.pages` 是持久化的手工页面；自动溢出页是未来导出层的派生数据。
 
 详细命令、历史和同步约束见 [React Designer Contract](../../.trellis/spec/monorepo/react-designer-contract.md)，视觉与交互契约见 [PTD UI System](../../.trellis/spec/monorepo/ptd-ui-system.md)。

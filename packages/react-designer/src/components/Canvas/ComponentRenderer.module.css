@@ -1,8 +1,43 @@
 .renderer {
   position: relative;
+  isolation: isolate;
   width: 100%;
   height: 100%;
   overflow: hidden;
+}
+
+.renderer[data-binding-status='missing'],
+.renderer[data-binding-status='invalid'] {
+  box-shadow: inset 0 0 0 1px var(--ptd-border-strong);
+}
+
+.renderer[data-binding-status='invalid'] {
+  box-shadow: inset 0 0 0 1px var(--ptd-danger);
+}
+
+.bindingDiagnostic {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  z-index: var(--ptd-layer-guide);
+  max-width: calc(100% - 4px);
+  padding: 1px 3px;
+  overflow: hidden;
+  color: var(--ptd-text-strong);
+  font-family: var(--ptd-font-ui);
+  font-size: var(--ptd-text-10);
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+  background: var(--ptd-surface-raised);
+  border: 1px solid var(--ptd-border-strong);
+  border-radius: var(--ptd-radius-1);
+}
+
+.bindingDiagnostic[data-status='invalid'] {
+  color: var(--ptd-danger);
+  border-color: var(--ptd-danger);
 }
 
 .groupChild {

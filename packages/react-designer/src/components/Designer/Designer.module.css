@@ -120,6 +120,12 @@
   grid-template-columns: var(--ptd-tool-dock-width) minmax(0, 1fr);
 }
 
+/* The resource panel lives inside Sidebar's stacking context. Elevate the complete compact Sidebar
+   while it is open so its panel remains above the canvas scrim and keeps pointer ownership. */
+.workspace[data-mode='compact'][data-resources-open='true'] > [data-ptd-region='left-sidebar'] {
+  z-index: var(--ptd-layer-sticky);
+}
+
 .workspace[data-mode='compact'] .inspectorRegion:not([hidden]) {
   position: absolute;
   z-index: var(--ptd-layer-sticky);

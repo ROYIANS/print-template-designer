@@ -1,4 +1,8 @@
-export { ComponentRegistry, defaultRegistry } from './component-registry'
+export {
+  ComponentRegistry,
+  defaultRegistry,
+  getComponentBindingTargets,
+} from './component-registry'
 export type {
   CatalogComponentDefinition,
   ComponentCatalogMetadata,
