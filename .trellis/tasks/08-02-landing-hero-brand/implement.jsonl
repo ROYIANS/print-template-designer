@@ -1,0 +1,7 @@
+{"file":".trellis/spec/monorepo/package-conventions.md","reason":"遵守 Web/React Designer 工作区构建与依赖边界。"}
+{"file":".trellis/spec/monorepo/typescript-conventions.md","reason":"保持 React 与浏览器动效代码的严格 TypeScript 合同。"}
+{"file":".trellis/spec/monorepo/styling-conventions.md","reason":"Hero 与品牌单元使用 CSS Modules，不引入内联静态样式或 CSS-in-JS。"}
+{"file":".trellis/spec/monorepo/ptd-ui-system.md","reason":"保持 Foliq 字标、暖灰色系和产品品牌资产的一致性。"}
+{"file":".trellis/spec/monorepo/directory-structure.md","reason":"确保变更留在 Web Host 与 React Designer 各自负责的层级。"}
+{"file":".trellis/spec/monorepo/quality-guidelines.md","reason":"遵守 ESLint、Prettier、测试与资源清理门禁。"}
+{"file":".trellis/tasks/08-02-landing-hero-brand/prd.md","reason":"实现顶部字符场、纯 Foliq 字标和旧 P 图形移除的验收合同。"}

@@ -1,0 +1,5 @@
+{"file":".trellis/spec/monorepo/typescript-conventions.md","reason":"检查动效组件与公共 React 代码不存在类型逃逸。"}
+{"file":".trellis/spec/monorepo/styling-conventions.md","reason":"检查 CSS Modules、响应式布局与 reduced-motion 合同。"}
+{"file":".trellis/spec/monorepo/ptd-ui-system.md","reason":"检查纯 Foliq 字标和暖灰品牌体系的一致性。"}
+{"file":".trellis/spec/monorepo/quality-guidelines.md","reason":"执行 Web/React Designer 测试、typecheck、lint、Prettier 与 build。"}
+{"file":".trellis/tasks/08-02-landing-hero-brand/prd.md","reason":"按 Definition of Done 进行目标倒推与浏览器验收。"}

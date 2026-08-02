@@ -60,12 +60,6 @@
   text-decoration: none;
 }
 
-.brand img {
-  width: 30px;
-  height: 30px;
-  object-fit: contain;
-}
-
 .brand > span {
   min-width: 0;
   display: grid;
@@ -717,11 +711,6 @@
 
   .compactBar > .brand {
     display: inline-flex;
-  }
-
-  .compactBar .brand img {
-    width: 27px;
-    height: 27px;
   }
 
   .compactActions {

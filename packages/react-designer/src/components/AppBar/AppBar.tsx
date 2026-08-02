@@ -30,11 +30,7 @@ import type { EditorStore } from '../../state'
 import { useEditorStore } from '../../state'
 import styles from './AppBar.module.css'
 
-type EditorCommandId =
-  | 'toggleRuler'
-  | 'toggleGuides'
-  | 'toggleGuidesLock'
-  | 'clearGuides'
+type EditorCommandId = 'toggleRuler' | 'toggleGuides' | 'toggleGuidesLock' | 'clearGuides'
 
 type WorkspaceCommandId = 'pageSettings' | Extract<ResourcePanelId, 'assets' | 'pages' | 'data'>
 
@@ -246,7 +242,8 @@ const UNAVAILABLE: CommandState = { enabled: false, pending: false, reason: '暂
 function getEditorCommandState(store: EditorStore, command: EditorCommandId): CommandState {
   let enabled = true
 
-  if (command === 'clearGuides') enabled = store.guides.value.length > 0 && !store.guidesLocked.value
+  if (command === 'clearGuides')
+    enabled = store.guides.value.length > 0 && !store.guidesLocked.value
 
   return enabled
     ? { enabled: true, pending: false }
@@ -360,7 +357,6 @@ export function AppBar({ hostCommands, workspace }: AppBarProps) {
     >
       <div className={styles.topBar}>
         <div className={styles.brand} aria-label="Foliq 结构化文档设计器">
-          <span className={styles.legacyLogo} aria-hidden="true" />
           <span className={styles.wordmark}>Foliq</span>
           <span className={styles.productName}>结构化文档设计器</span>
         </div>
