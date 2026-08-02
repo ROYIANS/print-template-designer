@@ -1,0 +1,740 @@
+.tools {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--ptd-space-2);
+}
+
+.body {
+  overflow-x: hidden;
+}
+
+.iconButton,
+.recordControl button,
+.searchControl button,
+.literalSegment button,
+.fieldToken button {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  padding: 0;
+  border: 0;
+  border-radius: var(--ptd-radius-1);
+  color: var(--ptd-text-muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.iconButton:hover,
+.recordControl button:hover:not(:disabled),
+.searchControl button:hover,
+.literalSegment button:hover,
+.fieldToken button:hover {
+  color: var(--ptd-text-strong);
+  background: var(--ptd-surface-sunken);
+}
+
+.iconButton svg,
+.recordControl svg,
+.literalSegment svg,
+.fieldToken svg {
+  width: 16px;
+  height: 16px;
+}
+
+.segmented {
+  min-width: 0;
+  height: 28px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  padding: 2px;
+  border: 1px solid var(--ptd-border);
+  border-radius: var(--ptd-radius-1);
+  background: var(--ptd-surface-sunken);
+}
+
+.segmented button {
+  min-width: 0;
+  padding: 0 7px;
+  border: 0;
+  border-radius: var(--ptd-radius-1);
+  color: var(--ptd-text-muted);
+  background: transparent;
+  font: inherit;
+  font-size: 11px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.segmented button[aria-pressed='true'] {
+  color: var(--ptd-selection-strong);
+  background: var(--ptd-surface-raised);
+  box-shadow: inset 0 -1px 0 var(--ptd-border-strong);
+}
+
+.segmented button:disabled,
+.recordControl button:disabled,
+.primaryButton:disabled,
+.fieldMain:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.recordControl {
+  height: 28px;
+  display: grid;
+  grid-template-columns: 28px minmax(42px, auto) 28px;
+  align-items: center;
+  border: 1px solid var(--ptd-border);
+  border-radius: var(--ptd-radius-1);
+  background: var(--ptd-surface-raised);
+}
+
+.recordControl output {
+  color: var(--ptd-text);
+  font-family: var(--ptd-font-metric);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.inlineNote {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--ptd-text-muted);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.sourceSection,
+.bindingSection,
+.fieldsSection {
+  min-width: 0;
+  padding: var(--ptd-space-3);
+  border-bottom: 1px solid var(--ptd-border-subtle);
+}
+
+.fieldsSection {
+  border-bottom: 0;
+}
+
+.sectionHeading,
+.surfaceHeader {
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--ptd-space-2);
+}
+
+.sectionHeading h3,
+.surfaceHeader h3 {
+  margin: 0;
+  color: var(--ptd-text-strong);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.sectionHeading p {
+  margin: 2px 0 0;
+  color: var(--ptd-text-muted);
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.actionButton,
+.primaryButton,
+.secondaryButton,
+.textAction {
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 8px;
+  border: 1px solid var(--ptd-border);
+  border-radius: var(--ptd-radius-1);
+  color: var(--ptd-text);
+  background: var(--ptd-surface-raised);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.actionButton:hover,
+.secondaryButton:hover,
+.textAction:hover {
+  color: var(--ptd-text-strong);
+  border-color: var(--ptd-border-strong);
+  background: var(--ptd-surface-sunken);
+}
+
+.primaryButton {
+  border-color: var(--ptd-action);
+  color: var(--ptd-surface-paper);
+  background: var(--ptd-action);
+}
+
+.primaryButton:hover:not(:disabled) {
+  border-color: var(--ptd-action-hover);
+  background: var(--ptd-action-hover);
+}
+
+.actionButton svg,
+.textAction svg {
+  width: 14px;
+  height: 14px;
+}
+
+.dropControl {
+  min-width: 0;
+  min-height: 52px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--ptd-space-2);
+  margin-top: var(--ptd-space-2);
+  padding: var(--ptd-space-2);
+  border: 1px dashed var(--ptd-border-strong);
+  border-radius: var(--ptd-radius-1);
+  color: var(--ptd-text-muted);
+  background: var(--ptd-surface-sunken);
+  font-size: 10px;
+}
+
+.dropControl[data-dragging='true'] {
+  border-color: var(--ptd-selection);
+  color: var(--ptd-selection-strong);
+  background: var(--ptd-selection-subtle);
+}
+
+.textAction {
+  width: 100%;
+  margin-top: var(--ptd-space-2);
+  justify-content: flex-start;
+  border-color: transparent;
+  color: var(--ptd-text-muted);
+  background: transparent;
+}
+
+.searchControl {
+  min-width: 0;
+  height: 28px;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 4px;
+  margin-top: var(--ptd-space-2);
+  padding: 0 4px 0 7px;
+  border: 1px solid var(--ptd-border);
+  border-radius: var(--ptd-radius-1);
+  background: var(--ptd-surface-raised);
+}
+
+.searchControl > svg {
+  width: 14px;
+  height: 14px;
+  color: var(--ptd-text-muted);
+}
+
+.searchControl input,
+.textControl input,
+.literalSegment input {
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  color: var(--ptd-text-strong);
+  background: transparent;
+  font: inherit;
+}
+
+.searchControl input::placeholder {
+  color: var(--ptd-text-muted);
+}
+
+.fieldTree {
+  min-width: 0;
+  margin: var(--ptd-space-2) calc(var(--ptd-space-1) * -1) 0;
+}
+
+.fieldBranch {
+  min-width: 0;
+}
+
+.fieldRow {
+  min-width: 0;
+  min-height: 36px;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 3px;
+  padding-left: calc(var(--field-depth, 0) * 10px);
+  border-bottom: 1px solid var(--ptd-border-subtle);
+}
+
+.fieldBranch[data-depth='1'] .fieldRow {
+  --field-depth: 1;
+}
+.fieldBranch[data-depth='2'] .fieldRow {
+  --field-depth: 2;
+}
+.fieldBranch[data-depth='3'] .fieldRow {
+  --field-depth: 3;
+}
+.fieldBranch[data-depth='4'] .fieldRow {
+  --field-depth: 4;
+}
+.fieldBranch[data-depth='5'] .fieldRow,
+.fieldBranch[data-depth='6'] .fieldRow,
+.fieldBranch[data-depth='7'] .fieldRow,
+.fieldBranch[data-depth='8'] .fieldRow,
+.fieldBranch[data-depth='9'] .fieldRow,
+.fieldBranch[data-depth='10'] .fieldRow,
+.fieldBranch[data-depth='11'] .fieldRow,
+.fieldBranch[data-depth='12'] .fieldRow {
+  --field-depth: 5;
+}
+
+.disclosure,
+.editField {
+  height: 28px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: var(--ptd-radius-1);
+  color: var(--ptd-text-muted);
+  background: transparent;
+  font: inherit;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.disclosure {
+  width: 22px;
+}
+
+.disclosure svg {
+  width: 14px;
+  height: 14px;
+  transition: transform var(--ptd-duration-instant) var(--ptd-ease-out);
+}
+
+.fieldBranch[aria-expanded='false'] > .fieldRow .disclosure svg {
+  transform: rotate(-90deg);
+}
+
+.disclosureSpacer {
+  width: 22px;
+}
+
+.fieldMain {
+  min-width: 0;
+  display: grid;
+  justify-items: start;
+  padding: 4px 3px;
+  border: 0;
+  border-radius: var(--ptd-radius-1);
+  color: var(--ptd-text);
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.fieldMain:hover:not(:disabled) {
+  color: var(--ptd-selection-strong);
+  background: var(--ptd-selection-subtle);
+}
+
+.fieldName,
+.fieldPath {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fieldName {
+  color: inherit;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.fieldPath {
+  color: var(--ptd-text-muted);
+  font-family: var(--ptd-font-metric);
+  font-size: 9px;
+}
+
+.typeLabel {
+  padding: 1px 3px;
+  border: 1px solid var(--ptd-border-subtle);
+  border-radius: var(--ptd-radius-1);
+  color: var(--ptd-text-muted);
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+.editField {
+  width: 32px;
+}
+
+.disclosure:hover,
+.editField:hover {
+  color: var(--ptd-text-strong);
+  background: var(--ptd-surface-sunken);
+}
+
+.emptyState {
+  min-height: 108px;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 5px;
+  padding: var(--ptd-space-4);
+  text-align: center;
+}
+
+.emptyState strong {
+  color: var(--ptd-text-strong);
+  font-size: 12px;
+}
+
+.emptyState span {
+  max-width: 210px;
+  color: var(--ptd-text-muted);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.importSurface {
+  min-width: 0;
+  display: grid;
+  gap: var(--ptd-space-3);
+  padding: var(--ptd-space-3);
+}
+
+.pasteControl,
+.textControl {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+  color: var(--ptd-text);
+  font-size: 10px;
+}
+
+.pasteControl textarea {
+  min-width: 0;
+  min-height: 208px;
+  resize: vertical;
+  padding: var(--ptd-space-2);
+  border: 1px solid var(--ptd-border);
+  border-radius: var(--ptd-radius-1);
+  color: var(--ptd-text-strong);
+  background: var(--ptd-surface-raised);
+  font: 11px/1.5 var(--ptd-font-metric);
+  tab-size: 2;
+}
+
+.sourceName {
+  margin: 0;
+  overflow: hidden;
+  color: var(--ptd-text-muted);
+  font-family: var(--ptd-font-metric);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+  border: 1px solid var(--ptd-border);
+  border-radius: var(--ptd-radius-1);
+}
+
+.summaryGrid > div {
+  min-width: 0;
+  padding: 6px;
+  border-right: 1px solid var(--ptd-border-subtle);
+}
+
+.summaryGrid > div:last-child {
+  border-right: 0;
+}
+
+.summaryGrid dt {
+  color: var(--ptd-text-muted);
+  font-size: 9px;
+}
+
+.summaryGrid dd {
+  margin: 2px 0 0;
+  color: var(--ptd-text-strong);
+  font-family: var(--ptd-font-metric);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.diagnostics,
+.impactSummary {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+  padding: var(--ptd-space-2);
+  border: 1px solid var(--ptd-border);
+  border-radius: var(--ptd-radius-1);
+  background: var(--ptd-surface-sunken);
+}
+
+.diagnostics strong,
+.impactSummary strong {
+  color: var(--ptd-text-strong);
+  font-size: 10px;
+}
+
+.diagnostics ul {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.diagnostics li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 5px;
+  color: var(--ptd-text);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.diagnostics li > span {
+  color: var(--ptd-text-muted);
+  font-weight: 650;
+}
+
+.diagnostics li[data-severity='error'],
+.diagnostics li[data-severity='error'] > span {
+  color: var(--ptd-danger);
+}
+
+.impactSummary span {
+  color: var(--ptd-text-muted);
+  font-size: 10px;
+}
+
+.actionRow {
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ptd-space-2);
+}
+
+.fieldEditor,
+.composer {
+  min-width: 0;
+  display: grid;
+  gap: var(--ptd-space-2);
+  margin-top: var(--ptd-space-2);
+  padding: var(--ptd-space-2);
+  border: 1px solid var(--ptd-border);
+  border-radius: var(--ptd-radius-1);
+  background: var(--ptd-surface-sunken);
+}
+
+.textControl input {
+  height: 28px;
+  padding: 0 7px;
+  border: 1px solid var(--ptd-border);
+  border-radius: var(--ptd-radius-1);
+  background: var(--ptd-surface-raised);
+}
+
+.presetControl {
+  display: grid;
+  gap: 5px;
+  color: var(--ptd-text);
+  font-size: 10px;
+}
+
+.presetControl > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.presetControl button {
+  min-height: 26px;
+  padding: 0 7px;
+  border: 1px solid var(--ptd-border);
+  border-radius: var(--ptd-radius-1);
+  color: var(--ptd-text-muted);
+  background: var(--ptd-surface-raised);
+  font: inherit;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.presetControl button[aria-pressed='true'] {
+  border-color: var(--ptd-selection-border);
+  color: var(--ptd-selection-strong);
+  background: var(--ptd-selection-subtle);
+}
+
+.fieldIdentity {
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--ptd-text-muted);
+  font-family: var(--ptd-font-metric);
+  font-size: 9px;
+  line-height: 1.45;
+}
+
+.composerSegments {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.literalSegment,
+.fieldToken {
+  min-width: 0;
+  min-height: 30px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) 28px;
+  align-items: center;
+  gap: 4px;
+  padding-left: 6px;
+  border: 1px solid var(--ptd-border);
+  border-radius: var(--ptd-radius-1);
+  background: var(--ptd-surface-raised);
+}
+
+.literalSegment > span {
+  color: var(--ptd-text-muted);
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+.literalSegment input {
+  height: 28px;
+}
+
+.fieldToken {
+  grid-template-columns: 16px minmax(0, 1fr) 28px;
+  color: var(--ptd-selection-strong);
+  background: var(--ptd-selection-subtle);
+}
+
+.fieldToken > svg {
+  width: 13px;
+  height: 13px;
+}
+
+.fieldToken > span {
+  overflow: hidden;
+  font-size: 10px;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.iconButton:focus-visible,
+.segmented button:focus-visible,
+.recordControl button:focus-visible,
+.actionButton:focus-visible,
+.primaryButton:focus-visible,
+.secondaryButton:focus-visible,
+.textAction:focus-visible,
+.dropControl button:focus-visible,
+.searchControl:has(input:focus-visible),
+.disclosure:focus-visible,
+.fieldMain:focus-visible,
+.editField:focus-visible,
+.pasteControl textarea:focus-visible,
+.textControl input:focus-visible,
+.presetControl button:focus-visible,
+.literalSegment:has(input:focus-visible),
+.literalSegment button:focus-visible,
+.fieldToken button:focus-visible {
+  outline: 2px solid var(--ptd-focus);
+  outline-offset: 1px;
+}
+
+@media (pointer: coarse) {
+  .iconButton,
+  .recordControl button,
+  .searchControl button,
+  .actionButton,
+  .primaryButton,
+  .secondaryButton,
+  .textAction,
+  .disclosure,
+  .editField,
+  .fieldMain,
+  .presetControl button,
+  .literalSegment button,
+  .fieldToken button {
+    min-height: var(--ptd-control-touch);
+  }
+
+  .iconButton,
+  .recordControl button,
+  .searchControl button,
+  .literalSegment button,
+  .fieldToken button {
+    width: var(--ptd-control-touch);
+    height: var(--ptd-control-touch);
+  }
+
+  .fieldRow {
+    min-height: var(--ptd-control-touch);
+  }
+}
+
+@container designer (max-width: 480px) {
+  .tools {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .recordControl {
+    width: 100%;
+    grid-template-columns: 32px minmax(0, 1fr) 32px;
+  }
+
+  .dropControl {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .summaryGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .summaryGrid > div:nth-child(2) {
+    border-right: 0;
+  }
+
+  .summaryGrid > div:nth-child(-n + 2) {
+    border-bottom: 1px solid var(--ptd-border-subtle);
+  }
+}

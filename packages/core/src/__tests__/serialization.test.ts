@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { serialize, deserialize } from '../serialization'
+import { CURRENT_TEMPLATE_VERSION, serialize, deserialize } from '../serialization'
 import type { TemplateSchema } from '../types/template-schema'
 import { DEFAULT_PAGE_CONFIG } from '../types/page-config'
 
@@ -17,10 +17,13 @@ describe('serialization', () => {
     expect(() => JSON.parse(json)).not.toThrow()
   })
 
-  it('serialize includes _version: 1', () => {
+  it('serialize includes the current canonical version', () => {
     const json = serialize(sampleTemplate)
     const parsed = JSON.parse(json) as Record<string, unknown>
-    expect(parsed['_version']).toBe(1)
+    expect(parsed['_version']).toBe(CURRENT_TEMPLATE_VERSION)
+    expect(parsed['data']).toEqual({ version: 1, fields: [] })
+    expect(parsed).not.toHaveProperty('dataSource')
+    expect(parsed).not.toHaveProperty('dataSet')
   })
 
   it('round-trip is lossless', () => {
@@ -34,6 +37,44 @@ describe('serialization', () => {
   it('deserialize handles missing _version as 0', () => {
     const raw = JSON.stringify({ ...sampleTemplate, _version: undefined })
     expect(() => deserialize(raw)).not.toThrow()
+  })
+
+  it('preserves legacy data on read and only migrates it at an explicit save boundary', () => {
+    const legacy = {
+      ...sampleTemplate,
+      dataSource: [{ id: 'amount', title: '金额', field: 'amount', typeName: 'Money' as const }],
+      dataSet: { amount: '1234.5' },
+    }
+    const read = deserialize(JSON.stringify(legacy))
+    expect(read.data).toBeUndefined()
+    expect(read.dataSource).toEqual(legacy.dataSource)
+
+    const saved = JSON.parse(serialize(read)) as Record<string, unknown>
+    expect(saved).not.toHaveProperty('dataSource')
+    expect(saved).not.toHaveProperty('dataSet')
+    expect(saved['data']).toMatchObject({
+      version: 1,
+      fields: [
+        {
+          id: 'amount',
+          valueType: 'number',
+          formatter: { kind: 'number', coerceNumericString: true },
+        },
+      ],
+      sampleRecords: [{ amount: '1234.5' }],
+    })
+    expect(read.data).toBeUndefined()
+    expect(read.dataSet).toEqual({ amount: '1234.5' })
+  })
+
+  it('rejects malformed and future templates instead of casting them', () => {
+    expect(() => deserialize('[]')).toThrow('根节点')
+    expect(() => deserialize(JSON.stringify({ ...sampleTemplate, _version: 999 }))).toThrow(
+      '不支持的模板版本',
+    )
+    expect(() => deserialize(JSON.stringify({ ...sampleTemplate, pages: [] }))).toThrow(
+      'TemplateSchema',
+    )
   })
 
   it('deserialize fills legacy left and right page margins', () => {

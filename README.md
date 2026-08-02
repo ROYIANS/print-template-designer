@@ -6,7 +6,7 @@
 </div>
 
 > [!IMPORTANT]
-> 当前仓库正在进行 v2 重写。核心模型、渲染组件、React 编辑器、多页面管理、GitHub 登录、模板版本 API 与完整自托管容器栈已经落地；Web 的模板保存/打开流程和导出能力尚未实现。原 Vue 2 版本保存在 [`legacy/`](./legacy/) 中，仅供参考。
+> 当前仓库正在进行 v2 重写。核心模型、渲染组件、React 编辑器、多页面管理、GitHub 登录、文件工作台、模板持久化与版本历史、Datasource v2 和完整自托管容器栈已经落地；打印、PDF/Word、自动分页与外部数据连接器尚未实现。原 Vue 2 版本保存在 [`legacy/`](./legacy/) 中，仅供参考。
 
 ## 项目定位
 
@@ -14,9 +14,9 @@ Foliq 不是一个只能独立运行的页面 Demo，也没有把技术路线限
 
 - **可嵌入的设计器内核**：Schema、单位换算、序列化、数据绑定和组件注册表不依赖 UI 框架。
 - **专业 React 编辑器**：提供完整的画布工作区、组件目录、属性面板和编辑命令。
-- **可演进的完整应用**：Vite Web Host 与 NestJS 模板服务已经存在，后续将接通持久化、数据预览和导出流程。
+- **可演进的完整应用**：Vite Web Host 已接通 NestJS 模板服务，提供认证、文件工作台、保存、另存为、版本历史与恢复；后续继续接入外部数据连接器、打印和导出。
 
-当前更准确的描述是：**可用的专业编辑器基础 + 尚在集成中的完整应用**。
+当前更准确的描述是：**已经形成文档设计、数据校样和版本化保存闭环的专业 Web 应用，打印出版链路仍在建设中**。
 
 ## 当前能力
 
@@ -28,26 +28,28 @@ Foliq 不是一个只能独立运行的页面 Demo，也没有把技术路线限
 - 真实标尺、悬停预览线、可固定和着色的参考线。
 - 文本框、直线、矩形、椭圆、星形的画布拖拽绘制，以及 Hand Tool。
 - 多页面新增、复制、删除和排序。
+- JSON object / object array 导入、嵌套字段树、字段搜索、格式化、组件绑定、记录切换与实时数据校样。
+- Host 可通过显式 `RenderContext` 注入临时运行时数据、locale、timeZone 与确定性的 `now`，不会默认写回模板。
 - 宽屏、标准与紧凑三种响应式工作区布局。
 - 文本、表格、图像、编码、图形五类组件目录，并区分可用组件与规划组件。
 
 ### 引擎与服务
 
-- 框架无关的 `TemplateSchema`、页面配置、序列化、数据绑定和组件注册表。
+- 框架无关的 `TemplateSchema`、canonical Datasource v2、页面配置、序列化、安全数据绑定和组件注册表。
 - 原生 DOM 渲染组件：文本、表格、图像、二维码、条码和基础图形。
 - NestJS + Prisma + PostgreSQL 多用户模板 API，支持 GitHub OAuth、Allowlist、owner 隔离、不可变版本快照、恢复和乐观并发控制。
 - GitHub Actions 构建 Web/Server 镜像并发布到 GHCR；Compose 管理 PostgreSQL、migration、Server 和同源 Web 入口。
 
 ### 成熟度边界
 
-| 模块                  | 当前状态         | 说明                                                    |
-| --------------------- | ---------------- | ------------------------------------------------------- |
-| `@ptd/core`           | 已实现           | Schema、单位、序列化、数据绑定、组件注册表              |
-| `@ptd/components`     | 已实现           | 框架无关 DOM 渲染组件                                   |
-| `@ptd/react-designer` | 已实现，持续打磨 | Controlled React 编辑器和专业画布交互                   |
-| `apps/web`            | 认证 Host 已实现 | GitHub 登录已连接 Server；模板仍在内存中，尚未接入 CRUD |
-| `apps/server`         | API 已实现       | PostgreSQL、Better Auth、owner 隔离和模板/版本 API      |
-| `@ptd/export`         | 空脚手架         | PDF、打印、Word 和自动溢出分页均未实现                  |
+| 模块                  | 当前状态         | 说明                                                     |
+| --------------------- | ---------------- | -------------------------------------------------------- |
+| `@ptd/core`           | 已实现           | Schema、单位、canonical v2、JSON 验证/推断、绑定与注册表 |
+| `@ptd/components`     | 已实现           | 框架无关 DOM 渲染组件                                    |
+| `@ptd/react-designer` | 已实现，持续打磨 | Controlled React 编辑器和专业画布交互                    |
+| `apps/web`            | 应用闭环已实现   | 文件工作台、CRUD、版本历史、恢复、冲突保护与数据校样     |
+| `apps/server`         | API 已实现       | PostgreSQL、Better Auth、owner 隔离和模板/版本 API       |
+| `@ptd/export`         | 空脚手架         | PDF、打印、Word 和自动溢出分页均未实现                   |
 
 ## 架构
 
@@ -120,31 +122,28 @@ v2 packages 当前只在本仓库 workspace 中使用，**尚未发布到 npm**�
 
 ```tsx
 import { useState } from 'react'
-import { Designer, type TemplateSchema } from '@ptd/react-designer'
+import { Designer, type DesignerHost, type TemplateSchema } from '@ptd/react-designer'
 import '@ptd/react-designer/styles.css'
 
 export function TemplateEditor({ initialValue }: { initialValue: TemplateSchema }) {
   const [template, setTemplate] = useState(initialValue)
+  const host: DesignerHost = {
+    commands: { save: {}, open: {} },
+    onCommand: (command, context) => runDocumentCommand(command, context.template),
+  }
 
-  return (
-    <Designer
-      value={template}
-      onChange={setTemplate}
-      onSave={(next) => saveTemplate(next)}
-      onLoad={() => loadTemplate()}
-    />
-  )
+  return <Designer value={template} onChange={setTemplate} host={host} />
 }
 ```
 
 `DesignerProps` 当前只有四项：
 
-| 属性       | 类型                                              | 说明                      |
-| ---------- | ------------------------------------------------- | ------------------------- |
-| `value`    | `TemplateSchema`                                  | 必填，Host 持有的当前模板 |
-| `onChange` | `(value) => void`                                 | 编辑器产生变更时通知 Host |
-| `onSave`   | `(value) => void`                                 | 用户触发保存时调用        |
-| `onLoad`   | `() => TemplateSchema \| Promise<TemplateSchema>` | 用户触发载入时调用        |
+| 属性            | 类型              | 说明                                              |
+| --------------- | ----------------- | ------------------------------------------------- |
+| `value`         | `TemplateSchema`  | 必填，Host 持有的当前模板                         |
+| `onChange`      | `(value) => void` | 编辑器产生模板变更时通知 Host                     |
+| `host`          | `DesignerHost`    | 文档状态与 New/Open/Save/History 等应用级命令合同 |
+| `renderContext` | `RenderContext`   | 可选临时校样数据与确定性的 locale/timeZone/now    |
 
 样式需要由 Host 显式导入。API 与集成约束见 [`@ptd/react-designer` README](./packages/react-designer/README.md)。
 
@@ -207,13 +206,13 @@ cp .env.example .env
 
 接下来的主线按依赖顺序推进：
 
-1. 完善 Host 集成钩子与应用边界。
-2. 让 `apps/web` 接入模板列表、保存、版本历史、恢复和冲突处理。
-3. 重构数据源引用与数据预览流程。
-4. 实现预览、打印、PDF/Word 导出与派生自动分页。
-5. 完善备份恢复、监控和多架构容器发布。
+1. 实现静态/单记录打印预览与浏览器打印。
+2. 在已稳定的数据合同上增加 Excel/CSV 本地文件连接器。
+3. 设计具备 Secret 隔离和 SSRF 防护的 REST Server 连接器。
+4. 实现重复明细、结构表格与派生自动分页。
+5. 实现可复现 PDF 输出并独立评估 Word 版式降级边界。
 
-图表、签名、条件显示、字体管理、批量打印和多语言属于后续扩展，不应被理解为当前能力。
+Excel/XLS/XLSX、CSV、REST、打印、PDF/Word、自动分页、图表、签名、条件显示、字体管理、批量打印和多语言属于后续扩展，不应被理解为当前能力。
 
 ## Legacy v1
 

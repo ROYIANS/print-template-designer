@@ -67,5 +67,34 @@ export type {
   TableHorizontalAlign,
   TableVerticalAlign,
 } from './table-content'
-export type { DataSourceField, DataFieldType, DataSet } from './data-source'
+export { DATA_SOURCE_LIMITS } from './data-source'
+export type {
+  BindingExpression,
+  ComponentBinding,
+  ComponentBindingTarget,
+  ComponentBindingTargetDefinition,
+  DataDiagnostic,
+  DataDiagnosticCode,
+  DataDiagnosticSeverity,
+  DataFieldDefinition,
+  DataFieldType,
+  DataFormatter,
+  DataPath,
+  DataPathArrayItem,
+  DataPathSegment,
+  DataRecord,
+  DataSet,
+  DataSourceField,
+  DataSourceLimits,
+  DataValueType,
+  FieldBindingExpression,
+  JsonObject,
+  JsonPrimitive,
+  JsonValue,
+  LiteralBindingSegment,
+  RenderContext,
+  RenderMode,
+  TemplateDataDefinition,
+  TextBindingExpression,
+} from './data-source'
 export type { TemplateSchema, TemplatePage } from './template-schema'

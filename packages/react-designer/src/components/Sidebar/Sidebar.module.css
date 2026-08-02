@@ -817,46 +817,6 @@
   color: var(--ptd-text-muted);
 }
 
-.panelHint {
-  color: var(--ptd-text-muted);
-  font-size: 10px;
-  line-height: 1.45;
-}
-
-.dataList {
-  margin: 0;
-  padding: var(--ptd-space-2) 0;
-}
-
-.dataList > div {
-  min-height: 38px;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  padding: 6px var(--ptd-space-3);
-  border-bottom: 1px solid var(--ptd-border-subtle);
-}
-
-.dataList dt {
-  color: var(--ptd-text-strong);
-  font-weight: 600;
-}
-
-.dataList dd {
-  grid-column: 1;
-  margin: 2px 0 0;
-  color: var(--ptd-text-muted);
-  font-family: var(--ptd-font-metric);
-  font-size: 10px;
-}
-
-.dataList span {
-  grid-column: 2;
-  grid-row: 1 / 3;
-  color: var(--ptd-text-muted);
-  font-size: 9px;
-}
-
 .emptyState {
   min-height: 220px;
   display: grid;

@@ -7,7 +7,7 @@ import {
   type CSSProperties,
   type PointerEvent,
 } from 'react'
-import type { TemplateSchema } from '@ptd/core'
+import type { RenderContext, TemplateSchema } from '@ptd/core'
 import { useDesignerHostCommands, type DesignerHost } from '../../host'
 import { createEditorStore, EditorStoreProvider } from '../../state'
 import { isEditorInteractiveTarget, useEditorKeyboard } from '../../hooks/useEditorKeyboard'
@@ -27,10 +27,11 @@ export interface DesignerProps {
   value: TemplateSchema
   onChange?: (value: TemplateSchema) => void
   host?: DesignerHost
+  renderContext?: RenderContext
 }
 
-export function Designer({ value, onChange, host }: DesignerProps) {
-  const [store] = useState(() => createEditorStore(value, { onChange }))
+export function Designer({ value, onChange, host, renderContext }: DesignerProps) {
+  const [store] = useState(() => createEditorStore(value, { onChange, renderContext }))
   const rootRef = useRef<HTMLDivElement>(null)
   const layout = useWorkspaceLayout(rootRef)
   const getTemplate = useCallback(() => store.template.value, [store])
@@ -48,7 +49,8 @@ export function Designer({ value, onChange, host }: DesignerProps) {
   useEffect(() => {
     store.setOnChange(onChange)
     store.syncExternal(value)
-  }, [onChange, store, value])
+    store.setHostRenderContext(renderContext)
+  }, [onChange, renderContext, store, value])
 
   const workspaceStyle: WorkspaceVariables = {
     '--ptd-resource-panel-width': `${layout.resourceWidth}px`,

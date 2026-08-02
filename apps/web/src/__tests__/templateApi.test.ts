@@ -1,8 +1,48 @@
 import { describe, expect, it, vi } from 'vitest'
+import type { TemplateSchema } from '@ptd/core'
 import { INITIAL_TEMPLATE } from '../templates'
 import { createTemplateApi, TemplateApiError } from '../templateApi'
 
 const NOW = '2026-07-31T08:30:00.000Z'
+
+const CANONICAL_TEMPLATE: TemplateSchema = {
+  _version: 2,
+  pageConfig: { ...INITIAL_TEMPLATE.pageConfig, title: '数据校样模板' },
+  pages: [
+    {
+      id: 'canonical-page',
+      componentData: [
+        {
+          id: 'order-number',
+          component: 'RoySimpleText',
+          propValue: '订单编号',
+          style: { width: 160, height: 32, rotate: 0, opacity: 1 },
+          groupStyle: {},
+          position: { x: 12, y: 18 },
+          bindings: [
+            {
+              id: 'order-number-binding',
+              target: { kind: 'text' },
+              expression: { kind: 'field', fieldId: 'order-number-field' },
+            },
+          ],
+        },
+      ],
+    },
+  ],
+  data: {
+    version: 1,
+    fields: [
+      {
+        id: 'order-number-field',
+        name: '订单编号',
+        path: ['order', 'number'],
+        valueType: 'string',
+      },
+    ],
+    sampleRecords: [{ order: { number: 'FQ-20260801-01' } }],
+  },
+}
 
 function record(overrides: Record<string, unknown> = {}) {
   return {
@@ -51,6 +91,37 @@ describe('template API client', () => {
       title: '出库单',
       expectedVersion: 2,
     })
+  })
+
+  it('accepts canonical v2 content without requiring deprecated legacy keys', async () => {
+    const api = createTemplateApi(
+      vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) =>
+        jsonResponse(record({ content: CANONICAL_TEMPLATE })),
+      ),
+    )
+
+    const result = await api.get(7)
+
+    expect(result.content).toEqual(CANONICAL_TEMPLATE)
+    expect(result.content).not.toHaveProperty('dataSource')
+    expect(result.content).not.toHaveProperty('dataSet')
+    expect(result.content.data?.sampleRecords).toEqual([{ order: { number: 'FQ-20260801-01' } }])
+    expect(result.content.pages[0]?.componentData[0]?.bindings).toHaveLength(1)
+  })
+
+  it('keeps accepting legacy v0 content through Core deserialization', async () => {
+    const { _version: _legacyVersion, ...legacyV0 } = INITIAL_TEMPLATE
+    void _legacyVersion
+    const api = createTemplateApi(
+      vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) =>
+        jsonResponse(record({ content: legacyV0 })),
+      ),
+    )
+
+    const result = await api.get(7)
+
+    expect(result.content).toMatchObject({ _version: 0, dataSource: [], dataSet: {} })
+    expect(result.content.data).toBeUndefined()
   })
 
   it('covers list, create, delete and version endpoint contracts', async () => {
@@ -142,6 +213,24 @@ describe('template API client', () => {
     const api = createTemplateApi(
       vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) =>
         jsonResponse(record({ content: invalidContent })),
+      ),
+    )
+
+    await expect(api.get(7)).rejects.toMatchObject({ kind: 'invalid-response' })
+  })
+
+  it('rejects canonical responses that also contain non-empty legacy datasource truth', async () => {
+    const api = createTemplateApi(
+      vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) =>
+        jsonResponse(
+          record({
+            content: {
+              ...CANONICAL_TEMPLATE,
+              dataSource: [{ id: 'legacy', title: 'Legacy', field: 'legacy', typeName: 'String' }],
+              dataSet: { legacy: 'stale' },
+            },
+          }),
+        ),
       ),
     )
 

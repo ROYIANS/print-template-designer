@@ -3,3 +3,9 @@
 {"file": ".trellis/spec/monorepo/styling-conventions.md", "reason": "CSS Modules 用法、Radix UI data-* 属性样式化、禁止 inline style"}
 {"file": ".trellis/spec/monorepo/directory-structure.md", "reason": "monorepo 目录结构，packages/ 与 apps/ 解剖，数据源相关包位置"}
 {"file": ".trellis/spec/monorepo/quality-guidelines.md", "reason": "ESLint/Prettier/Node >=20 约定"}
+{"file": ".trellis/spec/monorepo/ptd-ui-system.md", "reason": "数据面板、字段树、JSON 导入、Popover/Sheet、窄屏与非阻断交互必须遵守 Foliq UI 合同"}
+{"file": ".trellis/spec/monorepo/react-designer-contract.md", "reason": "controlled value、实例 UI 状态、History/Dirty、Renderer、TemplatePreview 与 Host 边界"}
+{"file": ".trellis/spec/monorepo/server-architecture.md", "reason": "canonical TemplateSchema 需要通过现有 owner/version API 安全验证与 round-trip，不新增连接 Secret 或代理"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "Datasource 跨 Core、Components、Designer 与 Web，必须明确验证、求值、持久化和显示边界"}
+{"file": ".trellis/spec/guides/code-reuse-thinking-guide.md", "reason": "绑定目标、normalizer、诊断和媒体校验必须复用现有单一事实来源"}
+{"file": ".trellis/tasks/05-21-datasource-refactor/research/data-contract-audit.md", "reason": "当前实现审计、Legacy 可借鉴边界、推荐数据流与失败矩阵"}

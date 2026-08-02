@@ -41,7 +41,10 @@ component.destroy()
 - `update(schema)` 重新应用样式并渲染内容。
 - `destroy()` 移除 DOM；Host 必须在卸载时调用。
 
-组件只负责把 Schema 渲染成 DOM，不拥有选区、拖拽、历史、工具栏或页面管理；这些属于 `@ptd/react-designer`。
+组件只负责把已经解析好的 Schema 内容渲染成 DOM，不拥有数据源、样例记录、Host `RenderContext`、
+连接配置、凭据、选区、拖拽、历史、工具栏或页面管理。Datasource v2 的字段查找、格式化、绑定求值和
+诊断由 `@ptd/core` 统一完成，Designer/Preview 将 `resolveComponentBindings` 返回的派生
+`ComponentSchema` 交给本包现有 Renderer，避免每个组件维护另一套绑定规则。
 
 图片 Renderer 兼容旧字符串 URL 与结构化图片内容，并显示未设置、载入中和载入失败状态。二维码和
 条形码 Renderer 使用 `@ptd/core` 的统一规范化/校验，在动态渲染模块尚未完成、内容非法或模块失败时
@@ -55,6 +58,11 @@ Schema，但在数据流、分区编辑和自动分页合同完成前不属于�
 
 普通文本与表格单元格只按文本渲染；富文本在保存边界和 Renderer 入口使用相同白名单清洗。Host
 仍应在远程数据进入模板前完成业务层授权与长度限制，但不能依赖浏览器执行任意 Schema HTML。
+
+运行时字段值不会作为任意 HTML、脚本或网络表达式交给组件执行。图片、二维码与条形码在数据绑定派生
+后仍复用本包已有的安全来源、码制和异步状态合同。未来 Excel/CSV 与 REST 连接器负责把外部来源转换为
+Core 可验证的 JSON 记录；连接 Token、Cookie、认证头和其他 Secret 永远不属于本包或
+`TemplateSchema`。
 
 ## 开发
 

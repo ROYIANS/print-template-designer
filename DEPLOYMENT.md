@@ -79,6 +79,11 @@ PTD_WEB_ORIGIN=https://foliq.example.com
 
 上游代理转发到 `http://127.0.0.1:8080`，并保留 `Host`、`X-Forwarded-For` 和 `X-Forwarded-Proto`。容器 Nginx 会继续把这些信息交给启用了受控 `trust proxy` 的 Nest Server。
 
+模板 JSON 的完整请求体上限为 **4 MiB**，容器 Nginx 与 Nest Server 已保持一致。如果前面还有 Caddy、
+Traefik、Cloudflare 或宿主机 Nginx，需要确认其请求体上限不低于 4 MiB；否则上游可能先返回 413，
+请求不会到达 Foliq。示例数据本身仍受 Core 的 512 KiB 上限约束，4 MiB 还需要容纳页面、组件、绑定
+和请求信封。
+
 不要把 PostgreSQL 或 Server 端口直接开放到公网；默认 Compose 只发布 Web 端口。
 
 ## 镜像与标签

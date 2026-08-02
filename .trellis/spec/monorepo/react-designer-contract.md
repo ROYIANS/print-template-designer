@@ -19,6 +19,7 @@ interface DesignerProps {
   value: TemplateSchema
   onChange?: (value: TemplateSchema) => void
   host?: DesignerHost
+  renderContext?: RenderContext
 }
 
 interface DesignerHost {
@@ -36,6 +37,7 @@ interface TemplatePreviewProps {
   pageIndex?: number
   label?: string
   className?: string
+  renderContext?: RenderContext
 }
 ```
 
@@ -112,6 +114,32 @@ import '@ptd/react-designer/styles.css'
   public Preview surface.
 - ResizeObserver and every component renderer/editor instance must be disconnected or destroyed on unmount.
   Preview is not a bitmap-thumbnail generator and must never persist a derived image into TemplateSchema.
+- Preview is static and deterministic by default. It never inherits the current Designer's temporary
+  `RenderContext`; it renders proof data only when its Host explicitly supplies `renderContext`.
+
+#### Data definition, bindings and proof state
+
+- `TemplateSchema.data` is the canonical persisted data definition. Top-level `dataSource` / `dataSet`
+  and legacy field tokens are compatibility inputs only; normalization and serialization must converge
+  them to the canonical v2 data and binding model rather than creating a second editable source of truth.
+- Field models, field names, field formatters, component bindings, explicitly saved sample records,
+  removal of saved sample records and applying a newly reviewed import candidate are template mutations.
+  Each deliberate action emits through `onChange`, marks the Host document dirty and creates at most one
+  meaningful History entry.
+- Proof mode, current proof-record index, field-search query, expanded field ids and JSON import drafts,
+  parsing results or candidate previews are Designer-instance UI state. Host-supplied runtime data is also
+  temporary. None may enter `TemplateSchema`, History, dirty calculation or `onChange` until the user
+  explicitly applies a candidate that changes the canonical data definition.
+- `Designer.renderContext` is the Host injection point for temporary `data`, `record`, `recordIndex`,
+  `locale`, `timeZone` and an explicit ISO `now`. Changing it may update proof output, but does not write
+  runtime values back into the template.
+- Proof rendering calls Core `resolveComponentBindings` to derive render-only `ComponentSchema` values.
+  It must never mutate the source component, the controlled template or its manual pages, and must not
+  duplicate binding evaluation inside React renderers.
+- Switching proof mode or proof records, searching fields, and expanding/collapsing field rows produces no
+  History entry, dirty transition or Host change.
+- A genuinely external `value` replacement closes proof mode, clamps the proof-record index, and clears
+  import candidates and field-editing surfaces that belonged to the previous template.
 
 #### Host application commands and document state
 
@@ -362,6 +390,14 @@ import '@ptd/react-designer/styles.css'
 | Document status is conflict/error         | Render explicit text status; never rely on color alone              |
 | Preview page index is out of bounds       | Clamp to an existing manual page                                    |
 | Preview receives a new TemplateSchema     | Update real renderer content; no Host/history/selection mutation    |
+| Preview has no explicit `renderContext`   | Render static content; do not inherit Designer proof state          |
+| Host replaces `Designer.renderContext`    | Recompute proof only; no Schema, Host, dirty or history mutation     |
+| Proof/search/expanded state changes       | Update instance UI only; no Schema, Host, dirty or history mutation |
+| JSON is parsed or previewed               | Keep candidate local; do not mutate the template before Apply       |
+| User applies a valid import candidate     | Replace canonical data once; one Host emission and history entry    |
+| Field/formatter/binding/sample edit       | Persist once in canonical data; one coherent history entry          |
+| External `value` replaces the template    | Close proof, clamp record and clear stale data-panel draft surfaces |
+| Proof resolves a component binding        | Derive via Core without mutating source components or manual pages  |
 | First user mutation then undo             | Restore initial `value`                                             |
 | Gesture emits many transient updates      | One final history entry                                             |
 | Gesture is cancelled                      | Restore the exact gesture-start value; add no history entry         |
@@ -419,7 +455,16 @@ import '@ptd/react-designer/styles.css'
 - App Bar/keyboard tests: real EditorStore/workspace execution, Host Save/New/Open shortcuts,
   planned command disabled state and document title/version/status Chrome.
 - Preview tests: real ComponentRenderer output, external Schema synchronization, non-interactive semantics
-  and page-index clamping without Host changes or history.
+  and page-index clamping without Host changes or history; default static output does not inherit Designer
+  proof state, while an explicit Preview `renderContext` deterministically resolves bindings.
+- Data-panel/Store tests: proof mode, record navigation, search and expanded rows are instance-local and
+  history-free; JSON parse/preview remains local; Apply, field/formatter/binding edits and saved-sample
+  removal each create one coherent Host emission and history entry.
+- Store synchronization test: external `value` replacement closes proof, clamps the record index and clears
+  stale import and field-editing surfaces without modifying the incoming template.
+- Core/renderer contract test: proof uses `resolveComponentBindings`, leaves the source template and manual
+  pages referentially unchanged, and reacts to Host `record`, locale, time zone and explicit ISO `now`
+  without persisting runtime data.
 - Store/Core unit tests: measurement preferences are instance-local and history-free; conversion,
   formatting, parsing, precision and stepping preserve canonical Canvas geometry.
 - Core/Store tests: legacy page config gains left/right margins; invalid content areas are rejected;

@@ -7,6 +7,7 @@ import type {
   ComponentType,
   CreatableComponentType,
 } from '../types/component-schema'
+import type { ComponentBindingTargetDefinition } from '../types/data-source'
 import {
   DEFAULT_BAR_CODE_PROPS,
   DEFAULT_IMAGE_PROPS,
@@ -30,6 +31,8 @@ interface ComponentDefinitionBase<TType extends ComponentType> {
   category: ComponentCategory
   defaultStyle: Partial<ComponentStyle>
   defaultProps: unknown
+  /** Single source of truth for properties that may consume runtime data. */
+  bindingTargets?: readonly ComponentBindingTargetDefinition[]
 }
 
 export type CatalogComponentDefinition = ComponentDefinitionBase<CreatableComponentType> & {
@@ -60,6 +63,14 @@ const BUILT_IN_COMPONENTS = [
     },
     defaultStyle: { width: 200, height: 50, fontSize: 10, rotate: 0, opacity: 1 },
     defaultProps: '',
+    bindingTargets: [
+      {
+        kind: 'text',
+        label: '文本内容',
+        acceptedTypes: ['string', 'number', 'boolean', 'date'],
+        supportsInterpolation: true,
+      },
+    ],
   },
   {
     type: 'RoyText',
@@ -76,6 +87,14 @@ const BUILT_IN_COMPONENTS = [
     },
     defaultStyle: { width: 500, height: 200, fontSize: 12, rotate: 0, opacity: 1 },
     defaultProps: '<p></p>',
+    bindingTargets: [
+      {
+        kind: 'rich-text',
+        label: '富文本内容',
+        acceptedTypes: ['string', 'number', 'boolean', 'date'],
+        supportsInterpolation: true,
+      },
+    ],
   },
   {
     type: 'RoySimpleTable',
@@ -92,6 +111,14 @@ const BUILT_IN_COMPONENTS = [
     },
     defaultStyle: { width: 500, height: 200, rotate: 0, opacity: 1 },
     defaultProps: DEFAULT_SIMPLE_TABLE_PROPS,
+    bindingTargets: [
+      {
+        kind: 'table-cell-text',
+        label: '单元格文本',
+        acceptedTypes: ['string', 'number', 'boolean', 'date'],
+        supportsInterpolation: true,
+      },
+    ],
   },
   {
     type: 'RoyComplexTable',
@@ -117,6 +144,14 @@ const BUILT_IN_COMPONENTS = [
     },
     defaultStyle: { width: 200, height: 150, rotate: 0, opacity: 1 },
     defaultProps: DEFAULT_IMAGE_PROPS,
+    bindingTargets: [
+      {
+        kind: 'image-source',
+        label: '图片地址',
+        acceptedTypes: ['string'],
+        supportsInterpolation: false,
+      },
+    ],
   },
   {
     type: 'RoyQRCode',
@@ -133,6 +168,14 @@ const BUILT_IN_COMPONENTS = [
     },
     defaultStyle: { width: 100, height: 100, rotate: 0, opacity: 1 },
     defaultProps: DEFAULT_QR_CODE_PROPS,
+    bindingTargets: [
+      {
+        kind: 'code-content',
+        label: '二维码内容',
+        acceptedTypes: ['string', 'number', 'boolean', 'date'],
+        supportsInterpolation: true,
+      },
+    ],
   },
   {
     type: 'RoyBarCode',
@@ -149,6 +192,14 @@ const BUILT_IN_COMPONENTS = [
     },
     defaultStyle: { width: 200, height: 80, rotate: 0, opacity: 1 },
     defaultProps: DEFAULT_BAR_CODE_PROPS,
+    bindingTargets: [
+      {
+        kind: 'code-content',
+        label: '条形码内容',
+        acceptedTypes: ['string', 'number', 'boolean', 'date'],
+        supportsInterpolation: true,
+      },
+    ],
   },
   {
     type: 'RoyLine',
@@ -276,6 +327,16 @@ export class ComponentRegistry {
       (definition): definition is CatalogComponentDefinition => !definition.internal,
     )
   }
+
+  getBindingTargets(type: ComponentType): readonly ComponentBindingTargetDefinition[] {
+    return this.registry.get(type)?.bindingTargets ?? []
+  }
 }
 
 export const defaultRegistry = new ComponentRegistry()
+
+export function getComponentBindingTargets(
+  type: ComponentType,
+): readonly ComponentBindingTargetDefinition[] {
+  return defaultRegistry.getBindingTargets(type)
+}

@@ -8,5 +8,7 @@ export type {
   GuideAxis,
   GuideColor,
   LayerAction,
+  ProofEnvironment,
+  DataFieldPatch,
 } from './editor'
 export { EditorStoreProvider, useEditorStore } from './EditorStoreContext'

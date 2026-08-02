@@ -15,6 +15,30 @@ export type {
   DataSourceField,
   DataFieldType,
   DataSet,
+  BindingExpression,
+  ComponentBinding,
+  ComponentBindingTarget,
+  ComponentBindingTargetDefinition,
+  DataDiagnostic,
+  DataDiagnosticCode,
+  DataDiagnosticSeverity,
+  DataFieldDefinition,
+  DataFormatter,
+  DataPath,
+  DataPathArrayItem,
+  DataPathSegment,
+  DataRecord,
+  DataSourceLimits,
+  DataValueType,
+  FieldBindingExpression,
+  JsonObject,
+  JsonPrimitive,
+  JsonValue,
+  LiteralBindingSegment,
+  RenderContext,
+  RenderMode,
+  TemplateDataDefinition,
+  TextBindingExpression,
   TemplateSchema,
   TemplatePage,
   BarCodeFormat,
@@ -70,6 +94,7 @@ export {
   splitTableCell,
   updateTableCellText,
   updateTableCellsStyle,
+  DATA_SOURCE_LIMITS,
 } from './types'
 
 export { PAGE_SIZES, COMMON_SCALE, AUTO_PAGE_COMPONENTS } from './constants'
@@ -97,14 +122,45 @@ export type {
   PageDimensions,
 } from './utils'
 
-export { DataBindingEngine, convertByType } from './data-binding'
+export {
+  ARRAY_ITEM_PATH_SEGMENT,
+  DataBindingEngine,
+  canonicalizeTemplateData,
+  convertByType,
+  dataFieldIdForPath,
+  evaluateBinding,
+  flattenDataFields,
+  formatDataPath,
+  formatDataValue,
+  inferDataDefinition,
+  isDataPath,
+  isDataPathArrayItem,
+  isSafeDataKey,
+  normalizeTemplateData,
+  parseDataPath,
+  parseLegacyBindingExpression,
+  parseRuntimeRecordsJson,
+  readDataPath,
+  renderContextError,
+  resolveComponentBindings,
+  validateRuntimeRecords,
+} from './data-binding'
+export type {
+  BindingEvaluationResult,
+  ComponentBindingResolution,
+  DataPathParseResult,
+  DataPathReadResult,
+  NormalizedTemplateData,
+  RuntimeRecordsSummary,
+  RuntimeRecordsValidationResult,
+} from './data-binding'
 
-export { ComponentRegistry, defaultRegistry } from './registry'
+export { ComponentRegistry, defaultRegistry, getComponentBindingTargets } from './registry'
 export type {
   CatalogComponentDefinition,
   ComponentCatalogMetadata,
   ComponentDefinition,
 } from './registry'
 
-export { serialize, deserialize } from './serialization'
+export { CURRENT_TEMPLATE_VERSION, serialize, deserialize } from './serialization'
 export { isTemplateSchema } from './schema-validation'

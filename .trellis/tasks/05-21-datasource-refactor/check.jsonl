@@ -1,3 +1,8 @@
 {"file": ".trellis/spec/monorepo/quality-guidelines.md", "reason": "ESLint/Prettier 规范，检查代码风格合规性"}
 {"file": ".trellis/spec/monorepo/typescript-conventions.md", "reason": "strict TS 合规检查：禁止 as any、@ts-ignore，公共 API 导出规范"}
 {"file": ".trellis/spec/monorepo/styling-conventions.md", "reason": "CSS Modules 合规检查：禁止 inline style，Radix UI 样式化方式"}
+{"file": ".trellis/spec/monorepo/ptd-ui-system.md", "reason": "检查数据工作表面、键盘/焦点、错误、窄屏和非阻断交互是否符合产品合同"}
+{"file": ".trellis/spec/monorepo/react-designer-contract.md", "reason": "检查校样实例态不污染 controlled value、History/Dirty，Renderer/Host 边界不泄漏"}
+{"file": ".trellis/spec/monorepo/server-architecture.md", "reason": "检查 TemplateSchema 验证、版本持久化与 owner 边界，确保没有凭据进入模板合同"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "检查 Core/Components/Designer/Web 的格式、验证和错误合同是否一致"}
+{"file": ".trellis/tasks/05-21-datasource-refactor/research/data-contract-audit.md", "reason": "按审计失败矩阵验证兼容、安全、确定性和跨模板隔离"}

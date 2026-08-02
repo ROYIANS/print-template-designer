@@ -404,7 +404,40 @@ PanelRoot
 - Hover 才出现的次要动作必须提供键盘可达的替代入口。
 - 空状态包含：当前状态、下一步价值和一个明确动作。
 
-### 6.3 Web 文件工作台与文档级表面
+### 6.3 数据源与 Data Panel
+
+Data Panel 是面向模板作者的字段绑定工作区，不是后台 CRUD 表格，也不能堆叠未经封装的原始
+`input`、`select` 或 `textarea`。它沿用第 6.2 节面板原语，按以下顺序组织：
+
+```text
+DataPanel
+├─ 数据来源摘要
+├─ 设计内容 / 数据校样 segmented control
+├─ sample record 上一条 / 下一条
+├─ JSON 导入与候选预检
+├─ 当前绑定摘要
+├─ 可搜索的嵌套字段树
+├─ 字段编辑与格式化
+└─ 诊断
+```
+
+- JSON 导入同时支持拖入 `.json`、文件选择和粘贴 JSON。解析成功后先展示根结构、记录数、字段数、
+  byte size、diagnostics，以及现有 binding 的 valid / invalid 影响；只有用户明确执行“应用数据”才
+  修改模板。选择文件、粘贴、解析、推断字段和预检候选都保持本地，不触发 dirty、History 或 Host change。
+- 无效 JSON、primitive root、混合类型 root array、超过共享限制的数据、危险字段名及其他结构问题，
+  必须在导入表面就地显示原因和恢复方式，不能等到保存或渲染阶段才报错。
+- 字段树支持搜索、嵌套展开和明确的键盘可达绑定按钮。拖拽绑定可以作为效率增强，但不能成为唯一
+  入口；所有状态与动作必须有可访问名称和 focus-visible 状态。
+- 简单文本使用支持 literal 与多个 fields 混排的 composer。图片、二维码、条形码和自由表格 cell
+  仅展示与当前组件兼容的 binding target，不能让用户先创建必然无效的映射再靠保存报错。
+- 当前绑定摘要同时说明组件、target、field path 和 formatter。missing、type mismatch 与失效 binding
+  必须在组件 Frame 和 Data Panel 内提供文字状态及修复入口，不能只用颜色或警告图标表达。
+- 在 compact 模式中，Data Panel 作为 Resource overlay 仍必须完整支持导入、字段搜索、键盘绑定与
+  诊断，且在 390px 宽度下不产生页面级横向溢出。Resource/Inspector overlay 使用
+  `--ptd-layer-sticky`，高于 `--ptd-layer-scrim`；Scrim 仍覆盖 Canvas 与 Selection，并可点击关闭
+  当前 overlay。
+
+### 6.4 Web 文件工作台与文档级表面
 
 - 受保护的 `/app` 默认进入文件工作台，未保存新文档和已保存文档分别使用明确的 Editor URL；文件
   浏览不能继续作为覆盖画布的大型 Modal。当前只有 `updatedAt` 时必须称为“最近更新”，不得伪称
@@ -752,3 +785,6 @@ PTD 是桌面优先的生产工具，但不能假设所有桌面设备都有精�
 7. 浏览器实际截图确认，而不是只验证 CSS 文件存在。
 8. App Bar 浏览器断言覆盖 hover/focus 不展开、同一分类 click 开关、跨分类 click 切换、Header
    外部与 Escape 收起，以及 Designer 根节点不会在菜单 pointer down 时抢回焦点。
+9. Data Panel 覆盖 JSON drop / file / paste、导入预检后显式应用、键盘字段绑定、record switch
+   history-free、Frame 与面板双处文字诊断，以及 390px compact overlay 在 Scrim 上可操作且点击
+   Scrim 能关闭。

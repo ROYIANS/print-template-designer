@@ -1,7 +1,14 @@
 import { BadRequestException } from '@nestjs/common'
-import type { TemplateSchema } from '@ptd/core'
+import { deserialize, isTemplateSchema, type TemplateSchema } from '@ptd/core'
 
 const MAX_TITLE_LENGTH = 120
+
+/**
+ * Maximum size of the complete JSON request body accepted after the Better Auth routes.
+ * Datasource sample records have their own smaller Core limit; this allowance also covers pages,
+ * components, bindings and the request envelope. Keep docker/nginx.conf aligned with this value.
+ */
+export const TEMPLATE_JSON_BODY_LIMIT_BYTES = 4 * 1024 * 1024
 
 export interface TemplateWriteInput {
   title: string
@@ -41,27 +48,16 @@ function parseTitle(value: unknown): string {
   return title
 }
 
-function isTemplateSchema(value: unknown): value is TemplateSchema {
-  return (
-    isRecord(value) &&
-    typeof value['_version'] === 'number' &&
-    Number.isFinite(value['_version']) &&
-    isRecord(value['pageConfig']) &&
-    Array.isArray(value['pages']) &&
-    value['pages'].length > 0 &&
-    Array.isArray(value['dataSource']) &&
-    isRecord(value['dataSet'])
-  )
-}
-
 function parseContent(value: unknown): TemplateSchema {
-  if (!isTemplateSchema(value)) {
-    throw new BadRequestException(
-      'content must contain _version, pageConfig, non-empty pages, dataSource and dataSet',
-    )
+  try {
+    const json = JSON.stringify(value)
+    if (json === undefined) throw new TypeError('content is not JSON serializable')
+    const template = deserialize(json)
+    if (!isTemplateSchema(template)) throw new TypeError('content is not a valid TemplateSchema')
+    return template
+  } catch {
+    throw new BadRequestException('content must be a valid TemplateSchema')
   }
-
-  return value
 }
 
 function parseExpectedVersion(value: unknown): number {

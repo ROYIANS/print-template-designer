@@ -6,7 +6,7 @@ import {
   type INestApplication,
 } from '@nestjs/common'
 import { Test } from '@nestjs/testing'
-import { DEFAULT_PAGE_CONFIG, type TemplateSchema } from '@ptd/core'
+import { DEFAULT_PAGE_CONFIG, deserialize, serialize, type TemplateSchema } from '@ptd/core'
 import request from 'supertest'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { AppModule } from '../src/app.module.js'
@@ -32,6 +32,66 @@ const updatedContent: TemplateSchema = {
     title: 'Updated canvas',
   },
   dataSet: { invoiceNumber: 'INV-002' },
+}
+
+const persistedInitialContent = deserialize(serialize(initialContent))
+const persistedUpdatedContent = deserialize(serialize(updatedContent))
+
+const canonicalDataContent: TemplateSchema = {
+  _version: 2,
+  pageConfig: {
+    ...DEFAULT_PAGE_CONFIG,
+    title: 'Cold-chain label',
+  },
+  pages: [
+    {
+      id: 'canonical-page',
+      componentData: [
+        {
+          id: 'destination-label',
+          component: 'RoySimpleText',
+          propValue: '目的地',
+          style: { width: 160, height: 32, rotate: 0, opacity: 1 },
+          groupStyle: {},
+          position: { x: 12, y: 18 },
+          bindings: [
+            {
+              id: 'destination-binding',
+              target: { kind: 'text' },
+              expression: {
+                kind: 'text',
+                segments: [
+                  { kind: 'literal', value: '目的地：' },
+                  { kind: 'field', fieldId: 'destination-field' },
+                ],
+              },
+            },
+          ],
+        },
+      ],
+    },
+  ],
+  data: {
+    version: 1,
+    fields: [
+      {
+        id: 'destination-field',
+        name: '目的地',
+        path: ['shipment', 'destination'],
+        valueType: 'string',
+      },
+    ],
+    sampleRecords: [{ shipment: { destination: '上海 · 浦东新区' }, batch: 'FQ-20260801-01' }],
+  },
+}
+
+const updatedCanonicalDataContent: TemplateSchema = {
+  ...canonicalDataContent,
+  pageConfig: { ...canonicalDataContent.pageConfig, title: 'Cold-chain label updated' },
+  data: {
+    ...canonicalDataContent.data!,
+    sampleRecords: [{ shipment: { destination: '杭州 · 临平区' }, batch: 'FQ-20260801-02' }],
+  },
 }
 
 @Injectable()
@@ -112,7 +172,7 @@ describe('template API', () => {
     expect(created.body).toMatchObject({
       title: 'Invoice',
       version: 1,
-      content: initialContent,
+      content: persistedInitialContent,
     })
     expect(created.body.content).not.toEqual(expect.any(String))
 
@@ -124,7 +184,7 @@ describe('template API', () => {
     const current = await request(app.getHttpServer())
       .get(`/api/templates/${created.body.id}`)
       .expect(200)
-    expect(current.body).toMatchObject({ id: created.body.id, content: initialContent })
+    expect(current.body).toMatchObject({ id: created.body.id, content: persistedInitialContent })
 
     const versions = await request(app.getHttpServer())
       .get(`/api/templates/${created.body.id}/versions`)
@@ -139,7 +199,7 @@ describe('template API', () => {
       templateId: created.body.id,
       version: 1,
       title: 'Invoice',
-      content: initialContent,
+      content: persistedInitialContent,
     })
   })
 
@@ -153,7 +213,7 @@ describe('template API', () => {
     expect(updated.body).toMatchObject({
       title: 'Updated invoice',
       version: 2,
-      content: updatedContent,
+      content: persistedUpdatedContent,
     })
 
     await request(app.getHttpServer())
@@ -239,7 +299,7 @@ describe('template API', () => {
     expect(restored.body).toMatchObject({
       title: 'Original invoice',
       version: 3,
-      content: initialContent,
+      content: persistedInitialContent,
     })
 
     const history = await request(app.getHttpServer())
@@ -250,7 +310,10 @@ describe('template API', () => {
     const original = await request(app.getHttpServer())
       .get(`/api/templates/${created.id}/versions/1`)
       .expect(200)
-    expect(original.body).toMatchObject({ title: 'Original invoice', content: initialContent })
+    expect(original.body).toMatchObject({
+      title: 'Original invoice',
+      content: persistedInitialContent,
+    })
 
     await request(app.getHttpServer())
       .post(`/api/templates/${created.id}/versions/2/restore`)
@@ -311,6 +374,45 @@ describe('template API', () => {
       .post(`/api/templates/${created.id}/versions/99/restore`)
       .send({ expectedVersion: 1 })
       .expect(404)
+  })
+
+  it('round-trips canonical v2 data, bindings and samples through every version endpoint', async () => {
+    const created = await request(app.getHttpServer())
+      .post('/api/templates')
+      .send({ title: 'Canonical label', content: canonicalDataContent })
+      .expect(201)
+    expect(created.body.content).toEqual(canonicalDataContent)
+
+    const current = await request(app.getHttpServer())
+      .get(`/api/templates/${created.body.id}`)
+      .expect(200)
+    expect(current.body.content).toEqual(canonicalDataContent)
+
+    const updated = await request(app.getHttpServer())
+      .put(`/api/templates/${created.body.id}`)
+      .send({
+        title: 'Canonical label updated',
+        content: updatedCanonicalDataContent,
+        expectedVersion: 1,
+      })
+      .expect(200)
+    expect(updated.body.content).toEqual(updatedCanonicalDataContent)
+
+    const firstVersion = await request(app.getHttpServer())
+      .get(`/api/templates/${created.body.id}/versions/1`)
+      .expect(200)
+    expect(firstVersion.body.content).toEqual(canonicalDataContent)
+
+    const restored = await request(app.getHttpServer())
+      .post(`/api/templates/${created.body.id}/versions/1/restore`)
+      .send({ expectedVersion: 2 })
+      .expect(201)
+    expect(restored.body).toMatchObject({ version: 3, content: canonicalDataContent })
+
+    const restoredCurrent = await request(app.getHttpServer())
+      .get(`/api/templates/${created.body.id}`)
+      .expect(200)
+    expect(restoredCurrent.body.content).toEqual(canonicalDataContent)
   })
 })
 

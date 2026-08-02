@@ -121,16 +121,6 @@ function invalidResponse(message: string, cause?: unknown): TemplateApiError {
 
 function parseTemplate(value: unknown): TemplateSchema {
   if (!isRecord(value)) throw invalidResponse('content must be an object')
-  if (
-    typeof value['_version'] !== 'number' ||
-    !isRecord(value['pageConfig']) ||
-    !Array.isArray(value['pages']) ||
-    value['pages'].length === 0 ||
-    !Array.isArray(value['dataSource']) ||
-    !isRecord(value['dataSet'])
-  ) {
-    throw invalidResponse('content does not match TemplateSchema')
-  }
 
   try {
     const template = deserialize(JSON.stringify(value))

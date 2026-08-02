@@ -4,6 +4,7 @@ import {
   getPageDimensions,
   normalizeSimpleTableProps,
   type ComponentSchema,
+  type RenderContext,
   type TemplateSchema,
 } from '@ptd/core'
 import { EditorStore } from '../state/editor'
@@ -75,7 +76,102 @@ function tableComponent(id: string, locked = false): ComponentSchema {
   }
 }
 
+function proofTemplate(records: readonly { orderNo: string }[]): TemplateSchema {
+  return {
+    ...template([textComponent('text'), tableComponent('table')]),
+    data: {
+      version: 1,
+      fields: [{ id: 'field-order', name: '订单号', path: ['orderNo'], valueType: 'string' }],
+      sampleRecords: records,
+    },
+  }
+}
+
+function hostProofContext(recordIndex = 1): RenderContext {
+  const records = [{ orderNo: 'HOST-001' }, { orderNo: 'HOST-002' }]
+  return {
+    data: records,
+    record: records[recordIndex],
+    recordIndex,
+    locale: 'en-GB',
+    timeZone: 'Europe/London',
+    now: '2026-08-01T02:00:00.000Z',
+    mode: 'proof',
+  }
+}
+
 describe('EditorStore history and ownership', () => {
+  it('keeps proof mode and record switching outside template changes and history', () => {
+    const onChange = vi.fn()
+    const store = new EditorStore(proofTemplate([{ orderNo: 'CC-001' }, { orderNo: 'CC-002' }]), {
+      onChange,
+    })
+
+    expect(store.sampleRecords.value).toHaveLength(2)
+    store.setProofMode(true)
+    store.setProofRecordIndex(1)
+
+    expect(store.proofRenderContext.value).toMatchObject({
+      record: { orderNo: 'CC-002' },
+      recordIndex: 1,
+      locale: 'zh-CN',
+      timeZone: 'Asia/Shanghai',
+      mode: 'proof',
+    })
+    expect(store.history.value).toHaveLength(1)
+    expect(onChange).not.toHaveBeenCalled()
+    expect(store.startContentEditing('text')).toBe(false)
+    expect(store.selectTableCell('table', 0, 0)).toBe(false)
+    expect(store.startTableCellEditing('table', 'cell-1')).toBe(false)
+  })
+
+  it('uses an authoritative Host record until the user explicitly switches records', () => {
+    const renderContext = hostProofContext()
+    const store = new EditorStore(proofTemplate([{ orderNo: 'SAMPLE-001' }]), {
+      renderContext,
+    })
+
+    store.setProofMode(true)
+    expect(store.proofRenderContext.value).toMatchObject({
+      record: { orderNo: 'HOST-002' },
+      recordIndex: 1,
+      locale: 'en-GB',
+      timeZone: 'Europe/London',
+      now: '2026-08-01T02:00:00.000Z',
+    })
+
+    store.setProofRecordIndex(0)
+    expect(store.proofRenderContext.value?.record).toEqual({ orderNo: 'HOST-001' })
+    expect(store.history.value).toHaveLength(1)
+  })
+
+  it('isolates proof UI across external templates while retaining the same controlled Host context', () => {
+    const onChange = vi.fn()
+    const renderContext = hostProofContext()
+    const store = new EditorStore(proofTemplate([{ orderNo: 'SAMPLE-001' }]), {
+      onChange,
+      renderContext,
+    })
+    store.setProofMode(true)
+    store.setProofRecordIndex(0)
+
+    const replacement = {
+      ...proofTemplate([{ orderNo: 'NEW-SAMPLE' }]),
+      pageConfig: { ...proofTemplate([]).pageConfig, title: '另一份模板' },
+    }
+    store.syncExternal(replacement)
+
+    expect(store.proofMode.value).toBe(false)
+    expect(store.proofRecordIndex.value).toBe(1)
+    expect(store.history.value).toEqual([replacement])
+    expect(onChange).not.toHaveBeenCalled()
+
+    store.setHostRenderContext(renderContext)
+    store.setProofMode(true)
+    expect(store.proofRenderContext.value?.record).toEqual({ orderNo: 'HOST-002' })
+    expect(store.template.value).toBe(replacement)
+  })
+
   it('keeps a bounded, unique recent-color list as instance-only UI state', () => {
     const first = new EditorStore(template())
     const second = new EditorStore(template())
@@ -730,5 +826,150 @@ describe('EditorStore commands', () => {
     store.syncExternal(template([component('external', 1)]))
     expect(store.history.value).toHaveLength(1)
     expect(store.selectedIds.value).toEqual([])
+  })
+
+  it('canonicalizes imported data once and ignores structurally identical repeated applications', () => {
+    const onChange = vi.fn()
+    const store = new EditorStore(template(), { onChange })
+    const data = {
+      version: 1 as const,
+      fields: [
+        { id: 'field-order', name: '订单号', path: ['orderNo'], valueType: 'string' as const },
+      ],
+      sampleRecords: [{ orderNo: 'CC-001' }],
+    }
+
+    expect(store.replaceTemplateData(data)).toBe(true)
+    expect(store.template.value.data).toEqual(data)
+    expect(store.template.value.dataSource).toBeUndefined()
+    expect(store.template.value.dataSet).toBeUndefined()
+    expect(store.history.value).toHaveLength(2)
+    expect(onChange).toHaveBeenCalledTimes(1)
+
+    expect(store.replaceTemplateData(JSON.parse(JSON.stringify(data)) as typeof data)).toBe(false)
+    expect(store.history.value).toHaveLength(2)
+    expect(onChange).toHaveBeenCalledTimes(1)
+  })
+
+  it('renames and formats a field without changing its stable identity or fragmenting history', () => {
+    const onChange = vi.fn()
+    const store = new EditorStore(proofTemplate([{ orderNo: 'CC-001' }]), { onChange })
+
+    expect(
+      store.updateDataField('field-order', {
+        name: '出库单号',
+        formatter: { kind: 'none' },
+      }),
+    ).toBe(true)
+    expect(store.normalizedTemplateData.value.data.fields[0]).toMatchObject({
+      id: 'field-order',
+      path: ['orderNo'],
+      name: '出库单号',
+      formatter: { kind: 'none' },
+    })
+    expect(store.history.value).toHaveLength(2)
+    expect(onChange).toHaveBeenCalledTimes(1)
+
+    expect(
+      store.updateDataField('field-order', {
+        name: '出库单号',
+        formatter: { kind: 'none' },
+      }),
+    ).toBe(false)
+    expect(store.history.value).toHaveLength(2)
+  })
+
+  it('sets direct and mixed text bindings as discrete commands and preserves no-op semantics', () => {
+    const onChange = vi.fn()
+    const store = new EditorStore(proofTemplate([{ orderNo: 'CC-001' }]), {
+      onChange,
+      idFactory: () => 'binding-new',
+    })
+    const target = { kind: 'text' } as const
+    const direct = { kind: 'field', fieldId: 'field-order' } as const
+
+    expect(store.setComponentBinding('text', target, direct)).toBe(true)
+    expect(store.components.value[0]?.bindings).toEqual([
+      { id: 'binding-new', target, expression: direct },
+    ])
+    expect(store.setComponentBinding('text', target, { ...direct })).toBe(false)
+    expect(store.history.value).toHaveLength(2)
+    expect(onChange).toHaveBeenCalledTimes(1)
+
+    const mixed = {
+      kind: 'text' as const,
+      segments: [
+        { kind: 'literal' as const, value: '出库单：' },
+        { kind: 'field' as const, fieldId: 'field-order' },
+      ],
+    }
+    expect(store.setComponentBinding('text', target, mixed)).toBe(true)
+    expect(store.components.value[0]?.bindings?.[0]?.expression).toEqual(mixed)
+    expect(store.removeComponentBinding('text', target)).toBe(true)
+    expect(store.components.value[0]?.bindings).toEqual([])
+    expect(store.removeComponentBinding('text', target)).toBe(false)
+    expect(store.history.value).toHaveLength(4)
+  })
+
+  it('supports table-cell bindings while rejecting every binding mutation on locked objects', () => {
+    const store = new EditorStore(proofTemplate([{ orderNo: 'CC-001' }]), {
+      idFactory: () => 'cell-binding',
+    })
+    const target = { kind: 'table-cell-text', cellId: 'cell-1' } as const
+    expect(
+      store.setComponentBinding(
+        'table',
+        { ...target, cellId: 'missing-cell' },
+        {
+          kind: 'field',
+          fieldId: 'field-order',
+        },
+      ),
+    ).toBe(false)
+    expect(
+      store.setComponentBinding(
+        'text',
+        { kind: 'image-source' },
+        {
+          kind: 'field',
+          fieldId: 'field-order',
+        },
+      ),
+    ).toBe(false)
+    expect(
+      store.setComponentBinding('table', target, { kind: 'field', fieldId: 'field-order' }),
+    ).toBe(true)
+    expect(store.components.value[1]?.bindings?.[0]).toMatchObject({ target })
+
+    store.selectComponent('table')
+    store.setLock(true)
+    const historyLength = store.history.value.length
+    expect(
+      store.setComponentBinding('table', target, { kind: 'field', fieldId: 'field-order' }),
+    ).toBe(false)
+    expect(store.removeComponentBinding('table', target)).toBe(false)
+    expect(store.history.value).toHaveLength(historyLength)
+  })
+
+  it('removes sample records without deleting fields or component bindings', () => {
+    const value = proofTemplate([{ orderNo: 'CC-001' }])
+    value.pages[0]!.componentData[0] = {
+      ...value.pages[0]!.componentData[0]!,
+      bindings: [
+        {
+          id: 'binding-order',
+          target: { kind: 'text' },
+          expression: { kind: 'field', fieldId: 'field-order' },
+        },
+      ],
+    }
+    const store = new EditorStore(value)
+
+    expect(store.removeSampleRecords()).toBe(true)
+    expect(store.sampleRecords.value).toEqual([])
+    expect(store.normalizedTemplateData.value.data.fields).toHaveLength(1)
+    expect(store.components.value[0]?.bindings).toHaveLength(1)
+    expect(store.removeSampleRecords()).toBe(false)
+    expect(store.history.value).toHaveLength(2)
   })
 })

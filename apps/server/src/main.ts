@@ -7,6 +7,7 @@ import { AppModule } from './app.module.js'
 import { createAuth, setAuth } from './auth/auth.js'
 import { AuthConfigService, loopbackListenHost } from './auth/auth-config.js'
 import { PrismaService } from './prisma/prisma.service.js'
+import { TEMPLATE_JSON_BODY_LIMIT_BYTES } from './templates/template-contract.js'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bodyParser: false })
@@ -19,7 +20,7 @@ async function bootstrap() {
     setAuth(auth)
     expressApp.all('/api/auth/*splat', toNodeHandler(auth))
   }
-  expressApp.use(express.json())
+  expressApp.use(express.json({ limit: TEMPLATE_JSON_BODY_LIMIT_BYTES }))
 
   app.enableShutdownHooks()
   const port = process.env.PORT ?? 3000

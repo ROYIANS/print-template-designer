@@ -47,7 +47,23 @@ corepack pnpm --filter @ptd/react-designer build
 corepack pnpm --filter web build
 ```
 
-当前 Web 会通过同源 `/api` 代理连接 Server，完成 GitHub Cookie 会话和 Allowlist 准入检查。模板内容仍保存在内存中，尚未连接模板 CRUD。
+当前 Web 会通过同源 `/api` 代理连接 Server，完成 GitHub Cookie 会话和 Allowlist 准入检查，并已接通
+owner 隔离的模板 CRUD、文件工作台、另存为、版本历史、恢复与 `expectedVersion` 冲突保护。模板内容、
+canonical Datasource v2、结构化绑定和用户明确保存的 sample records 会进入不可变版本快照。
+
+## Datasource v2 开发边界
+
+- `TemplateSchema.data` 是唯一 canonical 数据定义；`dataSource` / `dataSet` 只用于 v0/v1 兼容读取。
+- JSON 导入只接受 object 或 object array，并必须复用 `@ptd/core` 的 `DATA_SOURCE_LIMITS`、
+  `parseRuntimeRecordsJson`、`validateRuntimeRecords` 与 `inferDataDefinition`，不要复制限制或字段推断逻辑。
+- 组件可绑定目标由 Core Registry 的 `getComponentBindingTargets` 声明；渲染通过
+  `resolveComponentBindings` 产生派生 Schema，不在 Components 或 Designer 复制 target → propValue 映射。
+- `RenderContext` 必须显式包含 JSON data、locale、timeZone、ISO `now` 和 mode；预览、打印和未来 Export
+  不得在组件内部读取系统时钟。
+- 临时 Host 数据、校样模式、当前记录和字段树 UI 状态不写入模板；字段模型、格式化、sample records 和
+  bindings 才是模板变更。
+- Excel/CSV、REST、Secret 管理、重复明细、自动分页、打印和导出仍是后续独立任务。认证凭据不得进入
+  `TemplateSchema`、模板版本或浏览器持久化。
 
 ## 启动 Server
 
@@ -157,9 +173,9 @@ corepack pnpm exec prettier --check "**/*.md"
 
 - `legacy/` 只读；v2 不从中 import 代码。
 - `@ptd/core` 不依赖 React 或 NestJS。
-- `@ptd/components` 负责 DOM 渲染，不负责编辑器工作区。
+- `@ptd/components` 只渲染 Core 已解析的内容，不持有数据源、运行时记录或连接凭据。
 - `@ptd/react-designer` 是受控组件，持久化由 Host 决定。
-- `apps/web` 通过同源 `/api` 使用 Server 认证，但模板 CRUD 仍由后续 Host 集成任务接入。
+- `apps/web` 通过同源 `/api` 使用 Server 认证、模板 CRUD、版本历史、恢复和冲突保护。
 - `@ptd/export` 目前没有导出实现。
 - `TemplateSchema.pages` 是手工页面；未来自动分页是预览/导出派生结果。
 

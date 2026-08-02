@@ -1,3 +1,5 @@
+import type { ComponentBinding } from './data-source'
+
 export type ComponentType =
   | 'RoySimpleText'
   | 'RoyText'
@@ -70,4 +72,6 @@ export interface ComponentSchema {
   position: ComponentPosition
   isLock?: boolean
   request?: unknown
+  /** Canonical Datasource v2 bindings. Static content remains in propValue. */
+  bindings?: readonly ComponentBinding[]
 }
