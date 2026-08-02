@@ -391,7 +391,7 @@ import '@ptd/react-designer/styles.css'
 | Preview page index is out of bounds       | Clamp to an existing manual page                                    |
 | Preview receives a new TemplateSchema     | Update real renderer content; no Host/history/selection mutation    |
 | Preview has no explicit `renderContext`   | Render static content; do not inherit Designer proof state          |
-| Host replaces `Designer.renderContext`    | Recompute proof only; no Schema, Host, dirty or history mutation     |
+| Host replaces `Designer.renderContext`    | Recompute proof only; no Schema, Host, dirty or history mutation    |
 | Proof/search/expanded state changes       | Update instance UI only; no Schema, Host, dirty or history mutation |
 | JSON is parsed or previewed               | Keep candidate local; do not mutate the template before Apply       |
 | User applies a valid import candidate     | Replace canonical data once; one Host emission and history entry    |
