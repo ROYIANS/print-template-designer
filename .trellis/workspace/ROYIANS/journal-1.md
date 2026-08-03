@@ -698,3 +698,37 @@ Added PostgreSQL, migration, Server and Web Compose lifecycle; hardened Bash/Pow
 ### Next Steps
 
 - None - task complete
+
+
+## Session 21: Floating Canvas Tool Dock
+
+**Date**: 2026-08-03
+**Task**: Floating Canvas Tool Dock
+**Branch**: `feature/refc`
+
+### Summary
+
+Reorganized the designer workspace around a two-layer floating dock, simplified single-selection context to catalog type and geometry, and preserved selection across delayed controlled-host drag echoes.
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `5305406` | (see git log) |
+| `518db9f` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
