@@ -48,6 +48,46 @@ export interface TableCellRange {
   endColumn: number
 }
 
+export interface DetailTableColumn {
+  id: string
+  title: string
+  width: number
+  /** Canonical field id evaluated relative to the current array item. */
+  fieldId?: string
+  fallback?: string
+  horizontalAlign: TableHorizontalAlign
+}
+
+export interface DetailTableFooterCell {
+  id: string
+  text: string
+  colSpan: number
+  fieldId?: string
+  fallback?: string
+  horizontalAlign: TableHorizontalAlign
+}
+
+export interface DetailTableFooter {
+  minHeight: number
+  cells: DetailTableFooterCell[]
+}
+
+/** Canonical props for the semantic, data-driven RoyComplexTable component. */
+export interface DetailTableProps {
+  dataFieldId: string
+  columns: DetailTableColumn[]
+  header: {
+    repeat: boolean
+    minHeight: number
+  }
+  body: {
+    minHeight: number
+    keepRowTogether: boolean
+  }
+  footer?: DetailTableFooter
+  emptyText: string
+}
+
 export const DEFAULT_TABLE_CELL_STYLE: Readonly<TableCellStyle> = Object.freeze({
   fontFamily: '"Sarasa UI SC", "Microsoft YaHei UI", sans-serif',
   fontSize: 10,
@@ -99,6 +139,71 @@ export function createSimpleTableProps(rows = 2, columns = 2): SimpleTableProps 
 
 export const DEFAULT_SIMPLE_TABLE_PROPS: Readonly<SimpleTableProps> =
   Object.freeze(createSimpleTableProps())
+
+export const DEFAULT_DETAIL_TABLE_PROPS: Readonly<DetailTableProps> = Object.freeze({
+  dataFieldId: '',
+  columns: [
+    {
+      id: 'column-1',
+      title: '项目',
+      width: 240,
+      horizontalAlign: 'left',
+    },
+    {
+      id: 'column-2',
+      title: '数量',
+      width: 120,
+      horizontalAlign: 'right',
+    },
+    {
+      id: 'column-3',
+      title: '备注',
+      width: 180,
+      horizontalAlign: 'left',
+    },
+  ],
+  header: { repeat: true, minHeight: 32 },
+  body: { minHeight: 32, keepRowTogether: true },
+  emptyText: '暂无明细',
+} satisfies DetailTableProps)
+
+export function isDetailTableProps(value: unknown): value is DetailTableProps {
+  const source = record(value)
+  if (!source || typeof source['dataFieldId'] !== 'string' || !Array.isArray(source['columns'])) {
+    return false
+  }
+  if (
+    source['columns'].length === 0 ||
+    !source['columns'].every(isDetailTableColumn) ||
+    new Set(source['columns'].map((column) => column.id)).size !== source['columns'].length
+  ) {
+    return false
+  }
+  const header = record(source['header'])
+  const body = record(source['body'])
+  if (
+    !header ||
+    typeof header['repeat'] !== 'boolean' ||
+    !isPositiveNumber(header['minHeight']) ||
+    !body ||
+    typeof body['keepRowTogether'] !== 'boolean' ||
+    !isPositiveNumber(body['minHeight']) ||
+    typeof source['emptyText'] !== 'string'
+  ) {
+    return false
+  }
+  return (
+    source['footer'] === undefined ||
+    isDetailTableFooter(source['footer'], source['columns'].length)
+  )
+}
+
+export function normalizeDetailTableProps(value: unknown): DetailTableProps {
+  if (isDetailTableProps(value)) return cloneDetailTable(value)
+  const source = record(value)
+  if (source && Array.isArray(source['tableCols'])) return normalizeLegacyDetailTable(source)
+  return cloneDetailTable(DEFAULT_DETAIL_TABLE_PROPS)
+}
 
 export function isSimpleTableProps(value: unknown): value is SimpleTableProps {
   const source = record(value)
@@ -710,6 +815,105 @@ function normalizeTracks(value: unknown[], count: number, fallback: number): num
 
 function isTrackArray(value: unknown): value is number[] {
   return Array.isArray(value) && value.length >= 1 && value.every(isPositiveNumber)
+}
+
+function isDetailTableColumn(value: unknown): value is DetailTableColumn {
+  const source = record(value)
+  return Boolean(
+    source &&
+    typeof source['id'] === 'string' &&
+    source['id'].length > 0 &&
+    typeof source['title'] === 'string' &&
+    isPositiveNumber(source['width']) &&
+    (source['fieldId'] === undefined || typeof source['fieldId'] === 'string') &&
+    (source['fallback'] === undefined || typeof source['fallback'] === 'string') &&
+    typeof source['horizontalAlign'] === 'string' &&
+    HORIZONTAL_ALIGNS.has(source['horizontalAlign'] as TableHorizontalAlign),
+  )
+}
+
+function isDetailTableFooter(value: unknown, columnCount: number): value is DetailTableFooter {
+  const source = record(value)
+  if (!source || !isPositiveNumber(source['minHeight']) || !Array.isArray(source['cells'])) {
+    return false
+  }
+  let occupied = 0
+  const ids = new Set<string>()
+  for (const valueCell of source['cells']) {
+    const cell = record(valueCell)
+    if (
+      !cell ||
+      typeof cell['id'] !== 'string' ||
+      cell['id'].length === 0 ||
+      ids.has(cell['id']) ||
+      typeof cell['text'] !== 'string' ||
+      !Number.isInteger(cell['colSpan']) ||
+      typeof cell['colSpan'] !== 'number' ||
+      cell['colSpan'] < 1 ||
+      ((cell['fieldId'] !== undefined || cell['fallback'] !== undefined) &&
+        !(
+          (cell['fieldId'] === undefined || typeof cell['fieldId'] === 'string') &&
+          (cell['fallback'] === undefined || typeof cell['fallback'] === 'string')
+        )) ||
+      typeof cell['horizontalAlign'] !== 'string' ||
+      !HORIZONTAL_ALIGNS.has(cell['horizontalAlign'] as TableHorizontalAlign)
+    ) {
+      return false
+    }
+    ids.add(cell['id'])
+    occupied += cell['colSpan']
+  }
+  return occupied === columnCount
+}
+
+function cloneDetailTable(value: Readonly<DetailTableProps>): DetailTableProps {
+  return {
+    dataFieldId: value.dataFieldId,
+    columns: value.columns.map((column) => ({ ...column })),
+    header: { ...value.header },
+    body: { ...value.body },
+    footer: value.footer
+      ? { ...value.footer, cells: value.footer.cells.map((cell) => ({ ...cell })) }
+      : undefined,
+    emptyText: value.emptyText,
+  }
+}
+
+function normalizeLegacyDetailTable(source: Record<string, unknown>): DetailTableProps {
+  const rawColumns = source['tableCols'] as unknown[]
+  const columns = rawColumns.flatMap((value, index): DetailTableColumn[] => {
+    const column = record(value)
+    if (!column) return []
+    return [
+      {
+        id: typeof column['id'] === 'string' && column['id'] ? column['id'] : `column-${index + 1}`,
+        title: typeof column['title'] === 'string' ? column['title'] : '',
+        width: positiveSize(column['width'], 120),
+        fieldId: typeof column['field'] === 'string' ? column['field'] : undefined,
+        horizontalAlign: member(
+          column['align'],
+          HORIZONTAL_ALIGNS,
+          DEFAULT_DETAIL_TABLE_PROPS.columns[index]?.horizontalAlign ?? 'left',
+        ),
+      },
+    ]
+  })
+  return {
+    ...cloneDetailTable(DEFAULT_DETAIL_TABLE_PROPS),
+    dataFieldId: typeof source['tableDataSource'] === 'string' ? source['tableDataSource'] : '',
+    columns: columns.length > 0 ? columns : cloneDetailTable(DEFAULT_DETAIL_TABLE_PROPS).columns,
+    header: {
+      repeat: true,
+      minHeight: positiveSize(
+        source['tableRowHeight'],
+        DEFAULT_DETAIL_TABLE_PROPS.header.minHeight,
+      ),
+    },
+    body: {
+      keepRowTogether: true,
+      minHeight: positiveSize(source['tableRowHeight'], DEFAULT_DETAIL_TABLE_PROPS.body.minHeight),
+    },
+  }
 }
 
 function dimension(value: unknown, fallback: number): number {

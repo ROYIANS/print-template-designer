@@ -43,6 +43,25 @@ describe('serialization', () => {
     expect(restored.pages[0]?.id).toBe('page-1')
   })
 
+  it('round-trips an optional default page master', () => {
+    const withOutput: TemplateSchema = {
+      ...sampleTemplate,
+      output: {
+        defaultPageMasterId: 'default',
+        pageMasters: [
+          {
+            id: 'default',
+            name: '默认版式',
+            header: { heightMm: 12, componentData: [] },
+            footer: { heightMm: 8, componentData: [] },
+          },
+        ],
+      },
+    }
+
+    expect(deserialize(serialize(withOutput)).output).toEqual(withOutput.output)
+  })
+
   it('deserialize handles missing _version as 0', () => {
     const raw = JSON.stringify({ ...sampleTemplate, _version: undefined })
     expect(() => deserialize(raw)).not.toThrow()
