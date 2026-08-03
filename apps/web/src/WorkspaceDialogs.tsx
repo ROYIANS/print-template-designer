@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef } from 'react'
+import { RiErrorWarningLine } from '@remixicon/react'
 import styles from './WorkspaceDialogs.module.css'
 
 interface UnsavedDialogProps {
@@ -91,7 +92,7 @@ function DecisionDialog({
           <h2 id={titleId}>{title}</h2>
         </header>
         <div className={styles.notice}>
-          <span aria-hidden="true">!</span>
+          <RiErrorWarningLine className={styles.warningIcon} aria-hidden="true" />
           <p id={descriptionId}>{description}</p>
         </div>
         {error ? (

@@ -6,7 +6,12 @@ const designerSourceEntry = fileURLToPath(
   new URL('../../packages/react-designer/src/index.ts', import.meta.url),
 )
 const coreSourceEntry = fileURLToPath(new URL('../../packages/core/src/index.ts', import.meta.url))
+const exportSourceEntry = fileURLToPath(
+  new URL('../../packages/export/src/index.ts', import.meta.url),
+)
 const designerDevStyles = fileURLToPath(new URL('./src/designer-dev.css', import.meta.url))
+const mainHtmlEntry = fileURLToPath(new URL('./index.html', import.meta.url))
+const outputRenderHtmlEntry = fileURLToPath(new URL('./output-render.html', import.meta.url))
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command }) => ({
@@ -29,6 +34,10 @@ export default defineConfig(({ command }) => ({
         find: /^@ptd\/core$/,
         replacement: coreSourceEntry,
       },
+      {
+        find: /^@ptd\/export$/,
+        replacement: exportSourceEntry,
+      },
     ],
   },
   optimizeDeps:
@@ -47,5 +56,11 @@ export default defineConfig(({ command }) => ({
   build: {
     outDir: 'dist',
     sourcemap: true,
+    rollupOptions: {
+      input: {
+        main: mainHtmlEntry,
+        outputRender: outputRenderHtmlEntry,
+      },
+    },
   },
 }))

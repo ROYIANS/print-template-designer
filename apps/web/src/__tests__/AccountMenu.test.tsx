@@ -46,10 +46,14 @@ describe('AccountMenu', () => {
     act(() => root.render(<AccountMenu user={githubUser} surface="home" onSignOut={vi.fn()} />))
 
     expect(trigger().getAttribute('aria-label')).toBe('账户菜单，小孟')
+    expect(trigger().querySelector('svg[aria-hidden="true"]')).not.toBeNull()
+    expect(trigger().textContent).not.toContain('▾')
     expect(container.querySelector('[role="dialog"]')).toBeNull()
     act(() => trigger().click())
     expect(trigger().getAttribute('aria-expanded')).toBe('true')
-    expect(container.querySelector('[role="dialog"]')?.textContent).toContain('xiaomeng@example.com')
+    expect(container.querySelector('[role="dialog"]')?.textContent).toContain(
+      'xiaomeng@example.com',
+    )
 
     act(() => trigger().click())
     expect(trigger().getAttribute('aria-expanded')).toBe('false')
@@ -104,9 +108,7 @@ describe('AccountMenu', () => {
   it('routes the website action through the host navigation guard', () => {
     const onReturnHome = vi.fn()
     act(() =>
-      root.render(
-        <AccountMenu user={githubUser} surface="editor" onReturnHome={onReturnHome} />,
-      ),
+      root.render(<AccountMenu user={githubUser} surface="editor" onReturnHome={onReturnHome} />),
     )
     act(() => trigger().click())
 

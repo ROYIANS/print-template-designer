@@ -18,6 +18,9 @@ import {
   type WorkspaceView,
 } from './navigation'
 import { SaveAsSheet } from './SaveAsSheet'
+import { createOutputJob, type OutputJob } from './outputJob'
+import { OutputPreview } from './OutputPreview'
+import { downloadOutputPdf, outputApi, outputApiErrorMessage } from './outputApi'
 import {
   PRODUCT_CAPTURE_KEYS,
   PRODUCT_CAPTURE_TEMPLATES,
@@ -258,6 +261,9 @@ function WorkspaceEditor({
   const [restoreError, setRestoreError] = useState<string>()
   const [pendingImport, setPendingImport] = useState<TemplateSchema>()
   const [templateExchangeError, setTemplateExchangeError] = useState<string>()
+  const [outputPreviewJob, setOutputPreviewJob] = useState<OutputJob>()
+  const [outputExporting, setOutputExporting] = useState(false)
+  const [outputExportError, setOutputExportError] = useState<string>()
   const templateFileInputRef = useRef<HTMLInputElement>(null)
   const allowUnloadRef = useRef(false)
   const requestedTemplateId =
@@ -302,6 +308,8 @@ function WorkspaceEditor({
     setVersionHistoryOpen(false)
     setRestoreVersion(undefined)
     setRestoreError(undefined)
+    setOutputPreviewJob(undefined)
+    setOutputExportError(undefined)
   }, [])
 
   useEffect(
@@ -346,6 +354,21 @@ function WorkspaceEditor({
     [closeTransientSurfaces, document],
   )
 
+  const exportOutput = useCallback(async (template: TemplateSchema, now?: string) => {
+    setOutputExporting(true)
+    setOutputExportError(undefined)
+    try {
+      const job = createOutputJob(template, 'export', now)
+      const download = await outputApi.createPdf(job, template.pageConfig.title)
+      downloadOutputPdf(download)
+    } catch (error) {
+      setOutputExportError(outputApiErrorMessage(error))
+      throw error
+    } finally {
+      setOutputExporting(false)
+    }
+  }, [])
+
   const host = useMemo<DesignerHost>(
     () => ({
       document: {
@@ -357,6 +380,15 @@ function WorkspaceEditor({
       },
       commands: {
         ...documentHostCommandStates(document.state),
+        preview:
+          document.state.status === 'loading'
+            ? { enabled: false, reason: '请等待模板载入完成' }
+            : { enabled: true },
+        print: { enabled: false, reason: '请先导出 PDF 后打印' },
+        exportDocument:
+          document.state.status === 'loading'
+            ? { enabled: false, reason: '请等待模板载入完成' }
+            : { enabled: true, pending: outputExporting },
         keyboardShortcuts: { enabled: true },
         documentation: { enabled: true },
         about: { enabled: true },
@@ -365,6 +397,7 @@ function WorkspaceEditor({
         if (command === 'importTemplate' || command === 'exportTemplate') {
           setTemplateExchangeError(templateJsonErrorMessage(error))
         }
+        if (command === 'exportDocument') setOutputExportError(outputApiErrorMessage(error))
       },
       onCommand: async (command: DesignerHostCommandId, context) => {
         switch (command) {
@@ -401,6 +434,13 @@ function WorkspaceEditor({
             setTemplateExchangeError(undefined)
             downloadTemplateJson(context.template, document.state.title)
             return
+          case 'preview':
+            closeTransientSurfaces()
+            setOutputPreviewJob(createOutputJob(context.template, 'print'))
+            return
+          case 'exportDocument':
+            await exportOutput(context.template)
+            return
           case 'keyboardShortcuts':
             closeTransientSurfaces()
             setHelpSheet('shortcuts')
@@ -418,7 +458,15 @@ function WorkspaceEditor({
         }
       },
     }),
-    [closeTransientSurfaces, document, hasUnsavedChanges, requestHome, runGuarded],
+    [
+      closeTransientSurfaces,
+      document,
+      exportOutput,
+      hasUnsavedChanges,
+      outputExporting,
+      requestHome,
+      runGuarded,
+    ],
   )
 
   return (
@@ -433,6 +481,21 @@ function WorkspaceEditor({
           host={host}
         />
       </div>
+      {outputPreviewJob ? (
+        <OutputPreview
+          template={outputPreviewJob.template}
+          renderContext={outputPreviewJob.renderContext}
+          options={outputPreviewJob.options}
+          exporting={outputExporting}
+          exportError={outputExportError}
+          onClose={() => setOutputPreviewJob(undefined)}
+          onExport={() => {
+            void exportOutput(outputPreviewJob.template, outputPreviewJob.options.now).catch(
+              () => undefined,
+            )
+          }}
+        />
+      ) : null}
       <input
         ref={templateFileInputRef}
         className={styles.templateFileInput}
@@ -469,6 +532,21 @@ function WorkspaceEditor({
             type="button"
             aria-label="关闭模板 JSON 错误提示"
             onClick={() => setTemplateExchangeError(undefined)}
+          >
+            关闭
+          </button>
+        </div>
+      ) : null}
+      {outputExportError && !outputPreviewJob ? (
+        <div className={styles.templateExchangeError} role="alert">
+          <div>
+            <strong>PDF 导出未完成</strong>
+            <span>{outputExportError}</span>
+          </div>
+          <button
+            type="button"
+            aria-label="关闭 PDF 导出错误提示"
+            onClick={() => setOutputExportError(undefined)}
           >
             关闭
           </button>

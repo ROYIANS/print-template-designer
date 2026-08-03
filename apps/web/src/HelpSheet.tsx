@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef } from 'react'
+import { RiCloseLine } from '@remixicon/react'
 import styles from './HelpSheet.module.css'
 
 export type HelpSheetView = 'shortcuts' | 'about'
@@ -51,7 +52,7 @@ export function HelpSheet({ view, onClose }: HelpSheetProps) {
           )}
         </h2>
         <button ref={closeRef} type="button" onClick={onClose} aria-label="关闭帮助面板">
-          ×
+          <RiCloseLine aria-hidden="true" />
         </button>
       </header>
       {view === 'shortcuts' ? (

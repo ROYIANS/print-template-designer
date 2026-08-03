@@ -115,10 +115,10 @@
   box-shadow: 0 1px 3px rgb(0 0 0 / 5%);
 }
 
-.sidebar nav button > span {
-  width: 12px;
-  height: 1px;
-  background: currentColor;
+.sidebar nav button > svg {
+  width: 15px;
+  height: 15px;
+  flex: none;
 }
 
 .compactBar {
@@ -197,19 +197,16 @@
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--foliq-focus) 12%, transparent);
 }
 
-.searchField svg,
+.searchField > svg,
 .newButton svg,
 .emptyState svg,
 .compactActions svg {
   width: 17px;
   height: 17px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.8;
-  stroke-linecap: round;
+  flex: none;
 }
 
-.searchField svg {
+.searchField > svg {
   color: var(--home-ink-muted);
 }
 
@@ -239,6 +236,11 @@
   font: inherit;
   font-size: 17px;
   cursor: pointer;
+}
+
+.searchField button svg {
+  width: 16px;
+  height: 16px;
 }
 
 .searchField button:hover {
@@ -392,17 +394,25 @@
 .cardActions > button {
   width: 40px;
   height: 40px;
+  display: grid;
+  place-items: center;
   padding: 0;
   border: 1px solid rgb(0 0 0 / 10%);
   border-radius: 4px;
   color: var(--home-ink);
   background: rgb(255 255 255 / 92%);
   box-shadow: 0 4px 12px rgb(0 0 0 / 7%);
-  font:
-    11px Outfit,
-    sans-serif;
   cursor: pointer;
   backdrop-filter: blur(8px);
+}
+
+.cardActions > button svg {
+  width: 18px;
+  height: 18px;
+}
+
+.actionSpinner {
+  animation: spin 800ms linear infinite;
 }
 
 .cardActions > button:disabled {
@@ -530,10 +540,10 @@
 
 .cardArrow {
   align-self: center;
+  width: 15px;
+  height: 15px;
   margin-right: 14px;
   color: var(--home-ink-muted);
-  font-family: Outfit, sans-serif;
-  font-size: 14px;
   transition: transform 160ms ease;
 }
 
@@ -554,13 +564,8 @@
 }
 
 .filePlaceholder svg {
-  width: 34px;
-  height: 34px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.4;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+  width: 30px;
+  height: 30px;
 }
 
 .previewLoading,
@@ -631,12 +636,19 @@
 .notice button {
   width: 28px;
   height: 28px;
+  display: grid;
+  place-items: center;
   padding: 0;
   border: 0;
   border-radius: 6px;
   color: var(--home-ink-muted);
   background: transparent;
   cursor: pointer;
+}
+
+.notice button svg {
+  width: 17px;
+  height: 17px;
 }
 
 .notice[data-kind='error'] {
@@ -798,7 +810,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .spinner,
-  .previewLoading > span {
+  .previewLoading > span,
+  .actionSpinner {
     animation: none;
   }
 

@@ -1,6 +1,17 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { TemplatePreview } from '@ptd/react-designer'
 import {
+  RiAddLine,
+  RiArrowRightUpLine,
+  RiCloseLine,
+  RiFileTextLine,
+  RiFolder3Line,
+  RiLoader4Line,
+  RiMore2Line,
+  RiSearchLine,
+  RiTimeLine,
+} from '@remixicon/react'
+import {
   TemplateApiError,
   templateApi,
   type TemplateApi,
@@ -81,30 +92,10 @@ function Brand({ compact = false }: { compact?: boolean }) {
   )
 }
 
-function SearchIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <circle cx="10.8" cy="10.8" r="6.3" />
-      <path d="m15.5 15.5 4.1 4.1" />
-    </svg>
-  )
-}
-
-function PlusIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M12 5v14M5 12h14" />
-    </svg>
-  )
-}
-
 function FilePlaceholder() {
   return (
     <span className={styles.filePlaceholder} aria-hidden="true">
-      <svg viewBox="0 0 48 48">
-        <path d="M14 6.5h13l7 7V41.5H14z" />
-        <path d="M27 6.5v8h7M19 23h10M19 29h10M19 35h7" />
-      </svg>
+      <RiFileTextLine />
     </span>
   )
 }
@@ -214,9 +205,7 @@ function TemplateGallery({
                     </time>
                   </span>
                 </span>
-                <span className={styles.cardArrow} aria-hidden="true">
-                  ↗
-                </span>
+                <RiArrowRightUpLine className={styles.cardArrow} aria-hidden="true" />
               </button>
               {detail?.kind === 'error' ? (
                 <button className={styles.retryPreview} type="button" onClick={onRetry}>
@@ -246,8 +235,13 @@ function TemplateGallery({
                   onClick={() =>
                     onToggleActions(actionMenuId === summary.id ? undefined : summary.id)
                   }
+                  aria-busy={pendingId === summary.id || undefined}
                 >
-                  {pendingId === summary.id ? '…' : '•••'}
+                  {pendingId === summary.id ? (
+                    <RiLoader4Line className={styles.actionSpinner} aria-hidden="true" />
+                  ) : (
+                    <RiMore2Line aria-hidden="true" />
+                  )}
                 </button>
                 {actionMenuId === summary.id ? (
                   <div
@@ -456,7 +450,7 @@ export function WorkspaceHome({
             aria-pressed={activeSection === 'recent'}
             onClick={() => setActiveSection('recent')}
           >
-            <span aria-hidden="true" />
+            <RiTimeLine aria-hidden="true" />
             最近更新
           </button>
           <button
@@ -464,7 +458,7 @@ export function WorkspaceHome({
             aria-pressed={activeSection === 'all'}
             onClick={() => setActiveSection('all')}
           >
-            <span aria-hidden="true" />
+            <RiFolder3Line aria-hidden="true" />
             全部模板
           </button>
         </nav>
@@ -474,7 +468,7 @@ export function WorkspaceHome({
         <Brand compact />
         <div className={styles.compactActions}>
           <button type="button" aria-label="新建空白模板" onClick={onNew}>
-            <PlusIcon />
+            <RiAddLine aria-hidden="true" />
           </button>
           <div className={styles.accountSlot}>{accountControl}</div>
         </div>
@@ -487,7 +481,7 @@ export function WorkspaceHome({
           </div>
           <div className={styles.headerActions}>
             <div className={styles.searchField}>
-              <SearchIcon />
+              <RiSearchLine aria-hidden="true" />
               <input
                 type="search"
                 aria-label="按标题搜索模板"
@@ -497,12 +491,12 @@ export function WorkspaceHome({
               />
               {query ? (
                 <button type="button" aria-label="清除搜索" onClick={() => setQuery('')}>
-                  ×
+                  <RiCloseLine aria-hidden="true" />
                 </button>
               ) : null}
             </div>
             <button className={styles.newButton} type="button" onClick={onNew}>
-              <PlusIcon />
+              <RiAddLine aria-hidden="true" />
               新建模板
             </button>
           </div>
@@ -537,7 +531,7 @@ export function WorkspaceHome({
               <p>从空白 A4 页面开始设计，首次保存后会出现在这里。</p>
             </div>
             <button type="button" onClick={onNew}>
-              <PlusIcon />
+              <RiAddLine aria-hidden="true" />
               新建空白模板
             </button>
           </section>
@@ -589,7 +583,7 @@ export function WorkspaceHome({
         >
           {notice.message}
           <button type="button" aria-label="关闭文件操作提示" onClick={() => setNotice(undefined)}>
-            ×
+            <RiCloseLine aria-hidden="true" />
           </button>
         </div>
       ) : null}

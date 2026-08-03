@@ -11,6 +11,7 @@
     "baseUrl": ".",
     "paths": {
       "@ptd/core": ["../../packages/core/src/index.ts"],
+      "@ptd/export": ["../../packages/export/src/index.ts"],
       "@ptd/react-designer": ["../../packages/react-designer/src/index.ts"]
     }
   },
