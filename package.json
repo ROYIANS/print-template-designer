@@ -16,7 +16,7 @@
   "type": "module",
   "engines": {
     "node": ">=20",
-    "pnpm": ">=10"
+    "pnpm": "11.18.0"
   },
   "scripts": {
     "build": "pnpm -r build",
@@ -39,14 +39,5 @@
   "workspaces": [
     "packages/*",
     "apps/*"
-  ],
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@nestjs/core",
-      "@prisma/client",
-      "@prisma/engines",
-      "esbuild",
-      "prisma"
-    ]
-  }
+  ]
 }

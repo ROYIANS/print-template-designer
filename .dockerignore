@@ -20,7 +20,6 @@
 !.env.example
 
 # Files not required by either runtime image
-packages/export
 legacy
 **/*.md
 **/*.log
