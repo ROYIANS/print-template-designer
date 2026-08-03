@@ -111,7 +111,7 @@ function InspectorShell({
     <aside className={styles.inspector} aria-label={label} data-ptd-region="inspector">
       <PanelRoot className={styles.inspectorPanel}>
         <PanelHeader title={title} meta={meta} />
-        <PanelBody>
+        <PanelBody className={styles.inspectorBody}>
           <div
             className={styles.inspectorView}
             data-ptd-region={page ? 'page-inspector' : undefined}

@@ -33,12 +33,14 @@
   gap: var(--ptd-space-1);
   box-sizing: border-box;
   padding: 6px var(--ptd-space-2);
-  border: 1px solid var(--ptd-border-strong);
-  border-radius: var(--ptd-radius-2);
-  color: var(--ptd-text);
-  background: var(--ptd-surface-raised);
+  border: 0;
+  border-radius: var(--ptd-radius-surface);
+  color: var(--ptd-header-text);
+  background: var(--ptd-header-bg);
   box-shadow: var(--ptd-shadow-tool-dock);
+  backdrop-filter: blur(14px);
   pointer-events: auto;
+  -webkit-backdrop-filter: blur(14px);
 }
 
 .group {
@@ -52,7 +54,7 @@
   height: 20px;
   flex: 0 0 auto;
   margin: 0 3px;
-  background: var(--ptd-border);
+  background: var(--ptd-header-control-border-hover);
 }
 
 .dockButton {
@@ -63,15 +65,15 @@
   display: grid;
   place-items: center;
   padding: 0;
-  border: 1px solid transparent;
-  border-radius: var(--ptd-radius-1);
-  color: var(--ptd-text-muted);
+  border: 0;
+  border-radius: var(--ptd-radius-control);
+  color: var(--ptd-header-text-icon);
   background: transparent;
   cursor: pointer;
   transition:
     color var(--ptd-duration-instant) var(--ptd-ease-out),
     background-color var(--ptd-duration-instant) var(--ptd-ease-out),
-    border-color var(--ptd-duration-instant) var(--ptd-ease-out),
+    box-shadow var(--ptd-duration-instant) var(--ptd-ease-out),
     transform var(--ptd-duration-instant) var(--ptd-ease-out);
 }
 
@@ -81,8 +83,8 @@
 }
 
 .dockButton:hover:not(:disabled) {
-  color: var(--ptd-text-strong);
-  background: var(--ptd-surface-sunken);
+  color: var(--ptd-header-text);
+  background: var(--ptd-header-hover);
 }
 
 .dockButton:active:not(:disabled) {
@@ -90,10 +92,14 @@
 }
 
 .dockButton[aria-pressed='true'] {
-  color: var(--ptd-selection-strong);
-  border-color: var(--ptd-selection-border);
-  background: var(--ptd-selection-subtle);
-  box-shadow: inset 0 -2px 0 var(--ptd-selection);
+  color: var(--ptd-paper-0);
+  background: var(--ptd-selection);
+  box-shadow: none;
+}
+
+.dockButton[aria-pressed='true']:hover:not(:disabled) {
+  color: var(--ptd-paper-0);
+  background: var(--ptd-selection-strong);
 }
 
 .dockButton:disabled {
@@ -116,7 +122,7 @@
   width: 5px;
   height: 5px;
   box-sizing: border-box;
-  border: 1px solid var(--ptd-surface-raised);
+  border: 1px solid var(--ptd-header-bg);
   border-radius: var(--ptd-radius-round);
   background: var(--ptd-selection);
 }
@@ -143,15 +149,15 @@
   padding: 0;
   border: 0;
   border-radius: var(--ptd-radius-1) 0 var(--ptd-radius-1) 0;
-  color: var(--ptd-text-muted);
+  color: var(--ptd-header-text-icon);
   background: transparent;
   cursor: pointer;
 }
 
 .groupedToolDisclosure:hover,
 .groupedToolDisclosure[aria-expanded='true'] {
-  color: var(--ptd-text-strong);
-  background: var(--ptd-surface-sunken);
+  color: var(--ptd-header-text);
+  background: var(--ptd-header-hover);
 }
 
 .groupedToolDisclosure svg {
@@ -168,8 +174,8 @@
   display: grid;
   gap: 1px;
   padding: var(--ptd-space-1);
-  border: 1px solid var(--ptd-border-strong);
-  border-radius: var(--ptd-radius-1);
+  border: 0;
+  border-radius: var(--ptd-radius-overlay);
   background: var(--ptd-surface-raised);
   box-shadow: var(--ptd-shadow-floating);
   transform: translateX(-50%);
@@ -190,8 +196,8 @@
   align-items: center;
   gap: var(--ptd-space-2);
   padding: 0 7px;
-  border: 1px solid transparent;
-  border-radius: var(--ptd-radius-1);
+  border: 0;
+  border-radius: var(--ptd-radius-control);
   color: var(--ptd-text);
   background: transparent;
   font: inherit;
@@ -206,9 +212,15 @@
 }
 
 .groupedToolMenu button[aria-checked='true'] {
-  border-color: var(--ptd-border-strong);
-  box-shadow: inset 0 -2px 0 var(--ptd-selection);
+  color: var(--ptd-paper-0);
+  background: var(--ptd-selection);
+  box-shadow: none;
   font-weight: 650;
+}
+
+.groupedToolMenu button[aria-checked='true']:hover {
+  color: var(--ptd-paper-0);
+  background: var(--ptd-selection-strong);
 }
 
 .groupedToolMenu button svg {

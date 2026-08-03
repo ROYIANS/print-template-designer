@@ -114,15 +114,15 @@
   display: grid;
   place-items: center;
   padding: 0;
-  border: 1px solid transparent;
-  border-radius: var(--ptd-radius-1);
+  border: 0;
+  border-radius: var(--ptd-radius-control);
   color: var(--ptd-text-muted);
   background: transparent;
   cursor: pointer;
   transition:
     color var(--ptd-duration-instant) var(--ptd-ease-out),
     background-color var(--ptd-duration-instant) var(--ptd-ease-out),
-    border-color var(--ptd-duration-instant) var(--ptd-ease-out),
+    box-shadow var(--ptd-duration-instant) var(--ptd-ease-out),
     transform var(--ptd-duration-instant) var(--ptd-ease-out);
 }
 
@@ -147,9 +147,14 @@
 }
 
 .toolButton[aria-pressed='true'] {
-  color: var(--ptd-selection-strong);
-  border-color: var(--ptd-selection-border);
-  background: var(--ptd-selection-subtle);
+  color: var(--ptd-paper-0);
+  background: var(--ptd-selection);
+  box-shadow: none;
+}
+
+.toolButton[aria-pressed='true']:hover:not(:disabled) {
+  color: var(--ptd-paper-0);
+  background: var(--ptd-selection-strong);
 }
 
 .toolButton[data-danger='true']:hover:not(:disabled) {

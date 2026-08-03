@@ -131,13 +131,17 @@ describe('floating tool dock workspace composition', () => {
     expect(dock.textContent).toContain('拖动画布平移')
   })
 
-  it('encodes the confirmed heavy-shadow main island and narrower shadowless shelf contract', () => {
+  it('encodes the confirmed borderless island and primary selection contract', () => {
     const dockCss = readFileSync(
       resolve(process.cwd(), 'src/components/FloatingToolDock/FloatingToolDock.module.css'),
       'utf8',
     )
     const contextCss = readFileSync(
       resolve(process.cwd(), 'src/components/Toolbar/Toolbar.module.css'),
+      'utf8',
+    )
+    const themeCss = readFileSync(
+      resolve(process.cwd(), 'src/components/Theme/Theme.module.css'),
       'utf8',
     )
     const designerCss = readFileSync(
@@ -153,10 +157,36 @@ describe('floating tool dock workspace composition', () => {
     expect(dockCss).toMatch(/\.floatingDock\s*{[^}]*width:\s*448px/)
     expect(dockCss).toMatch(/\.mainDock\s*{[^}]*width:\s*100%/)
     expect(dockCss).toMatch(/\.mainDock\s*{[^}]*justify-content:\s*center/)
+    expect(dockCss).toMatch(/\.mainDock\s*{[^}]*border:\s*0/)
+    expect(dockCss).toMatch(/\.mainDock\s*{[^}]*background:\s*var\(--ptd-header-bg\)/)
+    expect(dockCss).toMatch(/\.mainDock\s*{[^}]*border-radius:\s*var\(--ptd-radius-surface\)/)
     expect(dockCss).toMatch(/\.mainDock[\s\S]*box-shadow:\s*var\(--ptd-shadow-tool-dock\)/)
+    expect(themeCss).toMatch(
+      /--ptd-shadow-tool-dock:\s*0 3px 8px rgb\(0 0 0 \/ 35%\), 0 1px 3px rgb\(0 0 0 \/ 50%\),\s*inset 0 0\.5px 0 rgb\(255 255 255 \/ 8%\),\s*inset 0 0 0\.5px rgb\(255 255 255 \/ 30%\);/,
+    )
+    expect(dockCss).toMatch(/\.dockButton\s*{[^}]*border:\s*0/)
+    expect(dockCss).toMatch(
+      /\.dockButton\[aria-pressed='true'\]\s*{[^}]*color:\s*var\(--ptd-paper-0\)/,
+    )
+    expect(dockCss).toMatch(
+      /\.dockButton\[aria-pressed='true'\]\s*{[^}]*background:\s*var\(--ptd-selection\)/,
+    )
+    expect(dockCss).toMatch(/\.dockButton\[aria-pressed='true'\]\s*{[^}]*box-shadow:\s*none/)
+    expect(dockCss).toMatch(/\.groupedToolMenu\s*{[^}]*border:\s*0/)
+    expect(dockCss).not.toMatch(/box-shadow:\s*inset 0 -/)
+    expect(dockCss).not.toContain('var(--ptd-selection-subtle)')
     expect(contextCss).toMatch(/\.toolbar[\s\S]*background:\s*var\(--ptd-surface-sunken\)/)
     expect(contextCss).toMatch(/\.toolbar\s*{[^}]*border:\s*0/)
     expect(contextCss).toMatch(/\.toolbar\s*{[^}]*box-shadow:\s*none/)
+    expect(contextCss).toMatch(/\.toolButton\s*{[^}]*border:\s*0/)
+    expect(contextCss).toMatch(
+      /\.toolButton\[aria-pressed='true'\]\s*{[^}]*color:\s*var\(--ptd-paper-0\)/,
+    )
+    expect(contextCss).toMatch(
+      /\.toolButton\[aria-pressed='true'\]\s*{[^}]*background:\s*var\(--ptd-selection\)/,
+    )
+    expect(contextCss).toMatch(/\.toolButton\[aria-pressed='true'\]\s*{[^}]*box-shadow:\s*none/)
+    expect(contextCss).not.toContain('var(--ptd-selection-subtle)')
     expect(designerCss).toMatch(
       /grid-template-rows:\s*auto minmax\(0, 1fr\) var\(--ptd-status-bar-height\)/,
     )
