@@ -57,6 +57,20 @@ describe('workspace decision surfaces', () => {
     expect(onDiscard).toHaveBeenCalledTimes(1)
   })
 
+  it('uses the same discard protection before replacing content with imported JSON', async () => {
+    const onDiscard = vi.fn()
+    await act(async () => {
+      root.render(<UnsavedDialog action="import" onCancel={vi.fn()} onDiscard={onDiscard} />)
+    })
+
+    expect(container.textContent).toContain('导入所选模板 JSON')
+    const discard = Array.from(container.querySelectorAll('button')).find((button) =>
+      button.textContent?.includes('丢弃并导入'),
+    )
+    await act(async () => discard?.click())
+    expect(onDiscard).toHaveBeenCalledTimes(1)
+  })
+
   it('keeps Save As errors visible and blocks editing, closing and duplicate submit while pending', async () => {
     const onClose = vi.fn()
     const onConfirm = vi.fn()

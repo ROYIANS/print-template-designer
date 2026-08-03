@@ -2,6 +2,7 @@ import { act, StrictMode } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { INITIAL_TEMPLATE } from '../templates'
+import { parseTemplateJson } from '../templateJson'
 import { TemplateApiError, type TemplateApi, type TemplateRecord } from '../templateApi'
 import {
   documentHostCommandStates,
@@ -254,6 +255,51 @@ describe('Web document controller', () => {
     )
     expect(controller.state).toMatchObject({ id: 21, serverVersion: 1, status: 'clean' })
     expect(locationChange).toHaveBeenCalledWith(21, true)
+  })
+
+  it('opens imported JSON as a dirty unsaved document without retaining server identity', async () => {
+    const create = vi.fn(async (input: { title: string; content: typeof INITIAL_TEMPLATE }) =>
+      record({ id: 22, title: input.title, content: input.content, version: 1 }),
+    )
+    const api = fakeApi({ create })
+    const locationChange = await render(api, 7)
+    const imported = parseTemplateJson(JSON.stringify(changedTemplate('导入的出库单')))
+
+    await act(async () => controller.importDocument(imported))
+
+    expect(controller.state).toMatchObject({
+      title: '导入的出库单',
+      status: 'dirty',
+      requiresSave: true,
+      currentTemplate: imported,
+    })
+    expect(controller.state).not.toHaveProperty('id')
+    expect(controller.state).not.toHaveProperty('serverVersion')
+    expect(shouldConfirmDocumentExit(controller.state)).toBe(true)
+    expect(documentHostCommandStates(controller.state)).toMatchObject({
+      save: { enabled: true },
+      importTemplate: { enabled: true },
+      exportTemplate: { enabled: true },
+    })
+    expect(locationChange).toHaveBeenCalledWith(undefined, false)
+
+    await act(async () => {
+      await controller.save()
+    })
+    expect(create).toHaveBeenCalledWith(
+      { title: '导入的出库单', content: imported },
+      expect.any(AbortSignal),
+    )
+    expect(controller.state).toMatchObject({ status: 'clean', requiresSave: false, id: 22 })
+  })
+
+  it('keeps an imported blank template dirty even when it equals the blank baseline', async () => {
+    await render(fakeApi())
+
+    await act(async () => controller.importDocument(INITIAL_TEMPLATE))
+
+    expect(controller.state.status).toBe('dirty')
+    expect(shouldConfirmDocumentExit(controller.state)).toBe(true)
   })
 
   it('updates with expectedVersion and advances the saved baseline', async () => {

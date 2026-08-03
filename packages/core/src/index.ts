@@ -162,5 +162,10 @@ export type {
   ComponentDefinition,
 } from './registry'
 
-export { CURRENT_TEMPLATE_VERSION, serialize, deserialize } from './serialization'
+export {
+  CURRENT_TEMPLATE_VERSION,
+  TEMPLATE_SCHEMA_JSON_LIMIT_BYTES,
+  serialize,
+  deserialize,
+} from './serialization'
 export { isTemplateSchema } from './schema-validation'

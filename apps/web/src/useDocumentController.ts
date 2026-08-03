@@ -10,6 +10,7 @@ export interface DocumentState {
   serverVersion?: number
   savedTemplate: TemplateSchema
   currentTemplate: TemplateSchema
+  requiresSave: boolean
   status: DesignerDocumentStatus
   message?: string
 }
@@ -23,6 +24,7 @@ interface UseDocumentControllerOptions {
 export interface DocumentController {
   state: DocumentState
   setCurrentTemplate(template: TemplateSchema): void
+  importDocument(template: TemplateSchema): void
   newDocument(): void
   openDocument(templateId: number): void
   save(template?: TemplateSchema): Promise<boolean>
@@ -44,6 +46,7 @@ function initialState(): DocumentState {
     title: template.pageConfig.title,
     savedTemplate: template,
     currentTemplate: template,
+    requiresSave: false,
     status: 'clean',
     message: '尚未保存到服务器',
   }
@@ -56,6 +59,7 @@ function loadingState(templateId: number): DocumentState {
     title: `模板 #${templateId}`,
     savedTemplate: template,
     currentTemplate: template,
+    requiresSave: false,
     status: 'loading',
     message: `正在载入模板 #${templateId}…`,
   }
@@ -67,13 +71,16 @@ function invalidRouteState(): DocumentState {
     title: template.pageConfig.title,
     savedTemplate: template,
     currentTemplate: template,
+    requiresSave: false,
     status: 'error',
     message: '地址中的模板编号无效，请从模板库重新选择。',
   }
 }
 
-export function isDocumentDirty(state: Pick<DocumentState, 'savedTemplate' | 'currentTemplate'>) {
-  return serialize(state.savedTemplate) !== serialize(state.currentTemplate)
+export function isDocumentDirty(
+  state: Pick<DocumentState, 'savedTemplate' | 'currentTemplate' | 'requiresSave'>,
+) {
+  return state.requiresSave || serialize(state.savedTemplate) !== serialize(state.currentTemplate)
 }
 
 export function shouldConfirmDocumentExit(state: DocumentState): boolean {
@@ -122,10 +129,18 @@ export function documentHostCommandStates(state: DocumentState): DesignerHostCom
             : (unavailableReason ?? busyReason),
     },
     restoreVersion: { enabled: false, reason: '请先从版本历史选择要恢复的版本' },
+    importTemplate: { enabled: !busy, pending: busy, reason: busyReason },
+    exportTemplate: {
+      enabled: !busy && !unavailable,
+      pending: busy,
+      reason: unavailableReason ?? busyReason,
+    },
   }
 }
 
-function settledStatus(state: Pick<DocumentState, 'savedTemplate' | 'currentTemplate'>) {
+function settledStatus(
+  state: Pick<DocumentState, 'savedTemplate' | 'currentTemplate' | 'requiresSave'>,
+) {
   return isDocumentDirty(state) ? ('dirty' as const) : ('clean' as const)
 }
 
@@ -224,6 +239,7 @@ export function useDocumentController({
         serverVersion: record.version,
         savedTemplate: template,
         currentTemplate: template,
+        requiresSave: false,
         status: 'clean',
         message,
       }))
@@ -311,6 +327,23 @@ export function useDocumentController({
     onLocationChange(undefined, false)
   }, [cancelRequest, commit, onLocationChange])
 
+  const importDocument = useCallback(
+    (source: TemplateSchema) => {
+      const template = cloneTemplate(source)
+      cancelRequest()
+      commit(() => ({
+        title: titleFromTemplate(template, '导入模板'),
+        savedTemplate: template,
+        currentTemplate: template,
+        requiresSave: true,
+        status: 'dirty',
+        message: '已导入模板 JSON · 尚未保存到服务器',
+      }))
+      onLocationChange(undefined, false)
+    },
+    [cancelRequest, commit, onLocationChange],
+  )
+
   const openDocument = useCallback(
     (templateId: number) => {
       if (stateRef.current.id === templateId) {
@@ -386,6 +419,7 @@ export function useDocumentController({
             serverVersion: record.version,
             savedTemplate,
             currentTemplate,
+            requiresSave: false,
           }
           const status = settledStatus(next)
           return {
@@ -470,7 +504,25 @@ export function useDocumentController({
   )
 
   return useMemo(
-    () => ({ state, setCurrentTemplate, newDocument, openDocument, save, saveAs, restoreVersion }),
-    [newDocument, openDocument, restoreVersion, save, saveAs, setCurrentTemplate, state],
+    () => ({
+      state,
+      setCurrentTemplate,
+      importDocument,
+      newDocument,
+      openDocument,
+      save,
+      saveAs,
+      restoreVersion,
+    }),
+    [
+      importDocument,
+      newDocument,
+      openDocument,
+      restoreVersion,
+      save,
+      saveAs,
+      setCurrentTemplate,
+      state,
+    ],
   )
 }

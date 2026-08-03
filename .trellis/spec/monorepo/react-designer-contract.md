@@ -168,6 +168,12 @@ import '@ptd/react-designer/styles.css'
 - Version History is a File-menu Host intent. The Host owns version list/detail requests, real snapshot
   preview, restore confirmation, `expectedVersion`, request cancellation and 409 handling; Designer owns
   no version records and never applies a restore snapshot internally.
+- Template JSON import/export are distinct File-menu Host intents and must not be conflated with the
+  Data Panel's runtime/sample-data JSON workflow. Export receives the command context's exact current
+  in-memory `TemplateSchema`, including unsaved edits; the Host serializes it through Core without server
+  id/version/owner/session metadata. Import is Host-owned file I/O: size/version/schema validation and
+  canonical migration happen before replacing `value`; a successful import becomes an id-less dirty
+  document, and dirty/conflict content must pass the existing discard guard first.
 - `Ctrl/Cmd+S/N/O` and `Ctrl/Cmd+Shift+S` execute only a currently enabled, non-pending declared
   Host command and yield to rich text, table cells, form controls and Portal menus.
 - `DesignerDocumentState` exposes optional id/title/version plus

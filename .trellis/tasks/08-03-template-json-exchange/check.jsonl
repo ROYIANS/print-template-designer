@@ -1,0 +1,5 @@
+{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file": ".trellis/spec/monorepo/quality-guidelines.md", "reason": "测试、类型检查、构建与格式门槛"}
+{"file": ".trellis/spec/monorepo/typescript-conventions.md", "reason": "严格类型审查"}
+{"file": ".trellis/spec/monorepo/react-designer-contract.md", "reason": "跨层 Host 与文档状态一致性"}
+{"file": ".trellis/spec/monorepo/ptd-ui-system.md", "reason": "App Bar、响应式和可访问性审查"}

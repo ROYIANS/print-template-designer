@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest'
-import { CURRENT_TEMPLATE_VERSION, serialize, deserialize } from '../serialization'
+import {
+  CURRENT_TEMPLATE_VERSION,
+  TEMPLATE_SCHEMA_JSON_LIMIT_BYTES,
+  serialize,
+  deserialize,
+} from '../serialization'
 import type { TemplateSchema } from '../types/template-schema'
 import { DEFAULT_PAGE_CONFIG } from '../types/page-config'
 
@@ -12,6 +17,10 @@ const sampleTemplate: TemplateSchema = {
 }
 
 describe('serialization', () => {
+  it('publishes the shared 4 MiB template JSON persistence boundary', () => {
+    expect(TEMPLATE_SCHEMA_JSON_LIMIT_BYTES).toBe(4 * 1024 * 1024)
+  })
+
   it('serialize produces valid JSON', () => {
     const json = serialize(sampleTemplate)
     expect(() => JSON.parse(json)).not.toThrow()

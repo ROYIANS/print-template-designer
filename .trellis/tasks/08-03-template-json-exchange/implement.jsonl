@@ -1,0 +1,9 @@
+{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file": ".trellis/spec/monorepo/package-conventions.md", "reason": "跨 Core、React Designer 与 Web 的包边界和公开导出"}
+{"file": ".trellis/spec/monorepo/typescript-conventions.md", "reason": "严格类型与公共 API 约束"}
+{"file": ".trellis/spec/monorepo/styling-conventions.md", "reason": "App Bar 与 Web 反馈样式边界"}
+{"file": ".trellis/spec/monorepo/directory-structure.md", "reason": "新增 Web 文件的职责位置"}
+{"file": ".trellis/spec/monorepo/quality-guidelines.md", "reason": "测试、格式化与构建门槛"}
+{"file": ".trellis/spec/monorepo/react-designer-contract.md", "reason": "Host 命令、文档状态与受控模板合同"}
+{"file": ".trellis/spec/monorepo/ptd-ui-system.md", "reason": "文件菜单、反馈和可访问性交互合同"}
+{"file": ".trellis/tasks/08-03-template-json-exchange/research/existing-contracts.md", "reason": "Core、Host、大小限制与文档生命周期调研"}

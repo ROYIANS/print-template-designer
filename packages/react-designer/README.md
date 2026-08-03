@@ -42,6 +42,8 @@ export function Editor({ initialValue }: { initialValue: TemplateSchema }) {
           save: { pending: saving },
           saveAs: {},
           versionHistory: {},
+          importTemplate: {},
+          exportTemplate: {},
         },
         onCommand: async (command, context) => {
           if (command === 'save') {
@@ -139,6 +141,10 @@ interface DesignerHost {
 - New/Open/Save/Save As/Version History/Restore 的确认、API、错误提示、冲突处理和路由均由 Host 负责。
 - File → Version History 只分发 `versionHistory` Host intent；历史列表、真实快照预览、恢复确认和
   `expectedVersion` 属于 Host，不进入 Designer package。
+- File → Import/Export Template JSON 只分发 `importTemplate` / `exportTemplate` Host intent。导出上下文
+  是包含未保存编辑的最新 `TemplateSchema`；本地文件读写、Core 序列化/反序列化、大小与版本校验、
+  未保存替换保护，以及将导入结果标记为无服务端 ID 的新文档，均由 Host 负责。它与 Data Panel 的
+  示例数据 JSON 导入是两种不同工作流。
 - 当前公共 Host ID 还覆盖模板浏览器、版本历史/恢复、模板导入导出、预览、打印、文档导出与帮助入口；
   `DESIGNER_HOST_COMMAND_IDS` 可用于建立穷尽映射。
 
