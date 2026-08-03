@@ -98,7 +98,7 @@ legacy/             只读的 Vue 2 版本
 ### 环境要求
 
 - Node.js **22.12 或更高版本**（CI 与 Docker 使用 Node 22）。
-- 通过 Corepack 使用仓库声明的 pnpm **10.15.1**。
+- 通过 Corepack 使用仓库声明的 pnpm **11.18.0**。
 
 虽然部分 package 的 `engines` 仍允许 Node 20，完整开发、CI 与容器环境统一使用 Node 22，以减少工具链和 Prisma 运行时差异。
 

@@ -23,13 +23,13 @@ This applies to both the main agent and all sub-agents (`trellis-implement`, `tr
 
 ## Toolchain
 
-| Tool       | Version          | Config                                        |
-| ---------- | ---------------- | --------------------------------------------- |
-| ESLint     | v9 (flat config) | `eslint.config.js` at root                    |
-| Prettier   | v3               | `.prettierrc.json` at root                    |
-| TypeScript | v5+              | `tsconfig.base.json` + per-package            |
+| Tool       | Version            | Config                                         |
+| ---------- | ------------------ | ---------------------------------------------- |
+| ESLint     | v9 (flat config)   | `eslint.config.js` at root                     |
+| Prettier   | v3                 | `.prettierrc.json` at root                     |
+| TypeScript | v5+                | `tsconfig.base.json` + per-package             |
 | Node       | 22.12+ recommended | Full workspace baseline; CI/Docker use Node 22 |
-| pnpm       | 10.15.1          | root `packageManager` + `pnpm-workspace.yaml` |
+| pnpm       | 11.18.0            | root `packageManager` + `pnpm-workspace.yaml`  |
 
 ---
 
@@ -71,12 +71,12 @@ Run: `corepack pnpm lint`
 
 - Every `packages/*` must have a `typecheck` and build script appropriate to its current package
   contract
-- Implemented library packages (`core`, `components`, `react-designer`) use tsup and Vitest
-- `@ptd/export` is currently a `tsc`-only empty scaffold and has no test script; add tests/build
-  infrastructure when its implementation contract is approved
+- Implemented library packages (`core`, `components`, `export`, `react-designer`) use tsup and Vitest
 - `src/index.ts` must exist and be the only public API entry point
 - After an authorized dependency change, `corepack pnpm install` must succeed from root and the
   lockfile must be committed with the manifest change
+- pnpm build-script policy belongs in root `pnpm-workspace.yaml#allowBuilds`; pnpm 11 no longer
+  reads `package.json#pnpm.onlyBuiltDependencies`
 - Destroy third-party instances in cleanup / component unmount (DOM listeners, observers, editors,
   renderers, browser processes, or other external resources)
 
@@ -94,8 +94,7 @@ Run: `corepack pnpm lint`
 
 ## Testing
 
-Implemented library packages use **Vitest** for unit tests. `@ptd/export` remains an untested empty
-scaffold until export work begins.
+Implemented library packages use **Vitest** for unit tests.
 
 ### vitest.config.ts (required in every package)
 

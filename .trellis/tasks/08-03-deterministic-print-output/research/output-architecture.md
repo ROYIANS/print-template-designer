@@ -136,8 +136,23 @@ Puppeteer Core 仍是可行替代，但本任务不同时维护两种后端。�
   无横向溢出、适合页面/宽度/缩放/导出/关闭可用。模板 id 只是当次隔离测试库 QA 数据，不属于公共合同。
 - 完整 HTTP 路径已跑通：当前模板 → 打印预览 → `POST /api/output/pdf` → `application/pdf` 下载；预览与 PDF
   的尺寸、文本位置和换行一致，差异仅为浏览器与 PDF rasterizer 抗锯齿。
-- 本机没有 Docker CLI，不能执行 Server/Web image build、Compose E2E 和容器内 CJK 验收。该项保持明确
-  blocker，不允许用静态 Dockerfile 审查或 Windows Chrome smoke 代替。
+- macOS Docker Desktop 的 Linux arm64 环境已完整构建 Web 与 Server image。Server 最终镜像为
+  `mcr.microsoft.com/playwright:v1.62.0-noble` runtime，镜像内 `playwright-core@1.62.0` 启动固定
+  Chromium 151.0.7922.34；不需要 `privileged`、`SYS_ADMIN` 或额外 capability。
+- `node:22-bookworm-slim` 默认缺少 Prisma platform detection 需要的 OpenSSL runtime，会警告并回退到
+  `openssl-1.1.x`。共同 base stage 必须安装 `openssl`，让 dependencies、build 和
+  production-dependencies 三个继承阶段都使用可识别的 OpenSSL 3/libssl3。
+- Playwright Noble arm64 runtime 不自带 `/usr/bin/dumb-init`。最终 runtime 必须显式固定安装
+  `dumb-init=1.2.5-3`；实际容器已验证 `dumb-init` 为 PID 1，并能正确启动 Chromium。
+- 最终 Server image 通过生产 `OutputBrowserService` 生成两页 A4 PDF：IR 页数与 PDF 页数均为 2，
+  无空白尾页、无图片 XObject，文字使用带 `/ToUnicode` 的 Type3 矢量 glyph 程序。Poppler 逐页 PNG
+  检查中文无缺字、方框或裁切，固定 Noto Sans CJK SC 命中成功。
+- 固定 Chromium + Noto CJK 下未出现 replacement character，但 `pdfplumber` 仍会把部分简体中文
+  ToUnicode 映射为 CJK 兼容部首（例如 `一/页` 提取为 `⼀/⻚`）；NFKC 加已知部首归一化后内容正确。
+  因此可以确认 PDF 保留真实文字对象和视觉中文，但仍不能宣称原始 Unicode 码位完全一致。
+- 隔离 Compose 项目已完成 PostgreSQL migrate、Server、Web 启动，并通过 Web Nginx 调用真实
+  `POST /api/output/pdf`：返回 `200 application/pdf`、UTF-8 Content-Disposition 和两页 A4 PDF。
+  验收使用独立临时 volume/network，结束后已清理，没有访问或重置本地共享数据库。
 
 ## Chromium 容器策略
 

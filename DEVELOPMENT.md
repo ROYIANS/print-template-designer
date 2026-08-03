@@ -7,7 +7,7 @@
 | 工具       | 建议版本 | 说明                                                |
 | ---------- | -------- | --------------------------------------------------- |
 | Node.js    | 22.12+   | CI、Docker 构建与生产 Server 运行时统一使用 Node 22 |
-| pnpm       | 10.15.1  | 由根 `packageManager` 声明，通过 Corepack 调用      |
+| pnpm       | 11.18.0  | 由根 `packageManager` 声明，通过 Corepack 调用      |
 | PowerShell | 7+       | Windows 脚本和项目约定的最低版本                    |
 
 先确认实际运行时，而不是只看版本管理器当前配置：
@@ -17,7 +17,7 @@ node --version
 corepack pnpm --version
 ```
 
-期望 pnpm 输出 `10.15.1`。项目命令统一写为 `corepack pnpm ...`，避免被其他全局 pnpm 或工具内置 runtime 接管。
+期望 pnpm 输出 `11.18.0`。项目命令统一写为 `corepack pnpm ...`，避免被其他全局 pnpm 或工具内置 runtime 接管。
 
 ## 安装
 
@@ -26,7 +26,8 @@ corepack enable
 corepack pnpm install
 ```
 
-不要在子目录分别安装依赖，也不要提交 `node_modules/` 或 `dist/`。
+pnpm 的依赖构建脚本白名单由根 `pnpm-workspace.yaml` 的 `allowBuilds` 统一维护。不要在子目录
+分别安装依赖，也不要提交 `node_modules/` 或 `dist/`。
 
 ## 启动 Web
 

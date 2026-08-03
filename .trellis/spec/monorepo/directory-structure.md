@@ -12,7 +12,7 @@ print-template-designer/
     core/           @ptd/core           Framework-agnostic engine (pure TS)
     components/     @ptd/components     Canvas components (TS DOM + Preact Signals)
     react-designer/ @ptd/react-designer React designer UI
-    export/         @ptd/export         Reserved export scaffold (no implementation yet)
+    export/         @ptd/export         Deterministic output compiler and DOM renderer
   apps/
     web/            Designer web app (React + Vite)
     server/         NestJS + Prisma backend
@@ -44,9 +44,7 @@ packages/<name>/
   tsconfig.build.json  outDir: dist, rootDir: src (used by build script)
 ```
 
-`@ptd/core`, `@ptd/components`, and `@ptd/react-designer` use tsup and Vitest. `@ptd/export`
-currently remains a `tsc`-only scaffold with no test runner; its README must state that explicitly.
-Do not describe a uniform package anatomy that the repository does not yet implement.
+`@ptd/core`, `@ptd/components`, `@ptd/export`, and `@ptd/react-designer` use tsup and Vitest.
 
 ## Apps Anatomy
 

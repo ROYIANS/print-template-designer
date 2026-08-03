@@ -71,6 +71,98 @@ not expose the rejected URL in logs or diagnostics.
   No Cookie, database setting or Server secret enters the render context.
 - PDF uses `preferCSSPageSize`, zero margin, background graphics, no Chromium header/footer and explicit metadata time.
 
+## Scenario: Fixed Chromium Server Runtime Image
+
+### 1. Scope / Trigger
+
+- Trigger: changing the Server Docker base, Playwright/Chromium version, pnpm version, Prisma install stages,
+  init process or container fonts.
+- This is an infra contract because dependency installation, Prisma generation, Nest startup, Chromium launch and
+  PDF glyph output span different Docker stages and Linux distributions.
+
+### 2. Signatures
+
+- Build: `docker build -f docker/Dockerfile.server -t <server-image> .`
+- Runtime: `ENTRYPOINT ["/usr/bin/dumb-init", "--"]` followed by `CMD ["node", "dist/main.js"]`.
+- Browser package/image pair: `playwright-core@1.62.0` with
+  `mcr.microsoft.com/playwright:v1.62.0-noble`.
+
+### 3. Contracts
+
+- The shared `node:22-bookworm-slim` base installs `openssl` before dependencies, build and
+  production-dependencies stages run Prisma commands.
+- Every Docker build activates the root-declared `pnpm@11.18.0` and asserts the resolved version.
+- The independent Playwright runtime installs `dumb-init=1.2.5-3` and
+  `fonts-noto-cjk=1:20230817+repack1-3`; it must not assume packages from the Node base are inherited.
+- Runtime output configuration uses `PTD_OUTPUT_RENDER_URL`, `PTD_OUTPUT_MAX_CONCURRENCY` and
+  `PTD_OUTPUT_TIMEOUT_MS`; Compose needs no privileged mode or extra Linux capability.
+
+### 4. Validation & Error Matrix
+
+| Condition                                           | Required result                                                      |
+| --------------------------------------------------- | -------------------------------------------------------------------- |
+| OpenSSL absent from the Node slim stages            | Build fails; do not accept Prisma's `openssl-1.1.x` fallback warning |
+| `/usr/bin/dumb-init` absent from the final stage    | Build assertion fails before the image can reach OCI runtime failure |
+| pnpm does not resolve to `11.18.0`                  | Build assertion fails before dependency installation                 |
+| Noto CJK does not match the fixed package/version   | Image validation fails; do not accept host-font fallback             |
+| IR page count differs from parsed PDF page count    | Docker PDF smoke fails                                               |
+| Compose adds `privileged`, `SYS_ADMIN` or `cap_add` | Security validation fails                                            |
+
+### 5. Good/Base/Bad Cases
+
+- Good: final image starts with `dumb-init` as PID 1, launches the fixed Chromium and returns a multi-page CJK PDF
+  whose parsed page count matches the Output IR.
+- Base: a template containing only manual pages still produces one A4 PDF page per Output page without a trailing
+  blank page.
+- Bad: a statically plausible Dockerfile that was never built, or a PDF checked only for `/ToUnicode`, is not valid
+  release evidence.
+
+### 6. Tests Required
+
+1. Run `docker build --check` and a complete Server image build; assert no OpenSSL detection fallback warning.
+2. Start the final image through its default ENTRYPOINT; assert `/proc/1/comm` is `dumb-init`.
+3. Assert the exact `playwright-core`, Chromium, `dumb-init` and Noto CJK versions inside the image.
+4. Generate a real PDF through `OutputBrowserService`; assert PDF signature, IR/PDF page counts, A4 size,
+   normalized metadata and no fatal diagnostic.
+5. Inspect text objects and image XObjects, extract CJK text, then render every page with Poppler and inspect glyphs,
+   clipping and blank pages. Compatibility-radical ToUnicode mappings must be reported rather than hidden.
+6. Run an isolated Compose `/api/output/pdf` E2E and verify `200 application/pdf` plus UTF-8
+   `Content-Disposition`; delete only the test project's containers, network and volume afterward.
+
+### 7. Wrong vs Correct
+
+#### Wrong
+
+```dockerfile
+FROM node:22-bookworm-slim AS base
+RUN corepack prepare pnpm@11.18.0 --activate
+
+FROM mcr.microsoft.com/playwright:v1.62.0-noble AS runtime
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+```
+
+This assumes Prisma can detect OpenSSL in the slim build stages and that an independent runtime contains
+`dumb-init`; neither assumption is guaranteed.
+
+#### Correct
+
+```dockerfile
+FROM node:22-bookworm-slim AS base
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends openssl \
+    && rm -rf /var/lib/apt/lists/* \
+    && corepack prepare pnpm@11.18.0 --activate \
+    && test "$(pnpm --version)" = "11.18.0"
+
+FROM mcr.microsoft.com/playwright:v1.62.0-noble AS runtime
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+      dumb-init=1.2.5-3 \
+      fonts-noto-cjk=1:20230817+repack1-3 \
+    && test -x /usr/bin/dumb-init \
+    && rm -rf /var/lib/apt/lists/*
+```
+
 ## Verification
 
 Every output change must cover the closest pure unit test and consumer typecheck. Before release:

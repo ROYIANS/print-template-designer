@@ -170,7 +170,8 @@ git pull --ff-only
 ./deploy.sh --build
 ```
 
-PowerShell 对应 `.\deploy.ps1 -Build`。本地构建仍然使用与 CI 相同的 Dockerfile、Node 22 和 pnpm 10.15.1，不使用宿主机 Node_modules。
+PowerShell 对应 `.\deploy.ps1 -Build`。本地构建仍然使用与 CI 相同的 Dockerfile、Node 22 和 pnpm
+11.18.0，不使用宿主机 Node_modules。
 
 ## 运维命令
 

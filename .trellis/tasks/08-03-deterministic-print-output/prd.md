@@ -368,7 +368,7 @@ fragment 顺序与视觉布局。PDF metadata 中不可隐式写入每次变化�
 - [x] 远程资源被阻断且没有对测试地址发起请求。
 - [x] Server 同时超过并发上限时有确定的拒绝/排队合同，无无界 Page 创建。
 - [x] 任务超时和 Browser crash 后 Context/Browser 生命周期正确清理。
-- [ ] Docker Server image 能启动 Chromium 并完成真实 PDF smoke test。
+- [x] Docker Server image 能启动 Chromium 并完成真实 PDF smoke test。
 - [x] Compose 不需要 privileged 或 `SYS_ADMIN`。
 - [x] Core、Components、Export、React Designer、Web、Server 的 lint/typecheck/test/build 通过。
 - [x] README、DEVELOPMENT、DEPLOYMENT、相关 Trellis spec 与实现一致。
@@ -437,9 +437,9 @@ fragment 顺序与视觉布局。PDF metadata 中不可隐式写入每次变化�
 
 ## Definition of Done
 
-- [ ] 所有 Acceptance Criteria 完成或在 PRD 中经用户明确批准调整。
-- [ ] 研究结论写入本任务 `research/`。
-- [ ] 实现/检查上下文清单完成并通过 Trellis validate。
-- [ ] 新依赖和 Docker 版本被精确固定，无隐式浏览器下载漂移。
-- [ ] 代码、测试、公共文档和 Trellis spec 一致。
-- [ ] 任务变更按逻辑批次提交，不包含用户的未跟踪实验文件。
+- [x] 所有 Acceptance Criteria 完成或在 PRD 中经用户明确批准调整。
+- [x] 研究结论写入本任务 `research/`。
+- [x] 实现/检查上下文清单完成并通过 Trellis validate。
+- [x] 新依赖和 Docker 版本被精确固定，无隐式浏览器下载漂移。
+- [x] 代码、测试、公共文档和 Trellis spec 一致。
+- [x] 任务变更按逻辑批次提交，不包含用户的未跟踪实验文件。
