@@ -23,6 +23,9 @@
   --ptd-surface-panel: var(--ptd-paper-0);
   --ptd-surface-raised: var(--ptd-paper-0);
   --ptd-surface-sunken: var(--ptd-paper-2);
+  --ptd-surface-form: var(--ptd-paper-2);
+  --ptd-surface-field: var(--ptd-paper-0);
+  --ptd-surface-selection: var(--ptd-paper-0);
   --ptd-surface-canvas: var(--foliq-surface-muted, #ececea);
   --ptd-surface-paper: oklch(100% 0 0);
   --ptd-canvas-grid: rgb(10 10 10 / 1.35%);
@@ -49,7 +52,7 @@
   --ptd-guide-amber: oklch(66% 0.15 82);
   --ptd-success: oklch(47% 0.105 145);
   --ptd-danger: oklch(46% 0.17 27);
-  --ptd-focus: var(--ptd-ink-blue-600);
+  --ptd-focus: oklch(50% 0.105 258);
   --ptd-space-1: 4px;
   --ptd-space-2: 8px;
   --ptd-space-3: 12px;
@@ -60,16 +63,28 @@
   --ptd-control-sm: 28px;
   --ptd-control-md: 32px;
   --ptd-control-touch: 40px;
-  --ptd-radius-1: 2px;
-  --ptd-radius-2: 4px;
+  --ptd-radius-control-sm: 4px;
+  --ptd-radius-control: 6px;
+  --ptd-radius-surface: 8px;
+  --ptd-radius-overlay: 12px;
+  --ptd-radius-shell: 14px;
   --ptd-radius-round: 999px;
+  --ptd-radius-1: var(--ptd-radius-control-sm);
+  --ptd-radius-2: var(--ptd-radius-control);
   --ptd-shadow-paper:
     0 0 0 1px oklch(71% 0.006 85 / 78%), 4px 4px 0 oklch(21% 0.006 70 / 10%),
     0 18px 38px oklch(21% 0.006 70 / 10%);
+  --ptd-shadow-field: 0 1px 2px rgb(0 0 0 / 2%), 0 0 1px rgb(0 0 0 / 3%);
+  --ptd-shadow-field-hover:
+    0 2px 4px rgb(0 0 0 / 4%), 0 1px 2px rgb(0 0 0 / 6%), 0 0 1px rgb(0 0 0 / 6%);
+  --ptd-shadow-selection: 0 1px 2px rgb(0 0 0 / 5%), 0 0 1px rgb(0 0 0 / 5%);
   --ptd-shadow-control: 0 2px 8px oklch(21% 0.006 70 / 20%);
   --ptd-shadow-deck:
     0 1px 2px oklch(21% 0.006 70 / 10%), inset 0 1px 0 oklch(99.35% 0.003 106 / 88%);
   --ptd-shadow-floating: 0 8px 24px oklch(21% 0.006 70 / 16%);
+  --ptd-shadow-tool-dock:
+    0 3px 8px rgb(0 0 0 / 35%), 0 1px 3px rgb(0 0 0 / 50%), inset 0 0.5px 0 rgb(255 255 255 / 8%),
+    inset 0 0 0.5px rgb(255 255 255 / 30%);
   --ptd-header-bg: rgb(0 0 0 / 88%);
   --ptd-header-border: rgb(255 255 255 / 6%);
   --ptd-header-hover: rgb(255 255 255 / 5%);
@@ -87,13 +102,13 @@
   --ptd-header-radius-round: 100px;
   --ptd-app-bar-height: 42px;
   --ptd-app-bar-height-compact: 38px;
-  --ptd-command-bar-height: 40px;
-  --ptd-command-bar-height-compact: 36px;
   --ptd-status-bar-height: 24px;
   --ptd-tool-dock-width: 42px;
   --ptd-tool-dock-width-compact: 36px;
   --ptd-resource-panel-width: 280px;
   --ptd-inspector-width: 304px;
+  --ptd-floating-tool-dock-offset: var(--ptd-space-6);
+  --ptd-floating-tool-dock-safe-area: 128px;
   --ptd-layer-base: 0;
   --ptd-layer-stage: 1;
   --ptd-layer-canvas: 10;

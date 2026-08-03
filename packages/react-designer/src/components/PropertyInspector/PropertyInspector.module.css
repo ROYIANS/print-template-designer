@@ -4,16 +4,22 @@
   min-width: 0;
   min-height: 0;
   color: var(--ptd-text);
-  background: var(--ptd-surface-panel);
+  background: var(--ptd-surface-form);
 }
 
 .inspectorPanel {
   height: 100%;
-  border-left: 1px solid var(--ptd-border);
+  border: 0;
+}
+
+.inspectorBody {
+  background: var(--ptd-surface-form);
 }
 
 .inspectorView {
   min-width: 0;
+  min-height: 100%;
+  background: var(--ptd-surface-form);
 }
 
 .inspectorFooter {
@@ -22,7 +28,15 @@
 }
 
 .section {
-  border-bottom: 1px solid var(--ptd-border-subtle);
+  border: 0;
+}
+
+.section + .section::before {
+  content: '';
+  height: 1px;
+  display: block;
+  margin: 0 var(--ptd-space-3);
+  background: color-mix(in oklch, var(--ptd-border-subtle) 48%, transparent);
 }
 
 .sectionHeading {
@@ -30,9 +44,9 @@
   display: flex;
   align-items: center;
   gap: var(--ptd-space-2);
-  padding: 0 var(--ptd-space-3);
+  padding: var(--ptd-space-2) var(--ptd-space-3) 0;
   color: var(--ptd-text-strong);
-  background: color-mix(in oklch, var(--ptd-surface-panel) 92%, var(--ptd-surface-sunken));
+  background: transparent;
 }
 
 .sectionHeading > span,
@@ -55,7 +69,7 @@
 }
 
 .sectionBody {
-  padding: 10px var(--ptd-space-3) var(--ptd-space-3);
+  padding: var(--ptd-space-2) var(--ptd-space-3) var(--ptd-space-3);
 }
 
 .advancedWrap {
@@ -66,18 +80,19 @@
 .disclosure {
   margin-top: 2px;
   overflow: hidden;
-  border: 1px solid var(--ptd-border-subtle);
-  border-radius: var(--ptd-radius-1);
+  border: 0;
+  border-radius: var(--ptd-radius-surface);
+  background: color-mix(in oklch, var(--ptd-surface-form) 68%, var(--ptd-paper-3));
 }
 
 .disclosure > summary {
-  min-height: 30px;
+  min-height: var(--ptd-control-md);
   display: flex;
   align-items: center;
   gap: var(--ptd-space-2);
   padding: 0 var(--ptd-space-2);
   color: var(--ptd-text-strong);
-  background: var(--ptd-surface-sunken);
+  background: transparent;
   cursor: pointer;
   list-style: none;
   user-select: none;
@@ -115,7 +130,7 @@
 
 .disclosureBody {
   padding: var(--ptd-space-2);
-  border-top: 1px solid var(--ptd-border-subtle);
+  border: 0;
 }
 
 .fieldGrid {
@@ -149,7 +164,7 @@
   padding: 0 2px;
   overflow: hidden;
   border: 0;
-  border-radius: var(--ptd-radius-1);
+  border-radius: var(--ptd-radius-control-sm);
   background: transparent;
   font-family: inherit;
   text-align: left;
@@ -181,17 +196,18 @@
 }
 
 .numberControl {
-  height: 28px;
+  height: var(--ptd-inspector-control-height, var(--ptd-control-md));
   min-width: 0;
   display: grid;
   grid-template-columns: 24px minmax(0, 1fr) 24px;
   align-items: center;
   overflow: hidden;
-  border: 1px solid var(--ptd-border);
-  border-radius: var(--ptd-radius-1);
-  background: var(--ptd-surface-raised);
+  border: 0;
+  border-radius: var(--ptd-radius-control);
+  background: var(--ptd-surface-field);
+  box-shadow: var(--ptd-shadow-field);
   transition:
-    border-color var(--ptd-duration-instant) var(--ptd-ease-out),
+    background-color var(--ptd-duration-instant) var(--ptd-ease-out),
     box-shadow var(--ptd-duration-instant) var(--ptd-ease-out);
 }
 
@@ -200,29 +216,32 @@
 }
 
 .numberControl:hover:not([data-disabled='true']) {
-  border-color: var(--ptd-border-strong);
+  box-shadow: var(--ptd-shadow-field-hover);
 }
 
 .numberControl:focus-within {
-  border-color: var(--ptd-focus);
-  box-shadow: 0 0 0 1px var(--ptd-focus);
+  outline: 2px solid var(--ptd-focus);
+  outline-offset: 1px;
+  box-shadow: var(--ptd-shadow-field-hover);
 }
 
 .numberControl:has(input[aria-invalid='true']) {
-  border-color: var(--ptd-danger);
-  box-shadow: 0 0 0 1px var(--ptd-danger);
+  outline: 2px solid var(--ptd-danger);
+  outline-offset: 1px;
+  box-shadow: var(--ptd-shadow-field-hover);
 }
 
 .numberControl[data-disabled='true'] {
   color: var(--ptd-text-disabled);
   background: var(--ptd-surface-sunken);
+  box-shadow: none;
 }
 
 .numberControl input {
   box-sizing: border-box;
   width: 100%;
   min-width: 0;
-  height: 26px;
+  height: 100%;
   padding: 0 6px;
   border: 0;
   outline: 0;
@@ -245,7 +264,7 @@
 
 .numberControl button {
   width: 24px;
-  height: 26px;
+  height: 100%;
   display: grid;
   place-items: center;
   padding: 0;
@@ -308,17 +327,21 @@
 .selectControl {
   width: 100%;
   box-sizing: border-box;
-  border: 1px solid var(--ptd-border);
-  border-radius: var(--ptd-radius-1);
+  border: 0;
+  border-radius: var(--ptd-radius-control);
   color: var(--ptd-text-strong);
-  background: var(--ptd-surface-raised);
+  background: var(--ptd-surface-field);
+  box-shadow: var(--ptd-shadow-field);
   font: inherit;
   font-size: 11px;
+  transition:
+    background-color var(--ptd-duration-instant) var(--ptd-ease-out),
+    box-shadow var(--ptd-duration-instant) var(--ptd-ease-out);
 }
 
 .textControl,
 .selectControl {
-  height: 28px;
+  height: var(--ptd-inspector-control-height, var(--ptd-control-md));
   padding: 0 7px;
 }
 
@@ -337,14 +360,23 @@
 .textControl:hover:not(:disabled),
 .textArea:hover:not(:disabled),
 .selectControl:hover:not(:disabled) {
-  border-color: var(--ptd-border-strong);
+  box-shadow: var(--ptd-shadow-field-hover);
 }
 
 .textControl:focus-visible,
 .textArea:focus-visible,
 .selectControl:focus-visible {
   outline: 2px solid var(--ptd-focus);
-  outline-offset: 0;
+  outline-offset: 1px;
+  box-shadow: var(--ptd-shadow-field-hover);
+}
+
+.textControl[aria-invalid='true'],
+.textArea[aria-invalid='true'],
+.selectControl[aria-invalid='true'] {
+  outline: 2px solid var(--ptd-danger);
+  outline-offset: 1px;
+  box-shadow: var(--ptd-shadow-field-hover);
 }
 
 .textControl:disabled,
@@ -352,6 +384,7 @@
 .selectControl:disabled {
   color: var(--ptd-text-disabled);
   background: var(--ptd-surface-sunken);
+  box-shadow: none;
 }
 
 .segmented {
@@ -360,9 +393,10 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1px;
   padding: 2px;
-  border: 1px solid var(--ptd-border-subtle);
-  border-radius: var(--ptd-radius-1);
-  background: var(--ptd-surface-sunken);
+  border: 0;
+  border-radius: var(--ptd-radius-surface);
+  background: var(--ptd-surface-field);
+  box-shadow: var(--ptd-shadow-field);
 }
 
 .segmented[data-count='3'] {
@@ -375,15 +409,16 @@
 
 .segmented button {
   min-width: 0;
-  height: 26px;
+  height: calc(var(--ptd-inspector-control-height, var(--ptd-control-md)) - 4px);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 5px;
   padding: 0 6px;
   overflow: hidden;
+  box-sizing: border-box;
   border: 1px solid transparent;
-  border-radius: var(--ptd-radius-1);
+  border-radius: var(--ptd-radius-control);
   color: var(--ptd-text-muted);
   background: transparent;
   font: inherit;
@@ -394,14 +429,14 @@
 
 .segmented button:hover:not(:disabled) {
   color: var(--ptd-text-strong);
-  background: color-mix(in oklch, var(--ptd-surface-raised) 70%, transparent);
+  background: color-mix(in oklch, var(--ptd-surface-form) 58%, transparent);
 }
 
 .segmented button[aria-pressed='true'] {
   color: var(--ptd-selection-strong);
-  background: var(--ptd-surface-raised);
-  border-color: var(--ptd-border);
-  box-shadow: inset 0 -2px 0 color-mix(in oklch, var(--ptd-selection) 76%, transparent);
+  border-color: color-mix(in oklch, var(--ptd-border-subtle) 72%, transparent);
+  background: var(--ptd-surface-form);
+  box-shadow: none;
 }
 
 .segmented button:focus-visible {
@@ -427,32 +462,39 @@
 }
 
 .colorControl {
-  height: 28px;
+  height: var(--ptd-inspector-control-height, var(--ptd-control-md));
   min-width: 0;
   display: grid;
   grid-template-columns: 30px minmax(0, 1fr) 24px;
   overflow: hidden;
-  border: 1px solid var(--ptd-border);
-  border-radius: var(--ptd-radius-1);
-  background: var(--ptd-surface-raised);
+  border: 0;
+  border-radius: var(--ptd-radius-control);
+  background: var(--ptd-surface-field);
+  box-shadow: var(--ptd-shadow-field);
+  transition:
+    background-color var(--ptd-duration-instant) var(--ptd-ease-out),
+    box-shadow var(--ptd-duration-instant) var(--ptd-ease-out);
 }
 
 .colorControl:hover:not([data-disabled='true']) {
-  border-color: var(--ptd-border-strong);
+  box-shadow: var(--ptd-shadow-field-hover);
 }
 
 .colorControl:focus-within {
-  border-color: var(--ptd-focus);
-  box-shadow: 0 0 0 1px var(--ptd-focus);
+  outline: 2px solid var(--ptd-focus);
+  outline-offset: 1px;
+  box-shadow: var(--ptd-shadow-field-hover);
 }
 
 .colorControl:has(input[aria-invalid='true']) {
-  border-color: var(--ptd-danger);
-  box-shadow: 0 0 0 1px var(--ptd-danger);
+  outline: 2px solid var(--ptd-danger);
+  outline-offset: 1px;
+  box-shadow: var(--ptd-shadow-field-hover);
 }
 
 .colorControl[data-disabled='true'] {
   background: var(--ptd-surface-sunken);
+  box-shadow: none;
 }
 
 .colorWell {
@@ -502,7 +544,7 @@
 
 .colorControl > input {
   min-width: 0;
-  height: 26px;
+  height: 100%;
   padding: 0 7px;
   border: 0;
   outline: 0;
@@ -521,7 +563,7 @@
 
 .colorMenuTrigger {
   width: 24px;
-  height: 26px;
+  height: 100%;
   display: grid;
   place-items: center;
   padding: 0;
@@ -558,9 +600,9 @@
   display: grid;
   gap: var(--ptd-space-2);
   padding: var(--ptd-space-2);
-  border: 1px solid var(--ptd-border);
-  border-radius: var(--ptd-radius-1);
-  background: var(--ptd-surface-sunken);
+  border: 0;
+  border-radius: var(--ptd-radius-surface);
+  background: color-mix(in oklch, var(--ptd-surface-form) 68%, var(--ptd-paper-3));
 }
 
 .colorPaletteActions {
@@ -577,23 +619,24 @@
   gap: var(--ptd-space-1);
   flex: 1 1 0;
   padding: 0 var(--ptd-space-2);
-  border: 1px solid var(--ptd-border);
-  border-radius: var(--ptd-radius-1);
+  border: 0;
+  border-radius: var(--ptd-radius-control);
   color: var(--ptd-text);
-  background: var(--ptd-surface-raised);
+  background: var(--ptd-surface-field);
   font: inherit;
   font-size: 9px;
   cursor: pointer;
 }
 
 .colorPaletteActions button:hover:not(:disabled) {
-  border-color: var(--ptd-border-strong);
   color: var(--ptd-text-strong);
+  background: color-mix(in oklch, var(--ptd-surface-field) 80%, var(--ptd-surface-sunken));
 }
 
 .colorPaletteActions button[data-active='true'] {
-  border-color: var(--ptd-selection);
   color: var(--ptd-selection-strong);
+  background: var(--ptd-surface-selection);
+  box-shadow: var(--ptd-shadow-selection);
 }
 
 .colorPaletteActions button:disabled {
@@ -637,7 +680,7 @@
   aspect-ratio: 1;
   padding: 0;
   border: 1px solid color-mix(in oklch, var(--ptd-graphite-950) 25%, var(--ptd-border));
-  border-radius: var(--ptd-radius-1);
+  border-radius: var(--ptd-radius-control-sm);
   background: var(--field-color);
   cursor: pointer;
 }
@@ -656,8 +699,8 @@
 .summary {
   display: grid;
   gap: 3px;
-  border: 1px solid var(--ptd-border-subtle);
-  border-radius: var(--ptd-radius-1);
+  border: 0;
+  border-radius: var(--ptd-radius-surface);
   color: var(--ptd-text-muted);
   background: var(--ptd-surface-sunken);
   font-size: 10px;
@@ -668,7 +711,7 @@
   display: grid;
   gap: 2px;
   padding: 8px var(--ptd-space-3);
-  border-bottom: 1px solid color-mix(in oklch, var(--ptd-danger) 30%, var(--ptd-border));
+  border: 0;
   color: var(--ptd-text);
   background: color-mix(in oklch, var(--ptd-danger) 7%, var(--ptd-surface-panel));
 }
@@ -725,12 +768,12 @@
 .tableActionGrid button,
 .tableActionRow button {
   min-width: 0;
-  min-height: 27px;
+  min-height: var(--ptd-control-sm);
   padding: 3px 6px;
-  border: 1px solid var(--ptd-border);
-  border-radius: var(--ptd-radius-1);
+  border: 0;
+  border-radius: var(--ptd-radius-control);
   color: var(--ptd-text);
-  background: var(--ptd-surface-raised);
+  background: var(--ptd-surface-field);
   font: inherit;
   font-size: 10px;
   cursor: pointer;
@@ -738,9 +781,8 @@
 
 .tableActionGrid button:hover:not(:disabled),
 .tableActionRow button:hover:not(:disabled) {
-  border-color: var(--ptd-action);
   color: var(--ptd-action-hover);
-  background: var(--ptd-action-subtle);
+  background: color-mix(in oklch, var(--ptd-surface-field) 80%, var(--ptd-surface-sunken));
 }
 
 .tableActionGrid button:focus-visible,
@@ -750,7 +792,6 @@
 }
 
 .tableActionGrid button[data-danger]:hover:not(:disabled) {
-  border-color: var(--ptd-danger);
   color: var(--ptd-danger);
   background: var(--ptd-proof-subtle);
 }
@@ -768,7 +809,7 @@
   justify-content: space-between;
   gap: 8px;
   padding-top: 8px;
-  border-top: 1px solid var(--ptd-border-subtle);
+  border: 0;
 }
 
 .tableSubheading span {
@@ -800,6 +841,8 @@
 }
 
 .tableFieldGrid {
+  --ptd-inspector-control-height: var(--ptd-control-sm);
+
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 7px 5px;
@@ -807,16 +850,6 @@
 
 .tableFieldGrid input,
 .tableFieldGrid select {
-  width: 100%;
-  height: 28px;
-  min-width: 0;
-  box-sizing: border-box;
-  padding: 0 6px;
-  border: 1px solid var(--ptd-border);
-  border-radius: var(--ptd-radius-1);
-  color: var(--ptd-text-strong);
-  background: var(--ptd-surface-raised);
-  font: inherit;
   font-size: 10px;
 }
 
@@ -824,45 +857,45 @@
   padding: 3px;
 }
 
-.tableFieldGrid input:hover:not(:disabled),
-.tableFieldGrid select:hover:not(:disabled),
-.tableFieldGrid input:focus-visible,
-.tableFieldGrid select:focus-visible {
-  border-color: var(--ptd-action);
-  outline: none;
-}
-
 .tableSegmented {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1px;
-  padding: 1px;
-  border: 1px solid var(--ptd-border);
-  border-radius: var(--ptd-radius-1);
-  background: var(--ptd-surface-sunken);
+  padding: 2px;
+  border: 0;
+  border-radius: var(--ptd-radius-surface);
+  background: var(--ptd-surface-field);
+  box-shadow: var(--ptd-shadow-field);
 }
 
 .tableSegmented button {
-  height: 25px;
-  border: 0;
-  border-radius: 1px;
+  height: 24px;
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  border-radius: var(--ptd-radius-control);
   color: var(--ptd-text-muted);
   background: transparent;
   font: inherit;
   font-size: 10px;
 }
 
-.tableSegmented button:hover:not(:disabled),
-.tableSegmented button:focus-visible {
+.tableSegmented button:hover:not(:disabled) {
   color: var(--ptd-text-strong);
-  background: var(--ptd-surface-raised);
-  outline: none;
+  background: color-mix(in oklch, var(--ptd-surface-form) 58%, transparent);
+}
+
+.tableSegmented button:focus-visible {
+  position: relative;
+  z-index: var(--ptd-layer-stage);
+  outline: 2px solid var(--ptd-focus);
+  outline-offset: -1px;
 }
 
 .tableSegmented button[aria-pressed='true'] {
   color: var(--ptd-selection-strong);
-  background: var(--ptd-selection-subtle);
-  box-shadow: inset 0 -1px 0 var(--ptd-selection);
+  border-color: color-mix(in oklch, var(--ptd-border-subtle) 72%, transparent);
+  background: var(--ptd-surface-form);
+  box-shadow: none;
 }
 
 .assetActions {
@@ -873,26 +906,25 @@
 
 .assetAction {
   min-width: 0;
-  height: 30px;
+  height: var(--ptd-control-md);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 5px;
   box-sizing: border-box;
   padding: 0 7px;
-  border: 1px solid var(--ptd-border);
-  border-radius: var(--ptd-radius-1);
+  border: 0;
+  border-radius: var(--ptd-radius-control);
   color: var(--ptd-text-strong);
-  background: var(--ptd-surface-raised);
+  background: var(--ptd-surface-field);
   font: inherit;
   font-size: 10px;
   cursor: pointer;
 }
 
 .assetAction:hover:not(:disabled):not([data-disabled='true']) {
-  border-color: var(--ptd-action);
   color: var(--ptd-action-hover);
-  background: var(--ptd-action-subtle);
+  background: color-mix(in oklch, var(--ptd-surface-field) 80%, var(--ptd-surface-sunken));
 }
 
 .assetAction:focus-visible,
@@ -920,8 +952,8 @@
   align-items: baseline;
   gap: 3px 7px;
   padding: 7px 8px;
-  border: 1px solid var(--ptd-border-subtle);
-  border-radius: var(--ptd-radius-1);
+  border: 0;
+  border-radius: var(--ptd-radius-surface);
   color: var(--ptd-text-muted);
   background: var(--ptd-surface-sunken);
   font-size: 9px;
@@ -935,7 +967,6 @@
 }
 
 .validationMessage[data-error='true'] {
-  border-color: color-mix(in oklch, var(--ptd-danger) 40%, var(--ptd-border));
   color: var(--ptd-danger);
   background: color-mix(in oklch, var(--ptd-danger) 7%, var(--ptd-surface-panel));
 }
@@ -1035,7 +1066,7 @@
   place-items: center;
   color: var(--ptd-text-muted);
   background: var(--ptd-surface-sunken);
-  border-radius: var(--ptd-radius-1);
+  border-radius: var(--ptd-radius-control);
 }
 
 .footerIcon svg {
@@ -1067,13 +1098,11 @@
   width: 30px;
   height: 16px;
   padding: 0;
-  border: 1px solid var(--ptd-border-strong);
+  border: 0;
   border-radius: var(--ptd-radius-round);
-  background: var(--ptd-surface-sunken);
+  background: var(--ptd-graphite-300);
   cursor: pointer;
-  transition:
-    border-color var(--ptd-duration-instant) var(--ptd-ease-out),
-    background-color var(--ptd-duration-instant) var(--ptd-ease-out);
+  transition: background-color var(--ptd-duration-instant) var(--ptd-ease-out);
 }
 
 .switchControl > span {
@@ -1090,13 +1119,12 @@
 }
 
 .switchControl[aria-checked='true'] {
-  border-color: var(--ptd-selection);
-  background: var(--ptd-selection-subtle);
+  background: var(--ptd-selection);
 }
 
 .switchControl[aria-checked='true'] > span {
   transform: translateX(14px);
-  background: var(--ptd-selection);
+  background: var(--ptd-surface-selection);
 }
 
 .switchControl:focus-visible,
@@ -1107,21 +1135,20 @@
 
 .footerAction {
   width: 100%;
-  height: 30px;
+  height: var(--ptd-control-md);
   margin: 6px var(--ptd-space-3);
-  border: 1px solid var(--ptd-border);
-  border-radius: var(--ptd-radius-1);
+  border: 0;
+  border-radius: var(--ptd-radius-control);
   color: var(--ptd-text-strong);
-  background: var(--ptd-surface-raised);
+  background: var(--ptd-surface-field);
   font: inherit;
   font-size: 10px;
   cursor: pointer;
 }
 
 .footerAction:hover:not(:disabled) {
-  border-color: var(--ptd-action);
   color: var(--ptd-action-hover);
-  background: var(--ptd-action-subtle);
+  background: color-mix(in oklch, var(--ptd-surface-field) 80%, var(--ptd-surface-sunken));
 }
 
 .footerAction:disabled {
@@ -1139,6 +1166,10 @@
 }
 
 @media (pointer: coarse) {
+  .tableFieldGrid {
+    --ptd-inspector-control-height: var(--ptd-control-touch);
+  }
+
   .numberControl,
   .textControl,
   .selectControl,
@@ -1161,7 +1192,7 @@
   .numberControl input,
   .numberControl button,
   .colorControl > input {
-    height: 38px;
+    height: 100%;
   }
 
   .numberControl button {
@@ -1170,7 +1201,7 @@
 
   .colorMenuTrigger {
     width: 40px;
-    height: 38px;
+    height: 100%;
   }
 
   .colorSwatchGrid {

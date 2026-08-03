@@ -698,3 +698,71 @@ Added PostgreSQL, migration, Server and Web Compose lifecycle; hardened Bash/Pow
 ### Next Steps
 
 - None - task complete
+
+
+## Session 21: Floating Canvas Tool Dock
+
+**Date**: 2026-08-03
+**Task**: Floating Canvas Tool Dock
+**Branch**: `feature/refc`
+
+### Summary
+
+Reorganized the designer workspace around a two-layer floating dock, simplified single-selection context to catalog type and geometry, and preserved selection across delayed controlled-host drag echoes.
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `5305406` | (see git log) |
+| `518db9f` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
+
+
+## Session 22: 统一 Foliq UI 视觉体系与设计器工具栏
+
+**Date**: 2026-08-03
+**Task**: 统一 Foliq UI 视觉体系与设计器工具栏
+**Branch**: `feature/refc`
+
+### Summary
+
+建立连续暖灰 Inspector 表单、无边框字段与分组合同，并将底部双层工具栏统一为暖灰上下文层、近黑磨砂主浮岛和主色激活态；补充视觉合同测试与正式规范。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `6be0541` | (see git log) |
+| `be13eb1` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete

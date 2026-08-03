@@ -9,7 +9,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: 48px 48px 120px;
+  padding: 48px 48px var(--ptd-floating-tool-dock-safe-area);
   background-color: var(--ptd-surface-canvas);
   background-image:
     repeating-linear-gradient(

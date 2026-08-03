@@ -65,28 +65,12 @@
   transform: translateY(1px) scale(0.98);
 }
 
-.dockButton[data-state-kind='tool'][aria-pressed='true'] {
+.dockButton[aria-pressed='true'] {
   color: var(--ptd-selection-strong);
   background: var(--ptd-surface-panel);
 }
 
-.dockButton[data-state-kind='tool'][aria-pressed='true']::before {
-  content: '';
-  position: absolute;
-  top: 8px;
-  bottom: 8px;
-  left: -6px;
-  width: 2px;
-  border-radius: 0 1px 1px 0;
-  background: var(--ptd-selection);
-}
-
-.dockButton[data-state-kind='panel'][aria-pressed='true'] {
-  color: var(--ptd-selection-strong);
-  background: var(--ptd-surface-panel);
-}
-
-.dockButton[data-state-kind='panel'][aria-pressed='true']::after {
+.dockButton[aria-pressed='true']::after {
   content: '';
   position: absolute;
   top: 6px;
@@ -97,136 +81,15 @@
   background: var(--ptd-selection);
 }
 
-.dockButton[data-state-kind='disclosure'][aria-expanded='true'] {
-  color: var(--ptd-text-strong);
-  background: var(--ptd-surface-panel);
-}
-
-.moreToolButton[data-detail-active='true']::after {
-  content: '';
-  position: absolute;
-  right: 4px;
-  bottom: 4px;
-  width: 4px;
-  height: 4px;
-  border: 1px solid var(--ptd-surface-app);
-  border-radius: var(--ptd-radius-round);
-  background: var(--ptd-selection);
-}
-
 .dockButton:focus-visible,
 .closePanel:focus-visible,
 .resizeHandle:focus-visible,
-.catalogTile:focus-visible,
-.shapePreset:focus-visible,
-.catalogSearchItem:focus-visible,
-.shapeDisclosure:focus-visible,
-.shapeToolMenu button:focus-visible,
-.plannedSection summary:focus-visible,
 .layerRow:focus-visible,
 .pageRow:focus-visible,
 .pageAction:focus-visible,
-.emptyState button:focus-visible,
-.search input:focus-visible {
+.emptyState button:focus-visible {
   outline: 2px solid var(--ptd-focus);
   outline-offset: -2px;
-}
-
-.shapeToolGroup {
-  position: relative;
-  width: 30px;
-  height: 30px;
-}
-
-.shapePrimary {
-  width: 30px;
-}
-
-.shapeDisclosure {
-  position: absolute;
-  z-index: 2;
-  right: 0;
-  bottom: 0;
-  width: 13px;
-  height: 13px;
-  display: grid;
-  place-items: center;
-  padding: 0;
-  border: 0;
-  border-radius: var(--ptd-radius-1) 0 var(--ptd-radius-1) 0;
-  color: var(--ptd-text-muted);
-  background: transparent;
-  cursor: pointer;
-}
-
-.shapeDisclosure:hover,
-.shapeDisclosure[aria-expanded='true'] {
-  color: var(--ptd-text-strong);
-  background: var(--ptd-surface-raised);
-}
-
-.shapeDisclosure svg {
-  width: 9px;
-  height: 9px;
-}
-
-.shapeToolMenu {
-  position: absolute;
-  z-index: var(--ptd-layer-floating);
-  top: 0;
-  left: calc(100% + 8px);
-  width: 148px;
-  display: grid;
-  gap: 1px;
-  padding: var(--ptd-space-1);
-  border: 1px solid var(--ptd-border-strong);
-  border-radius: var(--ptd-radius-1);
-  background: var(--ptd-surface-raised);
-  box-shadow: var(--ptd-shadow-floating);
-}
-
-.shapeMenuTitle {
-  padding: 4px 7px 3px;
-  color: var(--ptd-text-muted);
-  font-size: 10px;
-  font-weight: 650;
-  letter-spacing: 0.04em;
-}
-
-.shapeToolMenu button {
-  height: 32px;
-  display: grid;
-  grid-template-columns: 22px minmax(0, 1fr);
-  align-items: center;
-  gap: var(--ptd-space-2);
-  padding: 0 7px;
-  border: 1px solid transparent;
-  border-radius: var(--ptd-radius-1);
-  color: var(--ptd-text);
-  background: transparent;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-
-.shapeToolMenu button:hover,
-.shapeToolMenu button[aria-checked='true'] {
-  color: var(--ptd-text-strong);
-  background: var(--ptd-surface-sunken);
-}
-
-.shapeToolMenu button[aria-checked='true'] {
-  border-color: var(--ptd-border-strong);
-  font-weight: 650;
-}
-
-.shapeToolMenu button svg {
-  width: 18px;
-  height: 18px;
-}
-
-.dockGrow {
-  flex: 1;
 }
 
 .panelSlot {
@@ -293,356 +156,6 @@
 .closePanel svg {
   width: 16px;
   height: 16px;
-}
-
-.search {
-  height: 28px;
-  display: grid;
-  grid-template-columns: 18px minmax(0, 1fr);
-  align-items: center;
-  gap: var(--ptd-space-1);
-  padding: 0 6px;
-  border: 1px solid var(--ptd-border);
-  border-radius: var(--ptd-radius-1);
-  background: var(--ptd-surface-raised);
-}
-
-.search svg {
-  width: 15px;
-  height: 15px;
-  color: var(--ptd-text-muted);
-}
-
-.search input {
-  min-width: 0;
-  height: 100%;
-  padding: 0;
-  border: 0;
-  color: var(--ptd-text-strong);
-  background: transparent;
-  font: inherit;
-}
-
-.search input::placeholder {
-  color: var(--ptd-text-muted);
-}
-
-.catalogSection {
-  padding: var(--ptd-space-3) var(--ptd-space-2);
-  border-bottom: 1px solid var(--ptd-border-subtle);
-}
-
-.catalogGroupHeader {
-  min-height: 16px;
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--ptd-space-2);
-  margin: 0 var(--ptd-space-1);
-}
-
-.catalogGroupHeader h3 {
-  margin: 0;
-  color: var(--ptd-text-strong);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-}
-
-.catalogGroupHeader span {
-  color: var(--ptd-text-muted);
-  font-family: var(--ptd-font-metric);
-  font-size: 10px;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-.catalogGroupIntro {
-  margin: 2px var(--ptd-space-1) var(--ptd-space-2);
-  color: var(--ptd-text-muted);
-  font-size: 11px;
-  line-height: 1.4;
-}
-
-.catalogTileGrid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--ptd-space-1);
-}
-
-.catalogTile,
-.shapePreset {
-  min-width: 0;
-  border: 1px solid transparent;
-  border-radius: var(--ptd-radius-1);
-  color: var(--ptd-text);
-  background: transparent;
-  font: inherit;
-  cursor: pointer;
-  transition:
-    color var(--ptd-duration-instant) var(--ptd-ease-out),
-    background-color var(--ptd-duration-instant) var(--ptd-ease-out),
-    border-color var(--ptd-duration-instant) var(--ptd-ease-out),
-    transform var(--ptd-duration-instant) var(--ptd-ease-out);
-}
-
-.catalogTile {
-  min-height: 42px;
-  display: grid;
-  grid-template-columns: 24px minmax(0, 1fr);
-  align-items: center;
-  gap: 6px;
-  padding: 4px 7px;
-  text-align: left;
-}
-
-.catalogTile[draggable='true'] {
-  cursor: grab;
-}
-
-.catalogTile:hover,
-.shapePreset:hover {
-  color: var(--ptd-text-strong);
-  background: var(--ptd-surface-sunken);
-  border-color: var(--ptd-border);
-}
-
-.catalogTile:active,
-.shapePreset:active {
-  transform: translateY(1px);
-}
-
-.catalogTile[draggable='true']:active {
-  cursor: grabbing;
-}
-
-.catalogTile svg {
-  width: 18px;
-  height: 18px;
-  color: var(--ptd-text-muted);
-}
-
-.catalogTile span {
-  overflow: hidden;
-  font-size: 11px;
-  font-weight: 650;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.shapePresetGrid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 3px;
-}
-
-.shapePreset {
-  min-height: 58px;
-  display: grid;
-  place-items: center;
-  align-content: center;
-  gap: 5px;
-  padding: 5px 2px;
-}
-
-.shapePreset svg {
-  width: 21px;
-  height: 21px;
-  color: var(--ptd-text-muted);
-}
-
-.shapePreset span {
-  font-size: 10px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.catalogTile:hover svg,
-.catalogTile[data-active-tool='true'] svg,
-.shapePreset:hover svg,
-.shapePreset[data-active-tool='true'] svg {
-  color: var(--ptd-text-strong);
-}
-
-.catalogTile[data-active-tool='true'],
-.shapePreset[data-active-tool='true'] {
-  color: var(--ptd-text-strong);
-  border-color: var(--ptd-border-strong);
-  background: var(--ptd-surface-raised);
-  box-shadow: inset 0 -2px 0 var(--ptd-graphite-600);
-  font-weight: 650;
-}
-
-.catalogTooltip {
-  z-index: var(--ptd-layer-tooltip);
-  width: 190px;
-  display: grid;
-  gap: 2px;
-  padding: 7px 9px;
-  border: 1px solid var(--ptd-graphite-700);
-  border-radius: var(--ptd-radius-1);
-  color: var(--ptd-paper-0);
-  background: var(--ptd-graphite-950);
-  box-shadow: var(--ptd-shadow-floating);
-}
-
-.catalogTooltip strong {
-  font-size: 11px;
-}
-
-.catalogTooltip span {
-  color: var(--ptd-graphite-300);
-  font-size: 10px;
-  line-height: 1.45;
-}
-
-.catalogSearchList,
-.plannedList {
-  display: grid;
-  gap: 2px;
-}
-
-.catalogSearchItem,
-.plannedItem {
-  min-width: 0;
-  min-height: 54px;
-  display: grid;
-  grid-template-columns: 24px minmax(0, 1fr) auto;
-  align-items: start;
-  gap: 7px;
-  padding: 7px;
-  border: 1px solid transparent;
-  border-radius: var(--ptd-radius-1);
-  color: var(--ptd-text);
-  background: transparent;
-  font: inherit;
-  text-align: left;
-}
-
-.catalogSearchItem {
-  cursor: pointer;
-}
-
-.catalogSearchItem:hover {
-  color: var(--ptd-text-strong);
-  border-color: var(--ptd-border);
-  background: var(--ptd-surface-sunken);
-}
-
-.catalogSearchItem[data-active-tool='true'] {
-  color: var(--ptd-text-strong);
-  border-color: var(--ptd-border-strong);
-  background: var(--ptd-surface-raised);
-  box-shadow: inset 0 -2px 0 var(--ptd-graphite-600);
-}
-
-.catalogSearchItem > svg,
-.plannedItem > svg {
-  width: 18px;
-  height: 18px;
-  margin-top: 2px;
-  color: var(--ptd-text-muted);
-}
-
-.catalogSearchItem > span,
-.plannedItem > span {
-  min-width: 0;
-  display: grid;
-  gap: 2px;
-}
-
-.catalogSearchItem strong,
-.catalogSearchItem small,
-.plannedItem strong,
-.plannedItem small {
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.catalogSearchItem strong,
-.plannedItem strong {
-  color: currentColor;
-  font-size: 11px;
-  font-weight: 650;
-  line-height: 1.25;
-  white-space: nowrap;
-}
-
-.catalogSearchItem small,
-.plannedItem small {
-  color: var(--ptd-text-muted);
-  font-size: 11px;
-  line-height: 1.4;
-  white-space: normal;
-}
-
-.plannedSection {
-  border-bottom: 1px solid var(--ptd-border-subtle);
-}
-
-.plannedSection summary {
-  min-height: 42px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--ptd-space-2);
-  padding: 0 var(--ptd-space-3);
-  color: var(--ptd-text);
-  cursor: pointer;
-  list-style: none;
-}
-
-.plannedSection summary::-webkit-details-marker {
-  display: none;
-}
-
-.plannedSection summary > span {
-  display: flex;
-  align-items: baseline;
-  gap: var(--ptd-space-2);
-}
-
-.plannedSection summary strong {
-  color: var(--ptd-text-strong);
-  font-size: 11px;
-}
-
-.plannedSection summary small {
-  color: var(--ptd-text-muted);
-  font-size: 10px;
-}
-
-.plannedSection summary > svg {
-  width: 16px;
-  height: 16px;
-  transition: transform var(--ptd-duration-state) var(--ptd-ease-out);
-}
-
-.plannedSection[open] summary > svg {
-  transform: rotate(180deg);
-}
-
-.plannedList {
-  padding: 0 var(--ptd-space-2) var(--ptd-space-3);
-}
-
-.plannedItem {
-  color: var(--ptd-text-muted);
-  cursor: default;
-  opacity: 0.76;
-}
-
-.plannedItem em {
-  margin-top: 1px;
-  padding: 1px 4px;
-  border: 1px solid var(--ptd-border);
-  border-radius: var(--ptd-radius-1);
-  color: var(--ptd-text-muted);
-  background: var(--ptd-surface-sunken);
-  font-size: 9px;
-  font-style: normal;
-  line-height: 1.4;
-  white-space: nowrap;
 }
 
 .pageList,
@@ -863,21 +376,8 @@
   font-size: 11px;
 }
 
-.tooltip kbd {
-  color: var(--ptd-graphite-300);
-  font: 9px var(--ptd-font-metric);
-}
-
 .tooltipArrow {
   fill: var(--ptd-graphite-950);
-}
-
-.visuallyHidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
 }
 
 .sidebar[data-mode='compact'] {
@@ -905,27 +405,8 @@
     height: 40px;
   }
 
-  .shapeToolGroup,
-  .shapePrimary {
-    width: 40px;
-    height: 40px;
-  }
-
-  .shapeDisclosure {
-    width: 16px;
-    height: 16px;
-  }
-
-  .shapeDisclosure svg {
-    width: 11px;
-    height: 11px;
-  }
-
   .pageRow,
-  .layerRow,
-  .catalogTile,
-  .catalogSearchItem,
-  .plannedItem {
+  .layerRow {
     min-height: 40px;
   }
 }
@@ -936,9 +417,7 @@
     padding-block: var(--ptd-space-1);
   }
 
-  .dockButton,
-  .shapeToolGroup,
-  .shapePrimary {
+  .dockButton {
     width: 32px;
     height: 32px;
   }
@@ -947,23 +426,10 @@
     width: 15px;
     height: 15px;
   }
-
-  .shapeDisclosure {
-    width: 12px;
-    height: 12px;
-  }
-
-  .shapeDisclosure svg {
-    width: 8px;
-    height: 8px;
-  }
 }
 
-/* Viewport fallback for phone-scale coarse-pointer hosts; specificity beats the 40px rule. */
 @media (pointer: coarse) and (max-width: 480px) {
-  .toolDock .dockButton,
-  .toolDock .shapeToolGroup,
-  .toolDock .shapePrimary {
+  .toolDock .dockButton {
     width: 32px;
     height: 32px;
   }
@@ -972,24 +438,10 @@
     width: 15px;
     height: 15px;
   }
-
-  .toolDock .shapeDisclosure {
-    width: 12px;
-    height: 12px;
-  }
-
-  .toolDock .shapeDisclosure svg {
-    width: 8px;
-    height: 8px;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dockButton,
-  .catalogTile,
-  .shapePreset,
-  .catalogSearchItem,
-  .plannedSection summary > svg {
+  .dockButton {
     transition: none;
   }
 }
