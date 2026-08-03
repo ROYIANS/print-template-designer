@@ -230,6 +230,21 @@ import '@ptd/react-designer/styles.css'
 - Page, Single, Multi and free-table business panels compose the shared `InspectorControls` layer;
   native input/select/textarea/color elements are implementation details of that layer rather than
   independently styled business fields.
+- The Inspector body is one continuous warm `surface-form`, not a stack of white Section cards. Sections
+  use heading rhythm and spacing, plus at most one low-contrast 1 CSS px inset separator between adjacent
+  Sections. Editable fields use a white borderless `surface-field`, 6 CSS px radius and
+  `--ptd-shadow-field`.
+- Normal Inspector fields are 32 CSS px high, explicit compact/table-internal fields are 28 CSS px and
+  coarse-pointer fields are 40 CSS px. Page, Single, Multi and free-table panels must not introduce a
+  third field height or duplicate field appearance outside `InspectorControls`.
+- Field default shadow is deliberately near-invisible; hover, focus-visible and invalid raise it to
+  `--ptd-shadow-field-hover`. Focus-visible and invalid also use a full non-layout ring/outline plus text;
+  disabled/locked reduce surface/shadow while remaining identifiable. Business panels must not copy raw
+  shadows or restore decorative field outlines.
+- Inspector segmented/Button Groups use one white `surface-field` track. The current item uses the warm
+  `surface-form`, one low-contrast neutral 1 CSS px boundary and no selection shadow. This inset form-control
+  language does not replace the archival-ink active surface used by Floating Dock or the raised white selection
+  surface used by Rail and navigation Tabs.
 - Typed numeric drafts outside the declared range remain local and expose an associated accessible
   error. They do not clamp into Schema, emit a Host change or create history; steppers and scrubbers may
   stop at an explicit boundary. Escape restores the exact gesture start.
@@ -307,12 +322,19 @@ The Designer shell uses three grid rows and mounts the floating controls inside 
 - At normal widths the Main Dock has a stable 448 CSS px width and centers its tool groups. The Context
   Shelf is absolutely positioned behind it and inset 24 CSS px from each side, giving it 400 CSS px of
   content-safe width without participating in the dock's intrinsic sizing. It uses `surface-sunken`, has no
-  border or box shadow and overlaps the Main Dock edge by 5 CSS px. The Main Dock uses the dedicated
-  `--ptd-shadow-tool-dock` token. Changing context content must not move or resize Main Dock controls, and
+  border or box shadow and overlaps the Main Dock edge by 5 CSS px. The Main Dock is also borderless, uses
+  the near-black translucent `--ptd-header-bg`, 8 CSS px radius, one 14 CSS px backdrop blur and the dedicated
+  `--ptd-shadow-tool-dock` token. Changing context content must not move or
+  resize Main Dock controls, and
   desktop context content must not be clipped. A single-component context shows only its user-facing
   catalog type plus X/Y/W/H metrics; it does not expose custom layer names, internal Schema component types
   such as `RoySimpleText`, or duplicate Copy/Lock/Layer/Delete actions already available through the
   component Quick Bar, Canvas context menu and keyboard paths.
+- Main Dock and Context Shelf tool selection use a complete archival-ink `--ptd-selection` surface
+  with white foreground, no border and no selection shadow. Rail, navigation Tabs and Status Bar selection
+  retain a complete white selection surface, `--ptd-shadow-selection` and archival-ink foreground. Persistent blue bottom indicators, pale-blue fills
+  and non-focused blue outlines are forbidden; Canvas selection/guides and focus-visible rings keep their
+  functional archival-ink geometry.
 - Canvas scroll content reserves `--ptd-floating-tool-dock-safe-area`; the dock offset leaves the
   horizontal scrollbar and Status Bar operable. The dock uses the Selection layer so compact Scrim covers
   it, while Resource/Inspector overlay remains above the Scrim.
@@ -436,67 +458,70 @@ The Designer shell uses three grid rows and mounts the floating controls inside 
 
 ### 4. Validation & Error Matrix
 
-| Condition                                 | Required behavior                                                   |
-| ----------------------------------------- | ------------------------------------------------------------------- |
-| `value` is the exact last-emitted object  | No history reset                                                    |
-| `value` is a new external object          | Replace template; reset history baseline and selection              |
-| Host command key is absent                | Keep command disabled and label it as not integrated                |
-| Host command is pending                   | Reject duplicate menu, App Bar and shortcut execution               |
-| Save handler executes                     | Receive exact current template and optional document metadata       |
-| New/Open handler completes                | Wait for Host to replace controlled `value`; do not sync internally |
-| Document status is conflict/error         | Render explicit text status; never rely on color alone              |
-| Preview page index is out of bounds       | Clamp to an existing manual page                                    |
-| Preview receives a new TemplateSchema     | Update real renderer content; no Host/history/selection mutation    |
-| Preview has no explicit `renderContext`   | Render static content; do not inherit Designer proof state          |
-| Host replaces `Designer.renderContext`    | Recompute proof only; no Schema, Host, dirty or history mutation    |
-| Proof/search/expanded state changes       | Update instance UI only; no Schema, Host, dirty or history mutation |
-| JSON is parsed or previewed               | Keep candidate local; do not mutate the template before Apply       |
-| User applies a valid import candidate     | Replace canonical data once; one Host emission and history entry    |
-| Field/formatter/binding/sample edit       | Persist once in canonical data; one coherent history entry          |
-| External `value` replaces the template    | Close proof, clamp record and clear stale data-panel draft surfaces |
-| Proof resolves a component binding        | Derive via Core without mutating source components or manual pages  |
-| First user mutation then undo             | Restore initial `value`                                             |
-| Gesture emits many transient updates      | One final history entry                                             |
-| Gesture is cancelled                      | Restore the exact gesture-start value; add no history entry         |
-| Switch `mm` / `px`                        | Update all display consumers; no Schema, Host or history mutation   |
-| Page config draft is invalid              | Keep it local; do not emit or create history                        |
-| Page resize makes objects out of bounds   | Preserve geometry; derive warning count and Canvas marker           |
-| Select/Text/Shape + Space keydown         | `effectiveTool=hand`; persistent tool/history/selection unchanged   |
-| Space keyup, blur or cleanup              | Clear temporary Hand; restore exact persistent tool                 |
-| Hand pointer drag                         | Change viewport scroll only; no host/history/selection mutation     |
-| Text/Shape tool activation                | UI state only; do not create a component                            |
-| Valid Text/Shape pointer-up               | One component, one host emission and one history entry              |
-| Short/cancelled/lost-capture draw         | Clear preview; no component/emission/history                        |
-| Shape menu Escape                         | Close menu; preserve active Shape tool                              |
-| Designer shell renders                    | No standalone command-bar row; Canvas gains that vertical space     |
-| Left Rail renders                         | Exactly Assets/Pages/Layers/Data; no canvas creation tools          |
-| Context changes                           | Shelf content changes; Main Dock positions remain stable            |
-| Compact hides Image/Table shortcuts       | More Picker still exposes both and all other available tools        |
-| Compact overlay opens                     | Scrim covers Floating Dock; active overlay remains above Scrim      |
-| More Picker opens                         | Center above trigger and clamp completely inside Designer bounds    |
-| Selection contains a locked component     | Destructive/structural command is a no-op                           |
-| Context click targets unselected object   | Select that object before rendering component commands              |
-| Context click targets selected group item | Preserve the existing multi-selection                               |
-| Context click targets blank paper         | Clear selection; expose page properties and positioned paste        |
-| Pointer enters a context submenu          | Preserve Radix focus; allow submenu item click and keyboard select  |
-| Newly drawn rich text has empty HTML      | Focus full-frame editor; type without Inspector/source workaround   |
-| New QR or barcode frame                   | Persist a valid visible default; expose dedicated Inspector fields  |
-| Image content is a legacy string          | Render unchanged; first edit may normalize as one undoable gesture  |
-| Image source uses `blob:`/unsafe data     | Show field/frame error; never commit it as a stable source          |
-| QR/barcode content is invalid             | Show format-specific error; never leave a silent blank frame        |
-| Async code render resolves after update   | Ignore stale result through the instance render token               |
-| `pasteAt` receives a multi-selection      | Preserve relative geometry; regenerate every id; one history        |
-| Switch an existing page                   | Change UI page only; clear local selection; no host/history         |
-| Add or duplicate a page                   | Insert after source; select new page; one host/history              |
-| Duplicate a page with groups              | Regenerate page, component and recursive child ids                  |
-| Delete the only page                      | No-op; template always retains at least one manual page             |
-| Reorder around the active page            | Preserve active `page.id` and valid component selection             |
-| History removes the active page           | Select nearest valid page; never expose an invalid index            |
-| Unsupported structured `propValue`        | Inspector is read-only; never coerce to string                      |
-| Host omits `styles.css` import            | Integration is invalid; UI styling is not guaranteed                |
-| Built CSS Module default export is `{}`   | Invalid package build; host elements receive no class names         |
-| Host omits a peer dependency              | Workspace/install validation must fail before release               |
-| App build overlaps package `clean`        | Invalid verification order; rerun sequentially                      |
+| Condition                                 | Required behavior                                                    |
+| ----------------------------------------- | -------------------------------------------------------------------- |
+| `value` is the exact last-emitted object  | No history reset                                                     |
+| `value` is a new external object          | Replace template; reset history baseline and selection               |
+| Host command key is absent                | Keep command disabled and label it as not integrated                 |
+| Host command is pending                   | Reject duplicate menu, App Bar and shortcut execution                |
+| Save handler executes                     | Receive exact current template and optional document metadata        |
+| New/Open handler completes                | Wait for Host to replace controlled `value`; do not sync internally  |
+| Document status is conflict/error         | Render explicit text status; never rely on color alone               |
+| Preview page index is out of bounds       | Clamp to an existing manual page                                     |
+| Preview receives a new TemplateSchema     | Update real renderer content; no Host/history/selection mutation     |
+| Preview has no explicit `renderContext`   | Render static content; do not inherit Designer proof state           |
+| Host replaces `Designer.renderContext`    | Recompute proof only; no Schema, Host, dirty or history mutation     |
+| Proof/search/expanded state changes       | Update instance UI only; no Schema, Host, dirty or history mutation  |
+| JSON is parsed or previewed               | Keep candidate local; do not mutate the template before Apply        |
+| User applies a valid import candidate     | Replace canonical data once; one Host emission and history entry     |
+| Field/formatter/binding/sample edit       | Persist once in canonical data; one coherent history entry           |
+| External `value` replaces the template    | Close proof, clamp record and clear stale data-panel draft surfaces  |
+| Proof resolves a component binding        | Derive via Core without mutating source components or manual pages   |
+| First user mutation then undo             | Restore initial `value`                                              |
+| Gesture emits many transient updates      | One final history entry                                              |
+| Gesture is cancelled                      | Restore the exact gesture-start value; add no history entry          |
+| Switch `mm` / `px`                        | Update all display consumers; no Schema, Host or history mutation    |
+| Page config draft is invalid              | Keep it local; do not emit or create history                         |
+| Page resize makes objects out of bounds   | Preserve geometry; derive warning count and Canvas marker            |
+| Select/Text/Shape + Space keydown         | `effectiveTool=hand`; persistent tool/history/selection unchanged    |
+| Space keyup, blur or cleanup              | Clear temporary Hand; restore exact persistent tool                  |
+| Hand pointer drag                         | Change viewport scroll only; no host/history/selection mutation      |
+| Text/Shape tool activation                | UI state only; do not create a component                             |
+| Valid Text/Shape pointer-up               | One component, one host emission and one history entry               |
+| Short/cancelled/lost-capture draw         | Clear preview; no component/emission/history                         |
+| Shape menu Escape                         | Close menu; preserve active Shape tool                               |
+| Designer shell renders                    | No standalone command-bar row; Canvas gains that vertical space      |
+| Left Rail renders                         | Exactly Assets/Pages/Layers/Data; no canvas creation tools           |
+| Context changes                           | Shelf content changes; Main Dock positions remain stable             |
+| Compact hides Image/Table shortcuts       | More Picker still exposes both and all other available tools         |
+| Compact overlay opens                     | Scrim covers Floating Dock; active overlay remains above Scrim       |
+| More Picker opens                         | Center above trigger and clamp completely inside Designer bounds     |
+| Inspector field renders                   | White borderless field on warm form canvas with semantic shadow      |
+| Inspector field receives focus/errors     | Full non-layout focus/invalid ring plus accessible text              |
+| UI control becomes selected               | White raised surface; no blue bottom indicator or persistent outline |
+| Selection contains a locked component     | Destructive/structural command is a no-op                            |
+| Context click targets unselected object   | Select that object before rendering component commands               |
+| Context click targets selected group item | Preserve the existing multi-selection                                |
+| Context click targets blank paper         | Clear selection; expose page properties and positioned paste         |
+| Pointer enters a context submenu          | Preserve Radix focus; allow submenu item click and keyboard select   |
+| Newly drawn rich text has empty HTML      | Focus full-frame editor; type without Inspector/source workaround    |
+| New QR or barcode frame                   | Persist a valid visible default; expose dedicated Inspector fields   |
+| Image content is a legacy string          | Render unchanged; first edit may normalize as one undoable gesture   |
+| Image source uses `blob:`/unsafe data     | Show field/frame error; never commit it as a stable source           |
+| QR/barcode content is invalid             | Show format-specific error; never leave a silent blank frame         |
+| Async code render resolves after update   | Ignore stale result through the instance render token                |
+| `pasteAt` receives a multi-selection      | Preserve relative geometry; regenerate every id; one history         |
+| Switch an existing page                   | Change UI page only; clear local selection; no host/history          |
+| Add or duplicate a page                   | Insert after source; select new page; one host/history               |
+| Duplicate a page with groups              | Regenerate page, component and recursive child ids                   |
+| Delete the only page                      | No-op; template always retains at least one manual page              |
+| Reorder around the active page            | Preserve active `page.id` and valid component selection              |
+| History removes the active page           | Select nearest valid page; never expose an invalid index             |
+| Unsupported structured `propValue`        | Inspector is read-only; never coerce to string                       |
+| Host omits `styles.css` import            | Integration is invalid; UI styling is not guaranteed                 |
+| Built CSS Module default export is `{}`   | Invalid package build; host elements receive no class names          |
+| Host omits a peer dependency              | Workspace/install validation must fail before release                |
+| App build overlaps package `clean`        | Invalid verification order; rerun sequentially                       |
 
 ### 5. Good / Base / Bad Cases
 
@@ -545,7 +570,7 @@ The Designer shell uses three grid rows and mounts the floating controls inside 
   centered glyphs; Text/Shape disclosure overlays without shifting the glyph; grouped-menu and More-picker
   keys never activate Hand/Select or reach object shortcuts. The Rail exposes only four Resource buttons.
 - Workspace layout assertion: no `command-bar` region; Context Shelf is 48px narrower with no shadow;
-  Main Dock uses `--ptd-shadow-tool-dock`; Canvas safe area exceeds the combined dock stack; compact Image/
+  borderless Main Dock uses 8px radius and `--ptd-shadow-tool-dock`; Canvas safe area exceeds the combined dock stack; compact Image/
   Table shortcuts are hidden while More exposes all available component types.
 - Store unit test: `pasteAt` preserves multi-selection geometry, selects fresh ids, emits one host
   change, creates one history entry, undoes as one operation and clamps into physical page bounds.
@@ -553,6 +578,9 @@ The Designer shell uses three grid rows and mounts the floating controls inside 
   protection, one host/history mutation, active-page identity and Undo/Redo index repair.
 - Geometry unit test: group → scale/rotate/move → ungroup preserves visual geometry.
 - Inspector helper test: structured values are read-only; numeric primitive values preserve type.
+- Inspector CSS/browser assertion: continuous warm form canvas, 32/28/40px field sizes, 6px field radius,
+  white borderless surface, exact semantic field shadow and full non-layout focus/invalid rings. Page,
+  Single, Multi and Table controls must not expose a second raw field style.
 - Inspector value/palette tests: out-of-range drafts are rejected without clamping; shorthand HEX is
   normalized; document colors remain stable; recent colors are unique, bounded and instance-local.
 - Core content tests: image/QR/barcode defaults, exact guards, legacy normalization, unsafe image

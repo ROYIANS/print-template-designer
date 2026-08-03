@@ -35,16 +35,18 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
   Emoji 或套准符号补位；未来如增加独立图形 Logo，必须通过单独品牌批次确定。
 - 克制的档案墨蓝用于主要操作、选中、焦点和工具图标；它只表达明确交互状态，不得退化为
   大面积通用后台蓝。校样朱红只用于出血、校样与印刷提醒，必须稀少。
-- 视觉记忆点是“纸张、标尺、套准与校样”，不是玻璃、霓虹、渐变或 SaaS 卡片。
+- 视觉记忆点是“纸张、标尺、套准与校样”，不是大面积玻璃、霓虹、渐变或 SaaS 卡片；局部悬浮
+  Chrome 可以使用受控磨砂材质，但不能覆盖纸张工作台的主叙事。
 
 ## 2. 设计原则
 
 1. **画布优先**：编辑对象永远是视觉中心；应用 Chrome 不与纸张争夺注意力。
 2. **精确胜过装饰**：位置、尺寸、层级和状态必须清晰，装饰不得降低读数效率。
 3. **高密度但不拥挤**：使用紧凑控件、清晰分组和稳定节奏，不靠大块留白制造高级感。
-4. **边界表达层级**：优先使用 1px 边线和 surface 差异；阴影只属于纸张和浮层。
+4. **表面表达层级**：优先使用 surface 明度、间距、排版和受控阴影；边线只保留给焦点、错误、
+   画布几何、表格网格、纸张物理边界和无法由空间区分的必要结构分隔。
 5. **渐进披露**：常用动作直接可见，高级配置、危险动作和次要命令按需展开。
-6. **状态不能只靠颜色**：选中、锁定、错误和禁用同时通过图标、边界或文本表达。
+6. **状态不能只靠颜色**：选中、锁定、错误和禁用同时通过图标、完整 surface、ring、shadow 或文本表达。
 7. **沿用成熟心智模型**：保留 Legacy 已验证的画布工作流，把固定 Rail 重组为底部高频
    Floating Tool Dock 与 Pages/Layers/Data/Assets 按需资源面板。
 8. **结构即装饰**：工程感来自网格、细线、刻度、节点和精确对齐，不来自无业务意义的工程编号。
@@ -111,6 +113,9 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
   --ptd-surface-panel: var(--ptd-paper-0);
   --ptd-surface-raised: var(--ptd-paper-0);
   --ptd-surface-sunken: var(--ptd-paper-2);
+  --ptd-surface-form: var(--ptd-paper-2);
+  --ptd-surface-field: var(--ptd-paper-0);
+  --ptd-surface-selection: var(--ptd-paper-0);
   --ptd-surface-canvas: oklch(91.5% 0.008 85);
   --ptd-surface-paper: oklch(100% 0 0);
 
@@ -147,10 +152,12 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
 - 彩色状态与暖中性边框组合时优先使用显式语义 token；不得直接在 OKLCH 中混合两种带不同色相的
   颜色来生成状态边框，否则低彩度暖灰的隐藏色相可能把墨蓝插值为绿色。需要动态混色时应明确选择
   不产生色相绕行的插值空间，并通过实际浏览器检查结果。
-- Floating Tool Dock 主浮岛、Resource Panel、Inspector 与 Status Bar 使用接近白色的
-  `surface-panel`；其 Context Shelf 使用 `surface-sunken`，让长时间
-  工作的主 Chrome 保持清洁；`surface-app` 只承担框架底色，`surface-sunken` 只用于局部凹槽、
-  hover 和禁用状态。不得把多个深浅相近的灰 surface 反复嵌套成暗淡的整屏底色。
+- Floating Tool Dock 主浮岛使用近黑半透明 `header-bg`，Resource Panel、Inspector Header 与 Status Bar
+  使用接近白色的 `surface-panel`；Context Shelf 使用 `surface-sunken`。Inspector 的连续滚动表单区使用
+  `surface-form`，可编辑控件与 segmented track 使用白色 `surface-field`；导航 Tabs 的当前项使用
+  白色 `surface-selection`，Floating Dock 工具当前项使用档案墨蓝 `selection` 实底，Inspector segmented 当前项则回落到
+  `surface-form`。不得在 `surface-form`
+  中为每个 Section 再嵌套白色 Card。
 - 黑色 App Bar、较深的暖灰 Pasteboard 和纯白 Paper 继续形成三个明确层级；“提高 Panel 明度”
   不等于将 Canvas 或整页宿主铺成纯白。Pasteboard 保持与旧版相近的明度，只把冷蓝偏色收敛为
   暖纸灰，避免与落地页割裂。
@@ -173,18 +180,25 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
   --ptd-control-md: 32px;
   --ptd-control-touch: 40px;
 
-  --ptd-radius-1: 2px;
-  --ptd-radius-2: 4px;
+  --ptd-radius-control-sm: 4px;
+  --ptd-radius-control: 6px;
+  --ptd-radius-surface: 8px;
+  --ptd-radius-overlay: 12px;
+  --ptd-radius-shell: 14px;
   --ptd-radius-round: 999px;
+
+  /* Migration-only aliases; new UI code uses the semantic tokens above. */
+  --ptd-radius-1: var(--ptd-radius-control-sm);
+  --ptd-radius-2: var(--ptd-radius-control);
 }
 ```
 
-- 普通按钮、输入框、列表行和面板使用 2px 圆角。
-- 浮层和空状态容器最多使用 4px 圆角。
-- 只有单选、状态点、头像和旋转控制点可以为圆形或 pill。
-- 不允许使用 8px 以上大圆角作为默认视觉。
-- App Bar 是明确例外：为了保持与 ChemViz 产品家族一致，栏体使用 14px 底部圆角，展开命令项
-  使用 12px 圆角；该例外不能扩散到普通 Panel、Inspector 或画布组件。
+- 4px 只用于微型内部控件与紧密拼接段；普通 Field、Button、Tool item 和 Rail item 使用 6px。
+- Disclosure、普通 surface 和 Floating Main Dock 使用 8px；Popover、Dropdown、Context Menu 使用 12px。
+- App Bar、Modal 和 Sheet 外壳使用 14px。999px 只用于 Switch、头像、状态点、旋转控制点和真正圆形命中区。
+- 禁止业务组件继续新增 1/2/3/5/7/9px 等硬编码半径。旧 `radius-1/2` 仅为分阶段迁移 alias，不能作为
+  新组件的设计入口；完成 Designer/Web 迁移并确认 Canvas/output 不受影响后删除。
+- Medium 圆角不等于 pill：常规 Button、Tab、Chip 和 Card 不得因参考 HeroUI 而统一使用 999px。
 
 ### 4.4 阴影与层级
 
@@ -193,10 +207,14 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
   --ptd-shadow-paper:
     0 0 0 1px oklch(71% 0.006 85 / 78%), 4px 4px 0 oklch(21% 0.006 70 / 10%),
     0 18px 38px oklch(21% 0.006 70 / 10%);
+  --ptd-shadow-field: 0 1px 2px rgb(0 0 0 / 2%), 0 0 1px rgb(0 0 0 / 3%);
+  --ptd-shadow-field-hover:
+    0 2px 4px rgb(0 0 0 / 4%), 0 1px 2px rgb(0 0 0 / 6%), 0 0 1px rgb(0 0 0 / 6%);
+  --ptd-shadow-selection: 0 1px 2px rgb(0 0 0 / 5%), 0 0 1px rgb(0 0 0 / 5%);
   --ptd-shadow-floating: 0 8px 24px oklch(21% 0.006 70 / 16%);
   --ptd-shadow-tool-dock:
-    0 2px 2px oklch(21% 0.006 70 / 12%), 0 16px 38px oklch(21% 0.006 70 / 24%),
-    0 30px 64px oklch(21% 0.006 70 / 12%);
+    0 3px 8px rgb(0 0 0 / 35%), 0 1px 3px rgb(0 0 0 / 50%), inset 0 0.5px 0 rgb(255 255 255 / 8%),
+    inset 0 0 0.5px rgb(255 255 255 / 30%);
   --ptd-shadow-modal: 0 20px 56px oklch(21% 0.006 70 / 22%);
 
   --ptd-layer-canvas: 0;
@@ -213,7 +231,37 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
 }
 ```
 
-按钮、列表项和普通面板禁止各自添加阴影。纸张、Dropdown/Popover、Modal 与 Toast 才能使用阴影。
+阴影按语义分配：Field 默认使用几乎不可见的 `shadow-field`，hover/focus/invalid 提升为
+`shadow-field-hover`；白色 selection surface 使用 `shadow-selection`；Paper、
+Dropdown/Popover、Floating Dock、Modal/Sheet 与 Toast 使用各自更高层级阴影。普通 Button、Tool item、
+List item、Section 和 Panel 默认平面；Primary/Danger 通过语义填充而非 field shadow 表达层级。
+
+### 4.5 Border budget 与状态表面
+
+- Form Field、普通 Button/Tool/List、导航类 selection surface、Floating Main Dock、Popover/Menu 默认
+  `border: 0`。删除边框后必须通过 surface、spacing、typography 或语义 shadow 补足层级，不能让控件消失。
+- Field default = `surface-field + shadow-field + 6px radius`，其中默认 shadow 只提供近乎不可见的轮廓；
+  hover/focus/invalid 提升为参考 HeroUI 的 `shadow-field-hover`；
+  focus-visible 和 invalid 使用不参与盒模型的完整 ring/outline 与文字反馈，不通过切换 `border-width`。
+- Floating Dock 两层工具栏的当前项使用档案墨蓝 `selection` 实底与白色前景，不投影、不加边框；
+  Rail、Tabs 与 Status Bar 的当前项位于灰色 track/container 中，使用白色
+  `surface-selection + shadow-selection` 和档案墨蓝前景。Inspector 内的二至四项 Button Group 使用完整
+  白色 `surface-field` track；当前项回落到 `surface-form`，使用一条低对比中性完整边界且不投影。
+  两种选择语言都禁止 inset bottom indicator、蓝色下边条、大面积浅蓝填充或非聚焦蓝框。
+- Canvas selection、参考线、表格网格、Paper 物理边界、颜色样本必要轮廓以及无法由 surface/spacing
+  区分的单一结构分隔属于功能性线，可以保留。每条保留线必须能说明该语义，不能为“更精致”重复套框。
+- `--ptd-focus` 保持档案墨蓝色相并可独立校准亮度/对比度；它不与 Action/Selection 强制使用同一数值。
+
+### 4.6 受控磨砂材质
+
+- `backdrop-filter` 只用于确实覆盖在其他应用内容之上的 App Bar、Floating Dock、Popover/Menu、Modal/Sheet
+  等少量 Chrome。Inspector form canvas、Field、Section、普通 Panel、Resource Panel、Paper、Canvas、模板预览
+  和 output DOM 使用实色表面，不添加 blur。
+- 同一视觉堆栈最多出现一层磨砂；禁止嵌套 blur、全屏 blur、在滚动画布上铺设大面积 blur，或让磨砂成为
+  Field 与 Card 的默认材质。推荐从 12–16px 的低成本档位开始，必须以实际浏览器截图确认文字和图标对比度。
+- 磨砂表面仍需使用高不透明度的暖灰/黑色底色与语义 shadow。`backdrop-filter` 只是增强，不能承担唯一的
+  层级或可读性；不支持该属性、开启 reduced transparency 或性能不足时，回退到同层级的不透明 surface。
+- 该效果不得进入打印、PDF 或截图导出的内容树；不得为“像 iOS”引入发光边框、彩色玻璃或多层半透明噪声。
 
 ## 5. 字体与数值
 
@@ -267,15 +315,17 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
 
 从 Vidorra Blueprint、Zed 与 Workshop 只吸收适合密集工具台的结构原子：
 
-- **Hairline**：App Bar、Floating Tool Dock、Panel 与 Status Bar 使用 1px 暖中性细线。
+- **Hairline**：只在两个 surface 无法通过明度、间距或 shadow 区分时使用一条暖中性结构分隔；
+  Floating Tool Dock、普通 Panel、Field 和每个 Section 不因组件边界而自动获得外框。
 - **Engineering grid**：Pasteboard 可使用极淡工程纸网格；纸张本身保持干净，网格不能穿入模板。
 - **Mount texture**：Pasteboard 可叠加低对比 135° 斜线，表达纸张装配区而非真实打印材质；
   斜线、工程网格、工作区内框和节点均必须 `pointer-events: none`。
 - **Workbench frame**：Pasteboard 不添加包围纸张和标尺的重复工作区外框；Paper 边缘、真实标尺
   基线和应用分区线已经提供足够边界。禁止菱形、空心方块、纸张角点等纯装饰节点。
-- **Dot field**：选中行可使用 8px 低透明点阵与 2px inset 指示，但不得铺成高饱和色块。
-- **Physical press**：可交互 tile/按钮允许 1px inset 底边形成轻微实体感；hover 摊平，active
-  下压 `translateY(1px) scale(0.99)`。普通面板仍禁止外投影。
+- **Selection surface**：选中行/段/工具使用完整白色抬升 surface、轻 shadow 与墨蓝前景；禁止点阵、
+  inset 底边、蓝色下划线或高饱和色块成为默认 selection 语言。
+- **Physical press**：可交互 tile/按钮可在 active 时下压 `translateY(1px) scale(0.99)`；默认与 hover
+  不添加模拟实体厚度的 inset 底边，普通平面按钮也不获得 field shadow。
 - **Ruler/ticks**：任何视觉上类似标尺的刻线都必须对应真实毫米尺寸、页面方向和当前画布缩放；
   禁止使用无数字、固定间距且与纸张尺寸无关的伪标尺。
 - 禁止 `PRO / 01`、坐标角标、伪图纸编号、无意义英文缩写等装饰性工程文字。
@@ -347,7 +397,7 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
   再渲染假账户占位或引入 Auth 客户端。App Bar 不重复展示当前模板标题、页码、纸张方向和尺寸，这些
   信息由 Context Shelf、Inspector 与 Status Bar 承担。不存在的云保存、同步或运行状态不得占位。
 - 同一 Header 中的“文件工作台”和“保存模板”属于同一文档动作控件家族，必须使用相同高度、圆角、
-  边框轮廓、字重和状态节奏，只通过填充与明度表达主次，不得把一个做成普通矩形、另一个做成 Pill。
+  字重和状态节奏，只通过填充与明度表达主次，不得靠不同外框或把一个做成 Pill 来制造层级。
 - 当前应用菜单按低频工作流组织为文件(F)、模板(T)、视图(V)、帮助(H)，靠左排列在品牌之后并提供
   `accessKey`/`aria-keyshortcuts` 助记键语义。File 集中 New/Open/Save/Save As 与版本历史；Template
   承载页面设置、页面管理、素材资源、数据源与模板检查；View 聚焦标尺、参考线显隐/锁定/清空和页面
@@ -378,16 +428,17 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
   单选、多选和参考线选择切换命令。常规宽度下 Main Dock 稳定为 448px 并居中排列工具；Context
   Shelf 绝对定位在其后方，左右各内缩 24px，形成 400px 的内容安全宽度且不参与浮岛的 intrinsic
   width 计算。它使用灰色 `surface-sunken`，完全无边框和阴影，并向下压入 Main Dock 5px。
-  Main Dock 使用 raised surface 和专用重阴影，两层通过遮挡形成一个稳定整体。上下文变化不得移动
+  Main Dock 使用 8px radius 的无边框近黑半透明 surface、14px 单层受控 backdrop blur 和专用四层重阴影
+  （两层黑色外投影 + 两层白色 inset 高光），两层通过遮挡形成一个稳定整体。上下文变化不得移动
   或撑宽 Main Dock，桌面上下文内容不得被裁切；单选上下文只显示面向用户的目录类型与 X/Y/W/H，
   不展示自定义图层名称、`RoySimpleText` 等内部 Schema 类型，也不重复组件 Quick Bar、画布右键菜单
   和键盘路径已有的复制、锁定、层级与删除动作。
 - Select/Hand/Text/Shape/Image/Table/More 与 Inspector 开关属于 Main Dock；Undo/Redo 也迁入历史组。
   左 Rail 只保留 Assets/Pages/Layers/Data 四个入口并全部靠上排列。四个入口使用 `role="group"` 与
   `aria-label` 保持可理解性，打开状态的短标记朝向相邻 Resource Panel。
-- 精细指针下 Main Dock 的 Persistent Tool 激活使用轻墨蓝底、墨蓝图标、边线和 inset 底标记；
-  Rail 打开的资源面板入口使用中性 paper 底和邻近 Panel 的短几何标记。状态不得改变按钮尺寸，
-  也不得只靠颜色表达。
+- 精细指针下 Main Dock 与 Context Shelf 的 Persistent Tool 激活使用档案墨蓝 `selection` 主色实底与白色
+  图标/文字，不使用边线、浅蓝底、选中阴影或 inset 底标记；Rail 打开的资源面板入口仍使用白色抬升语言，并可在
+  邻近 Panel 一侧保留单一位置标识。状态不得改变按钮尺寸，也不得只靠颜色表达。
 - Floating Tool Dock 的 z-index 位于 Selection 与 compact Scrim 之间：正常编辑时高于 Paper/Selection，
   打开 Resource/Inspector overlay 时必须被 Scrim 覆盖。完整组件 Picker 作为 Portal 使用 floating
   layer，仍可在明确触发后位于工作区浮岛之上。
@@ -555,9 +606,13 @@ DataPanel
 ## 9. 表单与属性检查器
 
 - Label 始终可见，Placeholder 只给示例，不能承担字段名称。
-- 常规输入高度 28px，关键 Select/Combobox 高度 32px，圆角 2px。
+- Inspector 常规 Field 高 32px，明确标记为 compact 或表格内部的微型 Field 可为 28px，coarse pointer
+  为 40px；三者都使用 6px 常规 Field radius、白色无边框 surface 和同一 shadow/ring 状态矩阵。
 - Page、Single 与 Multi Inspector 复用固定 Header、单一滚动 Body 和可选固定 Footer；切换状态
   不得改变主面板的滚动与定位合同。
+- Inspector 的滚动 Body 是连续暖灰 `surface-form`。Section 通过标题、间距和克制分隔组织，不建立
+  独立白色 Card；相邻 Section 之间允许一条与内容左右对齐、低对比的单一 1px 结构分隔线。Input、
+  Select、Number、Textarea、Color 等 Field 才使用白色 `surface-field`。
 - 几何属性优先组成 X/Y/W/H 二列网格，使用带增减动作、等宽数值和清晰单位后缀的紧凑步进器。
   合法的编辑中间态在焦点内保留，完成编辑时才提交一个历史手势。
 - 文档显示单位默认 `mm`，Status Bar 提供全局 `mm / PTD Canvas px` 切换。页面、组件、表格、标尺、
@@ -568,9 +623,13 @@ DataPanel
 - 混合数值在没有相对调整语义时禁用 Label 拖动和增减动作，仅保留明确录入；不能用拖动把多选值
   意外压平成同一个绝对值。
 - 二至四项的小型枚举优先使用 segmented control；约束选项使用紧凑 Select；颜色同时提供可视
-  色板和可编辑值。只有真正的长内容使用 textarea，不能把 Inspector 退化成原始输入框列表。
+  色板和可编辑值。Inspector segmented/Button Group 整条使用白色 track，当前项使用与表单画布一致的
+  暖灰 surface 和低对比中性 1px 边界，不使用抬升阴影。只有真正的长内容使用 textarea，不能把
+  Inspector 退化成原始输入框列表。
 - Page、Single、Multi 与 Table 业务面板必须组合共享 `InspectorControls`；原生 `input`、`select`、
   `textarea` 和 `color` 只能存在于控件实现内部，不能在业务面板重复拼装视觉与 Gesture。
+- Field default 无可见 border；focus-visible/invalid 使用完整 ring/outline，disabled/locked 降低 surface
+  和 shadow 层级但保留可辨识性。业务面板不得复制 raw box-shadow、重新添加常驻轮廓或维护第三套高度。
 - 颜色控件闭合态保持紧凑色样、精确值和展开动作；展开态提供透明/无色（仅适用属性）、恢复默认、
   最近使用和文档颜色。最近颜色是 Designer 实例状态；文档颜色从当前模板派生、按频次和稳定顺序去重，
   两者都不写入 Schema 或历史。锁定或禁用时已展开面板必须收起。
@@ -696,6 +755,8 @@ Radix Tooltip、DropdownMenu、ContextMenu、Popover 和 Dialog 通过 Portal �
 loading、error、success。
 
 - `focus-visible` 使用 2px `--ptd-focus` 外环和 1px offset，不能裸写 `outline: none`。
+- 无边框默认态不能削弱 focus/invalid：ring 必须覆盖完整控件外形且不参与盒模型，白色 Field、暖灰
+  form canvas、深色 Header 和 Portal surface 都需要实际对比度验收。
 - Radix Tabs/Menu/Radio 使用其 roving tabindex 和键盘语义，不重新发明键盘模型。
 - 删除组件优先立即执行并允许撤销；批量或不可逆删除才使用确认对话框。
 - 所有拖拽动作必须有点击、菜单或键盘替代路径。
@@ -785,7 +846,10 @@ PTD 是桌面优先的生产工具，但不能假设所有桌面设备都有精�
 
 - 大圆角 Card、Chip、Pill 成为默认构图。
 - 多层卡片嵌套、每个区域都有阴影。
-- 玻璃拟态、发光边框、紫蓝渐变、渐变文字或装饰性 blob。
+- 用装饰性 border 包围每个 Field、Button、Section、Dock 或 Popover；删除 border 后又用 inset bottom
+  shadow 模拟蓝色下边条。
+- 大面积/嵌套玻璃拟态、发光边框、彩色玻璃、紫蓝渐变、渐变文字或装饰性 blob；受控磨砂材质只按
+  4.6 节用于少量真实悬浮 Chrome。
 - 在工作台中使用营销页式大标题和大面积无功能留白。
 - 文本缩写冒充图标；混用 Remix、Emoji 和不同描边风格。
 - 依赖 Hover 的唯一操作入口。
@@ -801,7 +865,8 @@ PTD 是桌面优先的生产工具，但不能假设所有桌面设备都有精�
 2. 无选择、单选、多选、锁定、面板折叠和画布滚动状态检查。
 3. 键盘 Tab/Arrow/Escape、Tooltip、Menu 和 Focus Ring 检查。
 4. 100% 与 200% 浏览器缩放检查；50%、75%、100%、150% 画布缩放检查。
-5. CSS 扫描：无 `!important`、无静态 inline style、无未 token 化颜色和 magic z-index。
+5. CSS 扫描：无 `!important`、无静态 inline style、无未 token 化颜色和 magic z-index；应用 UI 中每个
+   保留 border 均有功能语义，Field/selection/Dock 无常驻外框或 inset bottom indicator。
 6. TypeScript、Vitest、ESLint、包构建、CSS Module 映射断言和 Web 生产构建通过。
 7. 浏览器实际截图确认，而不是只验证 CSS 文件存在。
 8. App Bar 浏览器断言覆盖 hover/focus 不展开、同一分类 click 开关、跨分类 click 切换、Header
