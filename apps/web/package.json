@@ -14,7 +14,9 @@
   "dependencies": {
     "@preact/signals-react": "^2.1.0",
     "@ptd/core": "workspace:*",
+    "@ptd/export": "workspace:*",
     "@ptd/react-designer": "workspace:*",
+    "@remixicon/react": "4.9.0",
     "better-auth": "^1.6.25",
     "react": "^18.3.0",
     "react-dom": "^18.3.0"
