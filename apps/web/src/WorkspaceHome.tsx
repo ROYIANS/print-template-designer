@@ -73,7 +73,6 @@ function formatUpdatedAt(value: string, includeTime = true) {
 function Brand({ compact = false }: { compact?: boolean }) {
   return (
     <a className={styles.brand} data-compact={compact} href="/" aria-label="Foliq 首页">
-      <img src="/assets/brand/ptd-mark.svg" alt="" />
       <span>
         <strong>Foliq</strong>
         {!compact ? <small>结构化文档设计器</small> : null}

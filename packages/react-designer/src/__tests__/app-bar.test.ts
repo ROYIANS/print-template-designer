@@ -98,6 +98,7 @@ describe('AppBar application menu', () => {
     const brand = container.querySelector('[aria-label="Foliq 结构化文档设计器"]')
     expect(brand?.textContent).toContain('Foliq')
     expect(brand?.textContent).toContain('结构化文档设计器')
+    expect(brand?.querySelector('[aria-hidden="true"]')).toBeNull()
     expect(panel().id).toBe('ptd-application-menu')
     expect(container.textContent).not.toContain('用户账户（由宿主应用提供）')
   })

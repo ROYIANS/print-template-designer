@@ -72,20 +72,6 @@ function CheckIcon() {
   )
 }
 
-function PtdMark({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 28 28" aria-hidden="true">
-      <path fill="currentColor" opacity=".16" d="M1 7h17v20H1z" />
-      <path fill="currentColor" opacity=".38" d="M4 4h18v21H4z" />
-      <path
-        fill="currentColor"
-        fillRule="evenodd"
-        d="M7 1h13l5 5v17H7V1Zm4 4v15h3v-5.5h4c3.5 0 5.5-1.8 5.5-4.75S21.5 5 18 5h-7Zm3 3h4c1.5 0 2.4.65 2.4 1.75S19.5 11.5 18 11.5h-4V8Z"
-      />
-    </svg>
-  )
-}
-
 function PrecisionMarkIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -135,15 +121,15 @@ function HistorySealIcon() {
 }
 
 const ASCII_NOISE_GLYPHS = ".,':;~-`"
-const ASCII_DENSE_GLYPHS = '&_=!#$@%01'
 const ASCII_BACKGROUND_ROWS = 34
-const ASCII_SUBJECT_COLUMNS = 84
-const ASCII_SUBJECT_ROWS = 40
 const ASCII_MEASURE_TEXT = '00000000000000000000'
-
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(max, Math.max(min, value))
-}
+const ASCII_WORDMARK_COLUMNS = 112
+const ASCII_WORDMARK_ROWS = 34
+const ASCII_WORDMARK_CELL_WIDTH = 4
+const ASCII_WORDMARK_CELL_HEIGHT = 5
+const ASCII_WORDMARK_EDGE_GLYPHS = '.:+='
+const ASCII_WORDMARK_MID_GLYPHS = '+=01#'
+const ASCII_WORDMARK_DENSE_GLYPHS = '01#%@'
 
 function asciiNoise(column: number, row: number, frame: number, salt = 0): number {
   const value = Math.sin(column * 12.9898 + row * 78.233 + frame * 4.173 + salt * 19.19)
@@ -154,8 +140,8 @@ function buildAsciiBackground(frame: number, revealedRows: number, columns: numb
   const lines: string[] = []
 
   for (let row = 0; row < ASCII_BACKGROUND_ROWS; row += 1) {
-    const depth = row / (ASCII_BACKGROUND_ROWS - 1)
-    const isRevealed = row >= ASCII_BACKGROUND_ROWS - revealedRows
+    const depth = 1 - row / (ASCII_BACKGROUND_ROWS - 1)
+    const isRevealed = row < revealedRows
     const density = isRevealed ? 0.34 * Math.pow(depth, 2.5) : 0
     let line = ''
 
@@ -170,79 +156,96 @@ function buildAsciiBackground(frame: number, revealedRows: number, columns: numb
   return lines.join('\n')
 }
 
-function rectangleDensity(
-  x: number,
-  y: number,
-  centerX: number,
-  centerY: number,
-  halfWidth: number,
-  halfHeight: number,
-): number {
-  const localX = x - centerX
-  const localY = y - centerY
-  const edgeDistance = Math.min(halfWidth - Math.abs(localX), halfHeight - Math.abs(localY))
-  if (edgeDistance < 0) return 0
-  return edgeDistance < 0.028 ? 0.92 : 0.18
+function wordmarkGlyph(coverage: number, column: number, row: number, frame: number): string {
+  if (coverage < 0.06) return ' '
+  const glyphs =
+    coverage < 0.28
+      ? ASCII_WORDMARK_EDGE_GLYPHS
+      : coverage < 0.62
+        ? ASCII_WORDMARK_MID_GLYPHS
+        : ASCII_WORDMARK_DENSE_GLYPHS
+  const glyphIndex = Math.floor(asciiNoise(column, row, frame, 17) * glyphs.length)
+  return glyphs[Math.min(glyphIndex, glyphs.length - 1)] ?? '0'
 }
 
-function isNegativeP(localX: number, localY: number): boolean {
-  const stem = localX > -0.29 && localX < -0.14 && localY > -0.4 && localY < 0.4
-  const ellipseX = (localX + 0.015) / 0.3
-  const ellipseY = (localY + 0.18) / 0.28
-  const innerX = (localX + 0.015) / 0.14
-  const innerY = (localY + 0.18) / 0.13
-  const outerBowl = ellipseX * ellipseX + ellipseY * ellipseY < 1 && localX > -0.22
-  const innerBowl = innerX * innerX + innerY * innerY < 1
-  return stem || (outerBowl && !innerBowl)
-}
-
-function markDensity(x: number, y: number): number {
-  const frontCenterX = 0.08
-  const frontCenterY = -0.08
-  const halfWidth = 0.5
-  const halfHeight = 0.58
-  const localX = x - frontCenterX
-  const localY = y - frontCenterY
-  const edgeDistance = Math.min(halfWidth - Math.abs(localX), halfHeight - Math.abs(localY))
-
-  if (edgeDistance >= 0) {
-    const foldedCorner = localX > 0.28 && localY < -0.36 && localX - localY > 0.82
-    if (foldedCorner) return 0
-    if (isNegativeP(localX, localY)) return 0
-    return edgeDistance < 0.03 ? 0.99 : 0.84
-  }
-
-  return Math.max(
-    rectangleDensity(x, y, -0.2, 0.13, halfWidth, halfHeight),
-    rectangleDensity(x, y, -0.06, 0.03, halfWidth, halfHeight),
-  )
-}
-
-function buildAsciiSubject(frame: number): string {
+function buildAsciiWordmark(mask: readonly number[], frame: number): string {
   const lines: string[] = []
 
-  for (let row = 0; row < ASCII_SUBJECT_ROWS; row += 1) {
-    const y = (row / (ASCII_SUBJECT_ROWS - 1)) * 2 - 1
+  for (let row = 0; row < ASCII_WORDMARK_ROWS; row += 1) {
     let line = ''
-
-    for (let column = 0; column < ASCII_SUBJECT_COLUMNS; column += 1) {
-      const x = (column / (ASCII_SUBJECT_COLUMNS - 1)) * 2 - 1
-      const density = markDensity(x, y)
-      const noise = asciiNoise(column, row, frame, 5)
-      const glyphIndex = clamp(
-        Math.floor(asciiNoise(column, row, frame, 9) * ASCII_DENSE_GLYPHS.length),
-        0,
-        ASCII_DENSE_GLYPHS.length - 1,
-      )
-      line += noise < density ? ASCII_DENSE_GLYPHS[glyphIndex] : ' '
+    for (let column = 0; column < ASCII_WORDMARK_COLUMNS; column += 1) {
+      const coverage = mask[row * ASCII_WORDMARK_COLUMNS + column] ?? 0
+      line += wordmarkGlyph(coverage, column, row, frame)
     }
-    lines.push(line)
+    lines.push(line.trimEnd())
   }
 
   return lines.join('\n')
 }
 
-function AsciiPrintField() {
+async function createAsciiWordmarkMask(): Promise<number[] | null> {
+  if (!document.fonts) return null
+
+  try {
+    await document.fonts.load('400 200px "Cherry Bomb One"', 'Foliq')
+  } catch {
+    return null
+  }
+
+  const canvas = document.createElement('canvas')
+  canvas.width = ASCII_WORDMARK_COLUMNS * ASCII_WORDMARK_CELL_WIDTH
+  canvas.height = ASCII_WORDMARK_ROWS * ASCII_WORDMARK_CELL_HEIGHT
+  const context = canvas.getContext('2d', { willReadFrequently: true })
+  if (!context) return null
+
+  const padding = 6
+  let fontSize = 200
+  const fontFamily = '"Cherry Bomb One", "Outfit", sans-serif'
+  context.font = `400 ${fontSize}px ${fontFamily}`
+  let metrics = context.measureText('Foliq')
+  const initialWidth =
+    metrics.actualBoundingBoxLeft + metrics.actualBoundingBoxRight || metrics.width
+  const initialHeight =
+    metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent || fontSize
+  const scale = Math.min(
+    (canvas.width - padding * 2) / initialWidth,
+    (canvas.height - padding * 2) / initialHeight,
+  )
+
+  fontSize *= scale
+  context.font = `400 ${fontSize}px ${fontFamily}`
+  metrics = context.measureText('Foliq')
+  const boundsWidth =
+    metrics.actualBoundingBoxLeft + metrics.actualBoundingBoxRight || metrics.width
+  const boundsHeight =
+    metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent || fontSize
+  const originX = (canvas.width - boundsWidth) / 2 + metrics.actualBoundingBoxLeft
+  const originY = (canvas.height - boundsHeight) / 2 + metrics.actualBoundingBoxAscent
+
+  context.clearRect(0, 0, canvas.width, canvas.height)
+  context.fillStyle = '#000000'
+  context.fillText('Foliq', originX, originY)
+
+  const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data
+  const mask: number[] = []
+  for (let row = 0; row < ASCII_WORDMARK_ROWS; row += 1) {
+    for (let column = 0; column < ASCII_WORDMARK_COLUMNS; column += 1) {
+      let alpha = 0
+      for (let y = 0; y < ASCII_WORDMARK_CELL_HEIGHT; y += 1) {
+        for (let x = 0; x < ASCII_WORDMARK_CELL_WIDTH; x += 1) {
+          const pixelX = column * ASCII_WORDMARK_CELL_WIDTH + x
+          const pixelY = row * ASCII_WORDMARK_CELL_HEIGHT + y
+          alpha += pixels[(pixelY * canvas.width + pixelX) * 4 + 3] ?? 0
+        }
+      }
+      mask.push(alpha / (ASCII_WORDMARK_CELL_WIDTH * ASCII_WORDMARK_CELL_HEIGHT * 255))
+    }
+  }
+
+  return mask
+}
+
+function AsciiBrandField() {
   const fieldRef = useRef<HTMLDivElement>(null)
   const measureRef = useRef<HTMLSpanElement>(null)
   const backgroundColumnsRef = useRef(160)
@@ -251,6 +254,17 @@ function AsciiPrintField() {
   const [backgroundColumns, setBackgroundColumns] = useState(160)
   const [running, setRunning] = useState(true)
   const [reducedMotion, setReducedMotion] = useState(false)
+  const [wordmarkMask, setWordmarkMask] = useState<readonly number[]>([])
+
+  useEffect(() => {
+    let active = true
+    void createAsciiWordmarkMask().then((mask) => {
+      if (active && mask) setWordmarkMask(mask)
+    })
+    return () => {
+      active = false
+    }
+  }, [])
 
   useEffect(() => {
     const field = fieldRef.current
@@ -352,18 +366,22 @@ function AsciiPrintField() {
     <div
       ref={fieldRef}
       className={styles.asciiField}
-      aria-hidden="true"
       data-reduced-motion={reducedMotion}
       data-running={running}
     >
       <span ref={measureRef} className={styles.asciiMeasure}>
         {ASCII_MEASURE_TEXT}
       </span>
-      <pre className={styles.asciiNoise}>
+      <pre className={styles.asciiNoise} aria-hidden="true">
         {buildAsciiBackground(frame, revealedRows, backgroundColumns)}
       </pre>
       <div className={styles.asciiSubjectStage}>
-        <pre className={styles.asciiSubject}>{buildAsciiSubject(frame)}</pre>
+        <h1 id="hero-title" className={styles.asciiSubject} data-ready={wordmarkMask.length > 0}>
+          <span className={styles.visuallyHidden}>Foliq</span>
+          <pre className={styles.asciiWordmark} aria-hidden="true">
+            {buildAsciiWordmark(wordmarkMask, frame)}
+          </pre>
+        </h1>
       </div>
     </div>
   )
@@ -804,7 +822,6 @@ export function LandingPage({ access, notice, onEnterApp, onRetry }: LandingPage
       <header className={styles.header}>
         <div className={styles.headerInner}>
           <a className={styles.headerBrand} href="/" aria-label="Foliq 首页">
-            <PtdMark className={styles.brandSymbol} />
             <span className={styles.brandName}>Foliq</span>
             <span className={styles.headerBrandLabel}>结构化文档设计器</span>
           </a>
@@ -830,13 +847,13 @@ export function LandingPage({ access, notice, onEnterApp, onRetry }: LandingPage
       </header>
 
       <section className={styles.hero} id="start" aria-labelledby="hero-title">
-        <AsciiPrintField />
+        <AsciiBrandField />
         <div className={styles.main}>
-          <h1 id="hero-title" className={styles.heroTitle}>
+          <p className={styles.heroStatement}>
             不是设计一张图，
             <br />
             而是定义一种文档。
-          </h1>
+          </p>
           <p className={styles.heroLede}>
             Foliq 从标签、单据和报告开始，让页面结构成为可以持续演进的文档定义。
             <br className={styles.softBreak} />
@@ -1029,7 +1046,6 @@ export function LandingPage({ access, notice, onEnterApp, onRetry }: LandingPage
 
           <div className={styles.closingBrand}>
             <a className={styles.brand} href="/" aria-label="返回 Foliq 首页">
-              <PtdMark className={styles.brandSymbol} />
               <span className={styles.brandName}>Foliq</span>
             </a>
             <p className={styles.footerTagline}>

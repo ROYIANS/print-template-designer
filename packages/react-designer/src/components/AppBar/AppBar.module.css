@@ -50,13 +50,6 @@
   gap: var(--ptd-space-2);
 }
 
-.legacyLogo {
-  width: 22px;
-  height: 22px;
-  flex: 0 0 auto;
-  background: url('./legacy-logo.png') center / contain no-repeat;
-}
-
 .wordmark {
   color: var(--ptd-header-text);
   font-family: var(--ptd-font-brand);
@@ -465,11 +458,6 @@
     height: var(--ptd-app-bar-height-compact);
     gap: 6px;
     padding-inline: 8px;
-  }
-
-  .legacyLogo {
-    width: 19px;
-    height: 19px;
   }
 
   .wordmark {

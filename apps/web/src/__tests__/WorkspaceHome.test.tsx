@@ -135,6 +135,7 @@ describe('Workspace Home', () => {
     const compactShell = container.querySelector('[data-ptd-home-shell="compact"]')
     expect(compactShell?.textContent).toContain('Foliq')
     expect(compactShell?.textContent).toContain('账户')
+    expect(container.querySelector('a[aria-label="Foliq 首页"] img')).toBeNull()
     expect(container.textContent).not.toContain('DOCUMENT WORKSPACE')
     expect(container.textContent).not.toContain('0 DOCUMENTS')
     expect(container.textContent).not.toContain('01')
