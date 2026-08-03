@@ -93,6 +93,23 @@
   the same version.
 - Restore appends a new current version and snapshot; it never rewrites the selected historical row.
 
+## Deterministic PDF Boundary
+
+- The authenticated `POST /api/output/pdf` accepts a Core-validated TemplateSchema, bounded RenderContext and explicit
+  OutputOptions. It does not require a template id and never persists the request or result.
+- PDF layout belongs to `@ptd/export`; Server owns only contract validation, browser lifecycle, network isolation,
+  response headers and error mapping. Never accept arbitrary HTML, client OutputDocument, scripts or navigation URLs.
+- Use one long-lived Browser and one isolated BrowserContext/Page per request. Enforce a hard concurrency ceiling with
+  no unbounded queue; a cancelled/timed-out job retains its slot until Context cleanup completes.
+- Abort and all failure paths close the Context exactly once. Browser disconnect may trigger one rebuild, never an
+  infinite retry. Nest shutdown closes an already-running or currently-launching Browser.
+- Browser routing fails closed. Only the exact configured internal render origin's document/script/stylesheet/font plus
+  `data:`/`blob:` is permitted; no request may reach public, private, loopback, metadata or other Compose services.
+- The 30 second default application deadline remains below Nginx's 60 second `/api` timeout. Output request bodies use
+  the existing 4 MiB JSON limit; generated PDFs have an independent 64 MiB limit.
+- Map invalid request to 400, unauthenticated to 401, fatal layout to 422, saturation to 429, browser failure/cancel to
+  503 and timeout to 504. Error bodies and logs must not include template data, resource URLs, secrets or local paths.
+
 ## Required Verification
 
 For Server persistence changes, verify at minimum:

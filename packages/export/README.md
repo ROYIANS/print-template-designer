@@ -1,42 +1,71 @@
 # `@ptd/export`
 
-导出层的 package 位置已经预留，但**当前没有实现**。
+Foliq 的 framework-free 确定性输出引擎。它把 canonical `TemplateSchema`、显式
+`RenderContext` 与 `OutputOptions` 编译为可序列化的派生页 `OutputDocument`，并用同一份 IR
+驱动 Web 打印预览和 Server Chromium PDF。
 
-`src/index.ts` 目前只有：
+```text
+TemplateSchema + RenderContext + OutputOptions
+                    ↓
+          compileOutputDocument()
+                    ↓
+        OutputDocument（显式派生页）
+                    ↓
+       mountOutputDocument() + waitForOutputReady()
+```
+
+本包不依赖 React、NestJS、Playwright 或 Node-only API。Server 只负责受控浏览器生命周期与
+`page.pdf()`；页眉页脚、表格断点、续页表头和页码由本包决定，而不是交给浏览器黑盒分页。
+
+## 当前能力
+
+- 手工模板页一对一编译，自动续页不会写回 `TemplateSchema.pages`。
+- Page Master 的固定页眉、正文、页脚区域，以及 `{{page.number}}` / `{{page.totalPages}}`。
+- 语义化 `RoyComplexTable` 明细表：数组绑定、实际行高测量、整行续排、重复表头、空状态、
+  汇总行续页与页数上限。
+- `ROW_TOO_TALL`、`UNBREAKABLE_FRAGMENT`、`PAGE_LIMIT_EXCEEDED` 等稳定诊断；fatal diagnostic
+  会阻止 Server PDF。
+- 固定 mm 纸张与 PTD 逻辑坐标 Canvas，避免把设计器的 5 px/mm 坐标误当成物理 CSS px。
+- 复用 `@ptd/components` 的 DOM renderer；明细表 fragment 使用语义化 `table/thead/tbody/tfoot`。
+- 等待字体、嵌入图片、二维码、条码与连续两帧布局稳定。
+- 非嵌入图片在创建网络请求前被阻止，并返回 `REMOTE_RESOURCE_BLOCKED`。
+- 稳定 `data-ptd-output-*` 标记与显式 `destroy()`，供预览、内部 render bundle 和测试使用。
+
+## 公共入口
 
 ```ts
-export {}
+import { compileOutputDocument, mountOutputDocument, waitForOutputReady } from '@ptd/export'
+
+const output = await compileOutputDocument({ template, renderContext, options })
+const mounted = mountOutputDocument(container, output)
+const readinessDiagnostics = await waitForOutputReady(mounted.root)
+
+// 页面关闭或重新编译时释放组件实例与监听器。
+mounted.destroy()
 ```
 
-因此本包当前不能生成 PDF、不能调用浏览器打印、不能导出 Word，也没有 html2canvas/Puppeteer fallback。Legacy v1 曾有的导出能力不代表 v2 已迁移完成。
+`OutputDocument`、`OutputPage`、`OutputFragment`、Page Master、诊断码和 `OutputOptions` 的权威纯类型
+位于 `@ptd/core`；本包从 `src/index.ts` 导出编译器、DOM renderer、readiness 和明细表 fragment 类型。
 
-## 规划职责
+## 确定性与安全边界
 
-未来导出层需要统一处理：
+- 纸张尺寸由 `PageConfig` 的 mm 值决定；viewport、DPR、编辑器 zoom 和预览 fit scale 不进入布局。
+- `locale`、`timeZone` 与 ISO `now` 必须显式提供；输出代码不读取隐式系统时间。
+- 只接受结构化模板和数据，不接受任意 HTML、脚本或导航 URL。
+- v1 图片输出只允许嵌入模板的 `data:image/*`；`blob:`、远程和相对 URL 都不是可复现资源。
+- `window.print()`、`html2canvas + jsPDF` 和整页 bitmap PDF 不是权威输出路径。
+- v1 每张手工页只允许一个自动分页明细表；复杂 rowSpan、完整富文本逐行分页、奇偶页 Master、
+  批量输出和 Word 均在当前范围外。
 
-- 数据绑定后的预览模型。
-- 表格数据流、重复表头与自动溢出分页。
-- 打印样式、字体、图片和条码就绪状态。
-- 浏览器打印与可复现 PDF 输出。
-- Word 或其他格式的能力与降级边界。
-
-其中自动分页应产生派生页面，不能改写 `TemplateSchema.pages` 或污染 Designer Undo/Redo 历史。
-
-## 实现前必须先确定
-
-- 浏览器端与服务端导出的职责边界。
-- 输出一致性、分页精度、字体嵌入和资源加载策略。
-- Server 是否需要无头浏览器，以及其容器体积与安全模型。
-- 大数据量、批量打印、超时、取消和可观测性。
-- API 与 Host 集成钩子的稳定契约。
-
-在这些设计完成前，本包保持最小 scaffold，避免用临时实现锁死公共 API。
-
-## 当前脚本
-
-本包是 `tsc`-only scaffold，没有 tsup 配置和 Vitest 测试脚本：
+## 验证
 
 ```bash
+corepack pnpm --filter @ptd/core build
+corepack pnpm --filter @ptd/components build
 corepack pnpm --filter @ptd/export typecheck
+corepack pnpm --filter @ptd/export test
 corepack pnpm --filter @ptd/export build
 ```
+
+测试覆盖输入不可变、手工页、全局页码、40+ 行续页、重复表头、汇总行另页、超高行、页数上限、
+Page Master 无正文区域、DOM mount/destroy、真实物理纸张比例、资源阻断与 readiness 诊断。

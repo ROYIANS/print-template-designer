@@ -2,6 +2,7 @@
 
 NestJS 11 + Prisma 7 + PostgreSQL 的多用户模板服务。它通过 Better Auth GitHub OAuth 和服务端
 Allowlist 保护模板 CRUD、不可变版本历史、历史恢复与乐观并发控制。
+同一认证边界还提供受控 Headless Chromium PDF 输出；Server 重新校验并编译模板，不接受任意 HTML。
 
 ## 技术基线
 
@@ -13,6 +14,7 @@ Allowlist 保护模板 CRUD、不可变版本历史、历史恢复与乐观并�
 - `PTD_ALLOWED_EMAILS` 在服务端控制准入，`Template.ownerId` 隔离所有模板和版本操作。
 - 默认监听 `PORT=3000`。
 - 复用 `@ptd/core` 的 `TemplateSchema`、运行时验证和序列化逻辑。
+- `playwright-core` 与 Docker Playwright runtime 固定为同一版本；一个长期 Browser、每任务独立 Context。
 
 完整工作区推荐 Node 22.12+。
 
@@ -62,19 +64,49 @@ curl http://localhost:3000/healthz
 
 ## HTTP API
 
-| 方法     | 路径                                           | 成功语义                       |
-| -------- | ---------------------------------------------- | ------------------------------ |
-| `GET`    | `/healthz`                                     | 服务健康状态                   |
-| `*`      | `/api/auth/*`                                  | GitHub 模式的 OAuth/会话       |
-| `GET`    | `/api/account/me`                              | 当前账户及服务端 `authMode`    |
-| `GET`    | `/api/templates`                               | 按更新时间倒序返回模板摘要     |
-| `POST`   | `/api/templates`                               | 创建模板及 version 1 快照      |
-| `GET`    | `/api/templates/:id`                           | 读取当前模板及内容             |
-| `PUT`    | `/api/templates/:id`                           | 校验当前版本后更新并追加快照   |
-| `DELETE` | `/api/templates/:id`                           | 删除模板及级联历史             |
-| `GET`    | `/api/templates/:id/versions`                  | 按版本倒序返回历史摘要         |
-| `GET`    | `/api/templates/:id/versions/:version`         | 读取指定不可变快照             |
-| `POST`   | `/api/templates/:id/versions/:version/restore` | 把快照内容写成一个新的当前版本 |
+| 方法     | 路径                                           | 成功语义                             |
+| -------- | ---------------------------------------------- | ------------------------------------ |
+| `GET`    | `/healthz`                                     | 服务健康状态                         |
+| `*`      | `/api/auth/*`                                  | GitHub 模式的 OAuth/会话             |
+| `GET`    | `/api/account/me`                              | 当前账户及服务端 `authMode`          |
+| `GET`    | `/api/templates`                               | 按更新时间倒序返回模板摘要           |
+| `POST`   | `/api/templates`                               | 创建模板及 version 1 快照            |
+| `GET`    | `/api/templates/:id`                           | 读取当前模板及内容                   |
+| `PUT`    | `/api/templates/:id`                           | 校验当前版本后更新并追加快照         |
+| `DELETE` | `/api/templates/:id`                           | 删除模板及级联历史                   |
+| `GET`    | `/api/templates/:id/versions`                  | 按版本倒序返回历史摘要               |
+| `GET`    | `/api/templates/:id/versions/:version`         | 读取指定不可变快照                   |
+| `POST`   | `/api/templates/:id/versions/:version/restore` | 把快照内容写成一个新的当前版本       |
+| `POST`   | `/api/output/pdf`                              | 从结构化模板和显式运行时数据生成 PDF |
+
+### 生成 PDF
+
+```http
+POST /api/output/pdf
+Content-Type: application/json
+Accept: application/pdf
+```
+
+请求包含经 Core 深层校验的 `template`、受限 `renderContext` 和显式 `options.locale`、
+`options.timeZone`、`options.now`；可以输出尚未保存的当前内存模板，不要求 template id，也不会保存模板、
+业务数据或 PDF。成功响应为 `application/pdf`，`Content-Disposition` 使用清洗后的 UTF-8 文件名。
+
+PDF 引擎使用 `@ptd/export` 生成显式派生页，再让 Chromium 只绘制固定页面。它不使用浏览器默认业务分页、
+`window.print()`、`html2canvas` 或整页图片。默认并发 2、单任务截止 30 秒、PDF 上限 64 MiB；并发满时
+立即返回可重试错误，不建立无界 Page 队列。
+
+本地需要显式提供 render bundle 和 Chromium：
+
+```dotenv
+PTD_OUTPUT_RENDER_URL=http://127.0.0.1:5173/output-render.html
+PTD_CHROMIUM_EXECUTABLE_PATH=C:\Program Files\Google\Chrome\Application\chrome.exe
+PTD_OUTPUT_MAX_CONCURRENCY=2
+PTD_OUTPUT_TIMEOUT_MS=30000
+```
+
+容器内 `PTD_OUTPUT_RENDER_URL=http://web/output-render.html`，浏览器只允许该精确 origin 的 document、
+script、stylesheet 和 font，以及 `data:`/`blob:`。远程、私网、metadata、loopback 和其他 Compose
+service 请求全部阻断；render page 不携带认证 Cookie、数据库配置或任意用户脚本。
 
 ### 创建模板
 
@@ -166,12 +198,16 @@ Content-Type: application/json
 
 ## 错误语义
 
-| HTTP 状态          | 场景                                                   |
-| ------------------ | ------------------------------------------------------ |
-| `400 Bad Request`  | 非法 ID、请求体、标题、Schema 外形或 `expectedVersion` |
-| `401 Unauthorized` | 未登录或邮箱已不在 Allowlist                           |
-| `404 Not Found`    | 模板、指定历史版本不存在，或资源属于其他用户           |
-| `409 Conflict`     | `expectedVersion` 已过期，或并发写入抢先完成           |
+| HTTP 状态                  | 场景                                                   |
+| -------------------------- | ------------------------------------------------------ |
+| `400 Bad Request`          | 非法 ID、请求体、标题、Schema 外形或 `expectedVersion` |
+| `401 Unauthorized`         | 未登录或邮箱已不在 Allowlist                           |
+| `404 Not Found`            | 模板、指定历史版本不存在，或资源属于其他用户           |
+| `409 Conflict`             | `expectedVersion` 已过期，或并发写入抢先完成           |
+| `422 Unprocessable Entity` | fatal 输出诊断，如超高行、页数上限或受阻资源           |
+| `429 Too Many Requests`    | Chromium 并发池已满，可稍后重试                        |
+| `503 Service Unavailable`  | Chromium 无法启动或崩溃后重建失败                      |
+| `504 Gateway Timeout`      | 输出任务超过应用级截止时间                             |
 
 创建、更新和恢复通过事务保持当前模板与版本快照一致。`TemplateVersion` 只追加，不原地更新。
 
@@ -206,7 +242,7 @@ corepack pnpm --filter server build
 - Server CORS 配置；当前 Web 开发环境通过 Vite `/api` 同源代理访问 Server。
 - 静态资源上传与管理。
 - 数据源代理。
-- PDF/打印/Word 导出。
+- Word、批量输出与复杂长文本分页。
 - 自动备份上传、数据库高可用和容器编排平台配置。
 
 这些能力需要单独设计，不属于现有 API 的隐含保证。架构约束见 [Server Architecture](../../.trellis/spec/monorepo/server-architecture.md)。

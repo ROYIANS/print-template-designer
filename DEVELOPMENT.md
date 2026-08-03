@@ -36,13 +36,16 @@ corepack pnpm install
 corepack pnpm dev
 ```
 
-它等价于根脚本 `dev:web`：先按 `core → components → react-designer` 构建 workspace 依赖，然后并行启动三个 package 的 watch 和 Vite。直接进入 `apps/web` 裸跑 Vite 可能读取不到或读取到过期的 `dist`。
+它等价于根脚本 `dev:web`：先按 `core → components → export → react-designer` 构建 workspace 依赖，
+然后并行启动四个 package 的 watch 和 Vite。直接进入 `apps/web` 裸跑 Vite 可能读取不到或读取到过期的
+`dist`，并出现 `@ptd/core` / `@ptd/export` 无法解析或类型过期。
 
 只构建 Web：
 
 ```bash
 corepack pnpm --filter @ptd/core build
 corepack pnpm --filter @ptd/components build
+corepack pnpm --filter @ptd/export build
 corepack pnpm --filter @ptd/react-designer build
 corepack pnpm --filter web build
 ```
@@ -58,11 +61,11 @@ canonical Datasource v2、结构化绑定和用户明确保存的 sample records
   `parseRuntimeRecordsJson`、`validateRuntimeRecords` 与 `inferDataDefinition`，不要复制限制或字段推断逻辑。
 - 组件可绑定目标由 Core Registry 的 `getComponentBindingTargets` 声明；渲染通过
   `resolveComponentBindings` 产生派生 Schema，不在 Components 或 Designer 复制 target → propValue 映射。
-- `RenderContext` 必须显式包含 JSON data、locale、timeZone、ISO `now` 和 mode；预览、打印和未来 Export
+- `RenderContext` 必须显式包含 JSON data、locale、timeZone、ISO `now` 和 mode；校样、打印预览与 Export
   不得在组件内部读取系统时钟。
 - 临时 Host 数据、校样模式、当前记录和字段树 UI 状态不写入模板；字段模型、格式化、sample records 和
   bindings 才是模板变更。
-- Excel/CSV、REST、Secret 管理、重复明细、自动分页、打印和导出仍是后续独立任务。认证凭据不得进入
+- Excel/CSV、REST、Secret 管理、完整长文本分页和批量输出仍是后续独立任务。认证凭据不得进入
   `TemplateSchema`、模板版本或浏览器持久化。
 
 ## 启动 Server
@@ -125,6 +128,35 @@ corepack pnpm --filter server prisma:migrate:deploy
 
 不要手工编辑 `apps/server/src/generated/prisma/`；它由 Prisma 7 生成且被忽略。数据库结构变更必须提交新的 migration，不能用 `db push` 取代已提交的 migration 历史。
 
+## 本地 PDF 输出
+
+正式 PDF 不调用 `window.print()`。Web 的 `output-render.html` 加载与预览相同的 `@ptd/export` 编译器和
+DOM renderer，Server 通过 `playwright-core` 连接显式配置的 Chromium：
+
+```dotenv
+PTD_OUTPUT_RENDER_URL=http://127.0.0.1:5173/output-render.html
+PTD_CHROMIUM_EXECUTABLE_PATH=C:\Program Files\Google\Chrome\Application\chrome.exe
+PTD_OUTPUT_MAX_CONCURRENCY=2
+PTD_OUTPUT_TIMEOUT_MS=30000
+```
+
+`playwright-core` 不会为本地开发自动下载浏览器。Windows 可指向已安装的 Chrome/Chromium；Docker
+使用与 `playwright-core` 完全匹配的固定 Playwright image。Server 只允许内部 render origin、
+`data:` 和 `blob:`，模板中的远程/相对图片会在 Renderer 创建网络请求前产生
+`REMOTE_RESOURCE_BLOCKED`。要输出图片，请使用已嵌入模板的 `data:image/*`。
+
+真实 Chromium smoke test 默认跳过；先启动 Web（dev 或 production preview），再显式运行：
+
+```powershell
+$env:PTD_REAL_PDF_TEST = 'true'
+$env:PTD_OUTPUT_RENDER_URL = 'http://127.0.0.1:5173/output-render.html'
+$env:PTD_CHROMIUM_EXECUTABLE_PATH = 'C:\Program Files\Google\Chrome\Application\chrome.exe'
+corepack pnpm --filter server exec vitest run test/output-real-pdf.test.ts
+```
+
+该测试验证 PDF signature、IR/真实 PDF 页数一致、文字对象与显式 metadata 时间。最终视觉验收还应把
+PDF 渲染为 PNG 检查裁切、空白页、中文 glyph、页眉页脚和表格续页；文本提取不能代替视觉验收。
+
 ## 质量检查
 
 前端 CI 的依赖顺序是权威基线：上游 package 需要先 typecheck、再 build，消费者才能在干净环境解析其 `dist` 类型入口。
@@ -134,12 +166,15 @@ corepack pnpm --filter @ptd/core typecheck
 corepack pnpm --filter @ptd/core build
 corepack pnpm --filter @ptd/components typecheck
 corepack pnpm --filter @ptd/components build
+corepack pnpm --filter @ptd/export typecheck
+corepack pnpm --filter @ptd/export build
 corepack pnpm --filter @ptd/react-designer typecheck
 corepack pnpm --filter @ptd/react-designer build
 corepack pnpm --filter web typecheck
 
 corepack pnpm --filter @ptd/core test
 corepack pnpm --filter @ptd/components test
+corepack pnpm --filter @ptd/export test
 corepack pnpm --filter @ptd/react-designer test
 corepack pnpm lint:frontend
 corepack pnpm --filter web build
@@ -176,8 +211,9 @@ corepack pnpm exec prettier --check "**/*.md"
 - `@ptd/components` 只渲染 Core 已解析的内容，不持有数据源、运行时记录或连接凭据。
 - `@ptd/react-designer` 是受控组件，持久化由 Host 决定。
 - `apps/web` 通过同源 `/api` 使用 Server 认证、模板 CRUD、版本历史、恢复和冲突保护。
-- `@ptd/export` 目前没有导出实现。
-- `TemplateSchema.pages` 是手工页面；未来自动分页是预览/导出派生结果。
+- `@ptd/export` 只依赖 Core/Components，负责派生页 IR、Page Master、明细表分页、输出 DOM 与资源就绪；
+  不依赖 React、Nest 或 Playwright。
+- `TemplateSchema.pages` 是手工页面；自动分页只生成预览/导出的 `OutputDocument`，不写回模板或 History。
 
 更细的实现规则在 [`.trellis/spec/monorepo/`](./.trellis/spec/monorepo/index.md)。开始功能任务前，应按 [Trellis workflow](./.trellis/workflow.md) 创建或继续任务，并读取涉及层的规范。
 

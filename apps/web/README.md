@@ -37,6 +37,11 @@ React + Vite 的设计器 Host，也是 GHCR Web 镜像和完整自托管栈的�
 14. Web 持久化 `TemplateSchema.data` canonical v2、组件结构化 bindings 与受限 sample records。旧
     `dataSource/dataSet/[::field::]` 可兼容读取，并只在显式保存边界迁移；单纯打开、缩略图或版本预览
     不会偷偷改写模板。
+15. File → 打印预览会在命令执行瞬间取得最新内存模板，用 `@ptd/export` 编译真实派生页；多页纵向浏览、
+    适合页面/宽度、连续缩放、诊断、导出和关闭都位于与 Designer 一致的紧凑工具栏中。
+16. File → 导出 PDF 把同一结构化模板、显式 RenderContext 与 OutputOptions 发送到认证
+    `POST /api/output/pdf` 并下载 Blob；未保存模板同样可用，预览/导出不改变 Dirty、History 或版本。
+17. v1 的“打印”命令保持禁用并明确引导先导出 PDF，避免把 `window.print()` 误当成权威输出。
 
 `src/templateApi.ts` 覆盖模板 CRUD 和版本 list/get/restore 合同，负责 Cookie、AbortSignal、成功响应
 运行时校验和结构化 HTTP/网络错误。`src/useDocumentController.ts` 负责文档状态机和请求竞态；Dirty
@@ -56,13 +61,15 @@ Datasource 字段、样例和绑定属于模板更改，会自然进入 Dirty/Hi
 corepack pnpm dev
 ```
 
-根脚本会先构建 Web 所依赖的三个 workspace package，再启动它们的 watch 与 Vite。默认地址通常为 <http://localhost:5173>。
+根脚本会先构建 Web 所依赖的 `core`、`components`、`export` 和 `react-designer`，再启动它们的 watch
+与 Vite。默认地址通常为 <http://localhost:5173>。
 
 只做生产构建：
 
 ```bash
 corepack pnpm --filter @ptd/core build
 corepack pnpm --filter @ptd/components build
+corepack pnpm --filter @ptd/export build
 corepack pnpm --filter @ptd/react-designer build
 corepack pnpm --filter web typecheck
 corepack pnpm --filter web test
@@ -76,6 +83,8 @@ corepack pnpm --filter web build
 - Web 可以组合应用级路由、API client、身份与通知，但不应把这些职责塞进 `@ptd/react-designer`。
 - 认证使用同源 `/api` 和 HttpOnly Cookie；不在浏览器存储 Token。
 - Host 必须持有 `TemplateSchema`，并决定何时保存、载入和处理错误。
+- 打印预览可在浏览器运行 framework-free compiler/renderer；PDF HTTP、认证和下载只属于 Web Host，
+  不进入 `@ptd/react-designer`。
 - Web/Server 持久化的是 canonical Datasource v2 定义、结构化绑定和用户明确保存的受限 sample records；
   临时 Host 运行时记录默认不写入模板。
 - `<Designer renderContext={...}>` 是 Host 注入临时运行时数据、当前记录、locale、timeZone 和显式 `now`
@@ -97,11 +106,9 @@ corepack pnpm --filter web build
 - 作为独立能力设计的本地崩溃恢复草稿与自动保存。
 - 软删除与回收站；在 Server 仍使用不可恢复硬删除时不提供假的回收站入口。
 
-打印预览、浏览器打印、PDF/Word 与 Export 不属于 Web 模板持久化批次。
-
 Datasource v2 的 JSON 导入、字段树、组件绑定和实时校样现已完成。尚未实现的相邻能力包括：
 
 - Excel/XLS/XLSX 与 CSV 本地文件解析。
 - REST、GraphQL、SQL、Webhook 或其他 Server 数据源代理。
-- 重复明细、数据表格自动扩行和派生自动分页。
-- 打印预览、浏览器打印、PDF/Word 与批量导出。
+- 完整长文本逐行分页、复杂表格分组/小计和跨页合并规则。
+- Word、批量导出与直接打印工作流；当前权威路径是先生成 PDF 再交给专业 PDF 阅读器打印。
