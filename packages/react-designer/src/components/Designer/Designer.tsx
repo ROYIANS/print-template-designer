@@ -14,11 +14,11 @@ import { isEditorInteractiveTarget, useEditorKeyboard } from '../../hooks/useEdi
 import { useWorkspaceLayout } from '../../hooks/useWorkspaceLayout'
 import { AppBar } from '../AppBar'
 import { Canvas } from '../Canvas'
+import { FloatingToolDock } from '../FloatingToolDock'
 import { PropertyInspector } from '../PropertyInspector/PropertyInspector'
 import { Sidebar } from '../Sidebar'
 import { StatusBar } from '../StatusBar/StatusBar'
 import { ptdThemeClass } from '../Theme'
-import { Toolbar } from '../Toolbar/Toolbar'
 import styles from './Designer.module.css'
 
 type WorkspaceVariables = CSSProperties & Record<`--${string}`, string>
@@ -75,12 +75,6 @@ export function Designer({ value, onChange, host, renderContext }: DesignerProps
           hostCommands={hostCommands}
           workspace={{ openResource: layout.openResource, openInspector: layout.openInspector }}
         />
-        <Toolbar
-          resourcesOpen={layout.resourcesOpen}
-          inspectorOpen={layout.inspectorOpen}
-          onToggleResource={() => layout.toggleResource(layout.activeResource)}
-          onToggleInspector={layout.toggleInspector}
-        />
         <div
           className={styles.workspace}
           data-mode={layout.mode}
@@ -99,6 +93,11 @@ export function Designer({ value, onChange, host, renderContext }: DesignerProps
             <div className={styles.screens} data-ptd-region="canvas-viewport">
               <Canvas onOpenInspector={layout.openInspector} />
             </div>
+            <FloatingToolDock
+              mode={layout.mode}
+              inspectorOpen={layout.inspectorOpen}
+              onToggleInspector={layout.toggleInspector}
+            />
           </div>
           <div className={styles.inspectorRegion} hidden={!layout.inspectorOpen}>
             <button

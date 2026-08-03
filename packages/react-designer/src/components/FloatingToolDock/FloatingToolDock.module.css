@@ -1,0 +1,303 @@
+.floatingDock {
+  position: absolute;
+  z-index: var(--ptd-layer-selection);
+  bottom: var(--ptd-floating-tool-dock-offset);
+  left: 50%;
+  width: 448px;
+  max-width: calc(100% - var(--ptd-space-6));
+  display: grid;
+  justify-items: center;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.floatingDock > [data-ptd-region='context-shelf'] {
+  position: absolute;
+  z-index: 1;
+  right: 24px;
+  bottom: calc(100% - 5px);
+  left: 24px;
+  width: auto;
+  pointer-events: auto;
+}
+
+.mainDock {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 100%;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ptd-space-1);
+  box-sizing: border-box;
+  padding: 6px var(--ptd-space-2);
+  border: 1px solid var(--ptd-border-strong);
+  border-radius: var(--ptd-radius-2);
+  color: var(--ptd-text);
+  background: var(--ptd-surface-raised);
+  box-shadow: var(--ptd-shadow-tool-dock);
+  pointer-events: auto;
+}
+
+.group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.separator {
+  width: 1px;
+  height: 20px;
+  flex: 0 0 auto;
+  margin: 0 3px;
+  background: var(--ptd-border);
+}
+
+.dockButton {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--ptd-radius-1);
+  color: var(--ptd-text-muted);
+  background: transparent;
+  cursor: pointer;
+  transition:
+    color var(--ptd-duration-instant) var(--ptd-ease-out),
+    background-color var(--ptd-duration-instant) var(--ptd-ease-out),
+    border-color var(--ptd-duration-instant) var(--ptd-ease-out),
+    transform var(--ptd-duration-instant) var(--ptd-ease-out);
+}
+
+.dockButton svg {
+  width: 16px;
+  height: 16px;
+}
+
+.dockButton:hover:not(:disabled) {
+  color: var(--ptd-text-strong);
+  background: var(--ptd-surface-sunken);
+}
+
+.dockButton:active:not(:disabled) {
+  transform: translateY(1px) scale(0.98);
+}
+
+.dockButton[aria-pressed='true'] {
+  color: var(--ptd-selection-strong);
+  border-color: var(--ptd-selection-border);
+  background: var(--ptd-selection-subtle);
+  box-shadow: inset 0 -2px 0 var(--ptd-selection);
+}
+
+.dockButton:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.dockButton:focus-visible,
+.groupedToolDisclosure:focus-visible,
+.groupedToolMenu button:focus-visible {
+  outline: 2px solid var(--ptd-focus);
+  outline-offset: 1px;
+}
+
+.moreButton[data-detail-active='true']::after {
+  content: '';
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  width: 5px;
+  height: 5px;
+  box-sizing: border-box;
+  border: 1px solid var(--ptd-surface-raised);
+  border-radius: var(--ptd-radius-round);
+  background: var(--ptd-selection);
+}
+
+.groupedTool {
+  position: relative;
+  width: 30px;
+  height: 30px;
+}
+
+.groupedToolPrimary {
+  width: 30px;
+}
+
+.groupedToolDisclosure {
+  position: absolute;
+  z-index: 2;
+  right: 0;
+  bottom: 0;
+  width: 13px;
+  height: 13px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: var(--ptd-radius-1) 0 var(--ptd-radius-1) 0;
+  color: var(--ptd-text-muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.groupedToolDisclosure:hover,
+.groupedToolDisclosure[aria-expanded='true'] {
+  color: var(--ptd-text-strong);
+  background: var(--ptd-surface-sunken);
+}
+
+.groupedToolDisclosure svg {
+  width: 9px;
+  height: 9px;
+}
+
+.groupedToolMenu {
+  position: absolute;
+  z-index: var(--ptd-layer-floating);
+  bottom: calc(100% + 10px);
+  left: 50%;
+  width: 148px;
+  display: grid;
+  gap: 1px;
+  padding: var(--ptd-space-1);
+  border: 1px solid var(--ptd-border-strong);
+  border-radius: var(--ptd-radius-1);
+  background: var(--ptd-surface-raised);
+  box-shadow: var(--ptd-shadow-floating);
+  transform: translateX(-50%);
+}
+
+.groupedToolMenuTitle {
+  padding: 4px 7px 3px;
+  color: var(--ptd-text-muted);
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+}
+
+.groupedToolMenu button {
+  height: 32px;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  align-items: center;
+  gap: var(--ptd-space-2);
+  padding: 0 7px;
+  border: 1px solid transparent;
+  border-radius: var(--ptd-radius-1);
+  color: var(--ptd-text);
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.groupedToolMenu button:hover,
+.groupedToolMenu button[aria-checked='true'] {
+  color: var(--ptd-text-strong);
+  background: var(--ptd-surface-sunken);
+}
+
+.groupedToolMenu button[aria-checked='true'] {
+  border-color: var(--ptd-border-strong);
+  box-shadow: inset 0 -2px 0 var(--ptd-selection);
+  font-weight: 650;
+}
+
+.groupedToolMenu button svg {
+  width: 18px;
+  height: 18px;
+}
+
+.tooltip {
+  z-index: var(--ptd-layer-tooltip);
+  display: flex;
+  align-items: center;
+  gap: var(--ptd-space-2);
+  padding: 6px 8px;
+  border: 1px solid var(--ptd-graphite-700);
+  border-radius: var(--ptd-radius-1);
+  color: var(--ptd-paper-0);
+  background: var(--ptd-graphite-950);
+  box-shadow: var(--ptd-shadow-floating);
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+.tooltip kbd {
+  color: var(--ptd-graphite-300);
+  font: 9px var(--ptd-font-metric);
+}
+
+.tooltipArrow {
+  fill: var(--ptd-graphite-950);
+}
+
+.floatingDock[data-mode='compact'] .dockButton[data-compact-optional='true'] {
+  display: none;
+}
+
+@media (pointer: coarse) {
+  .dockButton,
+  .groupedTool,
+  .groupedToolPrimary {
+    width: 40px;
+    height: 40px;
+  }
+
+  .groupedToolDisclosure {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+@container (max-width: 480px) {
+  .floatingDock {
+    bottom: calc(var(--ptd-space-4) + var(--ptd-space-1));
+    max-width: calc(100% - var(--ptd-space-4));
+  }
+
+  .mainDock {
+    min-height: 40px;
+    gap: 2px;
+    padding: var(--ptd-space-1) 6px;
+  }
+
+  .dockButton,
+  .groupedTool,
+  .groupedToolPrimary {
+    width: 32px;
+    height: 32px;
+  }
+
+  .dockButton svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .separator {
+    margin-inline: 1px;
+  }
+}
+
+@media (pointer: coarse) and (max-width: 480px) {
+  .floatingDock .dockButton,
+  .floatingDock .groupedTool,
+  .floatingDock .groupedToolPrimary {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dockButton {
+    transition: none;
+  }
+}

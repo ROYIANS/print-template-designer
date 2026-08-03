@@ -37,6 +37,7 @@ import {
 const HISTORY_LIMIT = 20
 const PASTE_OFFSET = 12
 const RECENT_COLOR_LIMIT = 8
+const GESTURE_ECHO_LIMIT = 32
 
 export type Alignment = 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom'
 export type Distribution = 'horizontal' | 'vertical'
@@ -240,6 +241,7 @@ export class EditorStore {
   private onChange?: (template: TemplateSchema) => void
   private readonly idFactory: () => string
   private lastEmitted: TemplateSchema | null = null
+  private pendingGestureEchoes: TemplateSchema[] = []
   private gestureStart: TemplateSchema | null = null
 
   constructor(initialTemplate: TemplateSchema, options: EditorStoreOptions = {}) {
@@ -394,7 +396,21 @@ export class EditorStore {
   }
 
   syncExternal(template: TemplateSchema): void {
-    if (template === this.template.value || template === this.lastEmitted) return
+    if (template === this.template.value) {
+      this.pendingGestureEchoes = []
+      return
+    }
+    if (template === this.lastEmitted) return
+    if (this.pendingGestureEchoes.length > 0) {
+      if (structurallyEqual(template, this.template.value)) {
+        this.pendingGestureEchoes = []
+        return
+      }
+      if (this.pendingGestureEchoes.some((candidate) => structurallyEqual(candidate, template))) {
+        return
+      }
+      this.pendingGestureEchoes = []
+    }
     this.lastEmitted = null
     this.template.value = template
     this.currentPageIndex.value = Math.min(
@@ -1069,7 +1085,9 @@ export class EditorStore {
   }
 
   beginGesture(): void {
-    if (!this.gestureStart) this.gestureStart = this.template.value
+    if (this.gestureStart) return
+    this.gestureStart = this.template.value
+    this.rememberGestureEcho(this.gestureStart)
   }
 
   commitGesture(): void {
@@ -1084,8 +1102,7 @@ export class EditorStore {
     this.gestureStart = null
     if (!start || start === this.template.value) return
     this.template.value = start
-    this.lastEmitted = start
-    this.onChange?.(start)
+    this.emit(start)
     this.repairSelection()
   }
 
@@ -1135,8 +1152,7 @@ export class EditorStore {
     this.template.value = template
     this.repairProofRecordIndex()
     this.repairCurrentPage(preferredPageId)
-    this.lastEmitted = template
-    this.onChange?.(template)
+    this.emit(template)
     if (!transient) this.pushHistory(template)
     if (previousPageId !== this.currentPage.value?.id) this.resetPageSession()
     else this.repairSelection()
@@ -1158,11 +1174,24 @@ export class EditorStore {
     this.template.value = template
     this.repairProofRecordIndex()
     this.repairCurrentPage(previousPageId)
-    this.lastEmitted = template
-    this.onChange?.(template)
+    this.emit(template)
     this.gestureStart = null
     if (previousPageId !== this.currentPage.value?.id) this.resetPageSession()
     else this.repairSelection()
+  }
+
+  private emit(template: TemplateSchema): void {
+    this.lastEmitted = template
+    if (this.gestureStart) this.rememberGestureEcho(template)
+    this.onChange?.(template)
+  }
+
+  private rememberGestureEcho(template: TemplateSchema): void {
+    if (this.pendingGestureEchoes.at(-1) === template) return
+    this.pendingGestureEchoes.push(template)
+    if (this.pendingGestureEchoes.length > GESTURE_ECHO_LIMIT) {
+      this.pendingGestureEchoes.splice(0, this.pendingGestureEchoes.length - GESTURE_ECHO_LIMIT)
+    }
   }
 
   private repairCurrentPage(preferredPageId?: string): void {

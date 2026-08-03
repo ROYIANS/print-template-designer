@@ -70,6 +70,9 @@
   --ptd-shadow-deck:
     0 1px 2px oklch(21% 0.006 70 / 10%), inset 0 1px 0 oklch(99.35% 0.003 106 / 88%);
   --ptd-shadow-floating: 0 8px 24px oklch(21% 0.006 70 / 16%);
+  --ptd-shadow-tool-dock:
+    0 2px 2px oklch(21% 0.006 70 / 12%), 0 16px 38px oklch(21% 0.006 70 / 24%),
+    0 30px 64px oklch(21% 0.006 70 / 12%);
   --ptd-header-bg: rgb(0 0 0 / 88%);
   --ptd-header-border: rgb(255 255 255 / 6%);
   --ptd-header-hover: rgb(255 255 255 / 5%);
@@ -87,13 +90,13 @@
   --ptd-header-radius-round: 100px;
   --ptd-app-bar-height: 42px;
   --ptd-app-bar-height-compact: 38px;
-  --ptd-command-bar-height: 40px;
-  --ptd-command-bar-height-compact: 36px;
   --ptd-status-bar-height: 24px;
   --ptd-tool-dock-width: 42px;
   --ptd-tool-dock-width-compact: 36px;
   --ptd-resource-panel-width: 280px;
   --ptd-inspector-width: 304px;
+  --ptd-floating-tool-dock-offset: var(--ptd-space-6);
+  --ptd-floating-tool-dock-safe-area: 128px;
   --ptd-layer-base: 0;
   --ptd-layer-stage: 1;
   --ptd-layer-canvas: 10;

@@ -320,6 +320,30 @@ describe('EditorStore history and ownership', () => {
     expect(store.components.value[0]?.style.left).toBe(0)
   })
 
+  it('ignores delayed echoes from every transient gesture update', () => {
+    const emitted: TemplateSchema[] = []
+    const store = new EditorStore(template(), {
+      onChange: (next) => emitted.push(next),
+    })
+    store.selectComponent('a')
+    store.beginGesture()
+    store.transformComponent('a', { left: 5 }, true)
+    store.transformComponent('a', { left: 10 }, true)
+
+    store.syncExternal(JSON.parse(JSON.stringify(emitted[0]!)) as TemplateSchema)
+
+    expect(store.components.value[0]?.style.left).toBe(10)
+    expect(store.selectedIds.value).toEqual(['a'])
+    expect(store.history.value).toHaveLength(1)
+    store.commitGesture()
+    expect(store.history.value).toHaveLength(2)
+
+    store.syncExternal(JSON.parse(JSON.stringify(emitted[1]!)) as TemplateSchema)
+    expect(store.components.value[0]?.style.left).toBe(10)
+    expect(store.selectedIds.value).toEqual(['a'])
+    expect(store.history.value).toHaveLength(2)
+  })
+
   it('migrates legacy image content through one inspector gesture and undoes atomically', () => {
     const onChange = vi.fn()
     const store = new EditorStore(template([imageComponent('image')]), { onChange })

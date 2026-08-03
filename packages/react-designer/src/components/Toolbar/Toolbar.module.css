@@ -1,21 +1,21 @@
 .toolbar {
   position: relative;
-  z-index: var(--ptd-layer-sticky);
+  width: 100%;
   min-width: 0;
-  min-height: var(--ptd-command-bar-height);
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  min-height: 34px;
+  display: flex;
   align-items: center;
-  gap: var(--ptd-space-2);
-  padding: 0 var(--ptd-space-2);
-  border-bottom: 1px solid var(--ptd-border);
-  background: var(--ptd-surface-panel);
-  container-type: inline-size;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 3px 6px 8px;
+  overflow: hidden;
+  border: 0;
+  border-radius: var(--ptd-radius-2) var(--ptd-radius-2) 0 0;
+  background: var(--ptd-surface-sunken);
+  box-shadow: none;
 }
 
-.history,
 .context,
-.layoutTools,
 .group,
 .metrics,
 .guideColors {
@@ -23,13 +23,12 @@
   align-items: center;
 }
 
-.history,
-.layoutTools,
 .group {
   gap: 1px;
 }
 
 .context {
+  justify-content: center;
   min-width: 0;
   gap: 3px;
   overflow: hidden;
@@ -280,21 +279,20 @@
 }
 
 @container (max-width: 1120px) {
-  .metrics,
   .pageMetric {
     display: none;
   }
 }
 
 @container (max-width: 820px) {
-  .contextName,
+  .contextIdentity:not([data-compact-persistent='true']) .contextName,
   .secondaryAction {
     display: none;
   }
 }
 
 @container (max-width: 680px) {
-  .contextIdentity,
+  .contextIdentity:not([data-compact-persistent='true']),
   .rule {
     display: none;
   }
@@ -313,7 +311,7 @@
 
 @container (max-width: 480px) {
   .toolbar {
-    min-height: var(--ptd-command-bar-height-compact);
+    min-height: 32px;
     gap: var(--ptd-space-1);
     padding-inline: var(--ptd-space-1);
   }
@@ -332,7 +330,7 @@
 /* Viewport fallback for phone-scale coarse-pointer hosts; specificity beats the 40px rule. */
 @media (pointer: coarse) and (max-width: 480px) {
   .toolbar {
-    min-height: var(--ptd-command-bar-height-compact);
+    min-height: 32px;
   }
 
   .toolbar .toolButton {

@@ -9,24 +9,16 @@ import {
   RiAlignItemRightLine,
   RiAlignItemTopLine,
   RiAlignItemVerticalCenterLine,
-  RiArrowGoBackLine,
-  RiArrowGoForwardLine,
-  RiBringForward,
   RiClipboardLine,
   RiContractLeftRightLine,
   RiContractUpDownLine,
   RiDeleteBinLine,
-  RiFileCopyLine,
   RiGroupLine,
   RiHand,
   RiLandscapeLine,
-  RiLayoutLeftLine,
-  RiLayoutRightLine,
   RiLockLine,
   RiLockUnlockLine,
   RiRuler2Line,
-  RiSendBackward,
-  RiSplitCellsHorizontal,
 } from '@remixicon/react'
 import type { Alignment, Distribution, GuideColor } from '../../state'
 import { useEditorStore } from '../../state'
@@ -34,13 +26,6 @@ import { findAvailableCatalogItem } from '../../catalog'
 import { ptdThemeClass } from '../Theme'
 import { getToolGuidance, type ToolGuidance } from './toolGuidance'
 import styles from './Toolbar.module.css'
-
-interface ToolbarProps {
-  resourcesOpen: boolean
-  inspectorOpen: boolean
-  onToggleResource: () => void
-  onToggleInspector: () => void
-}
 
 interface ToolButtonProps {
   label: string
@@ -131,12 +116,7 @@ function GuideColorButton({
   )
 }
 
-export function Toolbar({
-  resourcesOpen,
-  inspectorOpen,
-  onToggleResource,
-  onToggleInspector,
-}: ToolbarProps) {
+export function Toolbar() {
   useSignals()
   const store = useEditorStore()
   const selected = store.selectedComponents.value
@@ -145,26 +125,7 @@ export function Toolbar({
 
   return (
     <Tooltip.Provider delayDuration={400} skipDelayDuration={120}>
-      <nav className={styles.toolbar} aria-label="当前上下文命令" data-ptd-region="command-bar">
-        <div className={styles.history} aria-label="历史">
-          <ToolButton
-            label="撤销"
-            shortcut="Ctrl Z"
-            onClick={() => store.undo()}
-            disabled={!store.canUndo.value}
-          >
-            <RiArrowGoBackLine />
-          </ToolButton>
-          <ToolButton
-            label="重做"
-            shortcut="Ctrl Y"
-            onClick={() => store.redo()}
-            disabled={!store.canRedo.value}
-          >
-            <RiArrowGoForwardLine />
-          </ToolButton>
-        </div>
-
+      <nav className={styles.toolbar} aria-label="当前上下文命令" data-ptd-region="context-shelf">
         <div className={styles.context}>
           {toolGuidance ? (
             <ActiveToolContext guidance={toolGuidance} />
@@ -177,23 +138,6 @@ export function Toolbar({
           ) : (
             <PageContext />
           )}
-        </div>
-
-        <div className={styles.layoutTools} aria-label="工作区面板">
-          <ToolButton
-            label={resourcesOpen ? '收起资源面板' : '打开资源面板'}
-            pressed={resourcesOpen}
-            onClick={onToggleResource}
-          >
-            <RiLayoutLeftLine />
-          </ToolButton>
-          <ToolButton
-            label={inspectorOpen ? '收起属性面板' : '打开属性面板'}
-            pressed={inspectorOpen}
-            onClick={onToggleInspector}
-          >
-            <RiLayoutRightLine />
-          </ToolButton>
         </div>
       </nav>
     </Tooltip.Provider>
@@ -228,10 +172,21 @@ function ActiveToolContext({ guidance }: { guidance: ToolGuidance }) {
   )
 }
 
-function ContextIdentity({ kind, name }: { kind: string; name: string }) {
+function ContextIdentity({
+  kind,
+  name,
+  compactPersistent = false,
+}: {
+  kind?: string
+  name: string
+  compactPersistent?: boolean
+}) {
   return (
-    <div className={styles.contextIdentity}>
-      <span>{kind}</span>
+    <div
+      className={styles.contextIdentity}
+      data-compact-persistent={compactPersistent || undefined}
+    >
+      {kind && <span>{kind}</span>}
       <strong className={styles.contextName}>{name}</strong>
     </div>
   )
@@ -285,58 +240,19 @@ function PageContext() {
 function SingleContext() {
   const store = useEditorStore()
   const component = store.primaryComponent.value!
-  const locked = Boolean(component.isLock)
+  const catalogItem = findAvailableCatalogItem(component.component)
   const style = component.style
+  const componentTypeName =
+    component.component === 'RoyGroup' ? '组合' : (catalogItem?.name ?? '组件')
   return (
     <>
-      <ContextIdentity kind={component.component} name={component.name || '未命名组件'} />
+      <ContextIdentity name={componentTypeName} compactPersistent />
       <div className={styles.metrics} aria-label="组件几何">
         <Metric label="X" value={style.left} />
         <Metric label="Y" value={style.top} />
         <Metric label="W" value={style.width} />
         <Metric label="H" value={style.height} />
       </div>
-      <span className={styles.rule} />
-      <ToolButton label="复制组件" shortcut="Ctrl C" onClick={() => store.copy()}>
-        <RiFileCopyLine />
-      </ToolButton>
-      <ToolButton
-        label={locked ? '解锁组件' : '锁定组件'}
-        pressed={locked}
-        onClick={() => store.setLock(!locked)}
-      >
-        {locked ? <RiLockUnlockLine /> : <RiLockLine />}
-      </ToolButton>
-      <ToolButton
-        label="下移一层"
-        disabled={locked}
-        onClick={() => store.moveLayer('backward')}
-        secondary
-      >
-        <RiSendBackward />
-      </ToolButton>
-      <ToolButton
-        label="上移一层"
-        disabled={locked}
-        onClick={() => store.moveLayer('forward')}
-        secondary
-      >
-        <RiBringForward />
-      </ToolButton>
-      {component.component === 'RoyGroup' && (
-        <ToolButton label="拆分组合" disabled={locked} onClick={() => store.ungroup()}>
-          <RiSplitCellsHorizontal />
-        </ToolButton>
-      )}
-      <ToolButton
-        label="删除组件"
-        shortcut="Delete"
-        danger
-        disabled={locked}
-        onClick={() => store.deleteSelected()}
-      >
-        <RiDeleteBinLine />
-      </ToolButton>
     </>
   )
 }
