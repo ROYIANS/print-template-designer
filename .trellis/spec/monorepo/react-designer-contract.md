@@ -96,6 +96,10 @@ import '@ptd/react-designer/styles.css'
   scope.
 - Commands produce a new immutable `TemplateSchema` and call the latest `onChange` callback.
 - When the host returns the exact emitted object as `value`, history is preserved.
+- During transient gestures, every emitted object remains a recognized Host echo. A bounded gesture-echo
+  window also recognizes structurally identical Host copies until the final gesture value is acknowledged;
+  a delayed earlier echo must not be mistaken for an external replacement or clear selection while a newer
+  local update is active. The window closes on final acknowledgement or a genuinely different external value.
 - A genuinely external template object creates a new history baseline and clears invalid selection.
 
 #### Read-only template preview
@@ -184,8 +188,9 @@ import '@ptd/react-designer/styles.css'
 - App Bar organizes low-frequency workflows as File/Template/View/Help. File owns document lifecycle;
   Template opens the existing page settings, page/assets/data workspaces and future template inspection;
   View owns ruler and guide assistance without repeating Status Bar zoom; Help dispatches real Host help
-  commands. Selection operations such as grouping, locking and layer movement stay in the Context Bar,
-  Canvas context menu and keyboard paths rather than creating a duplicate Object category. Window is not
+  commands. Single-component operations such as locking and layer movement stay in the component Quick Bar,
+  Canvas context menu and keyboard paths; multi-selection-only commands such as alignment and grouping may
+  remain in the Context Shelf. The App Bar must not create a duplicate Object category. Window is not
   used solely to mirror panel toggles. Version History is executable when the Host declares a saved document
   capability. A small number of stable near-term capabilities such as Template Inspection and Fit Page may
   appear disabled as `即将提供`, but a category must retain real executable actions and user-visible reasons
@@ -207,7 +212,7 @@ import '@ptd/react-designer/styles.css'
 
 - Every Designer instance defaults to `mm` and may switch globally to PTD Canvas `px`; the unit is
   instance UI state and survives external template synchronization without entering `TemplateSchema`.
-- Switching units updates Page/Single/Table Inspector geometry, ruler, guides, Context Bar and Status
+- Switching units updates Page/Single/Table Inspector geometry, ruler, guides, Context Shelf and Status
   Bar. It changes formatting, parsing, precision and step only; it emits no Host change and creates no
   history. Font size remains `pt`, rotation remains degrees, opacity remains percent and line height is unitless.
 - PTD Canvas coordinates use the existing fixed contract `1 mm = 5 px`; display `px` is not browser DPI
@@ -243,13 +248,14 @@ import '@ptd/react-designer/styles.css'
 - `activeTool` is the current user-selected tool. `temporaryHand` is a UI-only Space override;
   `effectiveTool` is `hand` only while that override is active and otherwise equals `activeTool`.
 - `lastDrawingTool` tracks only the four Shape subtypes. Select, Hand, Text and Space must not replace
-  the remembered Shape used by the grouped Dock control.
+  the remembered Shape used by the grouped Floating Main Dock control.
 - `H` selects persistent Hand; `V` and Escape select `select`. Space keydown outside editable controls
   sets temporary Hand; keyup, window blur and hook cleanup clear it even if focus has since moved.
 - Hand pan sessions own only pointer/client origins and viewport scroll origins. Pointer move changes
   only `scrollLeft/scrollTop`; it does not clear selection, mutate Schema, call `onChange` or write history.
 - Every available catalog click only activates its draw tool and creates nothing immediately. The user
-  defines the frame by dragging on Paper; Sidebar click/native drag must not insert a centered component.
+  defines the frame by dragging on Paper; Floating Main Dock click/native drag must not insert a centered
+  component.
 - Draw preview is local Canvas state. A valid pointer-up runs geometry normalization/clamp and exactly
   one `completeDrawnComponent()`; preview movement, sub-4px client-space drags and every cancellation
   path create no Schema, host emission or history node and do not switch tools.
@@ -266,11 +272,56 @@ import '@ptd/react-designer/styles.css'
 - The complete component catalog is exposed through an instance-local More picker rather than a Resource
   Panel. It renders only available tools, never planned items; opening, searching and recent-tool order are
   UI state and must not emit Host changes or history.
-- The Text Dock group remembers the last plain/rich text tool per Designer instance. Picker and grouped-tool
-  Portal/menu boundaries own Arrow/Home/End, Enter/Space and Escape, and restore trigger focus when dismissed.
+- The Text group in Floating Main Dock remembers the last plain/rich text tool per Designer instance.
+  Picker and grouped-tool Portal/menu boundaries own Arrow/Home/End, Enter/Space and Escape, and
+  restore trigger focus when dismissed.
 - Pointer-mouse outside press may dismiss the More picker. Touch/Pen outside pointerdown must not dismiss it;
   explicit close, tool selection and Escape remain available. Portal geometry stays clamped to the Designer
   container and carries the shared theme plus editor-interactive boundary.
+
+#### Workspace rail and floating tool dock
+
+The Designer shell uses three grid rows and mounts the floating controls inside the Canvas area:
+
+```tsx
+<AppBar />
+<Workspace>
+  <Sidebar />
+  <CanvasArea>
+    <Canvas />
+    <FloatingToolDock />
+  </CanvasArea>
+  <PropertyInspector />
+</Workspace>
+<StatusBar />
+```
+
+- There is no standalone Header-adjacent command-bar row. The left Sidebar rail contains exactly
+  Assets, Pages, Layers and Data, ordered at its top; it owns only Resource Panel disclosure and resize.
+- `FloatingToolDock` owns the persistent Main Dock plus one Context Shelf. The Main Dock groups
+  Undo/Redo, Select/Hand, Text/Shape/Image/SimpleTable/More and the Inspector toggle without duplicating
+  Store commands. The Context Shelf reuses the page, single, multi, guide and active-tool commands.
+- Stable DOM regions are `data-ptd-region="floating-tool-dock"` and
+  `data-ptd-region="context-shelf"`; the removed `command-bar` region must not be reintroduced as an
+  empty compatibility row.
+- At normal widths the Main Dock has a stable 448 CSS px width and centers its tool groups. The Context
+  Shelf is absolutely positioned behind it and inset 24 CSS px from each side, giving it 400 CSS px of
+  content-safe width without participating in the dock's intrinsic sizing. It uses `surface-sunken`, has no
+  border or box shadow and overlaps the Main Dock edge by 5 CSS px. The Main Dock uses the dedicated
+  `--ptd-shadow-tool-dock` token. Changing context content must not move or resize Main Dock controls, and
+  desktop context content must not be clipped. A single-component context shows only its user-facing
+  catalog type plus X/Y/W/H metrics; it does not expose custom layer names, internal Schema component types
+  such as `RoySimpleText`, or duplicate Copy/Lock/Layer/Delete actions already available through the
+  component Quick Bar, Canvas context menu and keyboard paths.
+- Canvas scroll content reserves `--ptd-floating-tool-dock-safe-area`; the dock offset leaves the
+  horizontal scrollbar and Status Bar operable. The dock uses the Selection layer so compact Scrim covers
+  it, while Resource/Inspector overlay remains above the Scrim.
+- In compact mode Image and SimpleTable direct buttons may be CSS-hidden, but More, Undo/Redo,
+  Select/Hand, Text, Shape and Inspector remain visible. The More picker must still expose every available
+  component type.
+- Component Picker geometry centers on its Main Dock trigger, opens upward with one gutter, clamps left/
+  right/top to the Designer bounds and derives max-height from the space above the trigger. Escape restores
+  More-button focus exactly as before the move.
 
 #### Clipboard placement
 
@@ -417,6 +468,12 @@ import '@ptd/react-designer/styles.css'
 | Valid Text/Shape pointer-up               | One component, one host emission and one history entry              |
 | Short/cancelled/lost-capture draw         | Clear preview; no component/emission/history                        |
 | Shape menu Escape                         | Close menu; preserve active Shape tool                              |
+| Designer shell renders                    | No standalone command-bar row; Canvas gains that vertical space     |
+| Left Rail renders                         | Exactly Assets/Pages/Layers/Data; no canvas creation tools          |
+| Context changes                           | Shelf content changes; Main Dock positions remain stable            |
+| Compact hides Image/Table shortcuts       | More Picker still exposes both and all other available tools        |
+| Compact overlay opens                     | Scrim covers Floating Dock; active overlay remains above Scrim      |
+| More Picker opens                         | Center above trigger and clamp completely inside Designer bounds    |
 | Selection contains a locked component     | Destructive/structural command is a no-op                           |
 | Context click targets unselected object   | Select that object before rendering component commands              |
 | Context click targets selected group item | Preserve the existing multi-selection                               |
@@ -484,9 +541,12 @@ import '@ptd/react-designer/styles.css'
   threshold and non-mutation of registry defaults.
 - Canvas/browser test: persistent Hand changes only viewport scroll with grab/grabbing cursor; Text
   activation creates nothing; one valid text frame is one undo step; cancel/lost capture creates none.
-- Sidebar test/browser assertion: primary tools use the documented fine/coarse/mobile targets and centered
-  glyphs; Text/Shape disclosure overlays without shifting the glyph; grouped-menu and More-picker keys never
-  activate Hand/Select or reach object shortcuts.
+- Floating Dock test/browser assertion: Main Dock tools use the documented fine/coarse/mobile targets and
+  centered glyphs; Text/Shape disclosure overlays without shifting the glyph; grouped-menu and More-picker
+  keys never activate Hand/Select or reach object shortcuts. The Rail exposes only four Resource buttons.
+- Workspace layout assertion: no `command-bar` region; Context Shelf is 48px narrower with no shadow;
+  Main Dock uses `--ptd-shadow-tool-dock`; Canvas safe area exceeds the combined dock stack; compact Image/
+  Table shortcuts are hidden while More exposes all available component types.
 - Store unit test: `pasteAt` preserves multi-selection geometry, selects fresh ids, emits one host
   change, creates one history entry, undoes as one operation and clamps into physical page bounds.
 - Store unit test: add/duplicate/delete/reorder page commands cover fresh recursive ids, final-page

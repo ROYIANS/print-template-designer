@@ -45,8 +45,8 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
 4. **边界表达层级**：优先使用 1px 边线和 surface 差异；阴影只属于纸张和浮层。
 5. **渐进披露**：常用动作直接可见，高级配置、危险动作和次要命令按需展开。
 6. **状态不能只靠颜色**：选中、锁定、错误和禁用同时通过图标、边界或文本表达。
-7. **沿用成熟心智模型**：保留 Legacy 已验证的画布工作流，把固定五入口 Rail 重组为高频
-   Tool Dock 与 Pages/Layers/Data/Assets 按需资源面板。
+7. **沿用成熟心智模型**：保留 Legacy 已验证的画布工作流，把固定 Rail 重组为底部高频
+   Floating Tool Dock 与 Pages/Layers/Data/Assets 按需资源面板。
 8. **结构即装饰**：工程感来自网格、细线、刻度、节点和精确对齐，不来自无业务意义的工程编号。
 9. **先定义契约再写局部样式**：尺寸、颜色、层级、滚动与交互状态必须使用统一 token。
 
@@ -147,7 +147,8 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
 - 彩色状态与暖中性边框组合时优先使用显式语义 token；不得直接在 OKLCH 中混合两种带不同色相的
   颜色来生成状态边框，否则低彩度暖灰的隐藏色相可能把墨蓝插值为绿色。需要动态混色时应明确选择
   不产生色相绕行的插值空间，并通过实际浏览器检查结果。
-- Context Bar、Resource Panel、Inspector 与 Status Bar 使用接近白色的 `surface-panel`，让长时间
+- Floating Tool Dock 主浮岛、Resource Panel、Inspector 与 Status Bar 使用接近白色的
+  `surface-panel`；其 Context Shelf 使用 `surface-sunken`，让长时间
   工作的主 Chrome 保持清洁；`surface-app` 只承担框架底色，`surface-sunken` 只用于局部凹槽、
   hover 和禁用状态。不得把多个深浅相近的灰 surface 反复嵌套成暗淡的整屏底色。
 - 黑色 App Bar、较深的暖灰 Pasteboard 和纯白 Paper 继续形成三个明确层级；“提高 Panel 明度”
@@ -193,6 +194,9 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
     0 0 0 1px oklch(71% 0.006 85 / 78%), 4px 4px 0 oklch(21% 0.006 70 / 10%),
     0 18px 38px oklch(21% 0.006 70 / 10%);
   --ptd-shadow-floating: 0 8px 24px oklch(21% 0.006 70 / 16%);
+  --ptd-shadow-tool-dock:
+    0 2px 2px oklch(21% 0.006 70 / 12%), 0 16px 38px oklch(21% 0.006 70 / 24%),
+    0 30px 64px oklch(21% 0.006 70 / 12%);
   --ptd-shadow-modal: 0 20px 56px oklch(21% 0.006 70 / 22%);
 
   --ptd-layer-canvas: 0;
@@ -263,7 +267,7 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
 
 从 Vidorra Blueprint、Zed 与 Workshop 只吸收适合密集工具台的结构原子：
 
-- **Hairline**：App Bar、Command Bar、Panel 与 Status Bar 使用贯穿区域的 1px 暖中性细线。
+- **Hairline**：App Bar、Floating Tool Dock、Panel 与 Status Bar 使用 1px 暖中性细线。
 - **Engineering grid**：Pasteboard 可使用极淡工程纸网格；纸张本身保持干净，网格不能穿入模板。
 - **Mount texture**：Pasteboard 可叠加低对比 135° 斜线，表达纸张装配区而非真实打印材质；
   斜线、工程网格、工作区内框和节点均必须 `pointer-events: none`。
@@ -311,11 +315,10 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
 ┌────────────────────────────────────────────────────────────────────┐
 │ App Bar：品牌、应用菜单、载入/保存、账户入口                        │ 42
 │ └─ Application Menu：点击展开/收起，真实下压下方工作区              │ auto
-├────────────────────────────────────────────────────────────────────┤
-│ Context Bar：历史 + 当前页面/单选/多选/参考线命令                  │ 40
 ├────┬──────────────┬──────────────────────────┬─────────────────────┤
-│Dock│ Resource     │ Canvas / Ruler / Paper   │ Inspector           │
-│ 42 │ 280, 按需    │ minmax(0, 1fr)           │ 304, 按需           │
+│Rail│ Resource     │ Canvas / Ruler / Paper   │ Inspector           │
+│ 42 │ 280, 按需    │ ┌─ Context Shelf ─────┐  │ 304, 按需           │
+│    │              │ └━ Floating Main Dock ━┘  │                     │
 ├────┴──────────────┴──────────────────────────┴─────────────────────┤
 │ Status Bar：页码、选择、页面尺寸、参考线、缩放                      │ 24
 └────────────────────────────────────────────────────────────────────┘
@@ -325,13 +328,13 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
 .ptdTheme {
   --ptd-app-bar-height: 42px;
   --ptd-app-bar-height-compact: 38px;
-  --ptd-command-bar-height: 40px;
-  --ptd-command-bar-height-compact: 36px;
   --ptd-status-bar-height: 24px;
   --ptd-tool-dock-width: 42px;
   --ptd-tool-dock-width-compact: 36px;
   --ptd-resource-panel-width: 280px;
   --ptd-inspector-width: 304px;
+  --ptd-floating-tool-dock-offset: var(--ptd-space-6);
+  --ptd-floating-tool-dock-safe-area: 128px;
 }
 ```
 
@@ -339,17 +342,18 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
   `rgb(255 255 255 / 6%)` hairline 与 `0 10px 28px rgb(0 0 0 / 12%)` 阴影；根据 PTD 高密度
   工作台语境将高度收紧为 42px、底角收紧为 14px。
 - App Bar 折叠时高 42px，第一行轨道使用内容高度；展开菜单必须参与 Designer Grid 布局并真实
-  下压 Context Bar、Canvas 和 Panel，禁止使用 fixed/absolute 覆盖工作区。
+  下压 Canvas 和 Panel，禁止使用 fixed/absolute 覆盖工作区。
 - App Bar 保留品牌与真实载入/保存动作；认证账户由 Web Host 在 Designer 外层提供，Designer 内不得
   再渲染假账户占位或引入 Auth 客户端。App Bar 不重复展示当前模板标题、页码、纸张方向和尺寸，这些
-  信息由 Context Bar、Inspector 与 Status Bar 承担。不存在的云保存、同步或运行状态不得占位。
+  信息由 Context Shelf、Inspector 与 Status Bar 承担。不存在的云保存、同步或运行状态不得占位。
 - 同一 Header 中的“文件工作台”和“保存模板”属于同一文档动作控件家族，必须使用相同高度、圆角、
   边框轮廓、字重和状态节奏，只通过填充与明度表达主次，不得把一个做成普通矩形、另一个做成 Pill。
 - 当前应用菜单按低频工作流组织为文件(F)、模板(T)、视图(V)、帮助(H)，靠左排列在品牌之后并提供
   `accessKey`/`aria-keyshortcuts` 助记键语义。File 集中 New/Open/Save/Save As 与版本历史；Template
   承载页面设置、页面管理、素材资源、数据源与模板检查；View 聚焦标尺、参考线显隐/锁定/清空和页面
-  适配；Help 提供快捷键、产品介绍与关于信息。高频对象命令只保留在选择 Context Bar、画布右键菜单
-  和键盘路径，不再建立 Object 分类形成第三份重复入口；同理不建立 Window 分类堆叠面板开关，也不
+  适配；Help 提供快捷键、产品介绍与关于信息。单选高频对象命令只保留在组件 Quick Bar、画布右键菜单
+  和键盘路径；多选对齐、分布和组合等专属命令可保留在 Context Shelf。App Bar 不再建立 Object 分类
+  形成重复入口；同理不建立 Window 分类堆叠面板开关，也不
   重复 Status Bar 的放大/缩小。展开区直接显示命令名称、简短用途与 Windows 风格快捷键，不增加
   “应用命令”“界面预览”等解释性标题。稳定且已进入近期产品合同的少量能力可用“即将提供”Disabled
   状态预告，但不得出现开发批次、等待合同或接入状态等内部文案，也不得让一个分类全部由占位项组成。
@@ -369,16 +373,26 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
 - 披露节奏与 ChemViz 一致：轨道使用 340ms `cubic-bezier(0.22, 1, 0.36, 1)`，内容从
   `translateY(-8px)` 与透明态进入；实现优先使用 `grid-template-rows: 0fr → 1fr`，不测量或动画
   固定高度。
-- Context Bar 依据 effective tool、页面、单选、多选和参考线选择切换命令；Text/Shape/Hand 工具
-  优先显示当前模式、直接操作和退出提示，返回 Select 后才恢复页面/选择上下文。
-- Tool Dock 在语义上分为工具和资源面板两区，但不常驻显示“工具”“面板”文字；使用分区位置、
-  `role="group"` 与 `aria-label` 保持可理解性。Select/Hand/Text/Shape/Image/Table/More 属于操作入口，
-  Assets/Pages/Layers/Data 只负责披露资源面板。它使用与面板相连的中性纸灰/石墨 surface；
-  常态图标中性，键盘 Focus 才固定使用墨蓝。Document Bar 承担深色视觉锚点，Dock 不应表现成
-  与画布割裂的第二套导航产品。
-- 精细指针下 Persistent Tool 激活使用轻中性 paper 底、墨蓝图标与靠 Dock 外缘的短几何标记；
-  打开的资源面板入口把短标记放在邻近 Panel 的一侧。两种状态不得改变按钮尺寸，也不使用三边
-  inset、负 margin、keycap 底边或外投影。禁止用“长墨蓝竖线 + 大面积浅墨蓝底”同时表达状态。
+- Floating Tool Dock 固定在 Canvas viewport 底部中央，由两层组成：下方 Main Dock 常驻并承载
+  `历史 / 交互工具 / 创建工具 / 工作区` 四组；上方 Context Shelf 常驻但依据 effective tool、页面、
+  单选、多选和参考线选择切换命令。常规宽度下 Main Dock 稳定为 448px 并居中排列工具；Context
+  Shelf 绝对定位在其后方，左右各内缩 24px，形成 400px 的内容安全宽度且不参与浮岛的 intrinsic
+  width 计算。它使用灰色 `surface-sunken`，完全无边框和阴影，并向下压入 Main Dock 5px。
+  Main Dock 使用 raised surface 和专用重阴影，两层通过遮挡形成一个稳定整体。上下文变化不得移动
+  或撑宽 Main Dock，桌面上下文内容不得被裁切；单选上下文只显示面向用户的目录类型与 X/Y/W/H，
+  不展示自定义图层名称、`RoySimpleText` 等内部 Schema 类型，也不重复组件 Quick Bar、画布右键菜单
+  和键盘路径已有的复制、锁定、层级与删除动作。
+- Select/Hand/Text/Shape/Image/Table/More 与 Inspector 开关属于 Main Dock；Undo/Redo 也迁入历史组。
+  左 Rail 只保留 Assets/Pages/Layers/Data 四个入口并全部靠上排列。四个入口使用 `role="group"` 与
+  `aria-label` 保持可理解性，打开状态的短标记朝向相邻 Resource Panel。
+- 精细指针下 Main Dock 的 Persistent Tool 激活使用轻墨蓝底、墨蓝图标、边线和 inset 底标记；
+  Rail 打开的资源面板入口使用中性 paper 底和邻近 Panel 的短几何标记。状态不得改变按钮尺寸，
+  也不得只靠颜色表达。
+- Floating Tool Dock 的 z-index 位于 Selection 与 compact Scrim 之间：正常编辑时高于 Paper/Selection，
+  打开 Resource/Inspector overlay 时必须被 Scrim 覆盖。完整组件 Picker 作为 Portal 使用 floating
+  layer，仍可在明确触发后位于工作区浮岛之上。
+- Canvas 滚动内容必须通过 `--ptd-floating-tool-dock-safe-area` 保留底部空间；Main Dock 与 Status Bar/
+  水平滚动条之间使用 `--ptd-floating-tool-dock-offset` 保持可点击间隙，不能只靠视觉阴影假装避让。
 - Resource Panel 默认宽 280px、限制在 240–360px；Inspector 默认 304px、限制在 280–420px。
   两者均可折叠和拖动调整，最后宽度在当前 Designer 实例中保留。
 - 无组件选择时 Inspector 必须展示真实 Page Inspector，而不是空状态；只读信息不得伪装成输入框。
@@ -486,7 +500,7 @@ DataPanel
   preview 或 React Overlay 中补视觉假象。
 - Shape Renderer 必须自包含实际几何；Star 等轮廓使用包内 SVG，不能依赖宿主是否加载某套图标
   字体来决定画布内容是否可见。
-- Shape 使用一个 Dock 工具组和四个面板 preset；精细指针下 Dock 主按钮为完整 30×30、图标
+- Shape 使用一个 Main Dock 工具组和四个面板 preset；精细指针下主按钮为完整 30×30、图标
   16×16 居中，disclosure 作为右下角 13×13 覆盖目标。coarse pointer 下恢复 40×40 主目标、
   20×20 图标与 16×16 disclosure。任何尺寸都不能压缩主按钮或把图标挤偏。
 - 当前 Shape preset 使用中性 graphite 边缘/字重与 inset edge，不使用蓝色左线或浅蓝填充。
@@ -528,7 +542,7 @@ DataPanel
 - 常规命令栏图标按钮视觉尺寸 28px；较宽的 coarse pointer 工作区将可点击区域提升到至少 40px。
   `<= 480px` 的 Designer 容器使用 32×32 紧凑视觉控件和 15–16px glyph，避免按钮填满整条
   36–38px Chrome；这是一项仅限手机宽度的高密度例外，不能扩散到平板或桌面触屏。
-- Tool Dock 的主入口在精细指针下使用 30×30 target 和 16×16 图标，coarse pointer 下使用
+- Floating Main Dock 的主入口在精细指针下使用 30×30 target 和 16×16 图标，coarse pointer 下使用
   40×40 target 和 20×20 图标；`<= 480px` 容器覆盖为 32×32 与 15×15。所有 glyph 共用同一
   光学中心。组合工具的 disclosure 只能叠加在角落，不能改变主图标 grid cell。Shape 菜单必须消费 Arrow/Home/End、
   Enter/Space 与 Escape，禁止继续冒泡到对象移动、临时 Hand 或全局退出工具快捷键。
@@ -547,7 +561,7 @@ DataPanel
 - 几何属性优先组成 X/Y/W/H 二列网格，使用带增减动作、等宽数值和清晰单位后缀的紧凑步进器。
   合法的编辑中间态在焦点内保留，完成编辑时才提交一个历史手势。
 - 文档显示单位默认 `mm`，Status Bar 提供全局 `mm / PTD Canvas px` 切换。页面、组件、表格、标尺、
-  参考线、Context Bar 与 Status Bar 必须同步；切换只改变显示和输入合同，不写模板、不发 Host change、
+  参考线、Context Shelf 与 Status Bar 必须同步；切换只改变显示和输入合同，不写模板、不发 Host change、
   不进入历史。字号继续使用 `pt`，旋转使用度，透明度使用百分比，行高保持无单位。
 - 可编辑数值的 Label 同时作为水平拖动热区：每次拖动只提交一个历史手势，Shift 加速，
   Alt/Option 精调，Escape 恢复拖动起点且不写入历史；触屏和键盘用户继续使用输入框与增减动作。
@@ -711,17 +725,20 @@ loading、error、success。
 PTD 是桌面优先的生产工具，但不能假设所有桌面设备都有精细鼠标。响应阈值以 Designer
 容器宽度为准，不读取设备类型，也不只依赖 `window.innerWidth`。
 
-- `>= 1440px`：wide；Tool Dock、Resource Panel、Canvas、Inspector 默认同时显示。
-- `1180–1439px`：standard；Tool Dock 与 Inspector 默认显示，Resource Panel 默认折叠。
-- `< 1180px`：compact；Tool Dock 保持，Resource Panel 与 Inspector 作为互斥 overlay 打开。
-- 从一个档位切到另一个档位时采用该档位的安全默认开合；用户仍可用 Context Bar 入口恢复面板。
+- `>= 1440px`：wide；Rail、Floating Tool Dock、Resource Panel、Canvas、Inspector 默认同时显示。
+- `1180–1439px`：standard；Rail、Floating Tool Dock 与 Inspector 默认显示，Resource Panel 默认折叠。
+- `< 1180px`：compact；Rail 与 Floating Tool Dock 保持，Resource Panel 与 Inspector 作为互斥 overlay 打开。
+- 从一个档位切到另一个档位时采用该档位的安全默认开合；用户使用 Rail 恢复资源面板，使用
+  Floating Main Dock 的工作区组恢复 Inspector。
 - compact overlay 打开一个必须关闭另一个；Scrim 或 Escape 可关闭当前 overlay。overlay 宽度以
   Designer 容器为边界，禁止使用 `100vw` 推算嵌入式设计器宽度。
 - compact Scrim 位于 Selection 与 Sticky Panel 两个语义层之间：它必须覆盖 Quick Bar、选框和
   画布编辑 Chrome，但不能盖住当前打开的 Resource/Inspector overlay。
 - 不因窄屏删除关键功能；只改变入口和披露层级。
+- compact 的 Floating Main Dock 保留 Undo/Redo、Select/Hand、Text、Shape、More 与 Inspector；
+  Image/Simple Table 可隐藏直接入口，但必须继续存在于 More Picker 的完整可用目录中。
 - `pointer: coarse` 时取消依赖 Hover 才可发现的操作；正常宽度控件命中区域至少 40px。仅当 Designer
-  容器 `<= 480px` 时，App Bar 高 38px、Context Bar 高 36px、Tool Dock 宽 36px，三者的主要
+  容器 `<= 480px` 时，App Bar 高 38px、Rail 宽 36px，Floating Main Dock 的主要
   控件收紧为 32px、glyph 为 15–16px。组件级响应以容器查询为主；顶层全屏 Web 宿主允许额外使用
   `(pointer: coarse) and (max-width: 480px)` 作为手机 viewport fallback，但不能替代容器查询。
   fallback 必须以更高选择器优先级明确覆盖 40px coarse 合同，不能依赖构建后的规则排序，也不能通过
@@ -736,7 +753,8 @@ PTD 是桌面优先的生产工具，但不能假设所有桌面设备都有精�
 <div data-ptd-region="designer" />
 <header data-ptd-region="app-bar" />
 <div data-ptd-region="application-menu" />
-<nav data-ptd-region="command-bar" />
+<div data-ptd-region="floating-tool-dock" />
+<nav data-ptd-region="context-shelf" />
 <aside data-ptd-region="left-sidebar" />
 <div data-ptd-region="resource-panel" />
 <div data-ptd-region="pages-panel" />
