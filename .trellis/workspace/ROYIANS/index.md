@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 21
+- **Total Sessions**: 22
 - **Last Active**: 2026-08-03
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~734 | Active |
+| `journal-1.md` | ~768 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 22 | 2026-08-03 | 统一 Foliq UI 视觉体系与设计器工具栏 | `6be0541`, `be13eb1` | `feature/refc` |
 | 21 | 2026-08-03 | Floating Canvas Tool Dock | `5305406`, `518db9f` | `feature/refc` |
 | 20 | 2026-08-03 | 完成 pnpm 11 迁移与 Docker PDF 验收 | `f64f8e5`, `4f00c33` | `feature/refc` |
 | 19 | 2026-08-02 | Datasource v2 数据合同、组件绑定与实时校样 | `f99104186a28549741b15e89d6a32df6ec71d99b`, `6691663`, `09cacae4a28d1055965cd7cbeb9f1cfe4b89d0ca` | `feature/refc` |
