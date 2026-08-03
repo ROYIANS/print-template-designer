@@ -21,6 +21,12 @@
   ID、安全路径读取、类型与格式化分离、结构化组件绑定、显式 `RenderContext` 和结构化诊断。
 - 数据面板支持拖入/选择/粘贴 JSON、应用前摘要与绑定影响、可搜索字段树、字段格式化、文本混合插值、
   图片/二维码/条形码/自由表格绑定、记录切换和非破坏性实时校样。
+- 建立确定性打印输出 vertical slice：`OutputDocument` 派生页 IR、Page Master、页码、明细表跨页、
+  续页重复表头、汇总行续页、显式诊断与 framework-free 输出 DOM renderer。
+- Web 增加与 Designer 同主题的多页打印预览、适合页面/宽度、连续缩放、诊断和未保存模板 PDF 下载。
+- Server 增加认证 `POST /api/output/pdf`、固定 Playwright Chromium、并发上限、超时/取消清理、
+  Browser crash 单次重建、网络默认拒绝和确定性 PDF metadata。
+- `/app` 工作台及相关 Sheet/Dialog 的交互图标统一为 Remix Icon，移除字符和手写 SVG 伪图标。
 
 ### Changed
 
@@ -31,6 +37,8 @@
 - 模板序列化升级到 canonical v2：`TemplateSchema.data` 是数据定义唯一事实来源；v0/v1
   `dataSource/dataSet/[::field::]` 保持兼容读取，只在显式保存边界迁移且保存后仍可求值。
 - UI 重构为面向报表开发者与设计师的高密度专业工作区，并支持响应式面板布局。
+- 正式输出不再规划为浏览器默认打印或整页截图；业务分页由 Foliq compiler 决定，Chromium 只负责受控
+  测量和 PDF 绘制。
 
 ### Infrastructure
 
@@ -38,14 +46,16 @@
 - Web 镜像基于 Nginx，支持 `/healthz`、同源 `/api` 代理、分支/SHA 标签、私有 GHCR 登录和脚本化回滚。
 - Server 使用 Prisma 7 PostgreSQL driver adapter 与已提交的 migration；Compose 通过一次性 migration 容器管理升级。
 - 自托管栈默认保留 PostgreSQL named volume，fresh 清库需要显式参数与二次确认。
+- Server runtime 切换为匹配 `playwright-core@1.62.0` 的固定 Playwright Noble image，固定 Noto CJK
+  字体，并保持 Compose 无 privileged / `SYS_ADMIN`。
 
 ### Current boundaries
 
 - v2 workspace packages 尚未发布到 npm。
 - `apps/web` 已连接 Server 认证、模板 CRUD、文件工作台、版本历史、恢复和冲突保护。
-- `@ptd/export` 仍是空脚手架；PDF、打印、Word 和自动溢出分页尚未实现。
+- `@ptd/export` 已完成明细表确定性分页 vertical slice；完整富文本分页、复杂表格、Word 和批量输出尚未实现。
 - Datasource v2 的 JSON 导入、字段树、绑定与单记录实时校样已经实现；Excel/CSV、REST/其他数据源代理、
-  Secret 管理、重复明细、自动分页和批量输出仍未实现。
+  Secret 管理、完整长文本/复杂表格分页和批量输出仍未实现。
 - 认证当前只提供 GitHub OAuth；邮箱登录与上传服务尚未实现。
 
 ## Legacy v1 history

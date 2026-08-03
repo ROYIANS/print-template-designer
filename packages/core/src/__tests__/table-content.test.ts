@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  DEFAULT_DETAIL_TABLE_PROPS,
   createSimpleTableProps,
   deleteTableColumn,
   deleteTableRow,
@@ -9,15 +10,69 @@ import {
   getTableCellIdsInRange,
   insertTableColumn,
   insertTableRow,
+  isDetailTableProps,
   isSimpleTableProps,
   mergeTableCells,
   normalizeSimpleTableProps,
+  normalizeDetailTableProps,
   resizeTableColumn,
   resizeTableRow,
   splitTableCell,
   updateTableCellText,
   updateTableCellsStyle,
 } from '../types/table-content'
+
+describe('detail table content', () => {
+  it('publishes a canonical immutable default', () => {
+    const normalized = normalizeDetailTableProps(undefined)
+
+    expect(isDetailTableProps(normalized)).toBe(true)
+    expect(normalized).toEqual(DEFAULT_DETAIL_TABLE_PROPS)
+    expect(normalized).not.toBe(DEFAULT_DETAIL_TABLE_PROPS)
+    expect(normalized.columns).not.toBe(DEFAULT_DETAIL_TABLE_PROPS.columns)
+  })
+
+  it('normalizes the legacy structured table shape without retaining executable html', () => {
+    const normalized = normalizeDetailTableProps({
+      tableDataSource: 'order-items',
+      tableRowHeight: 36,
+      tableCols: [
+        { title: '项目', field: 'item-name', width: 240, align: 'left' },
+        { title: '数量', field: 'quantity', width: 100, align: 'right' },
+      ],
+    })
+
+    expect(normalized).toMatchObject({
+      dataFieldId: 'order-items',
+      header: { repeat: true, minHeight: 36 },
+      body: { keepRowTogether: true, minHeight: 36 },
+      columns: [
+        { id: 'column-1', title: '项目', fieldId: 'item-name', horizontalAlign: 'left' },
+        { id: 'column-2', title: '数量', fieldId: 'quantity', horizontalAlign: 'right' },
+      ],
+    })
+    expect(isDetailTableProps(normalized)).toBe(true)
+  })
+
+  it('requires a footer to cover the complete column grid', () => {
+    expect(
+      isDetailTableProps({
+        ...normalizeDetailTableProps(undefined),
+        footer: {
+          minHeight: 32,
+          cells: [
+            {
+              id: 'total',
+              text: '合计',
+              colSpan: 2,
+              horizontalAlign: 'right',
+            },
+          ],
+        },
+      }),
+    ).toBe(false)
+  })
+})
 
 describe('simple table content', () => {
   it('creates an addressable 2 x 2 table with independent cell ids', () => {

@@ -10,6 +10,7 @@ import type {
   TemplateDataDefinition,
 } from './types/data-source'
 import type { TemplatePage, TemplateSchema } from './types/template-schema'
+import type { TemplateOutputDefinition } from './types/output'
 import { isDataPath } from './data-binding/path'
 import { validateRuntimeRecords } from './data-binding/validation'
 
@@ -277,6 +278,42 @@ function isTemplatePage(value: unknown): value is TemplatePage {
   )
 }
 
+function isTemplateOutputDefinition(value: unknown): value is TemplateOutputDefinition {
+  if (
+    !isRecord(value) ||
+    !isNonEmptyString(value['defaultPageMasterId']) ||
+    !Array.isArray(value['pageMasters']) ||
+    value['pageMasters'].length === 0
+  ) {
+    return false
+  }
+  const ids = new Set<string>()
+  for (const valueMaster of value['pageMasters']) {
+    if (
+      !isRecord(valueMaster) ||
+      !isNonEmptyString(valueMaster['id']) ||
+      ids.has(valueMaster['id']) ||
+      !isNonEmptyString(valueMaster['name']) ||
+      !isPageMasterRegion(valueMaster['header']) ||
+      !isPageMasterRegion(valueMaster['footer'])
+    ) {
+      return false
+    }
+    ids.add(valueMaster['id'])
+  }
+  return ids.has(value['defaultPageMasterId'])
+}
+
+function isPageMasterRegion(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    isFiniteNumber(value['heightMm']) &&
+    value['heightMm'] >= 0 &&
+    Array.isArray(value['componentData']) &&
+    value['componentData'].every((component) => isComponentSchema(component))
+  )
+}
+
 function isDataSourceField(value: unknown): value is DataSourceField {
   return (
     isRecord(value) &&
@@ -360,6 +397,7 @@ export function isTemplateSchema(value: unknown): value is TemplateSchema {
     Array.isArray(value['pages']) &&
     value['pages'].length > 0 &&
     value['pages'].every(isTemplatePage) &&
+    (value['output'] === undefined || isTemplateOutputDefinition(value['output'])) &&
     (canonical || legacy)
   )
 }

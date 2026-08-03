@@ -2,6 +2,7 @@ export { BaseComponent } from './base/base-component'
 export { applyCssVars, componentStyleToCssVariables } from './base/css-variables'
 export type { ComponentCssVariables } from './base/css-variables'
 export { injectStylesheet } from './base/stylesheet'
+export { createComponentInstance } from './componentFactory'
 
 export { RoySimpleText } from './components/RoySimpleText'
 export { RoyText } from './components/RoyText'

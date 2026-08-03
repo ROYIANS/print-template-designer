@@ -1,5 +1,10 @@
 import { BadRequestException } from '@nestjs/common'
-import { deserialize, isTemplateSchema, type TemplateSchema } from '@ptd/core'
+import {
+  TEMPLATE_SCHEMA_JSON_LIMIT_BYTES,
+  deserialize,
+  isTemplateSchema,
+  type TemplateSchema,
+} from '@ptd/core'
 
 const MAX_TITLE_LENGTH = 120
 
@@ -8,7 +13,7 @@ const MAX_TITLE_LENGTH = 120
  * Datasource sample records have their own smaller Core limit; this allowance also covers pages,
  * components, bindings and the request envelope. Keep docker/nginx.conf aligned with this value.
  */
-export const TEMPLATE_JSON_BODY_LIMIT_BYTES = 4 * 1024 * 1024
+export const TEMPLATE_JSON_BODY_LIMIT_BYTES = TEMPLATE_SCHEMA_JSON_LIMIT_BYTES
 
 export interface TemplateWriteInput {
   title: string

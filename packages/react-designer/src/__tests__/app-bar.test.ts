@@ -239,6 +239,30 @@ describe('AppBar application menu', () => {
     expect(panel().getAttribute('aria-hidden')).toBe('true')
   })
 
+  it('exposes template JSON exchange as distinct file commands', async () => {
+    const execute = vi.fn(async () => true)
+    const hostCommands: DesignerHostCommandController = {
+      configured: true,
+      document: { id: 'template-1', status: 'dirty' },
+      getState: () => ({ enabled: true, pending: false }),
+      execute,
+    }
+    renderAppBar({ hostCommands })
+
+    act(() => trigger('文件').click())
+    expect(command('导入模板 JSON').textContent).toContain('未保存的新模板')
+    expect(command('导出模板 JSON').textContent).toContain('当前未保存修改')
+    expect(panel().textContent).not.toContain('导入数据 JSON')
+
+    await act(async () => command('导出模板 JSON').click())
+    expect(execute).toHaveBeenCalledWith('exportTemplate')
+    expect(panel().getAttribute('aria-hidden')).toBe('true')
+
+    act(() => trigger('文件').click())
+    await act(async () => command('导入模板 JSON').click())
+    expect(execute).toHaveBeenCalledWith('importTemplate')
+  })
+
   it('organizes low-frequency workflows without duplicating object commands', () => {
     const hostCommands: DesignerHostCommandController = {
       configured: true,
@@ -261,6 +285,8 @@ describe('AppBar application menu', () => {
     expect(panel().textContent).toContain('打开模板')
     expect(panel().textContent).toContain('保存模板')
     expect(panel().textContent).toContain('另存为')
+    expect(panel().textContent).toContain('导入模板 JSON')
+    expect(panel().textContent).toContain('导出模板 JSON')
     expect(panel().textContent).toContain('版本历史')
     expect(command('版本历史').disabled).toBe(false)
 

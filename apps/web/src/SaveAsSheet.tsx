@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react'
+import { RiCloseLine } from '@remixicon/react'
 import styles from './SaveAsSheet.module.css'
 
 interface SaveAsSheetProps {
@@ -67,7 +68,7 @@ export function SaveAsSheet({
       <header>
         <h2 id={`${inputId}-title`}>{mode === 'rename' ? '重命名模板' : '另存为'}</h2>
         <button type="button" disabled={pending} onClick={onClose} aria-label="关闭命名面板">
-          ×
+          <RiCloseLine aria-hidden="true" />
         </button>
       </header>
       <p className={styles.description}>

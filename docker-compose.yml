@@ -53,6 +53,9 @@ services:
       GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:?Set GITHUB_CLIENT_ID in .env}
       GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:?Set GITHUB_CLIENT_SECRET in .env}
       PTD_TRUST_PROXY: 'true'
+      PTD_OUTPUT_RENDER_URL: http://web/output-render.html
+      PTD_OUTPUT_MAX_CONCURRENCY: ${PTD_OUTPUT_MAX_CONCURRENCY:-2}
+      PTD_OUTPUT_TIMEOUT_MS: ${PTD_OUTPUT_TIMEOUT_MS:-30000}
     expose:
       - '3000'
     healthcheck:

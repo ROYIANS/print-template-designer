@@ -18,11 +18,19 @@ import {
   type WorkspaceView,
 } from './navigation'
 import { SaveAsSheet } from './SaveAsSheet'
+import { createOutputJob, type OutputJob } from './outputJob'
+import { OutputPreview } from './OutputPreview'
+import { downloadOutputPdf, outputApi, outputApiErrorMessage } from './outputApi'
 import {
   PRODUCT_CAPTURE_KEYS,
   PRODUCT_CAPTURE_TEMPLATES,
   type ProductCaptureKey,
 } from './templates'
+import {
+  downloadTemplateJson,
+  readTemplateJsonFile,
+  templateJsonErrorMessage,
+} from './templateJson'
 import {
   documentHostCommandStates,
   shouldConfirmDocumentExit,
@@ -222,7 +230,7 @@ function useAccountAccess() {
   return { access, retry }
 }
 
-type WorkspaceDialog = 'new' | 'leave'
+type WorkspaceDialog = 'new' | 'leave' | 'import'
 
 function signOut() {
   return authClient.signOut().then(() => window.location.assign('/'))
@@ -251,6 +259,12 @@ function WorkspaceEditor({
   const [restoreVersion, setRestoreVersion] = useState<number>()
   const [restorePending, setRestorePending] = useState(false)
   const [restoreError, setRestoreError] = useState<string>()
+  const [pendingImport, setPendingImport] = useState<TemplateSchema>()
+  const [templateExchangeError, setTemplateExchangeError] = useState<string>()
+  const [outputPreviewJob, setOutputPreviewJob] = useState<OutputJob>()
+  const [outputExporting, setOutputExporting] = useState(false)
+  const [outputExportError, setOutputExportError] = useState<string>()
+  const templateFileInputRef = useRef<HTMLInputElement>(null)
   const allowUnloadRef = useRef(false)
   const requestedTemplateId =
     view.kind === 'template'
@@ -269,6 +283,10 @@ function WorkspaceEditor({
     },
   })
   const hasUnsavedChanges = shouldConfirmDocumentExit(document.state)
+  const hasUnsavedChangesRef = useRef(hasUnsavedChanges)
+  useEffect(() => {
+    hasUnsavedChangesRef.current = hasUnsavedChanges
+  }, [hasUnsavedChanges])
   const restoreDisabledReason =
     document.state.status === 'conflict'
       ? '服务器版本已变化，请重新打开模板后再恢复'
@@ -290,6 +308,8 @@ function WorkspaceEditor({
     setVersionHistoryOpen(false)
     setRestoreVersion(undefined)
     setRestoreError(undefined)
+    setOutputPreviewJob(undefined)
+    setOutputExportError(undefined)
   }, [])
 
   useEffect(
@@ -323,6 +343,32 @@ function WorkspaceEditor({
     navigate('/app')
   }, [closeTransientSurfaces, navigate])
 
+  const applyImportedTemplate = useCallback(
+    (template: TemplateSchema) => {
+      closeTransientSurfaces()
+      setDialog(undefined)
+      setPendingImport(undefined)
+      setTemplateExchangeError(undefined)
+      document.importDocument(template)
+    },
+    [closeTransientSurfaces, document],
+  )
+
+  const exportOutput = useCallback(async (template: TemplateSchema, now?: string) => {
+    setOutputExporting(true)
+    setOutputExportError(undefined)
+    try {
+      const job = createOutputJob(template, 'export', now)
+      const download = await outputApi.createPdf(job, template.pageConfig.title)
+      downloadOutputPdf(download)
+    } catch (error) {
+      setOutputExportError(outputApiErrorMessage(error))
+      throw error
+    } finally {
+      setOutputExporting(false)
+    }
+  }, [])
+
   const host = useMemo<DesignerHost>(
     () => ({
       document: {
@@ -334,9 +380,24 @@ function WorkspaceEditor({
       },
       commands: {
         ...documentHostCommandStates(document.state),
+        preview:
+          document.state.status === 'loading'
+            ? { enabled: false, reason: '请等待模板载入完成' }
+            : { enabled: true },
+        print: { enabled: false, reason: '请先导出 PDF 后打印' },
+        exportDocument:
+          document.state.status === 'loading'
+            ? { enabled: false, reason: '请等待模板载入完成' }
+            : { enabled: true, pending: outputExporting },
         keyboardShortcuts: { enabled: true },
         documentation: { enabled: true },
         about: { enabled: true },
+      },
+      onCommandError: (command, error) => {
+        if (command === 'importTemplate' || command === 'exportTemplate') {
+          setTemplateExchangeError(templateJsonErrorMessage(error))
+        }
+        if (command === 'exportDocument') setOutputExportError(outputApiErrorMessage(error))
       },
       onCommand: async (command: DesignerHostCommandId, context) => {
         switch (command) {
@@ -361,6 +422,25 @@ function WorkspaceEditor({
             closeTransientSurfaces()
             setVersionHistoryOpen(true)
             return
+          case 'importTemplate':
+            closeTransientSurfaces()
+            setTemplateExchangeError(undefined)
+            if (templateFileInputRef.current) {
+              templateFileInputRef.current.value = ''
+              templateFileInputRef.current.click()
+            }
+            return
+          case 'exportTemplate':
+            setTemplateExchangeError(undefined)
+            downloadTemplateJson(context.template, document.state.title)
+            return
+          case 'preview':
+            closeTransientSurfaces()
+            setOutputPreviewJob(createOutputJob(context.template, 'print'))
+            return
+          case 'exportDocument':
+            await exportOutput(context.template)
+            return
           case 'keyboardShortcuts':
             closeTransientSurfaces()
             setHelpSheet('shortcuts')
@@ -378,7 +458,15 @@ function WorkspaceEditor({
         }
       },
     }),
-    [closeTransientSurfaces, document, hasUnsavedChanges, requestHome, runGuarded],
+    [
+      closeTransientSurfaces,
+      document,
+      exportOutput,
+      hasUnsavedChanges,
+      outputExporting,
+      requestHome,
+      runGuarded,
+    ],
   )
 
   return (
@@ -393,6 +481,77 @@ function WorkspaceEditor({
           host={host}
         />
       </div>
+      {outputPreviewJob ? (
+        <OutputPreview
+          template={outputPreviewJob.template}
+          renderContext={outputPreviewJob.renderContext}
+          options={outputPreviewJob.options}
+          exporting={outputExporting}
+          exportError={outputExportError}
+          onClose={() => setOutputPreviewJob(undefined)}
+          onExport={() => {
+            void exportOutput(outputPreviewJob.template, outputPreviewJob.options.now).catch(
+              () => undefined,
+            )
+          }}
+        />
+      ) : null}
+      <input
+        ref={templateFileInputRef}
+        className={styles.templateFileInput}
+        type="file"
+        accept="application/json,.json,.foliq.json"
+        tabIndex={-1}
+        aria-hidden="true"
+        onChange={async (event) => {
+          const input = event.currentTarget
+          const file = input.files?.[0]
+          input.value = ''
+          if (!file) return
+          setTemplateExchangeError(undefined)
+          try {
+            const template = await readTemplateJsonFile(file)
+            if (hasUnsavedChangesRef.current) {
+              setPendingImport(template)
+              setDialog('import')
+              return
+            }
+            applyImportedTemplate(template)
+          } catch (error) {
+            setTemplateExchangeError(templateJsonErrorMessage(error))
+          }
+        }}
+      />
+      {templateExchangeError ? (
+        <div className={styles.templateExchangeError} role="alert">
+          <div>
+            <strong>模板 JSON 操作未完成</strong>
+            <span>{templateExchangeError}</span>
+          </div>
+          <button
+            type="button"
+            aria-label="关闭模板 JSON 错误提示"
+            onClick={() => setTemplateExchangeError(undefined)}
+          >
+            关闭
+          </button>
+        </div>
+      ) : null}
+      {outputExportError && !outputPreviewJob ? (
+        <div className={styles.templateExchangeError} role="alert">
+          <div>
+            <strong>PDF 导出未完成</strong>
+            <span>{outputExportError}</span>
+          </div>
+          <button
+            type="button"
+            aria-label="关闭 PDF 导出错误提示"
+            onClick={() => setOutputExportError(undefined)}
+          >
+            关闭
+          </button>
+        </div>
+      ) : null}
       <AccountMenu
         user={user}
         surface="editor"
@@ -466,10 +625,11 @@ function WorkspaceEditor({
       ) : null}
       {dialog ? (
         <UnsavedDialog
-          action={dialog === 'new' ? 'new' : 'home'}
+          action={dialog === 'new' ? 'new' : dialog === 'import' ? 'import' : 'home'}
           onCancel={() => {
             setDialog(undefined)
             setPendingNavigation(undefined)
+            setPendingImport(undefined)
           }}
           onDiscard={() => {
             const action = dialog
@@ -477,6 +637,13 @@ function WorkspaceEditor({
             if (action === 'new') {
               setPendingNavigation(undefined)
               document.newDocument()
+              return
+            }
+            if (action === 'import') {
+              setPendingNavigation(undefined)
+              const template = pendingImport
+              setPendingImport(undefined)
+              if (template) applyImportedTemplate(template)
               return
             }
             const proceed = pendingNavigation

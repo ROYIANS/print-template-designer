@@ -33,13 +33,19 @@
 .sheet header button {
   width: 26px;
   height: 26px;
+  display: grid;
+  place-items: center;
   padding: 0;
   border: 1px solid transparent;
   border-radius: 2px;
   color: oklch(44% 0.008 70);
   background: transparent;
-  font-size: 20px;
   cursor: pointer;
+}
+
+.sheet header button svg {
+  width: 18px;
+  height: 18px;
 }
 
 .sheet header button:hover {

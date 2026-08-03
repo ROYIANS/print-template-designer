@@ -5,7 +5,9 @@ FROM node:22-alpine AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 
-RUN corepack enable && corepack prepare pnpm@10.15.1 --activate
+RUN corepack enable \
+    && corepack prepare pnpm@11.18.0 --activate \
+    && test "$(pnpm --version)" = "11.18.0"
 
 WORKDIR /app
 
@@ -14,6 +16,7 @@ FROM base AS dependencies
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json .npmrc ./
 COPY packages/core/package.json packages/core/
 COPY packages/components/package.json packages/components/
+COPY packages/export/package.json packages/export/
 COPY packages/react-designer/package.json packages/react-designer/
 COPY apps/web/package.json apps/web/
 
@@ -23,11 +26,13 @@ FROM dependencies AS build
 
 COPY packages/core packages/core
 COPY packages/components packages/components
+COPY packages/export packages/export
 COPY packages/react-designer packages/react-designer
 COPY apps/web apps/web
 
 RUN pnpm --filter @ptd/core build \
     && pnpm --filter @ptd/components build \
+    && pnpm --filter @ptd/export build \
     && pnpm --filter @ptd/react-designer build \
     && pnpm --filter web build
 

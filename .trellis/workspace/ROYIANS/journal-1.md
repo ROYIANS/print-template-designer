@@ -664,3 +664,37 @@ Added PostgreSQL, migration, Server and Web Compose lifecycle; hardened Bash/Pow
 ### Next Steps
 
 - None - task complete
+
+
+## Session 20: 完成 pnpm 11 迁移与 Docker PDF 验收
+
+**Date**: 2026-08-03
+**Task**: 完成 pnpm 11 迁移与 Docker PDF 验收
+**Branch**: `feature/refc`
+
+### Summary
+
+将 workspace 与 Docker 统一到 pnpm 11.18.0，修复 Server image 的 OpenSSL 和 dumb-init 运行时缺口；在 macOS Docker Desktop 上完成固定 Chromium/Noto CJK 的直接 PDF smoke、Poppler 逐页检查和隔离 Compose HTTP E2E，并同步 PRD、研究记录与 Trellis 规范。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `f64f8e5` | (see git log) |
+| `4f00c33` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete

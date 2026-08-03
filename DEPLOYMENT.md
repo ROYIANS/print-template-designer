@@ -7,12 +7,16 @@ PostgreSQL 17（named volume）
           ↓ healthy
 Prisma migrate deploy（一次性容器）
           ↓ exit 0
-Nest Server（Better Auth + 模板 API）
+Nest Server（Better Auth + 模板 API + Chromium PDF）
           ↓ healthy
 Nginx Web（静态应用 + 同源 /api 代理）
 ```
 
 GitHub Actions 对 Web、Server 和容器执行质量检查，并将两个运行时镜像发布到 GHCR。正常部署服务器只需要 Git、Docker Engine 和 Docker Compose v2，不需要 Node.js、pnpm 或编译器。显式 `--build`/`-Build` 模式才会在服务器本地构建镜像。
+
+Server runtime 基于固定 `mcr.microsoft.com/playwright:v1.62.0-noble`，与精确的
+`playwright-core@1.62.0` 匹配，并固定安装 `fonts-noto-cjk=1:20230817+repack1-3`。镜像明显大于普通
+Node slim，这是保留文字对象、固定 Chromium/字体和高保真 PDF 的预期成本。
 
 ## 首次部署
 
@@ -30,6 +34,8 @@ cp .env.example .env
 - `PTD_WEB_ORIGIN`：通常与 `BETTER_AUTH_URL` 相同。
 - `PTD_ALLOWED_EMAILS`：允许登录的 GitHub 邮箱，多个值用逗号分隔。
 - `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET`：GitHub OAuth App 凭据。
+- `PTD_OUTPUT_MAX_CONCURRENCY` / `PTD_OUTPUT_TIMEOUT_MS`：PDF BrowserContext 并发与总截止时间；默认
+  分别为 2 和 30000 ms，普通部署不建议盲目调大。
 
 然后执行：
 
@@ -85,6 +91,23 @@ Traefik、Cloudflare 或宿主机 Nginx，需要确认其请求体上限不低�
 和请求信封。
 
 不要把 PostgreSQL 或 Server 端口直接开放到公网；默认 Compose 只发布 Web 端口。
+
+## PDF 输出运行时
+
+Compose 将 Server 的内部 render URL 固定为 `http://web/output-render.html`。该页面由同一个 Web build
+生成，使用与浏览器打印预览相同的 `@ptd/export` compiler 和 DOM renderer。Chromium 不携带用户
+Cookie 或数据库环境，只允许精确 render origin 的 document/script/stylesheet/font 以及
+`data:`/`blob:`；远程、私网、metadata、其他 Compose service 和任意导航都会被阻断。
+
+每个 PDF 请求使用独立 BrowserContext/Page，一个长期 Browser 由 Nest 生命周期管理。超时、客户端
+取消和失败都会关闭 Context；Browser 断开后最多重建一次。Compose 不需要 `privileged`、`SYS_ADMIN`
+或额外 sandbox capability。Nginx `/api` 的 60 秒读取超时高于 Server 默认 30 秒截止，为错误响应和
+清理保留余量。
+
+`/healthz` 仍是轻量应用存活检查，不会为每次探测启动 Chromium。部署后的 PDF smoke test 应通过真实
+认证会话调用 `/api/output/pdf`，并至少验证：PDF 可打开、IR 页数等于实际页数、无空白尾页、中文 glyph
+正确、表头/页码重复、文字不是整页 JPEG/PNG。容器内中文文本提取也应单独检查；仅看到 `/ToUnicode`
+不能证明所有 CJK mapping 都正确。
 
 ## 镜像与标签
 
@@ -147,7 +170,8 @@ git pull --ff-only
 ./deploy.sh --build
 ```
 
-PowerShell 对应 `.\deploy.ps1 -Build`。本地构建仍然使用与 CI 相同的 Dockerfile、Node 22 和 pnpm 10.15.1，不使用宿主机 Node_modules。
+PowerShell 对应 `.\deploy.ps1 -Build`。本地构建仍然使用与 CI 相同的 Dockerfile、Node 22 和 pnpm
+11.18.0，不使用宿主机 Node_modules。
 
 ## 运维命令
 
@@ -229,8 +253,19 @@ Package 是 private，或 Token 没有 `read:packages`。同时配置 `GHCR_USER
 
 修改 `WEB_PORT`。如果宿主机反向代理与 Foliq 同机，优先使用 `BIND_ADDRESS=127.0.0.1`。
 
+### PDF 返回 429 / 504 / 503
+
+- `429`：当前 BrowserContext 并发已满；先检查是否有超大模板、慢资源或突发请求，不要直接无限加并发。
+- `504`：任务超过 `PTD_OUTPUT_TIMEOUT_MS`；检查页数、表格行、字体和 render bundle，不要让上游代理先超时。
+- `503`：Chromium 无法启动、崩溃后重建失败或请求已取消；查看 Server 日志和容器内 Playwright 版本。
+
+容器构建若在字体安装阶段失败，确认 apt source 仍提供 Dockerfile 固定的 Noble 版本；不要无审查改为
+不固定版本。`docker compose exec server fc-list | grep -i noto` 可检查 Noto CJK，实际 PDF 仍需渲染验收。
+
 ## 当前边界
 
 - 镜像目前只发布 `linux/amd64`；ARM64 需要扩展 CI platforms。
 - PostgreSQL 是单实例 named volume，不提供自动高可用、远程备份或灾难恢复。
 - 部署脚本是单主机 Compose 运维入口，不是零停机滚动发布系统。
+- Server Chromium 镜像与容器内 CJK PDF 需要在目标 `linux/amd64` Docker 环境做真实 smoke；只通过本地
+  Windows Chrome 不能替代该验收。

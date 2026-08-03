@@ -2,19 +2,16 @@
 
 ---
 
-## Implemented Package Modes
+## Implemented Package Mode
 
-The repository currently has two package modes. Conventions must describe the live package rather
-than pretending every directory has already reached the same maturity.
+All implemented workspace library packages use the same build and test mode.
 
-| Packages                                              | Current build/test mode                   |
-| ----------------------------------------------------- | ----------------------------------------- |
-| `@ptd/core`, `@ptd/components`, `@ptd/react-designer` | tsup ESM+CJS+d.ts, Vitest                 |
-| `@ptd/export`                                         | `tsc`-only empty scaffold, no test script |
+| Packages                                                             | Current build/test mode   |
+| -------------------------------------------------------------------- | ------------------------- |
+| `@ptd/core`, `@ptd/components`, `@ptd/export`, `@ptd/react-designer` | tsup ESM+CJS+d.ts, Vitest |
 
 New implemented library packages should use **tsup** for ESM + CJS + `.d.ts` unless an approved
-task establishes a different output contract. A reserved scaffold does not need fake build or test
-infrastructure before implementation starts.
+task establishes a different output contract.
 
 ### tsup.config.ts (required in implemented tsup packages)
 
@@ -184,6 +181,4 @@ corepack pnpm --filter @ptd/core build
 corepack pnpm --filter web dev
 ```
 
-`core`, `components`, and `react-designer` build through tsup. `export` builds with
-`tsc --project tsconfig.build.json` until the export implementation task deliberately establishes
-its public runtime and test contract.
+`core`, `components`, `export`, and `react-designer` build through tsup and test through Vitest.

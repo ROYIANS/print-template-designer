@@ -1,6 +1,7 @@
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { HelpSheet } from '../HelpSheet'
 import { SaveAsSheet } from '../SaveAsSheet'
 import { DeleteTemplateDialog, RestoreVersionDialog, UnsavedDialog } from '../WorkspaceDialogs'
 
@@ -30,6 +31,7 @@ describe('workspace decision surfaces', () => {
     expect(container.querySelector('aside')).not.toBeNull()
     expect(container.querySelector('[role="dialog"]')).toBeNull()
     expect(container.textContent).not.toContain('DOCUMENT COMMAND')
+    expect(container.querySelector('button[aria-label="关闭命名面板"] svg')).not.toBeNull()
     const input = container.querySelector<HTMLInputElement>('input')!
     await act(async () => {
       Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set?.call(
@@ -52,6 +54,35 @@ describe('workspace decision surfaces', () => {
     expect(container.textContent).not.toContain('UNSAVED CHANGES')
     const discard = Array.from(container.querySelectorAll('button')).find((button) =>
       button.textContent?.includes('丢弃并返回'),
+    )
+    await act(async () => discard?.click())
+    expect(onDiscard).toHaveBeenCalledTimes(1)
+  })
+
+  it('uses accessible vector icons for help controls and decision warnings', async () => {
+    await act(async () => {
+      root.render(<HelpSheet view="shortcuts" onClose={vi.fn()} />)
+    })
+    const close = container.querySelector<HTMLButtonElement>('button[aria-label="关闭帮助面板"]')
+    expect(close?.querySelector('svg[aria-hidden="true"]')).not.toBeNull()
+    expect(close?.textContent).not.toContain('×')
+
+    await act(async () => {
+      root.render(<UnsavedDialog action="home" onCancel={vi.fn()} onDiscard={vi.fn()} />)
+    })
+    expect(container.querySelector('[role="alertdialog"] svg[aria-hidden="true"]')).not.toBeNull()
+    expect(container.querySelector('[role="alertdialog"]')?.textContent).not.toContain('!')
+  })
+
+  it('uses the same discard protection before replacing content with imported JSON', async () => {
+    const onDiscard = vi.fn()
+    await act(async () => {
+      root.render(<UnsavedDialog action="import" onCancel={vi.fn()} onDiscard={onDiscard} />)
+    })
+
+    expect(container.textContent).toContain('导入所选模板 JSON')
+    const discard = Array.from(container.querySelectorAll('button')).find((button) =>
+      button.textContent?.includes('丢弃并导入'),
     )
     await act(async () => discard?.click())
     expect(onDiscard).toHaveBeenCalledTimes(1)

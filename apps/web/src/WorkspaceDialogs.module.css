@@ -45,17 +45,11 @@
   background: oklch(97% 0.018 72);
 }
 
-.notice > span {
+.warningIcon {
   width: 22px;
   height: 22px;
-  display: grid;
-  place-items: center;
   flex: none;
-  border-radius: 50%;
-  color: white;
-  background: oklch(58% 0.13 72);
-  font-family: Outfit, sans-serif;
-  font-weight: 700;
+  color: oklch(53% 0.13 72);
 }
 
 .notice p {

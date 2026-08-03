@@ -1,8 +1,9 @@
 import { useEffect, useId, useRef } from 'react'
+import { RiErrorWarningLine } from '@remixicon/react'
 import styles from './WorkspaceDialogs.module.css'
 
 interface UnsavedDialogProps {
-  action: 'new' | 'home'
+  action: 'new' | 'home' | 'import'
   onCancel(): void
   onDiscard(): void
 }
@@ -91,7 +92,7 @@ function DecisionDialog({
           <h2 id={titleId}>{title}</h2>
         </header>
         <div className={styles.notice}>
-          <span aria-hidden="true">!</span>
+          <RiErrorWarningLine className={styles.warningIcon} aria-hidden="true" />
           <p id={descriptionId}>{description}</p>
         </div>
         {error ? (
@@ -127,13 +128,15 @@ function DecisionDialog({
 }
 
 export function UnsavedDialog({ action, onCancel, onDiscard }: UnsavedDialogProps) {
-  const target = action === 'new' ? '新建空白模板' : '返回文件工作台'
+  const target =
+    action === 'new' ? '新建空白模板' : action === 'import' ? '导入所选模板 JSON' : '返回文件工作台'
+  const confirmAction = action === 'new' ? '新建' : action === 'import' ? '导入' : '返回'
   return (
     <DecisionDialog
       title="要丢弃未保存的更改吗？"
-      description={`当前设计与服务器保存版本不同。${target}会永久丢弃这些更改，但不会影响已保存的历史版本。`}
+      description={`当前设计包含未保存的更改。${target}会永久丢弃这些更改，但不会影响已保存的历史版本。`}
       cancelLabel="继续编辑"
-      confirmLabel={`丢弃并${action === 'new' ? '新建' : '返回'}`}
+      confirmLabel={`丢弃并${confirmAction}`}
       danger
       onCancel={onCancel}
       onConfirm={onDiscard}

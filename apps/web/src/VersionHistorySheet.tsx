@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { TemplatePreview } from '@ptd/react-designer'
+import { RiCloseLine } from '@remixicon/react'
 import {
   TemplateApiError,
   templateApi,
@@ -178,7 +179,7 @@ export function VersionHistorySheet({
           disabled={restorePending || suspended}
           onClick={onClose}
         >
-          ×
+          <RiCloseLine aria-hidden="true" />
         </button>
       </header>
       <div className={styles.body}>

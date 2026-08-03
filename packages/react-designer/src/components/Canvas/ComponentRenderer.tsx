@@ -7,42 +7,14 @@ import {
   type DataDiagnostic,
   type RenderContext,
 } from '@ptd/core'
-import {
-  RoyBarCode,
-  RoyCircle,
-  RoyComplexTable,
-  RoyImage,
-  RoyLine,
-  RoyQRCode,
-  RoyRect,
-  RoySimpleTable,
-  RoySimpleText,
-  RoyStar,
-  RoyText,
-  type BaseComponent,
-} from '@ptd/components'
+import { createComponentInstance, type BaseComponent } from '@ptd/components'
 import { getScaledGroupChildren } from '../../utils/groupGeometry'
 import { useEditorStore } from '../../state'
 import { ContentEditor, isDirectlyEditableComponent } from '../ContentEditor/ContentEditor'
 import { TableEditor } from '../TableEditor/TableEditor'
 import styles from './ComponentRenderer.module.css'
 
-type ComponentConstructor = new (schema: ComponentSchema) => BaseComponent
 type Variables = CSSProperties & Record<`--${string}`, string>
-
-const COMPONENT_MAP: Partial<Record<ComponentSchema['component'], ComponentConstructor>> = {
-  RoySimpleText,
-  RoyText,
-  RoyLine,
-  RoyRect,
-  RoyCircle,
-  RoyStar,
-  RoyImage,
-  RoyQRCode,
-  RoyBarCode,
-  RoySimpleTable,
-  RoyComplexTable,
-}
 
 interface ComponentRendererProps {
   schema: ComponentSchema
@@ -111,9 +83,9 @@ function VanillaRenderer({
 
   useEffect(() => {
     const element = containerRef.current
-    const Constructor = COMPONENT_MAP[schema.component]
-    if (!element || !Constructor) return
-    const instance = new Constructor(withoutOuterTransform(schema))
+    if (!element) return
+    const instance = createComponentInstance(withoutOuterTransform(schema))
+    if (!instance) return
     instance.mount(element)
     instanceRef.current = instance
     return () => {

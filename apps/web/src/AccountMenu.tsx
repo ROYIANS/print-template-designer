@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react'
+import { RiArrowDownSLine } from '@remixicon/react'
 import type { AccountUser } from './LandingPage'
 import styles from './AccountMenu.module.css'
 
@@ -58,9 +59,7 @@ export function AccountMenu({ user, surface, onReturnHome, onSignOut }: AccountM
           {user.image ? <img src={user.image} alt="" /> : user.name.slice(0, 1)}
         </span>
         <span className={styles.triggerName}>{user.name}</span>
-        <span className={styles.chevron} aria-hidden="true">
-          {open ? '▴' : '▾'}
-        </span>
+        <RiArrowDownSLine className={styles.chevron} aria-hidden="true" />
       </button>
 
       {open ? (

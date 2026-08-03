@@ -101,9 +101,16 @@
 }
 
 .chevron {
+  width: 15px;
+  height: 15px;
+  flex: none;
   color: currentColor;
-  font-size: 8px;
   opacity: 0.64;
+  transition: transform 150ms ease-out;
+}
+
+.trigger[aria-expanded='true'] .chevron {
+  transform: rotate(180deg);
 }
 
 .popover {
@@ -272,7 +279,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .popover {
+  .popover,
+  .chevron {
     animation: none;
+    transition: none;
   }
 }

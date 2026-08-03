@@ -6,7 +6,10 @@
 </div>
 
 > [!IMPORTANT]
-> 当前仓库正在进行 v2 重写。核心模型、渲染组件、React 编辑器、多页面管理、GitHub 登录、文件工作台、模板持久化与版本历史、Datasource v2 和完整自托管容器栈已经落地；打印、PDF/Word、自动分页与外部数据连接器尚未实现。原 Vue 2 版本保存在 [`legacy/`](./legacy/) 中，仅供参考。
+> 当前仓库正在进行 v2 重写。核心模型、渲染组件、React 编辑器、多页面管理、认证、文件工作台、
+> 模板持久化与版本历史、Datasource v2，以及确定性打印预览/PDF vertical slice 已经落地；完整长文本
+> 分页、复杂出版表格、Word、批量输出与外部数据连接器仍在建设。原 Vue 2 版本保存在
+> [`legacy/`](./legacy/) 中，仅供参考。
 
 ## 项目定位
 
@@ -14,9 +17,11 @@ Foliq 不是一个只能独立运行的页面 Demo，也没有把技术路线限
 
 - **可嵌入的设计器内核**：Schema、单位换算、序列化、数据绑定和组件注册表不依赖 UI 框架。
 - **专业 React 编辑器**：提供完整的画布工作区、组件目录、属性面板和编辑命令。
-- **可演进的完整应用**：Vite Web Host 已接通 NestJS 模板服务，提供认证、文件工作台、保存、另存为、版本历史与恢复；后续继续接入外部数据连接器、打印和导出。
+- **可演进的完整应用**：Vite Web Host 已接通 NestJS 模板服务，提供认证、文件工作台、版本历史、
+  真实逐页打印预览与服务端 PDF；后续继续扩展长文档分页和外部数据连接器。
 
-当前更准确的描述是：**已经形成文档设计、数据校样和版本化保存闭环的专业 Web 应用，打印出版链路仍在建设中**。
+当前更准确的描述是：**已经形成文档设计、数据校样、版本化保存和确定性 PDF 输出闭环的专业 Web
+应用，复杂打印出版能力仍在持续扩展**。
 
 ## 当前能力
 
@@ -39,17 +44,19 @@ Foliq 不是一个只能独立运行的页面 Demo，也没有把技术路线限
 - 原生 DOM 渲染组件：文本、表格、图像、二维码、条码和基础图形。
 - NestJS + Prisma + PostgreSQL 多用户模板 API，支持 GitHub OAuth、Allowlist、owner 隔离、不可变版本快照、恢复和乐观并发控制。
 - GitHub Actions 构建 Web/Server 镜像并发布到 GHCR；Compose 管理 PostgreSQL、migration、Server 和同源 Web 入口。
+- `@ptd/export` 将模板编译为显式派生页，支持 Page Master、页码、明细表智能分页与续页重复表头。
+- Web 提供与设计器同主题的多页打印预览；认证 Server 使用固定 Playwright Chromium 输出保留文字对象的 PDF。
 
 ### 成熟度边界
 
-| 模块                  | 当前状态         | 说明                                                     |
-| --------------------- | ---------------- | -------------------------------------------------------- |
-| `@ptd/core`           | 已实现           | Schema、单位、canonical v2、JSON 验证/推断、绑定与注册表 |
-| `@ptd/components`     | 已实现           | 框架无关 DOM 渲染组件                                    |
-| `@ptd/react-designer` | 已实现，持续打磨 | Controlled React 编辑器和专业画布交互                    |
-| `apps/web`            | 应用闭环已实现   | 文件工作台、CRUD、版本历史、恢复、冲突保护与数据校样     |
-| `apps/server`         | API 已实现       | PostgreSQL、Better Auth、owner 隔离和模板/版本 API       |
-| `@ptd/export`         | 空脚手架         | PDF、打印、Word 和自动溢出分页均未实现                   |
+| 模块                  | 当前状态          | 说明                                                       |
+| --------------------- | ----------------- | ---------------------------------------------------------- |
+| `@ptd/core`           | 已实现            | Schema、单位、canonical v2、JSON 验证/推断、绑定与注册表   |
+| `@ptd/components`     | 已实现            | 框架无关 DOM 渲染组件                                      |
+| `@ptd/react-designer` | 已实现，持续打磨  | Controlled React 编辑器和专业画布交互                      |
+| `apps/web`            | 应用闭环已实现    | 文件工作台、版本历史、数据校样、打印预览与 PDF 下载        |
+| `apps/server`         | API 已实现        | 模板/版本 API 与受控 Chromium PDF 输出                     |
+| `@ptd/export`         | v1 vertical slice | 派生页 IR、Page Master、明细表分页、DOM renderer/readiness |
 
 ## 架构
 
@@ -66,7 +73,9 @@ apps/web (React + Vite) ───────────────┐
 
 apps/server (NestJS + Prisma + PostgreSQL) ──── @ptd/core
 
-@ptd/export ── 当前仅为脚手架，尚未进入运行链路
+apps/web ───────────┐
+                    ├── @ptd/export ── @ptd/components ── @ptd/core
+apps/server render ─┘
 ```
 
 ```text
@@ -74,7 +83,7 @@ packages/
   core/             框架无关的数据模型与引擎
   components/       原生 DOM 渲染组件
   react-designer/   React 专业编辑器
-  export/           规划中的导出包
+  export/           确定性派生页编译、分页与输出 DOM renderer
 apps/
   web/              独立设计器 Host
   server/           模板持久化与版本 API
@@ -89,7 +98,7 @@ legacy/             只读的 Vue 2 版本
 ### 环境要求
 
 - Node.js **22.12 或更高版本**（CI 与 Docker 使用 Node 22）。
-- 通过 Corepack 使用仓库声明的 pnpm **10.15.1**。
+- 通过 Corepack 使用仓库声明的 pnpm **11.18.0**。
 
 虽然部分 package 的 `engines` 仍允许 Node 20，完整开发、CI 与容器环境统一使用 Node 22，以减少工具链和 Prisma 运行时差异。
 
@@ -101,7 +110,8 @@ corepack pnpm install
 corepack pnpm dev
 ```
 
-根 `dev` 命令会按依赖顺序构建 `core`、`components`、`react-designer`，再同时启动 package watch 和 Vite。默认访问地址通常为 <http://localhost:5173>。
+根 `dev` 命令会按依赖顺序构建 `core`、`components`、`export`、`react-designer`，再同时启动 package
+watch 和 Vite。默认访问地址通常为 <http://localhost:5173>。
 
 ### 启动模板服务
 
@@ -151,20 +161,23 @@ export function TemplateEditor({ initialValue }: { initialValue: TemplateSchema 
 
 模板服务提供以下 HTTP 端点：
 
-| 方法                     | 路径                                           | 用途                       |
-| ------------------------ | ---------------------------------------------- | -------------------------- |
-| `GET`                    | `/healthz`                                     | 健康检查                   |
-| `GET` / `POST`           | `/api/templates`                               | 列表 / 创建                |
-| `GET` / `PUT` / `DELETE` | `/api/templates/:id`                           | 读取 / 更新 / 删除         |
-| `GET`                    | `/api/templates/:id/versions`                  | 版本列表                   |
-| `GET`                    | `/api/templates/:id/versions/:version`         | 读取指定快照               |
-| `POST`                   | `/api/templates/:id/versions/:version/restore` | 将历史快照恢复为一个新版本 |
+| 方法                     | 路径                                           | 用途                         |
+| ------------------------ | ---------------------------------------------- | ---------------------------- |
+| `GET`                    | `/healthz`                                     | 健康检查                     |
+| `GET` / `POST`           | `/api/templates`                               | 列表 / 创建                  |
+| `GET` / `PUT` / `DELETE` | `/api/templates/:id`                           | 读取 / 更新 / 删除           |
+| `GET`                    | `/api/templates/:id/versions`                  | 版本列表                     |
+| `GET`                    | `/api/templates/:id/versions/:version`         | 读取指定快照                 |
+| `POST`                   | `/api/templates/:id/versions/:version/restore` | 将历史快照恢复为一个新版本   |
+| `POST`                   | `/api/output/pdf`                              | 由当前模板和显式数据生成 PDF |
 
 更新和恢复请求必须携带 `expectedVersion`。版本过期时返回 `409 Conflict`，以避免静默覆盖其他写入。请求体和响应语义见 [Server README](./apps/server/README.md)。
 
 ## 多页面与自动分页
 
-`TemplateSchema.pages` 表示用户手动管理、需要持久化的设计页面。未来的数据驱动自动溢出分页属于预览/打印/导出阶段生成的派生页面，不应写回手工页面，也不应污染编辑历史。这两个概念在 v2 中有意保持分离。
+`TemplateSchema.pages` 表示用户手动管理、需要持久化的设计页面。打印预览/PDF 通过 `@ptd/export`
+生成独立 `OutputDocument` 派生页面；明细表可以续页并重复表头，但不会写回手工页、Dirty 或 Undo/Redo。
+v1 已证明结构化表格 vertical slice，完整富文本逐行分页、分组小计和跨页合并单元格仍属后续能力。
 
 ## Docker 部署
 
@@ -197,7 +210,7 @@ cp .env.example .env
 | Core            | [`packages/core/README.md`](./packages/core/README.md)                     |
 | Components      | [`packages/components/README.md`](./packages/components/README.md)         |
 | React Designer  | [`packages/react-designer/README.md`](./packages/react-designer/README.md) |
-| Export scaffold | [`packages/export/README.md`](./packages/export/README.md)                 |
+| Export engine   | [`packages/export/README.md`](./packages/export/README.md)                 |
 | 开发指南        | [`DEVELOPMENT.md`](./DEVELOPMENT.md)                                       |
 | 部署指南        | [`DEPLOYMENT.md`](./DEPLOYMENT.md)                                         |
 | 变更记录        | [`CHANGELOG.md`](./CHANGELOG.md)                                           |
@@ -206,13 +219,14 @@ cp .env.example .env
 
 接下来的主线按依赖顺序推进：
 
-1. 实现静态/单记录打印预览与浏览器打印。
-2. 在已稳定的数据合同上增加 Excel/CSV 本地文件连接器。
-3. 设计具备 Secret 隔离和 SSRF 防护的 REST Server 连接器。
-4. 实现重复明细、结构表格与派生自动分页。
-5. 实现可复现 PDF 输出并独立评估 Word 版式降级边界。
+1. 在现有确定性输出主干上实现长文本逐行分页和更完整的 Page Master 编辑体验。
+2. 扩展结构化表格的分组、小计、carry-forward 与受控跨页规则。
+3. 在已稳定的数据合同上增加 Excel/CSV 本地文件连接器。
+4. 设计具备 Secret 隔离和 SSRF 防护的 REST Server 连接器。
+5. 增加批量输出/任务队列，并独立评估 Word 版式降级边界。
 
-Excel/XLS/XLSX、CSV、REST、打印、PDF/Word、自动分页、图表、签名、条件显示、字体管理、批量打印和多语言属于后续扩展，不应被理解为当前能力。
+Excel/XLS/XLSX、CSV、REST、Word、完整长文本分页、复杂表格分页、图表、签名、条件显示、字体管理、
+批量打印和多语言属于后续扩展，不应被理解为当前 v1 输出能力。
 
 ## Legacy v1
 

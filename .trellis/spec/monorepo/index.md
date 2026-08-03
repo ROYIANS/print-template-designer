@@ -16,6 +16,7 @@
 | [Quality Guidelines](./quality-guidelines.md)           | ESLint flat config, Prettier, Node 22 workspace baseline                     | Done   |
 | [React Designer Contract](./react-designer-contract.md) | Controlled state, commands, history and host integration                     | Done   |
 | [Server Architecture](./server-architecture.md)         | NestJS 11, Prisma 7, PostgreSQL, auth and concurrency contracts              | Done   |
+| [Output Architecture](./output-architecture.md)         | Derived pages, pagination, output DOM and controlled Chromium PDF            | Done   |
 
 ---
 
@@ -32,6 +33,7 @@ Before writing any code for a task in this monorepo, **always read these files**
 | [Directory Structure](./directory-structure.md)       | Where each package/app lives and what it owns — putting code in the wrong layer creates circular dependencies                                    |
 | [Quality Guidelines](./quality-guidelines.md)         | ESLint flat config + Prettier — CI will reject non-compliant code                                                                                |
 | [Server Architecture](./server-architecture.md)       | Read before changing `apps/server`, Prisma schema/migrations, database setup or template HTTP APIs                                               |
+| [Output Architecture](./output-architecture.md)       | Read before changing output contracts, pagination, preview, PDF renderer, Chromium or Docker fonts                                               |
 
 ## Public Documentation
 

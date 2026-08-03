@@ -139,4 +139,29 @@ describe('TemplateSchema runtime validation', () => {
       }),
     ).toBe(false)
   })
+
+  it('does not reject legacy structured-table props before the explicit save migration boundary', () => {
+    const base = template()
+    expect(
+      isTemplateSchema({
+        ...base,
+        pages: [
+          {
+            ...base.pages[0]!,
+            componentData: [
+              {
+                ...base.pages[0]!.componentData[0]!,
+                component: 'RoyComplexTable',
+                propValue: {
+                  tableDataSource: 'items',
+                  tableRowHeight: 36,
+                  tableCols: [{ title: '项目', field: 'name', width: 200 }],
+                },
+              },
+            ],
+          },
+        ],
+      }),
+    ).toBe(true)
+  })
 })

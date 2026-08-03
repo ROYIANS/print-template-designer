@@ -109,6 +109,9 @@ describe('VersionHistorySheet', () => {
     await render(api, { onRequestRestore })
 
     expect(api.listVersions).toHaveBeenCalledWith(7, expect.any(AbortSignal))
+    expect(
+      container.querySelector('button[aria-label="关闭版本历史"] svg[aria-hidden="true"]'),
+    ).not.toBeNull()
     expect(container.textContent).toContain('当前版本')
     expect(restoreButton().disabled).toBe(true)
     const versionOne = Array.from(

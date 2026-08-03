@@ -4,6 +4,7 @@ import { normalizePageConfig } from '../types/page-config'
 import type { TemplateSchema } from '../types/template-schema'
 
 export const CURRENT_TEMPLATE_VERSION = 2
+export const TEMPLATE_SCHEMA_JSON_LIMIT_BYTES = 4 * 1024 * 1024
 
 function record(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)

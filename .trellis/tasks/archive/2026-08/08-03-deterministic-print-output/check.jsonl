@@ -1,0 +1,8 @@
+{"file":".trellis/spec/monorepo/typescript-conventions.md","reason":"检查公共 Output/Schema/API 类型、ESM 和禁止不安全断言"}
+{"file":".trellis/spec/monorepo/styling-conventions.md","reason":"检查打印纸面 CSS variables、CSS Modules 和无编辑器样式泄漏"}
+{"file":".trellis/spec/monorepo/quality-guidelines.md","reason":"执行全工作区质量、格式、构建和依赖检查"}
+{"file":".trellis/spec/monorepo/react-designer-contract.md","reason":"验证 Preview/Host/History/dirty 边界未被破坏"}
+{"file":".trellis/spec/monorepo/server-architecture.md","reason":"验证认证、HTTP 合同、限制、生命周期与真实 Server 测试"}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"检查 Core 到 Docker 的端到端合同一致性"}
+{"file":".trellis/tasks/08-03-deterministic-print-output/research/output-architecture.md","reason":"核对 Chromium 版本、SSRF、确定性、进程池和分页 vertical slice 是否按调研落实"}
+{"file":".trellis/spec/monorepo/output-architecture.md","reason":"核对派生页、逻辑坐标、资源阻断、Context 清理和真实 PDF 验收合同"}

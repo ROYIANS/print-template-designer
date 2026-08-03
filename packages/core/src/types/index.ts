@@ -58,6 +58,10 @@ export {
   updateTableCellsStyle,
 } from './table-content'
 export type {
+  DetailTableColumn,
+  DetailTableFooter,
+  DetailTableFooterCell,
+  DetailTableProps,
   SimpleTableCell,
   SimpleTableProps,
   TableBorderStyle,
@@ -66,6 +70,11 @@ export type {
   TableCellTextDecoration,
   TableHorizontalAlign,
   TableVerticalAlign,
+} from './table-content'
+export {
+  DEFAULT_DETAIL_TABLE_PROPS,
+  isDetailTableProps,
+  normalizeDetailTableProps,
 } from './table-content'
 export { DATA_SOURCE_LIMITS } from './data-source'
 export type {
@@ -98,3 +107,21 @@ export type {
   TextBindingExpression,
 } from './data-source'
 export type { TemplateSchema, TemplatePage } from './template-schema'
+export { OUTPUT_PAGE_TOKENS } from './output'
+export type {
+  OutputBounds,
+  OutputDiagnostic,
+  OutputDiagnosticCode,
+  OutputDiagnosticSeverity,
+  OutputDocument,
+  OutputFragment,
+  OutputFragmentContinuation,
+  OutputOptions,
+  OutputPage,
+  OutputPageContext,
+  OutputRegion,
+  OutputRegionKind,
+  PageMaster,
+  PageMasterRegion,
+  TemplateOutputDefinition,
+} from './output'

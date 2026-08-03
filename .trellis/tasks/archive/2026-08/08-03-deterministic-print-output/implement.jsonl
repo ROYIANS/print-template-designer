@@ -1,0 +1,12 @@
+{"file":".trellis/spec/monorepo/package-conventions.md","reason":"升级 @ptd/export、增加 workspace 依赖与公共 exports 时遵循 package/tsup/peer 约定"}
+{"file":".trellis/spec/monorepo/typescript-conventions.md","reason":"跨 Core、Export、React、Server 的公共合同必须保持 strict TypeScript 与明确导出边界"}
+{"file":".trellis/spec/monorepo/styling-conventions.md","reason":"输出纸面复用 canvas CSS variables，预览 UI 使用 CSS Modules，避免样式泄漏和编辑器 transform 进入 PDF"}
+{"file":".trellis/spec/monorepo/directory-structure.md","reason":"任务跨 packages/export、core、components、react-designer、web、server 与 Docker，需要维持分层和依赖方向"}
+{"file":".trellis/spec/monorepo/quality-guidelines.md","reason":"全工作区 lint、format、test、build 与依赖验证基线"}
+{"file":".trellis/spec/monorepo/react-designer-contract.md","reason":"区分 TemplatePreview 与真实 OutputPreview，并通过 Host 命令接入预览/导出而不污染 Designer 状态"}
+{"file":".trellis/spec/monorepo/server-architecture.md","reason":"新增认证 PDF API、请求限制、Nest 生命周期和安全边界必须遵循现有 Server 合同"}
+{"file":".trellis/spec/monorepo/ptd-ui-system.md","reason":"Output Preview 与诊断表面必须延续专业制版工作台的视觉和交互语言"}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"同步 Schema、组件、Host、HTTP、Docker 与文档合同，避免单层完成但端到端断裂"}
+{"file":".trellis/spec/guides/code-reuse-thinking-guide.md","reason":"复用 Core 绑定、framework-free components 和现有 Host 能力，避免第二套组件渲染器"}
+{"file":".trellis/tasks/08-03-deterministic-print-output/research/output-architecture.md","reason":"已确认的分页/Chromium边界、Playwright选择、容器与安全调研是实现前提"}
+{"file":".trellis/spec/monorepo/output-architecture.md","reason":"确定性输出派生页、几何、资源就绪、Chromium 生命周期与验证的当前权威合同"}

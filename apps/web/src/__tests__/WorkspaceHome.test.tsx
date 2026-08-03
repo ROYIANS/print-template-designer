@@ -136,6 +136,8 @@ describe('Workspace Home', () => {
     expect(compactShell?.textContent).toContain('Foliq')
     expect(compactShell?.textContent).toContain('账户')
     expect(container.querySelector('a[aria-label="Foliq 首页"] img')).toBeNull()
+    expect(container.querySelector('nav[aria-label="文件导航"] button svg')).not.toBeNull()
+    expect(container.querySelector('button[aria-label="新建空白模板"] svg')).not.toBeNull()
     expect(container.textContent).not.toContain('DOCUMENT WORKSPACE')
     expect(container.textContent).not.toContain('0 DOCUMENTS')
     expect(container.textContent).not.toContain('01')
@@ -181,6 +183,8 @@ describe('Workspace Home', () => {
     expect(get.mock.calls.map(([id]) => id)).toEqual([1, 2, 3, 4])
     expect(get.mock.calls.every(([, signal]) => signal instanceof AbortSignal)).toBe(true)
     expect(container.querySelector('.ptd-simple-text__inner')?.textContent).toContain('预览内容')
+    expect(container.querySelector('button[aria-label="模板操作 服务器模板 1"] svg')).not.toBeNull()
+    expect(container.textContent).not.toContain('•••')
     expect(container.textContent).not.toContain('服务器模板 6')
     const allTemplates = Array.from(
       container.querySelectorAll<HTMLButtonElement>('nav[aria-label="文件导航"] button'),
@@ -206,6 +210,7 @@ describe('Workspace Home', () => {
     expect(input.getAttribute('aria-label')).toBe('按标题搜索模板')
     await act(async () => changeInput(input, '采购'))
     expect(input.getAttribute('aria-label')).toBe('按标题搜索模板')
+    expect(container.querySelector('button[aria-label="清除搜索"] svg')).not.toBeNull()
     expect(container.textContent).toContain('采购验收单')
     expect(container.textContent).not.toContain('发货通知单')
 
