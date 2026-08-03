@@ -1,0 +1,9 @@
+{"file":".trellis/spec/monorepo/package-conventions.md","reason":"Confirm workspace package scripts, exports, and build behavior for the React Designer package."}
+{"file":".trellis/spec/monorepo/typescript-conventions.md","reason":"Preserve strict TypeScript and React component conventions while extending the Inspector shell."}
+{"file":".trellis/spec/monorepo/styling-conventions.md","reason":"UI changes must remain scoped to CSS Modules and semantic CSS custom properties without leaking into output DOM."}
+{"file":".trellis/spec/monorepo/directory-structure.md","reason":"Keep shared Theme, Inspector controls, tests, and task artifacts in their established package locations."}
+{"file":".trellis/spec/monorepo/quality-guidelines.md","reason":"Use the repository lint, formatting, typecheck, test, and build gates."}
+{"file":".trellis/spec/monorepo/ptd-ui-system.md","reason":"Authoritative visual contract for surfaces, radii, shadows, border budget, Inspector layout, and controlled frost."}
+{"file":".trellis/spec/monorepo/react-designer-contract.md","reason":"Authoritative component and responsive behavior contract for Page, Single, Multi, and Table Inspector states."}
+{"file":".trellis/tasks/08-03-unified-ui-visual-system/research/heroui-form-visual-contract.md","reason":"Documents the HeroUI field-shadow reference and the boundaries of the visual adaptation."}
+{"file":".trellis/tasks/08-03-unified-ui-visual-system/research/ui-impact-audit.md","reason":"Maps the migration surface and constrains the first checkpoint to Theme plus Inspector."}
