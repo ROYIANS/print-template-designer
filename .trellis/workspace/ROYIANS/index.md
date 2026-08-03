@@ -8,8 +8,8 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 19
-- **Last Active**: 2026-08-02
+- **Total Sessions**: 20
+- **Last Active**: 2026-08-03
 <!-- @@@/auto:current-status -->
 
 ---
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~666 | Active |
+| `journal-1.md` | ~700 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 20 | 2026-08-03 | 完成 pnpm 11 迁移与 Docker PDF 验收 | `f64f8e5`, `4f00c33` | `feature/refc` |
 | 19 | 2026-08-02 | Datasource v2 数据合同、组件绑定与实时校样 | `f99104186a28549741b15e89d6a32df6ec71d99b`, `6691663`, `09cacae4a28d1055965cd7cbeb9f1cfe4b89d0ca` | `feature/refc` |
 | 18 | 2026-07-31 | 完成 Web App 模板生命周期 | `88c505c`, `d4dee02` | `feature/refc` |
 | 17 | 2026-07-31 | Complete self-hosted deployment stack | `c8fb221` | `feature/refc` |
