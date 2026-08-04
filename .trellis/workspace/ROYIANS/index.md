@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 23
+- **Total Sessions**: 24
 - **Last Active**: 2026-08-04
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~804 | Active |
+| `journal-1.md` | ~837 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 24 | 2026-08-04 | Editorial magazine template and print capability roadmap | `24bfa17` | `feature/refc` |
 | 23 | 2026-08-04 | Refine designer UI and electricity retail report export | `490b2c9`, `10873ff`, `dcb0975`, `69082f5` | `feature/refc` |
 | 22 | 2026-08-03 | 统一 Foliq UI 视觉体系与设计器工具栏 | `6be0541`, `be13eb1` | `feature/refc` |
 | 21 | 2026-08-03 | Floating Canvas Tool Dock | `5305406`, `518db9f` | `feature/refc` |
