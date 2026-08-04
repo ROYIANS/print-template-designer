@@ -395,7 +395,7 @@ function AccessAction({
       <div className={styles.accessAction} data-state="allowed">
         <p className={styles.accessState}>
           <span className={styles.stateDot} />
-          {local ? '本地开发身份已就绪' : `${access.user.name} 已获准`}
+          {local ? '本地开发身份已就绪' : `${access.user.name} 已登录`}
         </p>
         <button type="button" className={styles.primaryAction} onClick={onEnterApp}>
           {local ? '进入本地工作台' : '进入工作台'}
@@ -415,8 +415,8 @@ function AccessAction({
   if (access.kind === 'denied') {
     return (
       <div className={styles.accessAction} data-state="denied">
-        <p className={styles.accessTitle}>此账户尚未获准</p>
-        <p className={styles.accessCopy}>当前 GitHub 会话无法访问此工作台。</p>
+        <p className={styles.accessTitle}>无法验证此 GitHub 账户</p>
+        <p className={styles.accessCopy}>当前会话缺少可用的账户信息，无法进入工作台。</p>
         <button type="button" className={styles.secondaryAction} onClick={() => void signOut()}>
           退出并更换 GitHub 账户
         </button>
@@ -463,7 +463,7 @@ function AccessAction({
 
 const noticeCopy: Partial<Record<LandingNotice, string>> = {
   'auth-required': '请先使用 GitHub 登录，再进入工作台。',
-  'access-denied': '当前账户无法访问工作台，你仍可浏览完整产品介绍。',
+  'access-denied': '当前 GitHub 会话没有提供有效账户信息，请更换账户后重试。',
   'session-expired': '会话已经失效，请重新登录后继续。',
   'sign-in-failed': 'GitHub 登录未完成，请检查账户或稍后重试。',
   unavailable: '工作台服务暂时不可用，产品介绍不受影响。',
@@ -480,29 +480,30 @@ const capabilityItems: CapabilityItem[] = [
   {
     icon: <PrecisionMarkIcon />,
     accent: 'teal',
-    title: '像素级的精确排版',
+    title: '纸张级的精确排版',
     description:
-      '真实纸张尺寸、标尺与对齐线，毫米和像素随时切换。移动、缩放、旋转都能精确到个位数。',
+      '真实纸张尺寸、标尺、参考线与对齐工具共同工作，位置、尺寸和旋转都能通过属性面板精确调整。',
   },
   {
     icon: <ComponentBloomIcon />,
     accent: 'rose',
-    title: '一页纸装下所有信息',
+    title: '组件与数据一起编排',
     description:
-      '文本、图片、二维码、条形码、表格与基础图形自由组合。表格支持合并单元格、增删行列，像 Excel 一样直接编辑。',
+      '文本、富文本、图片、二维码、条形码、表格与基础图形自由组合；导入 JSON 后可绑定字段、切换记录并实时校样。',
   },
   {
     icon: <PageStackIcon />,
     accent: 'amber',
-    title: '多页面文档，整份管理',
-    description: '新增、复制、删除、排序页面，标签、说明书、多联单据都能在一份模板里管理完整。',
+    title: '多页面预览与 PDF 输出',
+    description:
+      '新增、复制、删除和排序设计页面；独立打印预览与服务端 PDF 使用同一份结构化模板生成结果。',
   },
   {
     icon: <HistorySealIcon />,
     accent: 'blue',
-    title: '版本留痕，正在接入工作台',
+    title: '保存、版本与安全恢复',
     description:
-      '服务端已经具备不可变版本与冲突保护；工作台里的保存、查看和恢复流程仍在接入，不把半成品当成已经上线。',
+      '每次保存都会生成不可变版本；历史快照可以预览并恢复成新版本，版本冲突时不会静默覆盖服务器内容。',
   },
 ]
 
@@ -718,7 +719,7 @@ const faqItems: FaqItem[] = [
   {
     question: '现在就能拿来做正式的模板吗？',
     answer:
-      '排版、组件和多页面管理都是可以直接使用的真实能力，很多业务模板已经能在这里完整制作出来。但打印预览、PDF/Word 导出和数据源绑定还没做完，如果你的场景离不开这些，建议先等一等，或者找我们确认。',
+      '可以。排版、多页面、版本历史、JSON 数据绑定、实时校样、打印预览和服务端 PDF 已经形成完整闭环，标签、单据和固定版式报告可以直接制作。Word、批量输出、外部数据连接器、完整长文本逐行分页与复杂出版表格仍在建设；依赖这些能力的场景建议先确认边界。',
   },
   {
     question: '改错了模板，还能找回来吗？',
@@ -728,12 +729,17 @@ const faqItems: FaqItem[] = [
   {
     question: '可以只部署在我们自己的服务器上吗？',
     answer:
-      '可以，而且这正是 Foliq 的设计初衷。整个系统都能装进你自己的机房或云主机，模板数据不需要经过任何第三方，谁能用、谁能看，都由你自己掌控。',
+      '可以。Web、Server、PostgreSQL 和 PDF 输出服务都能部署在自己的机房或云主机，模板、版本、账户映射与样例数据保存在自己的基础设施中。GitHub 只负责 OAuth 身份登录，不托管你的模板内容。',
   },
   {
     question: '除了我自己，还能让同事一起用吗？',
     answer:
-      '可以。目前通过 GitHub 账户登录，管理员可以维护一份允许登录的名单，把访问权限收在团队内部，不对外开放注册。',
+      '可以。有效的 GitHub OAuth 用户默认都能登录，每位用户的模板按 owner 隔离；PTD_ADMIN_EMAILS 只用于识别管理员，不是登录白名单。当前还没有组织空间、团队共享或完整 RBAC，因此同事之间不会自动看到彼此的模板。',
+  },
+  {
+    question: '演示环境里的数据会一直保留吗？',
+    answer:
+      '不会。开启演示模式后，非管理员用户的模板与版本会在每天 00:00 UTC（北京时间 08:00）恢复为示例数据，账户和会话仍然保留；管理员数据不参与恢复。普通自托管部署保持 PTD_DEMO_MODE=false 时不会执行这项每日恢复。',
   },
 ]
 
@@ -815,9 +821,9 @@ export function LandingPage({ access, notice, onEnterApp, onRetry }: LandingPage
             而是定义一种文档。
           </p>
           <p className={styles.heroLede}>
-            Foliq 从标签、单据和报告开始，让页面结构成为可以持续演进的文档定义。
+            Foliq 从标签、单据和报告开始，让页面结构成为可保存、可校样、可复用的文档定义。
             <br className={styles.softBreak} />
-            目录、期刊与手帐是长期方向；保存与版本流程仍在接入。
+            版本历史、JSON 数据绑定、打印预览和服务端 PDF 已形成闭环；长文本与复杂出版能力继续扩展。
           </p>
 
           {notice && <p className={styles.routeNotice}>{noticeCopy[notice]}</p>}
@@ -825,11 +831,11 @@ export function LandingPage({ access, notice, onEnterApp, onRetry }: LandingPage
           <div className={styles.heroMeta}>
             <div className={styles.metaItem}>
               <span className={styles.stateDot} />
-              <span>真实可用的排版画布，从标签、单据和报告开始</span>
+              <span>真实纸张排版、数据校样、版本恢复与 PDF 输出</span>
             </div>
             <div className={styles.metaItem}>
               <CheckIcon />
-              <span>部署在你自己的服务器上，数据不假手他人</span>
+              <span>模板、版本和样例数据保存在你自己的基础设施</span>
             </div>
           </div>
 
@@ -843,8 +849,8 @@ export function LandingPage({ access, notice, onEnterApp, onRetry }: LandingPage
         <section className={styles.product} id="product" aria-labelledby="product-title">
           <div className={styles.main}>
             <h2 id="product-title" className={styles.sectionTitle}>
-              <span className={styles.sectionTitleFaint}>不是效果图，是能点的界面。</span>
-              下面这些截图，就是你打开后看到的样子。
+              <span className={styles.sectionTitleFaint}>不是概念稿，是实际工作台。</span>
+              从标签到报告，看看真实 Schema 如何落到纸面。
             </h2>
 
             <ProductShowcase />
@@ -859,7 +865,7 @@ export function LandingPage({ access, notice, onEnterApp, onRetry }: LandingPage
           <div className={styles.main}>
             <h2 id="capabilities-title" className={styles.sectionTitle}>
               <span className={styles.sectionTitleFaint}>把复杂业务，排成清楚的一张纸。</span>
-              设计一张模板需要的，都在这里。
+              从排版、数据校样到版本与输出，核心闭环已经接通。
             </h2>
             <div className={styles.capabilityGrid}>
               {capabilityItems.map((item) => (
@@ -882,8 +888,10 @@ export function LandingPage({ access, notice, onEnterApp, onRetry }: LandingPage
               部署在你的服务器上，而不是别人的云端。
             </h2>
             <p className={styles.deploymentLede}>
-              Foliq 可以完整部署在你自己的服务器里，模板、版本数据和账户数据都留在你的基础设施上，
-              不经过任何第三方云服务中转。谁能登录、谁能看到什么，也由你自己的名单说了算。
+              Foliq 的 Web、Server、PostgreSQL 与 PDF 输出服务可以完整部署在自己的服务器里，
+              模板、版本、账户映射和样例数据都留在你的基础设施上。GitHub 只承担 OAuth 身份登录，
+              不托管模板内容；有效账户默认可以进入，各自的模板按 owner 隔离。公开演示还可以按天
+              恢复非管理员模板，普通自托管则默认关闭这项机制。
             </p>
           </div>
         </section>
@@ -959,9 +967,9 @@ export function LandingPage({ access, notice, onEnterApp, onRetry }: LandingPage
               我们更愿意先把话说清楚。
             </h2>
             <p className={styles.boundaryLede}>
-              工作台保存与版本历史已经可用；打印预览、PDF/Word
-              导出、数据源绑定与自动分页仍在开发中，暂未上线。
-              目录、期刊和手帐是长期方向，不是当前功能。Foliq
+              工作台已经接通版本化保存、JSON 数据源绑定、实时校样、独立打印预览与服务端 PDF；
+              结构化明细表分页也已完成首个可用切片。Word、批量输出、外部数据连接器、直接打印、
+              完整长文本逐行分页与复杂出版表格仍在开发中。目录、期刊和手帐是长期方向，不是当前功能。Foliq
               不会把还没做完的能力包装成现在就能用的样子——能不能用，我们说的和你看到的一致。
             </p>
           </div>
