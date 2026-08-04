@@ -12,11 +12,11 @@
     "type": "git",
     "url": "git://github.com/royians/print-template-designer.git"
   },
-  "packageManager": "pnpm@11.18.0",
+  "packageManager": "pnpm@11.20.0",
   "type": "module",
   "engines": {
     "node": ">=20",
-    "pnpm": "11.18.0"
+    "pnpm": ">=11"
   },
   "scripts": {
     "build": "pnpm -r build",

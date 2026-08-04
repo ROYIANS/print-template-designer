@@ -1,0 +1,5 @@
+{"file":".trellis/spec/monorepo/package-conventions.md","reason":"生成脚本与示例文件必须遵循根工作区的运行时和包管理约束。"}
+{"file":".trellis/spec/monorepo/typescript-conventions.md","reason":"模板结构与现有 TypeScript Schema、组件类型和数据绑定契约保持一致。"}
+{"file":".trellis/spec/monorepo/directory-structure.md","reason":"确认生成脚本、示例 JSON、输出 PDF 与任务研究资产的正确归属。"}
+{"file":".trellis/spec/monorepo/quality-guidelines.md","reason":"约束格式化、验证命令和提交前质量门禁。"}
+{"file":".trellis/spec/monorepo/output-architecture.md","reason":"模板必须满足固定纸张、嵌入资源、Chromium readiness、诊断和 PDF 物理尺寸契约。"}

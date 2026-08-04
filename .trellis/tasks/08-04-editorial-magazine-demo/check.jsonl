@@ -1,0 +1,3 @@
+{"file":".trellis/spec/monorepo/quality-guidelines.md","reason":"检查生成脚本、JSON、Markdown 和任务产物的格式与质量。"}
+{"file":".trellis/spec/monorepo/typescript-conventions.md","reason":"检查生成的模板仍满足严格 Schema 与组件类型约束。"}
+{"file":".trellis/spec/monorepo/output-architecture.md","reason":"检查真实解析、嵌入图片、输出诊断、PDF 页数与物理尺寸。"}

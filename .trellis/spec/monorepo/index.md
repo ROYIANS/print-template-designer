@@ -6,17 +6,18 @@
 
 ## Index
 
-| Guide                                                   | Description                                                                  | Status |
-| ------------------------------------------------------- | ---------------------------------------------------------------------------- | ------ |
-| [Directory Structure](./directory-structure.md)         | Monorepo layout, package roles                                               | Done   |
-| [Package Conventions](./package-conventions.md)         | package.json, tsconfig, exports                                              | Done   |
-| [TypeScript Conventions](./typescript-conventions.md)   | Strict TS, shared base config                                                | Done   |
-| [Styling Conventions](./styling-conventions.md)         | CSS Modules vs CSS Variables                                                 | Done   |
-| [PTD UI System](./ptd-ui-system.md)                     | Product visual language, tokens, workspace, panels and interaction contracts | Done   |
-| [Quality Guidelines](./quality-guidelines.md)           | ESLint flat config, Prettier, Node 22 workspace baseline                     | Done   |
-| [React Designer Contract](./react-designer-contract.md) | Controlled state, commands, history and host integration                     | Done   |
-| [Server Architecture](./server-architecture.md)         | NestJS 11, Prisma 7, PostgreSQL, auth and concurrency contracts              | Done   |
-| [Output Architecture](./output-architecture.md)         | Derived pages, pagination, output DOM and controlled Chromium PDF            | Done   |
+| Guide                                                                             | Description                                                                     | Status   |
+| --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | -------- |
+| [Directory Structure](./directory-structure.md)                                   | Monorepo layout, package roles                                                  | Done     |
+| [Package Conventions](./package-conventions.md)                                   | package.json, tsconfig, exports                                                 | Done     |
+| [TypeScript Conventions](./typescript-conventions.md)                             | Strict TS, shared base config                                                   | Done     |
+| [Styling Conventions](./styling-conventions.md)                                   | CSS Modules vs CSS Variables                                                    | Done     |
+| [PTD UI System](./ptd-ui-system.md)                                               | Product visual language, tokens, workspace, panels and interaction contracts    | Done     |
+| [Quality Guidelines](./quality-guidelines.md)                                     | ESLint flat config, Prettier, Node 22 workspace baseline                        | Done     |
+| [React Designer Contract](./react-designer-contract.md)                           | Controlled state, commands, history and host integration                        | Done     |
+| [Server Architecture](./server-architecture.md)                                   | NestJS 11, Prisma 7, PostgreSQL, auth and concurrency contracts                 | Done     |
+| [Output Architecture](./output-architecture.md)                                   | Derived pages, pagination, output DOM and controlled Chromium PDF               | Done     |
+| [Print Composition Capability Roadmap](./print-composition-capability-roadmap.md) | Proposed text flow, print charts, preflight and editorial composition contracts | Proposed |
 
 ---
 
