@@ -1,7 +1,7 @@
 # `apps/server`
 
-NestJS 11 + Prisma 7 + PostgreSQL 的多用户模板服务。它通过 Better Auth GitHub OAuth 和服务端
-Allowlist 保护模板 CRUD、不可变版本历史、历史恢复与乐观并发控制。
+NestJS 11 + Prisma 7 + PostgreSQL 的多用户模板服务。它通过 Better Auth GitHub OAuth Cookie 会话
+保护模板 CRUD、不可变版本历史、历史恢复与乐观并发控制。
 同一认证边界还提供受控 Headless Chromium PDF 输出；Server 重新校验并编译模板，不接受任意 HTML。
 
 ## 技术基线
@@ -11,7 +11,8 @@ Allowlist 保护模板 CRUD、不可变版本历史、历史恢复与乐观并�
 - PostgreSQL 是开发、测试和生产的唯一数据库；`DATABASE_URL` 必填。
 - Better Auth 只启用 GitHub OAuth；浏览器使用 HttpOnly Cookie，不保存 Token。
 - 本地可显式启用仅限 loopback 的固定开发身份；默认关闭，生产环境无法启用。
-- `PTD_ALLOWED_EMAILS` 在服务端控制准入，`Template.ownerId` 隔离所有模板和版本操作。
+- 通过 GitHub OAuth 的账户可直接试用；`Template.ownerId` 隔离所有模板和版本操作。
+- `PTD_ADMIN_EMAILS` 计算管理员身份，`PTD_DEMO_MODE` 控制公开落地页与访客数据恢复。
 - 默认监听 `PORT=3000`。
 - 复用 `@ptd/core` 的 `TemplateSchema`、运行时验证和序列化逻辑。
 - `playwright-core` 与 Docker Playwright runtime 固定为同一版本；一个长期 Browser、每任务独立 Context。
@@ -43,7 +44,7 @@ PTD_WEB_ORIGIN=http://localhost:5173
 PTD_DEV_AUTH_BYPASS=true
 ```
 
-该模式不要求 `BETTER_AUTH_SECRET`、`PTD_ALLOWED_EMAILS` 或 GitHub Client 凭据。Server 会在
+该模式不要求 `BETTER_AUTH_SECRET`、`PTD_ADMIN_EMAILS` 或 GitHub Client 凭据。Server 会在
 PostgreSQL 中幂等准备固定的 `PTD Local Developer` 用户，所有模板 API 仍使用该用户的真实
 `ownerId` 外键。`BETTER_AUTH_URL` 与 `PTD_WEB_ORIGIN` 必须是 `localhost`、`127.0.0.1` 或
 `[::1]` 的 HTTP(S) origin，且 `NODE_ENV=production` 时 Server 会拒绝启动。不要在公网、局域网
@@ -68,10 +69,12 @@ curl http://localhost:3000/healthz
 | -------- | ---------------------------------------------- | ------------------------------------ |
 | `GET`    | `/healthz`                                     | 服务健康状态                         |
 | `*`      | `/api/auth/*`                                  | GitHub 模式的 OAuth/会话             |
-| `GET`    | `/api/account/me`                              | 当前账户及服务端 `authMode`          |
+| `GET`    | `/api/runtime`                                 | 匿名可读的演示模式与重置时间         |
+| `GET`    | `/api/account/me`                              | 当前账户、`authMode` 与 `isAdmin`    |
 | `GET`    | `/api/templates`                               | 按更新时间倒序返回模板摘要           |
 | `POST`   | `/api/templates`                               | 创建模板及 version 1 快照            |
 | `GET`    | `/api/templates/:id`                           | 读取当前模板及内容                   |
+| `GET`    | `/api/templates/by-key/:key`                   | 按 owner 与 URL key 读取当前模板     |
 | `PUT`    | `/api/templates/:id`                           | 校验当前版本后更新并追加快照         |
 | `DELETE` | `/api/templates/:id`                           | 删除模板及级联历史                   |
 | `GET`    | `/api/templates/:id/versions`                  | 按版本倒序返回历史摘要               |
@@ -148,8 +151,18 @@ Nest JSON parser 与默认容器 Nginx 对完整请求体统一设置 **4 MiB** 
 之前被代理拒绝。
 
 `GET /api/account/me` 保留既有账户字段，并额外返回服务端权威的
-`authMode: "github" | "dev-bypass"`。Web 只能用这个字段展示本地开发状态，不能通过前端环境变量、
-请求头或浏览器存储自行声明 bypass。
+`authMode: "github" | "dev-bypass"` 与 `isAdmin`。Web 只能用这些字段展示部署状态，不能通过前端
+环境变量、请求头或浏览器存储自行声明 bypass 或管理员。
+
+### 演示模式
+
+`PTD_DEMO_MODE` 只接受 `true`/`false`，默认关闭。开启时，非管理员访客在首次受保护访问、Server 启动
+补偿和每日 00:00 UTC 定时任务中进入同一恢复服务。服务只替换该用户的 `Template` 与级联版本，并创建
+一份确定性的电价预测示例；`User`、`Account`、`Session` 和管理员模板不删除。`DemoUserState` 的
+`resetDate` 在同一事务中通过 PostgreSQL upsert 声明，保证同一 UTC 自然日幂等。
+
+`PTD_ADMIN_EMAILS` 是可选的逗号分隔邮箱，服务端统一小写比较；为空代表没有管理员。匿名
+`GET /api/runtime` 只返回 `demoMode` 与 `demoResetTime`，不会泄露管理员邮箱。
 
 ### 更新模板
 
@@ -201,7 +214,7 @@ Content-Type: application/json
 | HTTP 状态                  | 场景                                                   |
 | -------------------------- | ------------------------------------------------------ |
 | `400 Bad Request`          | 非法 ID、请求体、标题、Schema 外形或 `expectedVersion` |
-| `401 Unauthorized`         | 未登录或邮箱已不在 Allowlist                           |
+| `401 Unauthorized`         | 未登录                                                 |
 | `404 Not Found`            | 模板、指定历史版本不存在，或资源属于其他用户           |
 | `409 Conflict`             | `expectedVersion` 已过期，或并发写入抢先完成           |
 | `422 Unprocessable Entity` | fatal 输出诊断，如超高行、页数上限或受阻资源           |
@@ -238,7 +251,7 @@ corepack pnpm --filter server build
 
 ## 当前不包含
 
-- 邮箱登录、开放注册、邀请管理后台和角色权限系统。
+- 邮箱登录、邀请管理后台和持久化角色权限系统。
 - Server CORS 配置；当前 Web 开发环境通过 Vite `/api` 同源代理访问 Server。
 - 静态资源上传与管理。
 - 数据源代理。

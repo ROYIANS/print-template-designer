@@ -23,6 +23,7 @@ function changedTemplate(title = '已编辑模板') {
 function record(overrides: Partial<TemplateRecord> = {}): TemplateRecord {
   return {
     id: 7,
+    key: 'template-key-7',
     title: '服务器模板',
     content: changedTemplate('服务器模板'),
     version: 3,
@@ -49,6 +50,7 @@ function fakeApi(overrides: Partial<TemplateApi> = {}): TemplateApi {
       record({ id: 8, title: input.title, content: input.content, version: 1 }),
     ),
     get: vi.fn(async (id) => record({ id })),
+    getByKey: vi.fn(async (key) => record({ key })),
     update: vi.fn(async (id, input) =>
       record({
         id,
@@ -68,12 +70,32 @@ function fakeApi(overrides: Partial<TemplateApi> = {}): TemplateApi {
 interface HarnessProps {
   api: TemplateApi
   requestedTemplateId?: number | 'invalid'
+  requestedTemplateKey?: string
   onLocationChange: (templateId: number | undefined, replace: boolean) => void
   expose(controller: DocumentController): void
 }
 
-function Harness({ api, requestedTemplateId, onLocationChange, expose }: HarnessProps) {
-  expose(useDocumentController({ api, requestedTemplateId, onLocationChange }))
+function Harness({
+  api,
+  requestedTemplateId,
+  requestedTemplateKey,
+  onLocationChange,
+  expose,
+}: HarnessProps) {
+  expose(
+    useDocumentController({
+      api,
+      requestedTemplate:
+        requestedTemplateKey !== undefined
+          ? { kind: 'key', value: requestedTemplateKey }
+          : requestedTemplateId === 'invalid'
+            ? { kind: 'invalid' }
+            : requestedTemplateId === undefined
+              ? undefined
+              : { kind: 'id', value: requestedTemplateId },
+      onLocationChange: (record, replace) => onLocationChange(record?.id, replace),
+    }),
+  )
   return null
 }
 
@@ -97,6 +119,7 @@ describe('Web document controller', () => {
     api: TemplateApi,
     requestedTemplateId?: number | 'invalid',
     onLocationChange = vi.fn(),
+    requestedTemplateKey?: string,
   ) {
     await act(async () => {
       root.render(
@@ -104,6 +127,7 @@ describe('Web document controller', () => {
           <Harness
             api={api}
             requestedTemplateId={requestedTemplateId}
+            requestedTemplateKey={requestedTemplateKey}
             onLocationChange={onLocationChange}
             expose={(value) => {
               controller = value
@@ -140,6 +164,19 @@ describe('Web document controller', () => {
       status: 'clean',
       title: '服务器模板',
     })
+  })
+
+  it('loads canonical document routes by opaque key without rewriting the location', async () => {
+    const getByKey = vi.fn(async (key: string) => record({ key }))
+    const locationChange = await render(fakeApi({ getByKey }), undefined, vi.fn(), 'template-key-7')
+
+    expect(getByKey).toHaveBeenCalledWith('template-key-7', expect.any(AbortSignal))
+    expect(controller.state).toMatchObject({
+      id: 7,
+      key: 'template-key-7',
+      status: 'clean',
+    })
+    expect(locationChange).not.toHaveBeenCalled()
   })
 
   it('resets an invalid template route when navigation enters the explicit blank editor', async () => {

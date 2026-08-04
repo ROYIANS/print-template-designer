@@ -19,6 +19,7 @@ import {
   parseUpdateTemplateBody,
 } from './template-contract.js'
 import { PositiveIntPipe } from './positive-int.pipe.js'
+import { TemplateKeyPipe } from './template-key.pipe.js'
 import { TemplatesService } from './templates.service.js'
 
 @Controller('api/templates')
@@ -34,6 +35,11 @@ export class TemplatesController {
   @Post()
   create(@Req() request: AuthenticatedRequest, @Body() body: unknown) {
     return this.templates.create(request.user.id, parseCreateTemplateBody(body))
+  }
+
+  @Get('by-key/:key')
+  getByKey(@Req() request: AuthenticatedRequest, @Param('key', TemplateKeyPipe) key: string) {
+    return this.templates.getByKey(request.user.id, key)
   }
 
   @Get(':id')

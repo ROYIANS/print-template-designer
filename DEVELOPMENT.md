@@ -60,7 +60,7 @@ corepack pnpm --filter @ptd/react-designer build
 corepack pnpm --filter web build
 ```
 
-当前 Web 会通过同源 `/api` 代理连接 Server，完成 GitHub Cookie 会话和 Allowlist 准入检查，并已接通
+当前 Web 会通过同源 `/api` 代理连接 Server，完成 GitHub Cookie 会话和服务端账户检查，并已接通
 owner 隔离的模板 CRUD、文件工作台、另存为、版本历史、恢复与 `expectedVersion` 冲突保护。模板内容、
 canonical Datasource v2、结构化绑定和用户明确保存的 sample records 会进入不可变版本快照。
 
@@ -80,7 +80,7 @@ canonical Datasource v2、结构化绑定和用户明确保存的 sample records
 
 ## 启动 Server
 
-Server 只支持 PostgreSQL，`DATABASE_URL` 必填，默认监听 `PORT=3000`。先复制开发环境示例并配置隔离的 PostgreSQL 数据库、GitHub OAuth App 与 Allowlist：
+Server 只支持 PostgreSQL，`DATABASE_URL` 必填，默认监听 `PORT=3000`。先复制开发环境示例并配置隔离的 PostgreSQL 数据库与 GitHub OAuth App：
 
 ```bash
 cp apps/server/.env.example apps/server/.env
@@ -102,7 +102,8 @@ PORT=3000
 BETTER_AUTH_URL=http://localhost:3000
 BETTER_AUTH_SECRET=replace-with-openssl-rand-base64-32
 PTD_WEB_ORIGIN=http://localhost:5173
-PTD_ALLOWED_EMAILS=owner@example.com
+PTD_ADMIN_EMAILS=owner@example.com
+PTD_DEMO_MODE=false
 GITHUB_CLIENT_ID=replace-me
 GITHUB_CLIENT_SECRET=replace-me
 ```
@@ -118,7 +119,7 @@ PTD_WEB_ORIGIN=http://localhost:5173
 PTD_DEV_AUTH_BYPASS=true
 ```
 
-启用后不需要配置 `BETTER_AUTH_SECRET`、`PTD_ALLOWED_EMAILS`、`GITHUB_CLIENT_ID` 或
+启用后不需要配置 `BETTER_AUTH_SECRET`、`PTD_ADMIN_EMAILS`、`GITHUB_CLIENT_ID` 或
 `GITHUB_CLIENT_SECRET`。Server 会把受保护请求绑定到 PostgreSQL 中稳定的开发用户，因此模板的
 `ownerId` 外键、版本历史和多用户查询边界没有被前端短路。`/api/account/me` 返回
 `authMode: "dev-bypass"`，供 Web 明确显示“本地开发身份”。
@@ -126,7 +127,11 @@ PTD_DEV_AUTH_BYPASS=true
 这个开关默认关闭，并且只接受 `localhost`、`127.0.0.1` 或 `[::1]` 的 Web/Auth HTTP(S) origin；
 生产环境或非 loopback origin 会让 Server 启动失败，Server 也会强制只监听 Auth origin 的 loopback
 主机。不要加入自定义身份请求头，也不要在浏览器保存开发 Token。要验证真实认证流程时，关闭该开关并
-恢复 GitHub OAuth、Allowlist 与 Better Auth Secret。
+恢复 GitHub OAuth 与 Better Auth Secret。
+
+GitHub OAuth 模式不再使用额外邮箱白名单。`PTD_ADMIN_EMAILS` 是可选、逗号分隔的管理员邮箱配置；
+`PTD_DEMO_MODE=true` 时，管理员模板不会被每日恢复。演示恢复以 00:00 UTC 为自然日边界，只替换
+非管理员模板和版本，不删除账户或会话。日常开发建议保持 `PTD_DEMO_MODE=false`。
 
 常用 Prisma 命令：
 

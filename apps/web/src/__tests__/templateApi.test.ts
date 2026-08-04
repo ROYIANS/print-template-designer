@@ -47,6 +47,7 @@ const CANONICAL_TEMPLATE: TemplateSchema = {
 function record(overrides: Record<string, unknown> = {}) {
   return {
     id: 7,
+    key: 'template-key-7',
     title: '出库单',
     content: INITIAL_TEMPLATE,
     version: 3,
@@ -133,8 +134,8 @@ describe('template API client', () => {
       jsonResponse({ ...record(), templateId: 7 }),
       jsonResponse(record({ version: 4 })),
     ]
-    const fetcher = vi.fn(
-      async (_input: RequestInfo | URL, _init?: RequestInit) => responses.shift()!,
+    const fetcher = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) =>
+      responses.shift()!,
     )
     const api = createTemplateApi(fetcher)
 

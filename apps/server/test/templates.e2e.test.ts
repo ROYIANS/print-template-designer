@@ -174,6 +174,7 @@ describe('template API', () => {
       version: 1,
       content: persistedInitialContent,
     })
+    expect(created.body.key).toMatch(/^[A-Za-z0-9_-]{8,64}$/)
     expect(created.body.content).not.toEqual(expect.any(String))
 
     const list = await request(app.getHttpServer()).get('/api/templates').expect(200)
@@ -185,6 +186,15 @@ describe('template API', () => {
       .get(`/api/templates/${created.body.id}`)
       .expect(200)
     expect(current.body).toMatchObject({ id: created.body.id, content: persistedInitialContent })
+
+    const currentByKey = await request(app.getHttpServer())
+      .get(`/api/templates/by-key/${created.body.key}`)
+      .expect(200)
+    expect(currentByKey.body).toMatchObject({
+      id: created.body.id,
+      key: created.body.key,
+      content: persistedInitialContent,
+    })
 
     const versions = await request(app.getHttpServer())
       .get(`/api/templates/${created.body.id}/versions`)

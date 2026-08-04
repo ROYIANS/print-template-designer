@@ -338,9 +338,11 @@ List item、Section 和 Panel 默认平面；Primary/Danger 通过语义填充�
 
 ### 6.0 文件工作台 Home 与 Editor
 
-- 受保护应用包含两个一级空间：`/app` 是文件工作台 Home，`/app?template=<id>` 是已保存文档
-  Editor，明确的新建 URL（当前为 `/app?new=blank`）是未保存文档 Editor。裸 `/app` 不得隐式创建
-  空白模板，文件浏览也不得作为覆盖 Editor 的大型 Modal。
+- 受保护应用包含三个一级空间：`/app` 是文件工作台 Home，`/design/new` 与
+  `/design/:key/:slug` 是未保存/已保存 Editor，`/preview/new` 与 `/preview/:key/:slug` 是独立
+  Preview。opaque key 是资源身份，slug 只是规范化后的可读标题；`/app?new=blank` 和
+  `/app?template=<id>` 仅作为兼容迁移输入。裸 `/app` 不得隐式创建空白模板，文件浏览也不得作为
+  覆盖 Editor 的大型 Modal。
 - Home 使用与 Editor 相同的暖纸灰、暖石墨和档案墨蓝体系。宽屏采用稳定侧栏与文件主区，窄屏重组为
   真正的 compact top shell；不能只隐藏桌面元素，也不能用营销页大标题、无意义英文 eyebrow、工程编号、
   规则线或矩形框装饰制造“专业感”。专业感来自真实信息架构、内容、层级、对齐与状态。
@@ -356,6 +358,11 @@ List item、Section 和 Panel 默认平面；Primary/Danger 通过语义填充�
   直接执行退出等破坏性动作；GitHub 身份才显示显式退出，本地 Dev Bypass 不显示无效退出入口。
 - Editor App Bar 的账户触发器只显示圆形头像，通过 `aria-label` 保留账户名称，不再并列显示昵称或
   下拉箭头；Home 侧栏入口空间充足，可以继续显示头像、昵称和披露图标。
+- 普通部署根路径是专用登录页；演示部署才显示产品落地页。两者复用 44px 高、8px 圆角、18px GitHub
+  图标、单行标签和小箭头的紧凑登录操作，不能使用超大 SVG、换成三行中文或厚重胶囊。
+- 演示部署在 `/app` 内容区显示完整提示，明确每日北京时间 08:00 恢复访客模板、管理员不受影响，并
+  提供 GitHub Fork 操作；Design/Preview 深层路由使用不遮挡主工具栏的紧凑提示，允许关闭并在当前
+  浏览器会话内保持关闭状态。
 - Editor 的 Open/Template Browser 用户语义统一为“文件工作台”：clean 文档直接返回 `/app`；dirty 或
   conflict 文档先进入未保存决策。兼容 Host command 可以暂时保留 alias，但不得显示两个等价入口或分叉
   状态合同。

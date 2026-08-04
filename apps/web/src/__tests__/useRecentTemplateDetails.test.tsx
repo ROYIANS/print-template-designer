@@ -11,6 +11,7 @@ const NOW = '2026-07-31T08:30:00.000Z'
 function record(id: number): TemplateRecord {
   return {
     id,
+    key: `template-key-${id}`,
     title: `模板 ${id}`,
     content: INITIAL_TEMPLATE,
     version: 1,
@@ -24,6 +25,7 @@ function fakeApi(get: TemplateApi['get']): TemplateApi {
     list: vi.fn<TemplateApi['list']>(),
     create: vi.fn<TemplateApi['create']>(),
     get,
+    getByKey: vi.fn<TemplateApi['getByKey']>(),
     update: vi.fn<TemplateApi['update']>(),
     delete: vi.fn<TemplateApi['delete']>(),
     listVersions: vi.fn<TemplateApi['listVersions']>(),

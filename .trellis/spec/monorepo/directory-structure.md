@@ -66,7 +66,7 @@ apps/server/
     generated/prisma/ Ignored Prisma 7 generated Client
     health/           Health endpoint
     prisma/           Driver adapter, URL and lifecycle service
-    auth/             Better Auth configuration, Allowlist and Cookie Guard
+    auth/             Better Auth, access policy, demo lifecycle and Cookie Guard
     templates/        Owner-scoped HTTP contracts, controller and versioned persistence service
   prisma/
     migrations/       Committed PostgreSQL migration history

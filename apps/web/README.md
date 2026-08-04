@@ -6,24 +6,26 @@ React + Vite 的设计器 Host，也是 GHCR Web 镜像和完整自托管栈的�
 
 `src/App.tsx` 当前负责：
 
-1. `/` 始终展示公开的产品落地页和认证 CTA；已有 Session 不会被自动重定向。
-2. `/app` 是受保护的文件工作台 Home，显示基于 Server `updatedAt` 的“最近更新”真实内容预览、全部
-   模板高效列表、标题过滤和新建入口；`/app?new=blank` 才是未保存的新文档 Editor，
-   `/app?template=<id>` 是已保存文档 Editor。
-3. Web 直接调用 `/api/account/me`，以服务端返回的账户和 `authMode` 作为准入权威；不使用浏览器
-   Token、伪造身份请求头或前端认证开关。
-4. 生产环境保留 Better Auth GitHub 登录、退出、未获准、会话失效和服务不可用反馈。
+1. Web 先读取匿名 `/api/runtime`。演示模式下 `/` 展示公开产品落地页；普通自托管只显示紧凑登录页，
+   已有 Session 仍由用户明确进入工作台。
+2. `/app` 是受保护的文件工作台 Home；`/design/new` 是未保存编辑器，
+   `/design/:key/:slug` 是已保存编辑器，`/preview/new` 与 `/preview/:key/:slug` 是独立打印预览路由。
+   `/app?new=blank` 和 `/app?template=<id>` 只作为旧链接迁移输入，载入后替换为 canonical key URL。
+3. Web 直接调用 `/api/account/me`，以服务端返回的账户、`authMode` 与 `isAdmin` 作为身份权威；不使用
+   浏览器 Token、伪造身份请求头或前端认证开关。
+4. GitHub OAuth 身份默认可直接试用。登录 CTA 在落地页与普通登录页复用同一个 44px 紧凑横向操作，
+   使用明确尺寸的 GitHub 图标、单行标签和箭头。
 5. Server 启用受限 Dev Auth Bypass 时，`/api/account/me` 返回 `authMode: 'dev-bypass'`，根页面 CTA
    显示“进入本地工作台”，直接访问 `/app` 无需 OAuth 跳转。
-6. 获准后由 Web Document Controller 持有当前模板、服务器保存基线、文档 ID、版本和
+6. 登录后由 Web Document Controller 持有当前模板、服务器保存基线、文档 ID、opaque key、版本和
    `clean | dirty | saving | loading | error | conflict` 状态，并以 controlled 方式渲染 Designer。
 7. New、Open、Save、Save As、Template Browser 与 Version History 通过 `DesignerHost` 接入同源
    模板 API。Open 与 Template Browser 统一返回文件工作台；clean 文档不阻断，dirty/conflict 文档
    先显示未保存确认。
 8. 第一次 Save 直接使用当前页面标题 POST，不弹命名框；后续保存携带 `expectedVersion`；Save As 使用
    非模态 Command Sheet。409 会停止保存并进入 Conflict，不会自动覆盖。
-9. 首次保存、另存为和文件工作台打开会同步 canonical URL，刷新、前进与后退都会按地址恢复明确的
-   Home、新建 Editor 或已保存 Editor 状态。
+9. 首次保存、另存为和文件工作台打开会同步 canonical URL。key 是资源身份，slug 只负责可读性并在
+   载入后规范化；刷新、前进与后退都会恢复明确的 Home、Editor 或 Preview 状态。
 10. Home 与 Editor 复用真实账户 Popover；GitHub 身份可从显式菜单项退出，Dev Auth Bypass 只标识本地
     身份而不显示无效退出。最近区最多读取 4 份模板详情并在卸载时取消，全部列表不追加详情请求。
 11. 文件卡片提供轻量操作 Popover：重命名会以 `expectedVersion` 创建新版本，创建副本会建立独立文档，
@@ -37,11 +39,13 @@ React + Vite 的设计器 Host，也是 GHCR Web 镜像和完整自托管栈的�
 14. Web 持久化 `TemplateSchema.data` canonical v2、组件结构化 bindings 与受限 sample records。旧
     `dataSource/dataSet/[::field::]` 可兼容读取，并只在显式保存边界迁移；单纯打开、缩略图或版本预览
     不会偷偷改写模板。
-15. File → 打印预览会在命令执行瞬间取得最新内存模板，用 `@ptd/export` 编译真实派生页；多页纵向浏览、
-    适合页面/宽度、连续缩放、诊断、导出和关闭都位于与 Designer 一致的紧凑工具栏中。
+15. File → 打印预览导航到独立 `/preview/...` 路由，并在同一已挂载 Document Controller 中取得最新
+    内存模板；返回设计路由保留未保存修改，直接刷新则重新读取最近一次服务器保存版本。
 16. File → 导出 PDF 把同一结构化模板、显式 RenderContext 与 OutputOptions 发送到认证
     `POST /api/output/pdf` 并下载 Blob；未保存模板同样可用，预览/导出不改变 Dirty、History 或版本。
 17. v1 的“打印”命令保持禁用并明确引导先导出 PDF，避免把 `window.print()` 误当成权威输出。
+18. 演示模式在 `/app` 展示完整重置说明和 GitHub Fork 操作，在设计/预览深层路由展示可关闭的紧凑提示；
+    文案明确访客模板每日北京时间 08:00 恢复，管理员数据不受影响。关闭状态在当前浏览器会话内保留。
 
 `src/templateApi.ts` 覆盖模板 CRUD 和版本 list/get/restore 合同，负责 Cookie、AbortSignal、成功响应
 运行时校验和结构化 HTTP/网络错误。`src/useDocumentController.ts` 负责文档状态机和请求竞态；Dirty

@@ -1,0 +1,6 @@
+{"file":".trellis/spec/monorepo/typescript-conventions.md","reason":"Verify strict cross-layer contracts without unsafe assertions."}
+{"file":".trellis/spec/monorepo/styling-conventions.md","reason":"Verify CSS Modules and UI styling boundaries."}
+{"file":".trellis/spec/monorepo/ptd-ui-system.md","reason":"Verify login and demo surfaces against visual/accessibility contracts."}
+{"file":".trellis/spec/monorepo/quality-guidelines.md","reason":"Run the repository quality gate."}
+{"file":".trellis/spec/monorepo/server-architecture.md","reason":"Verify Prisma migration, transaction idempotency and owner isolation."}
+{"file":".trellis/tasks/08-04-public-demo-and-design-routes/research/implementation-baseline.md","reason":"Check implementation against the approved technical decisions."}

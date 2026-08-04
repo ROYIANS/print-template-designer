@@ -2,6 +2,7 @@ import { deserialize, isTemplateSchema, type TemplateSchema } from '@ptd/core'
 
 export interface TemplateSummary {
   id: number
+  key: string
   title: string
   version: number
   createdAt: string
@@ -66,6 +67,7 @@ export interface TemplateApi {
   list(signal?: AbortSignal): Promise<TemplateSummary[]>
   create(input: TemplateWriteInput, signal?: AbortSignal): Promise<TemplateRecord>
   get(id: number, signal?: AbortSignal): Promise<TemplateRecord>
+  getByKey(key: string, signal?: AbortSignal): Promise<TemplateRecord>
   update(id: number, input: TemplateUpdateInput, signal?: AbortSignal): Promise<TemplateRecord>
   delete(id: number, signal?: AbortSignal): Promise<void>
   listVersions(id: number, signal?: AbortSignal): Promise<TemplateVersionSummary[]>
@@ -94,6 +96,12 @@ function text(value: unknown, field: string): string {
     throw invalidResponse(`${field} must be a non-empty string`)
   }
   return value
+}
+
+function templateKey(value: unknown): string {
+  const key = text(value, 'key')
+  if (!/^[A-Za-z0-9_-]{8,64}$/.test(key)) throw invalidResponse('key must be a template key')
+  return key
 }
 
 function timestamp(value: unknown, field: string): string {
@@ -135,6 +143,7 @@ function parseSummary(value: unknown): TemplateSummary {
   if (!isRecord(value)) throw invalidResponse('template summary must be an object')
   return {
     id: positiveInteger(value['id'], 'id'),
+    key: templateKey(value['key']),
     title: text(value['title'], 'title'),
     version: positiveInteger(value['version'], 'version'),
     createdAt: timestamp(value['createdAt'], 'createdAt'),
@@ -246,6 +255,14 @@ export function createTemplateApi(
       return (await request(
         fetcher,
         `/api/templates/${id}`,
+        { method: 'GET', signal },
+        parseTemplateRecord,
+      )) as TemplateRecord
+    },
+    async getByKey(key, signal) {
+      return (await request(
+        fetcher,
+        `/api/templates/by-key/${encodeURIComponent(key)}`,
         { method: 'GET', signal },
         parseTemplateRecord,
       )) as TemplateRecord

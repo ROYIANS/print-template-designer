@@ -13,7 +13,8 @@ const environmentKeys = [
   'BETTER_AUTH_URL',
   'PTD_WEB_ORIGIN',
   'BETTER_AUTH_SECRET',
-  'PTD_ALLOWED_EMAILS',
+  'PTD_ADMIN_EMAILS',
+  'PTD_DEMO_MODE',
   'GITHUB_CLIENT_ID',
   'GITHUB_CLIENT_SECRET',
 ] as const
@@ -38,7 +39,8 @@ describe('development auth bypass', () => {
     process.env.BETTER_AUTH_URL = 'http://127.0.0.1:3000'
     process.env.PTD_WEB_ORIGIN = 'http://[::1]:5173'
     delete process.env.BETTER_AUTH_SECRET
-    delete process.env.PTD_ALLOWED_EMAILS
+    delete process.env.PTD_ADMIN_EMAILS
+    process.env.PTD_DEMO_MODE = 'false'
     delete process.env.GITHUB_CLIENT_ID
     delete process.env.GITHUB_CLIENT_SECRET
 
@@ -63,9 +65,14 @@ describe('development auth bypass', () => {
       .get('/api/account/me')
       .set('x-user-id', 'attacker-controlled')
       .expect(200)
+    await prisma.user.delete({ where: { id: DEV_AUTH_USER.id } })
     const secondAccount = await request(app.getHttpServer()).get('/api/account/me').expect(200)
 
-    expect(firstAccount.body).toEqual({ ...DEV_AUTH_USER, authMode: 'dev-bypass' })
+    expect(firstAccount.body).toEqual({
+      ...DEV_AUTH_USER,
+      authMode: 'dev-bypass',
+      isAdmin: false,
+    })
     expect(secondAccount.body).toEqual(firstAccount.body)
     expect(await prisma.user.count({ where: { id: DEV_AUTH_USER.id } })).toBe(1)
 

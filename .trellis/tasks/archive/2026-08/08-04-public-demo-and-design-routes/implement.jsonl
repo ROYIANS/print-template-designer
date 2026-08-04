@@ -1,0 +1,10 @@
+{"file":".trellis/spec/monorepo/package-conventions.md","reason":"Workspace commands and app/package boundary conventions."}
+{"file":".trellis/spec/monorepo/typescript-conventions.md","reason":"Strict TypeScript and NestJS ESM constraints."}
+{"file":".trellis/spec/monorepo/styling-conventions.md","reason":"Web UI must use CSS Modules and avoid static inline styles."}
+{"file":".trellis/spec/monorepo/ptd-ui-system.md","reason":"Authoritative Foliq login, workspace, demo notice and accessibility language."}
+{"file":".trellis/spec/monorepo/directory-structure.md","reason":"New Server demo files, Web components and migrations must stay in their owning layers."}
+{"file":".trellis/spec/monorepo/quality-guidelines.md","reason":"Lint, test, build and generated-artifact requirements."}
+{"file":".trellis/spec/monorepo/server-architecture.md","reason":"Auth, owner scoping, Prisma migrations and transactional persistence contracts."}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"Environment config, Server API, database and Web routing change together."}
+{"file":".trellis/spec/guides/code-reuse-thinking-guide.md","reason":"Shared login action, route builders and email normalization require one source of truth."}
+{"file":".trellis/tasks/08-04-public-demo-and-design-routes/research/implementation-baseline.md","reason":"Approved access, reset, route and UI design decisions."}

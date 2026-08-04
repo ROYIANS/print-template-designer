@@ -32,7 +32,8 @@ cp .env.example .env
 - `BETTER_AUTH_SECRET`：至少 32 字符，建议 `openssl rand -base64 32`。
 - `BETTER_AUTH_URL`：浏览器实际访问的公开 origin，不包含路径。
 - `PTD_WEB_ORIGIN`：通常与 `BETTER_AUTH_URL` 相同。
-- `PTD_ALLOWED_EMAILS`：允许登录的 GitHub 邮箱，多个值用逗号分隔。
+- `PTD_ADMIN_EMAILS`：可选的管理员邮箱，多个值用逗号分隔；管理员数据不参与演示重置。
+- `PTD_DEMO_MODE`：严格的 `true`/`false`，默认 `false`。开启后展示公开产品落地页，并每日恢复访客模板。
 - `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET`：GitHub OAuth App 凭据。
 - `PTD_OUTPUT_MAX_CONCURRENCY` / `PTD_OUTPUT_TIMEOUT_MS`：PDF BrowserContext 并发与总截止时间；默认
   分别为 2 和 30000 ms，普通部署不建议盲目调大。
@@ -71,6 +72,30 @@ Authorization callback URL: https://foliq.example.com/api/auth/callback/github
 ```
 
 GitHub App callback、`BETTER_AUTH_URL` 和真实浏览器 origin 必须精确一致。Web 和 API 在容器内仍为不同服务，但 Nginx 将 `/api/*` 代理到 Server，所以浏览器看到的是同一个 origin，Better Auth Cookie 不需要暴露给其他域名。
+
+GitHub OAuth 身份默认可以直接进入工作台，不再额外维护试用邮箱白名单。`PTD_ADMIN_EMAILS` 只用于
+服务端判定管理员，不会在数据库中创建可编辑角色，也不会由匿名 runtime API 暴露。
+
+## 演示模式
+
+普通自托管建议保持 `PTD_DEMO_MODE=false`：根路径只显示紧凑登录页，登录后进入文件工作台。
+
+公开产品演示可配置：
+
+```dotenv
+PTD_DEMO_MODE=true
+PTD_ADMIN_EMAILS=owner@example.com
+```
+
+此时根路径展示产品落地页，`/app` 会醒目说明数据恢复规则，设计和预览深层链接保留紧凑提示。Server
+在访客首次访问、启动补偿和每日 **00:00 UTC**（北京时间 08:00）三个入口复用同一幂等恢复逻辑：
+
+- 只替换非管理员账户的 `Template` 及其级联 `TemplateVersion`；
+- 每名访客恢复为一份确定性的售电行业电价预测示例；
+- 不删除 `User`、`Account`、`Session`，管理员模板也不受影响；
+- 多副本或同日重复请求通过 `DemoUserState` 日期声明避免重复恢复。
+
+管理员列表可以为空，但演示模式下这意味着所有账户都会每日恢复；部署脚本会给出警告而不是拒绝启动。
 
 ## HTTPS 与反向代理
 

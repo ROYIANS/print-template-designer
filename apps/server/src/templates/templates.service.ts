@@ -1,5 +1,4 @@
 import { ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common'
-import { deserialize, serialize, type TemplateSchema } from '@ptd/core'
 import { Prisma } from '../generated/prisma/client.js'
 import { PrismaService } from '../prisma/prisma.service.js'
 import type {
@@ -7,9 +6,11 @@ import type {
   TemplateUpdateInput,
   TemplateWriteInput,
 } from './template-contract.js'
+import { fromPrismaJson, toPrismaJson } from './template-json.js'
 
 interface StoredTemplate {
   id: number
+  key: string
   title: string
   content: Prisma.JsonValue
   version: number
@@ -26,22 +27,10 @@ interface StoredTemplateVersion {
   createdAt: Date
 }
 
-function toPrismaJson(content: TemplateSchema): Prisma.InputJsonValue {
-  const normalized: unknown = JSON.parse(serialize(content))
-  if (!isPrismaInputJsonObject(normalized)) {
-    throw new TypeError('Serialized template content must be a JSON object')
-  }
-
-  return normalized
-}
-
-function fromPrismaJson(content: Prisma.JsonValue): TemplateSchema {
-  return deserialize(JSON.stringify(content))
-}
-
 function toTemplateResponse(template: StoredTemplate) {
   return {
     id: template.id,
+    key: template.key,
     title: template.title,
     content: fromPrismaJson(template.content),
     version: template.version,
@@ -57,32 +46,6 @@ function toVersionResponse(version: StoredTemplateVersion) {
   }
 }
 
-function isPrismaInputJsonObject(value: unknown): value is Prisma.InputJsonObject {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    !Array.isArray(value) &&
-    Object.values(value).every(isPrismaInputJsonValue)
-  )
-}
-
-function isPrismaInputJsonValue(value: unknown): value is Prisma.InputJsonValue | null {
-  if (
-    value === null ||
-    typeof value === 'string' ||
-    typeof value === 'boolean' ||
-    (typeof value === 'number' && Number.isFinite(value))
-  ) {
-    return true
-  }
-
-  if (Array.isArray(value)) {
-    return value.every(isPrismaInputJsonValue)
-  }
-
-  return isPrismaInputJsonObject(value)
-}
-
 @Injectable()
 export class TemplatesService {
   constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
@@ -92,6 +55,7 @@ export class TemplatesService {
       where: { ownerId },
       select: {
         id: true,
+        key: true,
         title: true,
         version: true,
         createdAt: true,
@@ -129,6 +93,12 @@ export class TemplatesService {
       throw new NotFoundException(`Template ${id} was not found`)
     }
 
+    return toTemplateResponse(template)
+  }
+
+  async getByKey(ownerId: string, key: string) {
+    const template = await this.prisma.template.findFirst({ where: { key, ownerId } })
+    if (!template) throw new NotFoundException('Template was not found')
     return toTemplateResponse(template)
   }
 

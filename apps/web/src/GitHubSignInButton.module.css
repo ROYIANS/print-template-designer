@@ -1,0 +1,85 @@
+.root {
+  width: min(100%, 232px);
+  display: grid;
+  justify-items: stretch;
+  gap: 10px;
+}
+
+.root button {
+  min-height: 44px;
+  display: grid;
+  grid-template-columns: 18px max-content 15px;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 8px;
+  color: oklch(98% 0.003 106);
+  background: oklch(21% 0.006 70);
+  font:
+    600 13px 'Sarasa UI SC',
+    'Microsoft YaHei UI',
+    sans-serif;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 160ms cubic-bezier(0.25, 1, 0.5, 1),
+    transform 160ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.root button span {
+  white-space: nowrap;
+}
+
+.root button svg {
+  width: 18px;
+  height: 18px;
+}
+
+.root button svg:last-child {
+  width: 15px;
+  height: 15px;
+  color: oklch(82% 0.006 90);
+}
+
+.root button:hover:not(:disabled) {
+  background: oklch(27% 0.007 70);
+  transform: translateY(-1px);
+}
+
+.root button:active:not(:disabled) {
+  transform: translateY(1px) scale(0.99);
+}
+
+.root button:focus-visible {
+  outline: 2px solid var(--foliq-focus);
+  outline-offset: 3px;
+}
+
+.root button:disabled {
+  color: oklch(82% 0.006 90);
+  background: oklch(35% 0.008 70);
+  cursor: wait;
+}
+
+.root p {
+  margin: 0;
+  color: var(--foliq-faint);
+  font:
+    400 10px/1.55 'Sarasa UI SC',
+    'Microsoft YaHei UI',
+    sans-serif;
+  text-align: center;
+}
+
+.root .error {
+  color: oklch(46% 0.17 27);
+  font-size: 11px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .root button {
+    transition: none;
+  }
+}

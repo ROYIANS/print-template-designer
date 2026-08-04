@@ -13,8 +13,6 @@ export const DEV_AUTH_USER = {
 
 @Injectable()
 export class DevAuthUserService implements OnModuleInit {
-  private userPromise: Promise<SessionUser> | undefined
-
   constructor(
     @Inject(PrismaService) private readonly prisma: PrismaService,
     @Inject(AuthConfigService) private readonly authConfig: AuthConfigService,
@@ -28,8 +26,7 @@ export class DevAuthUserService implements OnModuleInit {
     if (this.authConfig.authMode !== 'dev-bypass') {
       throw new Error('The local development identity is only available in dev auth bypass mode')
     }
-    this.userPromise ??= this.ensureUser()
-    return this.userPromise
+    return this.ensureUser()
   }
 
   private async ensureUser(): Promise<SessionUser> {

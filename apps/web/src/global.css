@@ -24,6 +24,7 @@
   --foliq-accent: #0a0a0a;
   --foliq-accent-hover: #262626;
   --foliq-focus: #3c5fd9;
+  --foliq-layer-demo-notice: 1100;
   color-scheme: light;
   font-synthesis: none;
   text-rendering: optimizeLegibility;

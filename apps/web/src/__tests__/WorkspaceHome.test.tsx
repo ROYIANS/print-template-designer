@@ -68,6 +68,7 @@ function schema(content: string): TemplateSchema {
 function summary(id: number, title: string): TemplateSummary {
   return {
     id,
+    key: `template-key-${id}`,
     title,
     version: id,
     createdAt: NOW,
@@ -84,6 +85,7 @@ function fakeApi(overrides: Partial<TemplateApi> = {}): TemplateApi {
     list: vi.fn<TemplateApi['list']>(async () => []),
     create: vi.fn<TemplateApi['create']>(),
     get: vi.fn<TemplateApi['get']>(async (id) => record(id, `模板 ${id}`)),
+    getByKey: vi.fn<TemplateApi['getByKey']>(),
     update: vi.fn<TemplateApi['update']>(),
     delete: vi.fn<TemplateApi['delete']>(),
     listVersions: vi.fn<TemplateApi['listVersions']>(),
@@ -197,7 +199,7 @@ describe('Workspace Home', () => {
       (button) => button.querySelector('strong')?.textContent === '服务器模板 6',
     )
     await act(async () => open?.click())
-    expect(onOpen).toHaveBeenCalledWith(6)
+    expect(onOpen).toHaveBeenCalledWith(summary(6, '服务器模板 6'))
     expect(get).toHaveBeenCalledTimes(4)
   })
 
