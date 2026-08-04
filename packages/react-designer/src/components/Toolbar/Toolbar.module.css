@@ -2,7 +2,7 @@
   position: relative;
   width: 100%;
   min-width: 0;
-  min-height: 34px;
+  min-height: 35px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -108,8 +108,8 @@
 }
 
 .toolButton {
-  width: 28px;
-  height: 28px;
+  width: var(--ptd-control-xs);
+  height: var(--ptd-control-xs);
   flex: 0 0 auto;
   display: grid;
   place-items: center;
@@ -127,8 +127,8 @@
 }
 
 .toolButton svg {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
 }
 
 .toolButton:hover:not(:disabled) {
@@ -147,14 +147,14 @@
 }
 
 .toolButton[aria-pressed='true'] {
-  color: var(--ptd-paper-0);
-  background: var(--ptd-selection);
+  color: var(--ptd-text-strong);
+  background: var(--ptd-context-active);
   box-shadow: none;
 }
 
 .toolButton[aria-pressed='true']:hover:not(:disabled) {
-  color: var(--ptd-paper-0);
-  background: var(--ptd-selection-strong);
+  color: var(--ptd-text-strong);
+  background: var(--ptd-context-active-hover);
 }
 
 .toolButton[data-danger='true']:hover:not(:disabled) {

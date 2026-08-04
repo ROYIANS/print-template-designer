@@ -135,6 +135,8 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
   --ptd-selection-strong: var(--ptd-ink-blue-700);
   --ptd-selection-subtle: var(--ptd-ink-blue-100);
   --ptd-selection-border: oklch(74% 0.055 258);
+  --ptd-context-active: var(--ptd-graphite-300);
+  --ptd-context-active-hover: var(--ptd-graphite-400);
   --ptd-proof: var(--ptd-vermilion-600);
   --ptd-proof-subtle: var(--ptd-vermilion-100);
 
@@ -155,7 +157,8 @@ Foliq 是一张数字化的制版工作台：**精密、轻快、可信，带有
 - Floating Tool Dock 主浮岛使用近黑半透明 `header-bg`，Resource Panel、Inspector Header 与 Status Bar
   使用接近白色的 `surface-panel`；Context Shelf 使用 `surface-sunken`。Inspector 的连续滚动表单区使用
   `surface-form`，可编辑控件与 segmented track 使用白色 `surface-field`；导航 Tabs 的当前项使用
-  白色 `surface-selection`，Floating Dock 工具当前项使用档案墨蓝 `selection` 实底，Inspector segmented 当前项则回落到
+  白色 `surface-selection`，Floating Main Dock 工具当前项使用档案墨蓝 `selection` 实底；Context Shelf
+  当前项使用中性 `context-active`，避免与 Main Dock 争夺焦点。Inspector segmented 当前项则回落到
   `surface-form`。不得在 `surface-form`
   中为每个 Section 再嵌套白色 Card。
 - 黑色 App Bar、较深的暖灰 Pasteboard 和纯白 Paper 继续形成三个明确层级；“提高 Panel 明度”
@@ -243,7 +246,8 @@ List item、Section 和 Panel 默认平面；Primary/Danger 通过语义填充�
 - Field default = `surface-field + shadow-field + 6px radius`，其中默认 shadow 只提供近乎不可见的轮廓；
   hover/focus/invalid 提升为参考 HeroUI 的 `shadow-field-hover`；
   focus-visible 和 invalid 使用不参与盒模型的完整 ring/outline 与文字反馈，不通过切换 `border-width`。
-- Floating Dock 两层工具栏的当前项使用档案墨蓝 `selection` 实底与白色前景，不投影、不加边框；
+- Floating Main Dock 当前项使用档案墨蓝 `selection` 实底与白色前景；Context Shelf 当前项使用
+  `context-active` 中性灰实底与 `text-strong` 前景。两者都不投影、不加边框，下层主 Dock 保持更高视觉权重；
   Rail、Tabs 与 Status Bar 的当前项位于灰色 track/container 中，使用白色
   `surface-selection + shadow-selection` 和档案墨蓝前景。Inspector 内的二至四项 Button Group 使用完整
   白色 `surface-field` track；当前项回落到 `surface-form`，使用一条低对比中性完整边界且不投影。
@@ -350,6 +354,8 @@ List item、Section 和 Panel 默认平面；Primary/Danger 通过语义填充�
   Home，不进入 Canvas Toolbar 或 Inspector。
 - Home 与 Editor 复用 Web Host 提供的真实账户 Popover。头像/身份触发器只负责展开和收起菜单，不能
   直接执行退出等破坏性动作；GitHub 身份才显示显式退出，本地 Dev Bypass 不显示无效退出入口。
+- Editor App Bar 的账户触发器只显示圆形头像，通过 `aria-label` 保留账户名称，不再并列显示昵称或
+  下拉箭头；Home 侧栏入口空间充足，可以继续显示头像、昵称和披露图标。
 - Editor 的 Open/Template Browser 用户语义统一为“文件工作台”：clean 文档直接返回 `/app`；dirty 或
   conflict 文档先进入未保存决策。兼容 Host command 可以暂时保留 alias，但不得显示两个等价入口或分叉
   状态合同。
@@ -397,7 +403,8 @@ List item、Section 和 Panel 默认平面；Primary/Danger 通过语义填充�
   再渲染假账户占位或引入 Auth 客户端。App Bar 不重复展示当前模板标题、页码、纸张方向和尺寸，这些
   信息由 Context Shelf、Inspector 与 Status Bar 承担。不存在的云保存、同步或运行状态不得占位。
 - 同一 Header 中的“文件工作台”和“保存模板”属于同一文档动作控件家族，必须使用相同高度、圆角、
-  字重和状态节奏，只通过填充与明度表达主次，不得靠不同外框或把一个做成 Pill 来制造层级。
+  字重和状态节奏，只通过填充与明度表达主次，不得靠不同外框或把一个做成 Pill 来制造层级。两项动作
+  与宿主头像组成紧凑右侧操作组；头像命中区与保存动作之间只保留一个常规控件间距，不预留昵称按钮宽度。
 - 当前应用菜单按低频工作流组织为文件(F)、模板(T)、视图(V)、帮助(H)，靠左排列在品牌之后并提供
   `accessKey`/`aria-keyshortcuts` 助记键语义。File 集中 New/Open/Save/Save As 与版本历史；Template
   承载页面设置、页面管理、素材资源、数据源与模板检查；View 聚焦标尺、参考线显隐/锁定/清空和页面
@@ -425,9 +432,9 @@ List item、Section 和 Panel 默认平面；Primary/Danger 通过语义填充�
   固定高度。
 - Floating Tool Dock 固定在 Canvas viewport 底部中央，由两层组成：下方 Main Dock 常驻并承载
   `历史 / 交互工具 / 创建工具 / 工作区` 四组；上方 Context Shelf 常驻但依据 effective tool、页面、
-  单选、多选和参考线选择切换命令。常规宽度下 Main Dock 稳定为 448px 并居中排列工具；Context
-  Shelf 绝对定位在其后方，左右各内缩 24px，形成 400px 的内容安全宽度且不参与浮岛的 intrinsic
-  width 计算。它使用灰色 `surface-sunken`，完全无边框和阴影，并向下压入 Main Dock 5px。
+  单选、多选和参考线选择切换命令。Main Dock 使用 `max-content` 按当前可见工具组适配宽度，并受 Canvas
+  可用宽度约束；不得用固定宽度在工具两侧制造空白。Context Shelf 绝对定位在其后方，左右各内缩 24px，
+  不参与浮岛的 intrinsic width 计算。它使用灰色 `surface-sunken`，完全无边框和阴影，并向下压入 Main Dock 5px。
   Main Dock 使用 8px radius 的无边框近黑半透明 surface、14px 单层受控 backdrop blur 和专用四层重阴影
   （两层黑色外投影 + 两层白色 inset 高光），两层通过遮挡形成一个稳定整体。上下文变化不得移动
   或撑宽 Main Dock，桌面上下文内容不得被裁切；单选上下文只显示面向用户的目录类型与 X/Y/W/H，
@@ -436,8 +443,9 @@ List item、Section 和 Panel 默认平面；Primary/Danger 通过语义填充�
 - Select/Hand/Text/Shape/Image/Table/More 与 Inspector 开关属于 Main Dock；Undo/Redo 也迁入历史组。
   左 Rail 只保留 Assets/Pages/Layers/Data 四个入口并全部靠上排列。四个入口使用 `role="group"` 与
   `aria-label` 保持可理解性，打开状态的短标记朝向相邻 Resource Panel。
-- 精细指针下 Main Dock 与 Context Shelf 的 Persistent Tool 激活使用档案墨蓝 `selection` 主色实底与白色
-  图标/文字，不使用边线、浅蓝底、选中阴影或 inset 底标记；Rail 打开的资源面板入口仍使用白色抬升语言，并可在
+- 精细指针下 Main Dock 的 Persistent Tool 激活使用档案墨蓝 `selection` 主色实底与白色图标/文字；
+  Context Shelf 使用更深的中性灰 surface 与暖石墨前景，不能复用主色实底。两者都不使用边线、浅蓝底、
+  选中阴影或 inset 底标记；Rail 打开的资源面板入口仍使用白色抬升语言，并可在
   邻近 Panel 一侧保留单一位置标识。状态不得改变按钮尺寸，也不得只靠颜色表达。
 - Floating Tool Dock 的 z-index 位于 Selection 与 compact Scrim 之间：正常编辑时高于 Paper/Selection，
   打开 Resource/Inspector overlay 时必须被 Scrim 覆盖。完整组件 Picker 作为 Portal 使用 floating
@@ -590,7 +598,8 @@ DataPanel
 - 标准工具图标 16px，重要文档级动作 18px；描边粗细保持一致。
 - 禁止使用 Emoji、Unicode 箭头或“左齐/中齐/横分”等文字缩写代替正式图标。
 - 每个图标按钮必须有 `aria-label` 和 Tooltip；Tooltip 同时展示名称与快捷键。
-- 常规命令栏图标按钮视觉尺寸 28px；较宽的 coarse pointer 工作区将可点击区域提升到至少 40px。
+- 常规命令栏图标按钮视觉尺寸 28px；Context Shelf 在精细指针下使用 24×24 target 与 14×14 glyph，
+  通过灰条上下留白保持命中区可辨识，并服从同一 Tooltip/键盘入口合同。较宽的 coarse pointer 工作区将可点击区域提升到至少 40px。
   `<= 480px` 的 Designer 容器使用 32×32 紧凑视觉控件和 15–16px glyph，避免按钮填满整条
   36–38px Chrome；这是一项仅限手机宽度的高密度例外，不能扩散到平板或桌面触屏。
 - Floating Main Dock 的主入口在精细指针下使用 30×30 target 和 16×16 图标，coarse pointer 下使用

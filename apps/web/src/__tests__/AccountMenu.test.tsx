@@ -73,6 +73,14 @@ describe('AccountMenu', () => {
     expect(document.activeElement?.textContent).toContain('返回 Foliq 官网')
   })
 
+  it('uses only the avatar as the editor header trigger', () => {
+    act(() => root.render(<AccountMenu user={githubUser} surface="editor" onSignOut={vi.fn()} />))
+
+    expect(trigger().getAttribute('aria-label')).toBe('账户菜单，小孟')
+    expect(trigger().textContent).toBe('小')
+    expect(trigger().querySelector('svg')).toBeNull()
+  })
+
   it('closes through outside pointer input and Escape, restoring trigger focus', () => {
     act(() => root.render(<AccountMenu user={githubUser} surface="editor" onSignOut={vi.fn()} />))
     expect(container.querySelector('[data-surface="editor"]')).not.toBeNull()

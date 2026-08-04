@@ -131,7 +131,7 @@ describe('floating tool dock workspace composition', () => {
     expect(dock.textContent).toContain('拖动画布平移')
   })
 
-  it('encodes the confirmed borderless island and primary selection contract', () => {
+  it('encodes the content-fit island and split selection hierarchy', () => {
     const dockCss = readFileSync(
       resolve(process.cwd(), 'src/components/FloatingToolDock/FloatingToolDock.module.css'),
       'utf8',
@@ -154,8 +154,8 @@ describe('floating tool dock workspace composition', () => {
     expect(dockCss).toMatch(/context-shelf[^}]*bottom:\s*calc\(100% - 5px\)/)
     expect(dockCss).toMatch(/context-shelf[^}]*left:\s*24px/)
     expect(dockCss).toMatch(/context-shelf[^}]*width:\s*auto/)
-    expect(dockCss).toMatch(/\.floatingDock\s*{[^}]*width:\s*448px/)
-    expect(dockCss).toMatch(/\.mainDock\s*{[^}]*width:\s*100%/)
+    expect(dockCss).toMatch(/\.floatingDock\s*{[^}]*width:\s*max-content/)
+    expect(dockCss).toMatch(/\.mainDock\s*{[^}]*width:\s*max-content/)
     expect(dockCss).toMatch(/\.mainDock\s*{[^}]*justify-content:\s*center/)
     expect(dockCss).toMatch(/\.mainDock\s*{[^}]*border:\s*0/)
     expect(dockCss).toMatch(/\.mainDock\s*{[^}]*background:\s*var\(--ptd-header-bg\)/)
@@ -180,10 +180,13 @@ describe('floating tool dock workspace composition', () => {
     expect(contextCss).toMatch(/\.toolbar\s*{[^}]*box-shadow:\s*none/)
     expect(contextCss).toMatch(/\.toolButton\s*{[^}]*border:\s*0/)
     expect(contextCss).toMatch(
-      /\.toolButton\[aria-pressed='true'\]\s*{[^}]*color:\s*var\(--ptd-paper-0\)/,
+      /\.toolButton\s*{[^}]*width:\s*var\(--ptd-control-xs\)[^}]*height:\s*var\(--ptd-control-xs\)/,
     )
     expect(contextCss).toMatch(
-      /\.toolButton\[aria-pressed='true'\]\s*{[^}]*background:\s*var\(--ptd-selection\)/,
+      /\.toolButton\[aria-pressed='true'\]\s*{[^}]*color:\s*var\(--ptd-text-strong\)/,
+    )
+    expect(contextCss).toMatch(
+      /\.toolButton\[aria-pressed='true'\]\s*{[^}]*background:\s*var\(--ptd-context-active\)/,
     )
     expect(contextCss).toMatch(/\.toolButton\[aria-pressed='true'\]\s*{[^}]*box-shadow:\s*none/)
     expect(contextCss).not.toContain('var(--ptd-selection-subtle)')
