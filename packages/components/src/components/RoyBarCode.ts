@@ -1,10 +1,13 @@
 import { barCodeContentError, normalizeBarCodeProps, type ComponentSchema } from '@ptd/core'
 import { BaseComponent } from '../base/base-component'
 
-export class RoyBarCode extends BaseComponent {
-  private barContainer: HTMLDivElement | null = null
-  private renderToken = 0
+interface BarCodeRenderSession {
+  readonly target: HTMLDivElement
+}
 
+const renderSessions = new WeakMap<RoyBarCode, BarCodeRenderSession>()
+
+export class RoyBarCode extends BaseComponent {
   constructor(schema: ComponentSchema) {
     super(schema)
   }
@@ -18,14 +21,12 @@ export class RoyBarCode extends BaseComponent {
       barContainer.className = 'ptd-barcode__inner'
       this.container.appendChild(barContainer)
     }
-    this.barContainer = barContainer
-    this.renderBarCode()
+    this.renderBarCode(barContainer)
   }
 
-  private renderBarCode(): void {
-    if (!this.barContainer) return
-    const target = this.barContainer
-    const token = ++this.renderToken
+  private renderBarCode(target: HTMLDivElement): void {
+    const session: BarCodeRenderSession = { target }
+    renderSessions.set(this, session)
     const props = normalizeBarCodeProps(this.schema.propValue)
     const contentError = barCodeContentError(props)
 
@@ -37,7 +38,7 @@ export class RoyBarCode extends BaseComponent {
 
     import('bwip-js')
       .then((mod) => {
-        if (token !== this.renderToken || this.barContainer !== target) return
+        if (renderSessions.get(this) !== session) return
         const bwipjs = mod.default ?? mod
         const canvas = document.createElement('canvas')
         try {
@@ -59,14 +60,14 @@ export class RoyBarCode extends BaseComponent {
         }
       })
       .catch(() => {
-        if (token === this.renderToken && this.barContainer === target) {
+        if (renderSessions.get(this) === session) {
           setBarCodeStatus(this.container, target, 'error', '条形码渲染模块载入失败')
         }
       })
   }
 
   override destroy(): void {
-    this.renderToken += 1
+    renderSessions.delete(this)
     super.destroy()
   }
 }

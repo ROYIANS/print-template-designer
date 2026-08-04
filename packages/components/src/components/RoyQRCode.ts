@@ -8,10 +8,13 @@ import { BaseComponent } from '../base/base-component'
 
 const CORRECTION_LEVEL: Record<QRCodeErrorCorrection, number> = { L: 1, M: 0, Q: 3, H: 2 }
 
-export class RoyQRCode extends BaseComponent {
-  private qrContainer: HTMLDivElement | null = null
-  private renderToken = 0
+interface QRCodeRenderSession {
+  readonly target: HTMLDivElement
+}
 
+const renderSessions = new WeakMap<RoyQRCode, QRCodeRenderSession>()
+
+export class RoyQRCode extends BaseComponent {
   constructor(schema: ComponentSchema) {
     super(schema)
   }
@@ -26,14 +29,12 @@ export class RoyQRCode extends BaseComponent {
       qrContainer.style.height = '100%'
       this.container.appendChild(qrContainer)
     }
-    this.qrContainer = qrContainer
-    this.renderQRCode()
+    this.renderQRCode(qrContainer)
   }
 
-  private renderQRCode(): void {
-    if (!this.qrContainer) return
-    const target = this.qrContainer
-    const token = ++this.renderToken
+  private renderQRCode(target: HTMLDivElement): void {
+    const session: QRCodeRenderSession = { target }
+    renderSessions.set(this, session)
     const props = normalizeQRCodeProps(this.schema.propValue)
     const contentError = qrCodeContentError(props)
 
@@ -45,7 +46,7 @@ export class RoyQRCode extends BaseComponent {
 
     import('easyqrcodejs')
       .then((mod) => {
-        if (token !== this.renderToken || this.qrContainer !== target) return
+        if (renderSessions.get(this) !== session) return
         const QRCode = mod.default ?? mod
         target.replaceChildren()
         try {
@@ -64,14 +65,14 @@ export class RoyQRCode extends BaseComponent {
         }
       })
       .catch(() => {
-        if (token === this.renderToken && this.qrContainer === target) {
+        if (renderSessions.get(this) === session) {
           setCodeStatus(this.container, target, 'error', '二维码渲染模块载入失败')
         }
       })
   }
 
   override destroy(): void {
-    this.renderToken += 1
+    renderSessions.delete(this)
     super.destroy()
   }
 }
