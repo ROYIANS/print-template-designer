@@ -835,3 +835,36 @@ Created and verified a 210x285mm four-page black-and-white editorial magazine te
 ### Next Steps
 
 - None - task complete
+
+
+## Session 25: Public demo mode and canonical document routes
+
+**Date**: 2026-08-04
+**Task**: Public demo mode and canonical document routes
+**Branch**: `feature/refc`
+
+### Summary
+
+Opened GitHub OAuth access, added admin-aware demo restoration, keyed design and preview routes, demo notices, shared GitHub sign-in UI, and an A4-bounded electricity-price forecast example template.
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `e97ff47` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
