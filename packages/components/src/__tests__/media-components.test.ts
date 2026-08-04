@@ -4,6 +4,22 @@ import { RoyBarCode } from '../components/RoyBarCode'
 import { RoyImage } from '../components/RoyImage'
 import { RoyQRCode } from '../components/RoyQRCode'
 
+vi.mock('easyqrcodejs', () => ({
+  default: class QRCodeMock {
+    constructor(element: HTMLElement) {
+      element.append(document.createElement('canvas'))
+    }
+  },
+}))
+
+vi.mock('bwip-js', () => ({
+  default: {
+    toCanvas(canvas: HTMLCanvasElement) {
+      canvas.dataset['mockBarcode'] = 'ready'
+    },
+  },
+}))
+
 function schema(
   component: 'RoyImage' | 'RoyQRCode' | 'RoyBarCode',
   propValue: unknown,
@@ -121,6 +137,17 @@ describe('media component render states', () => {
     expect(element.textContent).toContain('二维码内容不能为空')
   })
 
+  it('completes the initial QR render started during the base constructor', async () => {
+    const component = new RoyQRCode(
+      schema('RoyQRCode', { text: 'https://example.test/reports/2026-q3' }),
+    )
+    const element = mount(component)
+
+    await vi.waitFor(() => expect(element.dataset['renderState']).toBe('ready'))
+    expect(element.querySelector('canvas')).not.toBeNull()
+    expect(element.querySelector('.ptd-render-state')).toBeNull()
+  })
+
   it('shows format-specific barcode validation instead of silently rendering blank', () => {
     const component = new RoyBarCode(
       schema('RoyBarCode', { text: '1234', bcid: 'ean13', includeText: true }),
@@ -129,5 +156,16 @@ describe('media component render states', () => {
 
     expect(element.dataset['renderState']).toBe('error')
     expect(element.textContent).toContain('12 或 13 位数字')
+  })
+
+  it('completes the initial barcode render started during the base constructor', async () => {
+    const component = new RoyBarCode(
+      schema('RoyBarCode', { text: 'FOLIQ-2026-Q3', bcid: 'code128', includeText: true }),
+    )
+    const element = mount(component)
+
+    await vi.waitFor(() => expect(element.dataset['renderState']).toBe('ready'))
+    expect(element.querySelector('canvas')?.dataset['mockBarcode']).toBe('ready')
+    expect(element.querySelector('.ptd-render-state')).toBeNull()
   })
 })

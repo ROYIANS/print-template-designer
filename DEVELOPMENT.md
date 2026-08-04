@@ -41,6 +41,15 @@ corepack pnpm dev
 然后并行启动四个 package 的 watch 和 Vite。直接进入 `apps/web` 裸跑 Vite 可能读取不到或读取到过期的
 `dist`，并出现 `@ptd/core` / `@ptd/export` 无法解析或类型过期。
 
+完成下方 Server 环境和 migration 配置后，可从根目录一次启动完整联调环境：
+
+```bash
+corepack pnpm dev:all
+```
+
+该命令保留相同的依赖预构建顺序，然后并行启动四个 package watcher、Vite 与 NestJS Server。它不会
+自动创建数据库或应用 migration；首次运行仍需先执行 Server 小节中的 `prisma:migrate:deploy`。
+
 只构建 Web：
 
 ```bash
@@ -82,7 +91,7 @@ cp apps/server/.env.example apps/server/.env
 
 ```bash
 corepack pnpm --filter server prisma:migrate:deploy
-corepack pnpm --filter server start:dev
+corepack pnpm --filter server dev
 ```
 
 自定义环境时，至少需要提供：

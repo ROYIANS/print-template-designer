@@ -3,7 +3,7 @@
   z-index: var(--ptd-layer-selection);
   bottom: var(--ptd-floating-tool-dock-offset);
   left: 50%;
-  width: 448px;
+  width: max-content;
   max-width: calc(100% - var(--ptd-space-6));
   display: grid;
   justify-items: center;
@@ -24,7 +24,7 @@
 .mainDock {
   position: relative;
   z-index: 2;
-  width: 100%;
+  width: max-content;
   max-width: 100%;
   min-height: 44px;
   display: flex;

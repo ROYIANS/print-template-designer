@@ -58,8 +58,12 @@ export function AccountMenu({ user, surface, onReturnHome, onSignOut }: AccountM
         <span className={styles.avatar} aria-hidden="true">
           {user.image ? <img src={user.image} alt="" /> : user.name.slice(0, 1)}
         </span>
-        <span className={styles.triggerName}>{user.name}</span>
-        <RiArrowDownSLine className={styles.chevron} aria-hidden="true" />
+        {surface === 'home' ? (
+          <>
+            <span className={styles.triggerName}>{user.name}</span>
+            <RiArrowDownSLine className={styles.chevron} aria-hidden="true" />
+          </>
+        ) : null}
       </button>
 
       {open ? (

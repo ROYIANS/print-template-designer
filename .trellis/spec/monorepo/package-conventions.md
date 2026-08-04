@@ -160,6 +160,7 @@ Corepack so the repository-declared pnpm version wins:
 ```bash
 corepack pnpm build          # runs each workspace package/app's own build script
 corepack pnpm dev            # builds Web dependencies, then watches them alongside apps/web
+corepack pnpm dev:all        # same preparation, then watches packages + Web + Server
 corepack pnpm typecheck      # runs each workspace's typecheck script
 corepack pnpm lint           # ESLint across workspace
 ```
@@ -167,6 +168,13 @@ corepack pnpm lint           # ESLint across workspace
 The Web development command must build `@ptd/core`, `@ptd/components`, and
 `@ptd/react-designer` sequentially before starting their watchers and Vite. A Vite-only command
 can consume missing or stale package `dist` output.
+
+The root `dev:all` command must preserve the same dependency preparation and then include the
+`server` workspace in the parallel `dev` run. Long-lived applications expose a common `dev` script
+so the root can coordinate them without shell-specific background operators or an extra process
+manager dependency. Root scripts that recursively invoke the package manager must call
+`corepack pnpm`, not a bare `pnpm`, so a globally installed older pnpm cannot bypass the repository's
+`packageManager` contract.
 
 The same dependency order applies to clean CI typechecks. Workspace packages publish their type
 entry from `dist/index.d.ts`, while `typecheck` uses `tsc --noEmit` and does not create that file.

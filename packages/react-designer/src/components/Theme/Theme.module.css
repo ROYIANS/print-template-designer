@@ -44,6 +44,8 @@
   --ptd-selection-strong: var(--ptd-ink-blue-700);
   --ptd-selection-subtle: var(--ptd-ink-blue-100);
   --ptd-selection-border: oklch(74% 0.055 258);
+  --ptd-context-active: var(--ptd-graphite-300);
+  --ptd-context-active-hover: var(--ptd-graphite-400);
   --ptd-proof: var(--ptd-vermilion-600);
   --ptd-proof-subtle: var(--ptd-vermilion-100);
   --ptd-guide-cobalt: var(--ptd-ink-blue-600);

@@ -5,6 +5,7 @@
   "type": "module",
   "description": "Foliq - NestJS backend server",
   "scripts": {
+    "dev": "prisma generate && nest start --watch",
     "start": "node dist/main.js",
     "start:dev": "prisma generate && nest start --watch",
     "start:prod": "node dist/main.js",

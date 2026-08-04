@@ -50,9 +50,18 @@
 }
 
 .account[data-surface='editor'] .trigger {
-  border-color: rgb(255 255 255 / 18%);
+  width: 30px;
+  max-width: none;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
   color: rgb(255 255 255 / 84%);
-  background: rgb(255 255 255 / 7%);
+  background: transparent;
+}
+
+.account[data-surface='editor'] .avatar {
+  width: 26px;
+  height: 26px;
 }
 
 .trigger:hover,
@@ -69,8 +78,7 @@
 
 .account[data-surface='editor'] .trigger:hover,
 .account[data-surface='editor'] .trigger[aria-expanded='true'] {
-  border-color: rgb(255 255 255 / 30%);
-  background: rgb(255 255 255 / 13%);
+  background: rgb(255 255 255 / 12%);
 }
 
 .avatar {
@@ -251,6 +259,15 @@
 @media (pointer: coarse) {
   .trigger {
     height: 40px;
+  }
+
+  .account[data-surface='editor'] .trigger {
+    width: 40px;
+  }
+
+  .account[data-surface='editor'] .avatar {
+    width: 28px;
+    height: 28px;
   }
 
   .actions a,

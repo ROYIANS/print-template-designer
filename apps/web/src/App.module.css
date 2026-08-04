@@ -13,7 +13,7 @@
 }
 
 .designerHost {
-  --ptd-host-account-space: 166px;
+  --ptd-host-account-space: 40px;
 }
 
 .workspaceSkipLink {
@@ -134,7 +134,7 @@
 
 @media (max-width: 520px) {
   .designerHost {
-    --ptd-host-account-space: 118px;
+    --ptd-host-account-space: 44px;
   }
 
   .templateExchangeError {

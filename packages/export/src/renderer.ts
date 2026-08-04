@@ -47,18 +47,28 @@ export function mountOutputDocument(
     pageCanvas.className = 'ptd-output-page__canvas'
     pageCanvas.dataset.ptdOutputPageCanvas = String(page.pageNumber)
     Object.assign(pageCanvas.style, {
+      width: '100%',
+      height: '100%',
+      overflow: 'hidden',
+      contain: 'strict',
+    })
+    const logicalCanvas = document.createElement('div')
+    logicalCanvas.className = 'ptd-output-page__logical-canvas'
+    logicalCanvas.dataset.ptdOutputLogicalCanvas = String(page.pageNumber)
+    Object.assign(logicalCanvas.style, {
       width: `${mmToPx(page.widthMm)}px`,
       height: `${mmToPx(page.heightMm)}px`,
       transform: `scale(${OUTPUT_CANVAS_SCALE})`,
     })
+    pageCanvas.append(logicalCanvas)
     pageElement.append(pageCanvas)
     for (const region of [page.regions.header, page.regions.body, page.regions.footer]) {
       const regionElement = document.createElement('div')
       regionElement.className = `ptd-output-region ptd-output-region--${region.kind}`
       regionElement.dataset.ptdOutputRegion = region.kind
       setBounds(regionElement, region.bounds)
-      pageCanvas.append(regionElement)
-      region.fragments.forEach((fragment) => mountFragment(pageCanvas, fragment, instances))
+      logicalCanvas.append(regionElement)
+      region.fragments.forEach((fragment) => mountFragment(logicalCanvas, fragment, instances))
     }
     root.append(pageElement)
   })
@@ -242,7 +252,8 @@ function outputStyle(output: OutputDocument): HTMLStyleElement {
     @page { size: ${pageSize}; margin: 0; }
     .ptd-output-document { display: flex; flex-direction: column; align-items: center; gap: 24px; }
     .ptd-output-page { position: relative; flex: none; overflow: hidden; box-sizing: border-box; break-after: page; }
-    .ptd-output-page__canvas { position: absolute; inset: 0 auto auto 0; transform-origin: top left; }
+    .ptd-output-page__canvas { position: absolute; inset: 0; }
+    .ptd-output-page__logical-canvas { position: absolute; inset: 0 auto auto 0; transform-origin: top left; }
     .ptd-output-page:last-child { break-after: auto; }
     .ptd-output-region, .ptd-output-fragment, .ptd-output-group-child { position: absolute; box-sizing: border-box; }
     .ptd-output-fragment { transform-origin: center center; }

@@ -58,6 +58,103 @@ v1 output images must be embedded `data:image/*`. Relative, remote, file and oth
 before an `<img>` request is created and return `REMOTE_RESOURCE_BLOCKED` with a source component id. Render code must
 not expose the rejected URL in logs or diagnostics.
 
+## Scenario: Async Code Renderers and Physical Print Canvas Isolation
+
+### 1. Scope / Trigger
+
+- Trigger: changing an asynchronously loaded canvas component such as `RoyQRCode` / `RoyBarCode`, or changing the
+  logical-to-physical scaling structure in `mountOutputDocument()`.
+- `BaseComponent` invokes the polymorphic `render()` during its constructor. Subclass field initializers have not run
+  at that point and will run after `super()` returns, so async render state cannot live in initialized subclass fields.
+- A transformed logical canvas must not participate directly in Chromium's paged-media shrink-to-fit calculation.
+
+### 2. Signatures
+
+```ts
+const renderSessions = new WeakMap<BaseComponent, { readonly target: HTMLDivElement }>()
+
+mountOutputDocument(container: HTMLElement, output: OutputDocument): MountedOutputDocument
+```
+
+Output DOM shape:
+
+```text
+.ptd-output-page                         physical mm page
+  .ptd-output-page__canvas               100% physical viewport, overflow hidden, contain strict
+    .ptd-output-page__logical-canvas     logical mmToPx dimensions + OUTPUT_CANVAS_SCALE transform
+      .ptd-output-region / fragment
+```
+
+### 3. Contracts
+
+- Every valid QR/barcode starts in `loading` and must reach `ready` or `error`; it must never remain `loading` because
+  constructor field initialization replaced its first render token or target reference.
+- QR/barcode async callbacks use class-external `WeakMap` session identity. `update()` replaces the active session;
+  `destroy()` deletes it; callbacks from an older session are no-ops.
+- The physical viewport is exactly `100% × 100%` of the mm page and owns `overflow: hidden` plus `contain: strict`.
+- The nested logical canvas owns `mmToPx(page.widthMm/heightMm)` dimensions and the
+  `(96 / 25.4) / mmToPx(1)` transform. Regions and fragments mount inside this logical canvas.
+- The physical isolation layer is required even when every visible component is inside the page. Without it,
+  Chromium may use the transform-before-layout dimensions for shrink-to-fit, scale A5 content to about 86.8%, and
+  let subsequent page backgrounds cover the previous page's bottom fragments.
+
+### 4. Validation & Error Matrix
+
+| Condition                                                        | Required result                                               |
+| ---------------------------------------------------------------- | ------------------------------------------------------------- |
+| Valid QR/barcode on its constructor render                       | leaves `loading`, reaches `ready`                             |
+| Renderer module import or encoding fails                         | stable component `error` and matching readiness diagnostic    |
+| Component updates before an old async callback returns           | old callback cannot replace the new render                    |
+| Component is destroyed before callback returns                   | callback is a no-op; session does not retain the instance     |
+| Logical canvas is mounted directly as the transformed page child | contract failure; PDF may shrink and lose bottom content      |
+| Four-page A5 fixed template                                      | PDF stays four A5 pages and every page footer remains visible |
+
+### 5. Good/Base/Bad Cases
+
+- Good: a 227-component A5 report with a bound QR code reaches readiness without diagnostics; all four PDF pages use
+  the safe printable width and preserve their bottom approval/footer content.
+- Base: a single fixed A4 text component renders through the same physical viewport/logical canvas structure.
+- Bad: `private renderToken = 0` or `private qrContainer = null` is read by `render()` during `super()` and then reset
+  by subclass initialization, leaving the first QR forever in `loading` and producing both `QRCODE_RENDER_FAILED` and
+  `LAYOUT_TIMEOUT`.
+
+### 6. Tests Required
+
+1. Components tests mock the QR/barcode libraries and assert the initial constructor render reaches `ready`.
+2. Media lifecycle tests continue to cover stale image callbacks; QR/barcode session changes must preserve the same
+   stale-callback rule.
+3. Export renderer tests assert the physical viewport is `100% × 100%`, isolated with `overflow: hidden` and
+   `contain: strict`, while the nested logical canvas owns logical pixel dimensions and transform.
+4. A real Chromium A5 PDF smoke must assert page count and physical size, render every page with Poppler, and inspect
+   KPI text, QR visibility, approval blocks and all four footers.
+
+### 7. Wrong vs Correct
+
+#### Wrong
+
+```ts
+class RoyQRCode extends BaseComponent {
+  private target: HTMLDivElement | null = null
+  private renderToken = 0
+  // BaseComponent calls render() before these initializers run, then they overwrite first-render state.
+}
+
+pageElement.append(logicalCanvas)
+logicalCanvas.style.transform = `scale(${OUTPUT_CANVAS_SCALE})`
+```
+
+#### Correct
+
+```ts
+const sessions = new WeakMap<RoyQRCode, { readonly target: HTMLDivElement }>()
+
+const physicalViewport = document.createElement('div')
+physicalViewport.style.contain = 'strict'
+physicalViewport.style.overflow = 'hidden'
+physicalViewport.append(logicalCanvas)
+pageElement.append(physicalViewport)
+```
+
 ## Server Renderer
 
 - `POST /api/output/pdf` is Cookie-session protected and accepts a deeply validated template, bounded RenderContext and

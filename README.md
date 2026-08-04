@@ -113,13 +113,21 @@ corepack pnpm dev
 根 `dev` 命令会按依赖顺序构建 `core`、`components`、`export`、`react-designer`，再同时启动 package
 watch 和 Vite。默认访问地址通常为 <http://localhost:5173>。
 
+完成 Server 环境和 PostgreSQL migration 配置后，也可以从根目录一次启动完整联调环境：
+
+```bash
+corepack pnpm dev:all
+```
+
+`dev:all` 沿用相同的前端依赖预构建顺序，然后并行启动四个 package watcher、Web 和 Server。
+
 ### 启动模板服务
 
 Web 的登录与准入检查依赖 Server。复制 `apps/server/.env.example` 并配置 PostgreSQL/GitHub OAuth 后，可单独启动 API：
 
 ```bash
 corepack pnpm --filter server prisma:migrate:deploy
-corepack pnpm --filter server start:dev
+corepack pnpm --filter server dev
 ```
 
 默认服务地址为 <http://localhost:3000>，健康检查为 `GET /healthz`。`DATABASE_URL` 必须指向 PostgreSQL；没有本地文件数据库回退。

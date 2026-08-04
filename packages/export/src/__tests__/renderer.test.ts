@@ -84,11 +84,19 @@ describe('output DOM renderer', () => {
     expect(page?.style.width).toBe('210mm')
     expect(page?.style.height).toBe('297mm')
     const canvas = container.querySelector<HTMLElement>('[data-ptd-output-page-canvas="1"]')
-    expect(canvas?.style.width).toBe('1050px')
-    expect(canvas?.style.height).toBe('1485px')
-    expect(Number(canvas?.style.transform.match(/scale\(([^)]+)\)/)?.[1])).toBeCloseTo(
+    expect(canvas?.style.width).toBe('100%')
+    expect(canvas?.style.height).toBe('100%')
+    expect(canvas?.style.overflow).toBe('hidden')
+    expect(canvas?.style.contain).toBe('strict')
+    const logicalCanvas = container.querySelector<HTMLElement>(
+      '[data-ptd-output-logical-canvas="1"]',
+    )
+    expect(logicalCanvas?.style.width).toBe('1050px')
+    expect(logicalCanvas?.style.height).toBe('1485px')
+    expect(Number(logicalCanvas?.style.transform.match(/scale\(([^)]+)\)/)?.[1])).toBeCloseTo(
       96 / 25.4 / 5,
     )
+    expect(logicalCanvas?.querySelector('[data-ptd-output-region="body"]')).not.toBeNull()
     expect(
       container.querySelector<HTMLElement>('[data-ptd-output-region="body"]')?.style.height,
     ).toBe('980px')
