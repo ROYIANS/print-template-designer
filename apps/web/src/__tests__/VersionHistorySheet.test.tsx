@@ -27,6 +27,7 @@ function fakeApi(overrides: Partial<TemplateApi> = {}): TemplateApi {
     list: vi.fn(async () => []),
     create: vi.fn(),
     get: vi.fn(),
+    getByKey: vi.fn(),
     update: vi.fn(),
     delete: vi.fn(),
     listVersions: vi.fn(async () => [

@@ -6,6 +6,7 @@ import {
   type ReactNode,
 } from 'react'
 import { authClient } from './auth-client'
+import { GitHubSignInButton } from './GitHubSignInButton'
 import type { LandingNotice } from './navigation'
 import styles from './LandingPage.module.css'
 
@@ -15,6 +16,7 @@ export interface AccountUser {
   email: string
   image: string | null
   authMode: 'github' | 'dev-bypass'
+  isAdmin: boolean
 }
 
 export type AccessState =
@@ -29,17 +31,6 @@ interface LandingPageProps {
   notice?: LandingNotice
   onEnterApp: () => void
   onRetry: () => void
-}
-
-function GitHubIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path
-        fill="currentColor"
-        d="M12 .7a11.5 11.5 0 0 0-3.64 22.4c.58.1.79-.25.79-.56v-2.24c-3.22.7-3.9-1.37-3.9-1.37-.52-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.7.08-.7 1.17.08 1.78 1.2 1.78 1.2 1.04 1.77 2.72 1.26 3.38.96.1-.75.4-1.26.74-1.55-2.57-.3-5.27-1.29-5.27-5.69 0-1.26.45-2.28 1.18-3.09-.12-.29-.51-1.46.11-3.05 0 0 .97-.3 3.17 1.18a10.9 10.9 0 0 1 5.76 0c2.2-1.49 3.16-1.18 3.16-1.18.63 1.59.24 2.76.12 3.05.74.81 1.18 1.83 1.18 3.09 0 4.42-2.71 5.38-5.29 5.67.42.36.79 1.07.79 2.16v3.2c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .7Z"
-      />
-    </svg>
-  )
 }
 
 function ArrowIcon() {
@@ -393,24 +384,7 @@ function AccessAction({
   onRetry,
   announceStatus = true,
 }: Omit<LandingPageProps, 'notice'> & { announceStatus?: boolean }) {
-  const [signingIn, setSigningIn] = useState(false)
-  const [message, setMessage] = useState<string>()
-
-  const signIn = async () => {
-    setSigningIn(true)
-    setMessage(undefined)
-    const result = await authClient.signIn.social({
-      provider: 'github',
-      callbackURL: `${window.location.origin}/app`,
-    })
-    if (result.error) {
-      setMessage(result.error.message ?? 'GitHub 登录没有完成，请重试。')
-      setSigningIn(false)
-    }
-  }
-
   const signOut = async () => {
-    setMessage(undefined)
     await authClient.signOut()
     onRetry()
   }
@@ -442,7 +416,7 @@ function AccessAction({
     return (
       <div className={styles.accessAction} data-state="denied">
         <p className={styles.accessTitle}>此账户尚未获准</p>
-        <p className={styles.accessCopy}>当前 GitHub 邮箱不在实例访问名单中。</p>
+        <p className={styles.accessCopy}>当前 GitHub 会话无法访问此工作台。</p>
         <button type="button" className={styles.secondaryAction} onClick={() => void signOut()}>
           退出并更换 GitHub 账户
         </button>
@@ -482,28 +456,14 @@ function AccessAction({
 
   return (
     <div className={styles.accessAction} data-state="signed-out">
-      <button
-        type="button"
-        className={styles.primaryAction}
-        disabled={signingIn}
-        onClick={() => void signIn()}
-      >
-        <GitHubIcon />
-        {signingIn ? '正在前往 GitHub…' : '使用 GitHub 登录'}
-      </button>
-      <p className={styles.securityNote}>HttpOnly Cookie · 服务端准入 · 不保存浏览器 Token</p>
-      {message && (
-        <p className={styles.inlineError} role="alert">
-          {message}
-        </p>
-      )}
+      <GitHubSignInButton />
     </div>
   )
 }
 
 const noticeCopy: Partial<Record<LandingNotice, string>> = {
-  'auth-required': '请先登录已获准的 GitHub 账户，再进入工作台。',
-  'access-denied': '当前账户没有工作台访问权限，你仍可浏览完整产品介绍。',
+  'auth-required': '请先使用 GitHub 登录，再进入工作台。',
+  'access-denied': '当前账户无法访问工作台，你仍可浏览完整产品介绍。',
   'session-expired': '会话已经失效，请重新登录后继续。',
   'sign-in-failed': 'GitHub 登录未完成，请检查账户或稍后重试。',
   unavailable: '工作台服务暂时不可用，产品介绍不受影响。',

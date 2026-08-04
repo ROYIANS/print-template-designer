@@ -6,7 +6,8 @@ function githubEnvironment(overrides: NodeJS.ProcessEnv = {}): NodeJS.ProcessEnv
     BETTER_AUTH_URL: 'https://ptd.example.com',
     BETTER_AUTH_SECRET: 'a-production-secret-that-is-at-least-32-characters',
     PTD_WEB_ORIGIN: 'https://ptd.example.com',
-    PTD_ALLOWED_EMAILS: 'owner@example.com',
+    PTD_ADMIN_EMAILS: 'owner@example.com',
+    PTD_DEMO_MODE: 'true',
     GITHUB_CLIENT_ID: 'github-client-id',
     GITHUB_CLIENT_SECRET: 'github-client-secret',
     ...overrides,
@@ -30,15 +31,9 @@ describe('auth runtime configuration', () => {
       authMode: 'github',
       baseUrl: 'https://ptd.example.com',
       webOrigin: 'https://ptd.example.com',
+      demoMode: true,
     })
-
-    expect(() =>
-      parseAuthRuntimeConfig(
-        githubEnvironment({
-          PTD_ALLOWED_EMAILS: '',
-        }),
-      ),
-    ).toThrow('at least one email')
+    expect([...config.adminEmails]).toEqual(['owner@example.com'])
     expect(() =>
       parseAuthRuntimeConfig(
         githubEnvironment({
@@ -61,7 +56,13 @@ describe('auth runtime configuration', () => {
           PTD_WEB_ORIGIN: webOrigin,
         }),
       )
-      expect(config).toEqual({ authMode: 'dev-bypass', baseUrl, webOrigin })
+      expect(config).toMatchObject({
+        authMode: 'dev-bypass',
+        baseUrl,
+        webOrigin,
+        demoMode: false,
+      })
+      expect([...config.adminEmails]).toEqual([])
     },
   )
 
@@ -114,5 +115,13 @@ describe('auth runtime configuration', () => {
         }),
       ),
     ).toThrow('must be either true or false')
+
+    expect(() =>
+      parseAuthRuntimeConfig(
+        githubEnvironment({
+          PTD_DEMO_MODE: 'sometimes',
+        }),
+      ),
+    ).toThrow('PTD_DEMO_MODE must be either true or false')
   })
 })

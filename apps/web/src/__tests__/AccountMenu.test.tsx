@@ -10,6 +10,7 @@ const githubUser: AccountUser = {
   email: 'xiaomeng@example.com',
   image: null,
   authMode: 'github',
+  isAdmin: false,
 }
 
 const devUser: AccountUser = {

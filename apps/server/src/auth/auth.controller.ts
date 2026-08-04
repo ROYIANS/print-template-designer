@@ -18,6 +18,20 @@ export class AuthController {
       emailVerified,
       image: image ?? null,
       authMode: this.authConfig.authMode,
+      isAdmin: this.authConfig.isAdmin(email),
+    }
+  }
+}
+
+@Controller('api/runtime')
+export class RuntimeController {
+  constructor(@Inject(AuthConfigService) private readonly authConfig: AuthConfigService) {}
+
+  @Get()
+  getRuntime() {
+    return {
+      demoMode: this.authConfig.demoMode,
+      demoResetTime: '00:00 UTC',
     }
   }
 }

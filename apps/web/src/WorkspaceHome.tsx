@@ -33,8 +33,9 @@ type FileAction = 'rename' | 'duplicate' | 'delete'
 interface WorkspaceHomeProps {
   api?: TemplateApi
   accountControl?: ReactNode
+  demoNotice?: ReactNode
   onNew(): void
-  onOpen(templateId: number): void
+  onOpen(template: TemplateSummary): void
 }
 
 function loadError(error: unknown): string {
@@ -119,7 +120,7 @@ function TemplateGallery({
   templates: TemplateSummary[]
   totalCount: number
   details: ReturnType<typeof useRecentTemplateDetails>
-  onOpen(templateId: number): void
+  onOpen(template: TemplateSummary): void
   onRetry(): void
   actionMenuId?: number
   pendingId?: number
@@ -172,7 +173,7 @@ function TemplateGallery({
               <button
                 type="button"
                 aria-label={`打开模板 ${summary.title}`}
-                onClick={() => onOpen(summary.id)}
+                onClick={() => onOpen(summary)}
               >
                 <span className={styles.cardPreview}>
                   {detail?.kind === 'ready' ? (
@@ -274,6 +275,7 @@ function TemplateGallery({
 export function WorkspaceHome({
   api = templateApi,
   accountControl,
+  demoNotice,
   onNew,
   onOpen,
 }: WorkspaceHomeProps) {
@@ -501,6 +503,8 @@ export function WorkspaceHome({
             </button>
           </div>
         </header>
+
+        {demoNotice ? <div className={styles.demoNotice}>{demoNotice}</div> : null}
 
         {state.kind === 'loading' ? (
           <section className={styles.systemState} role="status" aria-label="正在载入文件工作台">

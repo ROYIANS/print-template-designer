@@ -7,18 +7,22 @@ import {
 } from '@ptd/react-designer'
 import { AccountMenu } from './AccountMenu'
 import { authClient } from './auth-client'
+import { DemoModeNotice } from './DemoModeNotice'
 import { HelpSheet, type HelpSheetView } from './HelpSheet'
 import { LandingPage, type AccessState, type AccountUser } from './LandingPage'
+import { LoginPage } from './LoginPage'
 import {
+  documentUrl,
   isProductCaptureSearch,
   landingNoticeFromSearch,
   landingUrl,
+  newDocumentUrl,
   routeFromPathname,
-  workspaceViewFromSearch,
+  workspaceViewFromLocation,
   type WorkspaceView,
 } from './navigation'
 import { SaveAsSheet } from './SaveAsSheet'
-import { createOutputJob, type OutputJob } from './outputJob'
+import { createOutputJob } from './outputJob'
 import { OutputPreview } from './OutputPreview'
 import { downloadOutputPdf, outputApi, outputApiErrorMessage } from './outputApi'
 import {
@@ -35,10 +39,13 @@ import {
   documentHostCommandStates,
   shouldConfirmDocumentExit,
   useDocumentController,
+  type TemplateLocator,
 } from './useDocumentController'
 import { RestoreVersionDialog, UnsavedDialog } from './WorkspaceDialogs'
 import { WorkspaceHome } from './WorkspaceHome'
 import { VersionHistorySheet } from './VersionHistorySheet'
+import { useRuntimeConfig } from './runtimeConfig'
+import type { TemplateRecord } from './templateApi'
 import styles from './App.module.css'
 
 interface LocationState {
@@ -64,7 +71,8 @@ function parseAccountUser(value: unknown): AccountUser {
     typeof record['name'] !== 'string' ||
     typeof record['email'] !== 'string' ||
     !(record['image'] === null || typeof record['image'] === 'string') ||
-    (record['authMode'] !== 'github' && record['authMode'] !== 'dev-bypass')
+    (record['authMode'] !== 'github' && record['authMode'] !== 'dev-bypass') ||
+    typeof record['isAdmin'] !== 'boolean'
   ) {
     throw new Error('Account response is missing required user fields')
   }
@@ -74,6 +82,7 @@ function parseAccountUser(value: unknown): AccountUser {
     email: record['email'],
     image: record['image'],
     authMode: record['authMode'],
+    isAdmin: record['isAdmin'],
   }
 }
 
@@ -238,12 +247,14 @@ function signOut() {
 
 function WorkspaceEditor({
   user,
+  demoMode,
   view,
   navigate,
   registerBlocker,
   runGuarded,
 }: {
   user: AccountUser
+  demoMode: boolean
   view: Exclude<WorkspaceView, { kind: 'home' }>
   navigate(href: string, replace?: boolean, force?: boolean): void
   registerBlocker(blocker: NavigationBlocker): () => void
@@ -261,27 +272,40 @@ function WorkspaceEditor({
   const [restoreError, setRestoreError] = useState<string>()
   const [pendingImport, setPendingImport] = useState<TemplateSchema>()
   const [templateExchangeError, setTemplateExchangeError] = useState<string>()
-  const [outputPreviewJob, setOutputPreviewJob] = useState<OutputJob>()
   const [outputExporting, setOutputExporting] = useState(false)
   const [outputExportError, setOutputExportError] = useState<string>()
   const templateFileInputRef = useRef<HTMLInputElement>(null)
   const allowUnloadRef = useRef(false)
-  const requestedTemplateId =
-    view.kind === 'template'
-      ? view.templateId
-      : view.kind === 'invalid-template'
-        ? ('invalid' as const)
-        : undefined
+  const surface = view.kind === 'template' || view.kind === 'new' ? view.surface : 'design'
+  const requestedTemplate = useMemo<TemplateLocator | undefined>(() => {
+    if (view.kind === 'template') return { kind: 'key', value: view.templateKey }
+    if (view.kind === 'legacy-template') return { kind: 'id', value: view.templateId }
+    if (view.kind === 'invalid-template') return { kind: 'invalid' }
+    return undefined
+  }, [view])
   const document = useDocumentController({
-    requestedTemplateId,
-    onLocationChange: (templateId, replace) => {
+    requestedTemplate,
+    onLocationChange: (record: TemplateRecord | undefined, replace) => {
       navigate(
-        templateId === undefined ? '/app?new=blank' : `/app?template=${templateId}`,
+        record ? documentUrl('design', record.key, record.title) : newDocumentUrl('design'),
         replace,
         true,
       )
     },
   })
+
+  useEffect(() => {
+    if (
+      view.kind !== 'template' ||
+      document.state.key !== view.templateKey ||
+      document.state.status === 'loading' ||
+      document.state.status === 'error'
+    ) {
+      return
+    }
+    const canonical = documentUrl(view.surface, view.templateKey, document.state.title)
+    if (window.location.pathname !== canonical) navigate(canonical, true, true)
+  }, [document.state.key, document.state.status, document.state.title, navigate, view])
   const hasUnsavedChanges = shouldConfirmDocumentExit(document.state)
   const hasUnsavedChangesRef = useRef(hasUnsavedChanges)
   useEffect(() => {
@@ -308,7 +332,6 @@ function WorkspaceEditor({
     setVersionHistoryOpen(false)
     setRestoreVersion(undefined)
     setRestoreError(undefined)
-    setOutputPreviewJob(undefined)
     setOutputExportError(undefined)
   }, [])
 
@@ -436,7 +459,13 @@ function WorkspaceEditor({
             return
           case 'preview':
             closeTransientSurfaces()
-            setOutputPreviewJob(createOutputJob(context.template, 'print'))
+            navigate(
+              document.state.key
+                ? documentUrl('preview', document.state.key, document.state.title)
+                : newDocumentUrl('preview'),
+              false,
+              true,
+            )
             return
           case 'exportDocument':
             await exportOutput(context.template)
@@ -466,8 +495,54 @@ function WorkspaceEditor({
       outputExporting,
       requestHome,
       runGuarded,
+      navigate,
     ],
   )
+
+  const routedPreviewJob = useMemo(
+    () => createOutputJob(document.state.currentTemplate, 'print'),
+    [document.state.currentTemplate],
+  )
+
+  if (surface === 'preview') {
+    if (document.state.status === 'loading' || document.state.status === 'error') {
+      return (
+        <main
+          className={styles.workspaceLoading}
+          role={document.state.status === 'error' ? 'alert' : 'status'}
+        >
+          {document.state.status === 'loading' ? <span aria-hidden="true" /> : null}
+          {document.state.message ?? '正在准备打印预览…'}
+        </main>
+      )
+    }
+    return (
+      <main className={styles.app}>
+        <OutputPreview
+          template={routedPreviewJob.template}
+          renderContext={routedPreviewJob.renderContext}
+          options={routedPreviewJob.options}
+          exporting={outputExporting}
+          exportError={outputExportError}
+          onClose={() =>
+            navigate(
+              document.state.key
+                ? documentUrl('design', document.state.key, document.state.title)
+                : newDocumentUrl('design'),
+              false,
+              true,
+            )
+          }
+          onExport={() => {
+            void exportOutput(routedPreviewJob.template, routedPreviewJob.options.now).catch(
+              () => undefined,
+            )
+          }}
+        />
+        {demoMode ? <DemoModeNotice compact /> : null}
+      </main>
+    )
+  }
 
   return (
     <main className={styles.app}>
@@ -481,21 +556,6 @@ function WorkspaceEditor({
           host={host}
         />
       </div>
-      {outputPreviewJob ? (
-        <OutputPreview
-          template={outputPreviewJob.template}
-          renderContext={outputPreviewJob.renderContext}
-          options={outputPreviewJob.options}
-          exporting={outputExporting}
-          exportError={outputExportError}
-          onClose={() => setOutputPreviewJob(undefined)}
-          onExport={() => {
-            void exportOutput(outputPreviewJob.template, outputPreviewJob.options.now).catch(
-              () => undefined,
-            )
-          }}
-        />
-      ) : null}
       <input
         ref={templateFileInputRef}
         className={styles.templateFileInput}
@@ -537,7 +597,7 @@ function WorkspaceEditor({
           </button>
         </div>
       ) : null}
-      {outputExportError && !outputPreviewJob ? (
+      {outputExportError ? (
         <div className={styles.templateExchangeError} role="alert">
           <div>
             <strong>PDF 导出未完成</strong>
@@ -555,9 +615,10 @@ function WorkspaceEditor({
       <AccountMenu
         user={user}
         surface="editor"
-        onReturnHome={() => navigate('/')}
+        onReturnHome={() => navigate('/app')}
         onSignOut={user.authMode === 'github' ? () => runGuarded(signOut) : undefined}
       />
+      {demoMode ? <DemoModeNotice compact /> : null}
       {saveAsOpen ? (
         <SaveAsSheet
           defaultValue={`${document.state.title} 副本`}
@@ -689,6 +750,8 @@ function ProductCapture({ captureKey }: { captureKey: ProductCaptureKey }) {
 function App() {
   const { location, navigate, registerBlocker, runGuarded } = useBrowserLocation()
   const { access, retry } = useAccountAccess()
+  const runtime = useRuntimeConfig()
+  const demoMode = runtime.state.kind === 'ready' && runtime.state.config.demoMode
   const route = routeFromPathname(location.pathname)
   const captureTemplate = new URLSearchParams(location.search).get('template')
   const captureKey =
@@ -707,7 +770,7 @@ function App() {
 
   if (route === 'workspace') {
     if (access.kind === 'allowed') {
-      const view = workspaceViewFromSearch(location.search)
+      const view = workspaceViewFromLocation(location.pathname, location.search)
       if (view.kind === 'home') {
         return (
           <WorkspaceHome
@@ -719,14 +782,16 @@ function App() {
                 onSignOut={access.user.authMode === 'github' ? signOut : undefined}
               />
             }
-            onNew={() => navigate('/app?new=blank')}
-            onOpen={(templateId) => navigate(`/app?template=${templateId}`)}
+            demoNotice={demoMode ? <DemoModeNotice /> : undefined}
+            onNew={() => navigate(newDocumentUrl('design'))}
+            onOpen={(template) => navigate(documentUrl('design', template.key, template.title))}
           />
         )
       }
       return (
         <WorkspaceEditor
           user={access.user}
+          demoMode={demoMode}
           view={view}
           navigate={navigate}
           registerBlocker={registerBlocker}
@@ -742,15 +807,41 @@ function App() {
     )
   }
 
+  const enterApp = () => {
+    if (access.kind === 'allowed') navigate('/app')
+    else document.querySelector<HTMLButtonElement>('[data-state] button')?.focus()
+  }
+  const retryRuntimeAndAccount = () => {
+    retry()
+    runtime.retry()
+  }
+
+  if (runtime.state.kind === 'checking') {
+    return (
+      <main className={styles.workspaceLoading} role="status">
+        <span aria-hidden="true" />
+        正在读取部署模式…
+      </main>
+    )
+  }
+
+  if (demoMode) {
+    return (
+      <LandingPage
+        access={access}
+        notice={landingNoticeFromSearch(location.search)}
+        onEnterApp={enterApp}
+        onRetry={retryRuntimeAndAccount}
+      />
+    )
+  }
+
   return (
-    <LandingPage
+    <LoginPage
       access={access}
-      notice={landingNoticeFromSearch(location.search)}
-      onEnterApp={() => {
-        if (access.kind === 'allowed') navigate('/app')
-        else document.querySelector<HTMLButtonElement>('[data-state] button')?.focus()
-      }}
-      onRetry={retry}
+      runtimeError={runtime.state.kind === 'error'}
+      onEnterApp={enterApp}
+      onRetry={retryRuntimeAndAccount}
     />
   )
 }

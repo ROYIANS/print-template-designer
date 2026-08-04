@@ -89,13 +89,12 @@ require_value() {
 }
 
 validate_config() {
-  local postgres_user postgres_password postgres_db auth_secret auth_url web_origin allowed_emails
+  local postgres_user postgres_password postgres_db auth_secret auth_url web_origin demo_mode admin_emails
 
   require_value POSTGRES_PASSWORD
   require_value BETTER_AUTH_URL
   require_value BETTER_AUTH_SECRET
   require_value PTD_WEB_ORIGIN
-  require_value PTD_ALLOWED_EMAILS
   require_value GITHUB_CLIENT_ID
   require_value GITHUB_CLIENT_SECRET
 
@@ -122,9 +121,14 @@ validate_config() {
   [[ "$web_origin" =~ ^https?://[^/?#]+/?$ ]] \
     || fail "PTD_WEB_ORIGIN must be an HTTP(S) origin without a path."
 
-  allowed_emails="$(read_env_value PTD_ALLOWED_EMAILS)"
-  [[ "$allowed_emails" == *@*.* ]] \
-    || fail "PTD_ALLOWED_EMAILS must contain at least one email address."
+  demo_mode="$(read_env_value PTD_DEMO_MODE)"
+  demo_mode="${demo_mode:-false}"
+  [[ "$demo_mode" == "true" || "$demo_mode" == "false" ]] \
+    || fail "PTD_DEMO_MODE must be either true or false."
+  admin_emails="$(read_env_value PTD_ADMIN_EMAILS)"
+  if [[ "$demo_mode" == "true" && -z "$admin_emails" ]]; then
+    warn "PTD_DEMO_MODE is enabled without PTD_ADMIN_EMAILS; every account will be reset daily."
+  fi
 
   docker compose --env-file .env config --quiet \
     || fail "docker-compose.yml or .env is invalid."

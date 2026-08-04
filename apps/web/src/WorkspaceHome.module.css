@@ -160,6 +160,10 @@
   border-bottom: 1px solid var(--home-line);
 }
 
+.demoNotice {
+  margin-top: 24px;
+}
+
 .pageTitle h1 {
   margin: 0;
   font-size: clamp(30px, 3vw, 34px);

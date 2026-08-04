@@ -6,6 +6,7 @@ import { TemplateApiError, templateApi, type TemplateApi, type TemplateRecord } 
 
 export interface DocumentState {
   id?: number
+  key?: string
   title: string
   serverVersion?: number
   savedTemplate: TemplateSchema
@@ -15,10 +16,13 @@ export interface DocumentState {
   message?: string
 }
 
+export type TemplateLocator =
+  { kind: 'id'; value: number } | { kind: 'key'; value: string } | { kind: 'invalid' }
+
 interface UseDocumentControllerOptions {
-  requestedTemplateId?: number | 'invalid'
+  requestedTemplate?: TemplateLocator
   api?: TemplateApi
-  onLocationChange: (templateId: number | undefined, replace: boolean) => void
+  onLocationChange: (record: TemplateRecord | undefined, replace: boolean) => void
 }
 
 export interface DocumentController {
@@ -26,7 +30,6 @@ export interface DocumentController {
   setCurrentTemplate(template: TemplateSchema): void
   importDocument(template: TemplateSchema): void
   newDocument(): void
-  openDocument(templateId: number): void
   save(template?: TemplateSchema): Promise<boolean>
   saveAs(title: string, template?: TemplateSchema): Promise<boolean>
   restoreVersion(version: number): Promise<boolean>
@@ -52,16 +55,18 @@ function initialState(): DocumentState {
   }
 }
 
-function loadingState(templateId: number): DocumentState {
+function loadingState(locator: TemplateLocator): DocumentState {
   const template = blankTemplate()
+  const label = locator.kind === 'id' ? `#${locator.value}` : '所选模板'
   return {
-    id: templateId,
-    title: `模板 #${templateId}`,
+    id: locator.kind === 'id' ? locator.value : undefined,
+    key: locator.kind === 'key' ? locator.value : undefined,
+    title: `模板 ${label}`,
     savedTemplate: template,
     currentTemplate: template,
     requiresSave: false,
     status: 'loading',
-    message: `正在载入模板 #${templateId}…`,
+    message: `正在载入模板 ${label}…`,
   }
 }
 
@@ -185,16 +190,25 @@ function errorMessage(error: unknown, action: '载入' | '保存' | '恢复'): s
 }
 
 export function useDocumentController({
-  requestedTemplateId,
+  requestedTemplate,
   api = templateApi,
   onLocationChange,
 }: UseDocumentControllerOptions): DocumentController {
+  const requestedTemplateInvalid = requestedTemplate?.kind === 'invalid'
+  const requestedTemplateId = requestedTemplate?.kind === 'id' ? requestedTemplate.value : undefined
+  const requestedTemplateKey =
+    requestedTemplate?.kind === 'key' ? requestedTemplate.value : undefined
   const [state, setState] = useState<DocumentState>(initialState)
   const stateRef = useRef(state)
   const operationRef = useRef(0)
   const requestRef = useRef<AbortController>()
   const restoreOperationRef = useRef<number>()
   const mountedRef = useRef(true)
+  const onLocationChangeRef = useRef(onLocationChange)
+
+  useEffect(() => {
+    onLocationChangeRef.current = onLocationChange
+  }, [onLocationChange])
 
   const commit = useCallback((update: (previous: DocumentState) => DocumentState) => {
     setState((previous) => {
@@ -235,6 +249,7 @@ export function useDocumentController({
       const template = cloneTemplate(record.content)
       commit(() => ({
         id: record.id,
+        key: record.key,
         title: record.title,
         serverVersion: record.version,
         savedTemplate: template,
@@ -248,13 +263,17 @@ export function useDocumentController({
   )
 
   const load = useCallback(
-    async (templateId: number) => {
+    async (locator: Exclude<TemplateLocator, { kind: 'invalid' }>) => {
       const { controller, operation } = beginRequest()
-      commit(() => loadingState(templateId))
+      commit(() => loadingState(locator))
       try {
-        const record = await api.get(templateId, controller.signal)
+        const record =
+          locator.kind === 'id'
+            ? await api.get(locator.value, controller.signal)
+            : await api.getByKey(locator.value, controller.signal)
         if (!isCurrentOperation(operation)) return
         applyRecord(record, `已载入版本 ${record.version}`)
+        if (locator.kind === 'id') onLocationChangeRef.current(record, true)
       } catch (error) {
         if (isAbortError(error) || !isCurrentOperation(operation)) return
         commit((previous) => ({
@@ -268,12 +287,12 @@ export function useDocumentController({
   )
 
   useEffect(() => {
-    if (requestedTemplateId === 'invalid') {
+    if (requestedTemplateInvalid) {
       cancelRequest()
       commit(() => invalidRouteState())
       return
     }
-    if (requestedTemplateId === undefined) {
+    if (requestedTemplateId === undefined && requestedTemplateKey === undefined) {
       if (stateRef.current.id !== undefined || stateRef.current.status === 'error') {
         const next = initialState()
         cancelRequest()
@@ -281,17 +300,34 @@ export function useDocumentController({
       }
       return
     }
-    if (stateRef.current.id === requestedTemplateId) {
+    const locator: Exclude<TemplateLocator, { kind: 'invalid' }> | undefined =
+      requestedTemplateId !== undefined
+        ? { kind: 'id', value: requestedTemplateId }
+        : requestedTemplateKey !== undefined
+          ? { kind: 'key', value: requestedTemplateKey }
+          : undefined
+    if (!locator) return
+    const currentMatches =
+      (locator.kind === 'id' && stateRef.current.id === locator.value) ||
+      (locator.kind === 'key' && stateRef.current.key === locator.value)
+    if (currentMatches) {
       if (
         stateRef.current.status === 'loading' &&
         (!requestRef.current || requestRef.current.signal.aborted)
       ) {
-        void load(requestedTemplateId)
+        void load(locator)
       }
       return
     }
-    void load(requestedTemplateId)
-  }, [cancelRequest, commit, load, requestedTemplateId])
+    void load(locator)
+  }, [
+    cancelRequest,
+    commit,
+    load,
+    requestedTemplateId,
+    requestedTemplateInvalid,
+    requestedTemplateKey,
+  ])
 
   const setCurrentTemplate = useCallback(
     (template: TemplateSchema) => {
@@ -324,8 +360,8 @@ export function useDocumentController({
   const newDocument = useCallback(() => {
     cancelRequest()
     commit(() => initialState())
-    onLocationChange(undefined, false)
-  }, [cancelRequest, commit, onLocationChange])
+    onLocationChangeRef.current(undefined, false)
+  }, [cancelRequest, commit])
 
   const importDocument = useCallback(
     (source: TemplateSchema) => {
@@ -339,22 +375,9 @@ export function useDocumentController({
         status: 'dirty',
         message: '已导入模板 JSON · 尚未保存到服务器',
       }))
-      onLocationChange(undefined, false)
+      onLocationChangeRef.current(undefined, false)
     },
-    [cancelRequest, commit, onLocationChange],
-  )
-
-  const openDocument = useCallback(
-    (templateId: number) => {
-      if (stateRef.current.id === templateId) {
-        if (stateRef.current.status === 'error') void load(templateId)
-        return
-      }
-      cancelRequest()
-      commit(() => loadingState(templateId))
-      onLocationChange(templateId, false)
-    },
-    [cancelRequest, commit, load, onLocationChange],
+    [cancelRequest, commit],
   )
 
   const persist = useCallback(
@@ -413,6 +436,7 @@ export function useDocumentController({
           const next = {
             ...latest,
             id: record.id,
+            key: record.key,
             title: unchangedWhileSaving
               ? record.title
               : titleFromTemplate(currentTemplate, record.title),
@@ -431,7 +455,7 @@ export function useDocumentController({
                 : `版本 ${record.version} 已保存，另有新的未保存更改`,
           }
         })
-        if (create) onLocationChange(record.id, mode === 'save')
+        if (create) onLocationChangeRef.current(record, mode === 'save')
         return true
       } catch (error) {
         if (isAbortError(error) || !isCurrentOperation(operation)) return false
@@ -444,7 +468,7 @@ export function useDocumentController({
         return false
       }
     },
-    [api, beginRequest, commit, isCurrentOperation, onLocationChange],
+    [api, beginRequest, commit, isCurrentOperation],
   )
 
   const save = useCallback(
@@ -509,20 +533,10 @@ export function useDocumentController({
       setCurrentTemplate,
       importDocument,
       newDocument,
-      openDocument,
       save,
       saveAs,
       restoreVersion,
     }),
-    [
-      importDocument,
-      newDocument,
-      openDocument,
-      restoreVersion,
-      save,
-      saveAs,
-      setCurrentTemplate,
-      state,
-    ],
+    [importDocument, newDocument, restoreVersion, save, saveAs, setCurrentTemplate, state],
   )
 }

@@ -1,0 +1,126 @@
+.notice {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  color: oklch(27% 0.007 70);
+  background: oklch(94% 0.035 35);
+  font-family: 'Sarasa UI SC', 'Microsoft YaHei UI', sans-serif;
+}
+
+.resetIcon {
+  width: 18px;
+  height: 18px;
+  justify-self: center;
+  color: oklch(45% 0.16 35);
+}
+
+.notice div {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.notice strong {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.notice span {
+  color: oklch(44% 0.008 70);
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.notice a {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 11px;
+  border-radius: 6px;
+  color: oklch(98% 0.003 106);
+  background: oklch(27% 0.007 70);
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.notice a svg {
+  width: 15px;
+  height: 15px;
+}
+
+.notice a:hover {
+  background: oklch(35% 0.008 70);
+}
+
+.notice a:focus-visible {
+  outline: 2px solid var(--foliq-focus);
+  outline-offset: 2px;
+}
+
+.notice button {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  color: oklch(44% 0.008 70);
+  background: transparent;
+  cursor: pointer;
+}
+
+.notice button svg {
+  width: 14px;
+  height: 14px;
+}
+
+.notice button:hover {
+  color: oklch(27% 0.007 70);
+  background: oklch(88% 0.025 35);
+}
+
+.notice button:focus-visible {
+  outline: 2px solid var(--foliq-focus);
+  outline-offset: 2px;
+}
+
+.notice[data-compact='true'] {
+  position: fixed;
+  z-index: var(--foliq-layer-demo-notice);
+  right: 10px;
+  bottom: 30px;
+  width: min(340px, calc(100vw - 20px));
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 6px;
+  box-shadow: 0 8px 24px oklch(21% 0.006 70 / 16%);
+}
+
+.notice[data-compact='true'] strong {
+  font-size: 10px;
+}
+
+.notice[data-compact='true'] span {
+  overflow: hidden;
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 620px) {
+  .notice:not([data-compact='true']) {
+    grid-template-columns: 28px minmax(0, 1fr);
+  }
+
+  .notice:not([data-compact='true']) a {
+    grid-column: 2;
+    justify-self: start;
+  }
+}

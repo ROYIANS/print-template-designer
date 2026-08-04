@@ -84,7 +84,6 @@ function Test-DeploymentConfig {
     'BETTER_AUTH_URL',
     'BETTER_AUTH_SECRET',
     'PTD_WEB_ORIGIN',
-    'PTD_ALLOWED_EMAILS',
     'GITHUB_CLIENT_ID',
     'GITHUB_CLIENT_SECRET'
   )) {
@@ -119,9 +118,12 @@ function Test-DeploymentConfig {
     }
   }
 
-  $allowedEmails = Get-ConfigValue 'PTD_ALLOWED_EMAILS'
-  if ($allowedEmails -notmatch '@.+\.') {
-    Stop-WithError 'PTD_ALLOWED_EMAILS must contain at least one email address.'
+  $demoMode = (Get-ConfigValue 'PTD_DEMO_MODE' 'false').ToLowerInvariant()
+  if ($demoMode -notin @('true', 'false')) {
+    Stop-WithError 'PTD_DEMO_MODE must be either true or false.'
+  }
+  if ($demoMode -eq 'true' -and -not (Get-ConfigValue 'PTD_ADMIN_EMAILS')) {
+    Write-WarnStep 'PTD_DEMO_MODE is enabled without PTD_ADMIN_EMAILS; every account will be reset daily.'
   }
 
   & docker compose --env-file .env config --quiet

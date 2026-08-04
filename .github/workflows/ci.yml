@@ -103,7 +103,8 @@ jobs:
       BETTER_AUTH_URL: http://localhost:3000
       BETTER_AUTH_SECRET: ci-only-better-auth-secret-32-bytes
       PTD_WEB_ORIGIN: http://localhost:5173
-      PTD_ALLOWED_EMAILS: owner-a@example.com,owner-b@example.com
+      PTD_ADMIN_EMAILS: owner-a@example.com
+      PTD_DEMO_MODE: 'false'
       GITHUB_CLIENT_ID: ci-placeholder
       GITHUB_CLIENT_SECRET: ci-placeholder
     steps:

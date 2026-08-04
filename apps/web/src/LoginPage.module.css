@@ -1,0 +1,142 @@
+.page {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 32px;
+  color: var(--foliq-ink);
+  background:
+    linear-gradient(var(--foliq-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--foliq-line) 1px, transparent 1px), var(--foliq-surface);
+  background-size: 32px 32px;
+  font-family: 'Sarasa UI SC', 'Microsoft YaHei UI', sans-serif;
+}
+
+.login {
+  width: min(100%, 420px);
+  display: grid;
+  justify-items: start;
+  gap: 28px;
+  padding: 36px;
+  border-radius: 14px;
+  background: oklch(99.35% 0.003 106 / 96%);
+  box-shadow: 0 20px 56px oklch(21% 0.006 70 / 16%);
+}
+
+.brand {
+  color: var(--foliq-ink);
+  font: 400 24px var(--foliq-font-brand);
+  text-decoration: none;
+}
+
+.brand:focus-visible,
+.login button:focus-visible {
+  outline: 2px solid var(--foliq-focus);
+  outline-offset: 3px;
+}
+
+.copy {
+  display: grid;
+  gap: 8px;
+}
+
+.copy p,
+.copy h1,
+.copy span,
+.ready p,
+.ready span,
+.failure p,
+.status,
+.footer {
+  margin: 0;
+}
+
+.copy p {
+  color: var(--foliq-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.copy h1 {
+  max-width: 320px;
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.28;
+  letter-spacing: -0.035em;
+}
+
+.copy span {
+  color: var(--foliq-muted);
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.ready,
+.failure {
+  width: 100%;
+  display: grid;
+  gap: 8px;
+}
+
+.ready p {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.ready span,
+.failure p,
+.status {
+  color: var(--foliq-muted);
+  font-size: 11px;
+}
+
+.ready button,
+.failure button {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 6px;
+  color: oklch(98% 0.003 106);
+  background: oklch(21% 0.006 70);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ready button svg,
+.failure button svg {
+  width: 15px;
+  height: 15px;
+}
+
+.ready .signOut {
+  min-height: 32px;
+  margin: 0;
+  color: var(--foliq-muted);
+  background: transparent;
+  font-weight: 500;
+}
+
+.footer {
+  position: fixed;
+  bottom: 22px;
+  color: var(--foliq-faint);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+}
+
+@media (max-width: 520px) {
+  .page {
+    padding: 16px;
+    background-size: 24px 24px;
+  }
+
+  .login {
+    padding: 28px 24px;
+  }
+}

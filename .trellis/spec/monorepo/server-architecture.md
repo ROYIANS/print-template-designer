@@ -50,16 +50,26 @@
   consumed by the global parser.
 - The first release enables GitHub OAuth only. Email/password, OTP, SMTP, Passkey and browser-stored
   bearer tokens are outside this contract.
-- `PTD_ALLOWED_EMAILS` is parsed server-side, normalized to lowercase and fails closed. New identities
-  must pass it, and every protected request checks it again so removing an email revokes old sessions.
-- `/healthz` remains anonymous. Current-user, template and version endpoints require the Cookie
+- Any valid GitHub OAuth identity may create a session; do not add a second email allowlist in Web,
+  Better Auth hooks or the request Guard. `PTD_ADMIN_EMAILS` is optional, normalized to lowercase and
+  used only for a server-computed `isAdmin` policy.
+- `PTD_DEMO_MODE` is a strict `true|false` deployment switch that defaults false. `/api/runtime` is
+  anonymous and may expose only non-sensitive deployment state (`demoMode`, `demoResetTime`), never
+  administrator email addresses.
+- `/healthz` and `/api/runtime` remain anonymous. Current-user, template and version endpoints require the Cookie
   session Guard; unauthenticated access is 401.
+- Dev Auth Bypass must idempotently ensure its fixed database user when resolving each request; do not
+  permanently cache a user row that can disappear when an explicitly authorized development database reset
+  runs while the watcher remains alive.
 - `Template.ownerId` comes only from the authenticated request. Every read, conditional update,
   delete, version query and restore is scoped in the database by owner; cross-owner access is 404.
 - Auth/session/user/HTTP types remain outside `@ptd/react-designer`.
 
 ## Template Persistence Boundary
 
+- `Template.key` is the opaque, unique URL identity. Integer `Template.id` remains the database primary
+  key and internal mutation/version identifier. Key reads retain `ownerId` scoping; possession of a key
+  is not a sharing grant.
 - `Template` stores the current version; `TemplateVersion` is append-only history with a unique
   `(templateId, version)` key and cascade deletion from `Template`.
 - PostgreSQL stores template content as native `JsonB` through Prisma `Json`, while normalizing every
@@ -74,6 +84,103 @@
 - Do not use unchecked `any` or an unchecked assertion to force application objects into Prisma JSON.
   Validate the recursive JSON value and require an object at the top-level.
 
+## Demo Data Lifecycle
+
+- Demo reset uses the UTC natural day boundary at `00:00 UTC`. The same service handles first protected
+  access, startup compensation and the scheduled next boundary.
+- Administrators are excluded by the current normalized email policy. For every other user, replace only
+  owned `Template` rows and their cascading `TemplateVersion` rows with one deterministic example; never
+  delete `User`, `Account`, `Session` or administrator templates.
+- `DemoUserState.resetDate` is the concurrency boundary. Claim the date with a PostgreSQL upsert and
+  replace templates in the same transaction, so multiple replicas and repeated requests reset a visitor
+  at most once per UTC day.
+
+## Scenario: Public GitHub Access, Demo Restore and Canonical Document Keys
+
+### 1. Scope / Trigger
+
+- Trigger: any change to GitHub access policy, administrator computation, demo deployment behavior,
+  template URL identity or the Web design/preview route contract.
+- Why: this flow spans environment configuration, Better Auth, Guard execution, PostgreSQL state,
+  template API responses and Web routing. A partial change can either lock out trial users, reset
+  administrator data or create URLs that cannot be restored after refresh.
+
+### 2. Signatures
+
+- `GET /api/runtime -> { demoMode: boolean; demoResetTime: "00:00 UTC" }` (anonymous).
+- `GET /api/account/me -> SessionUser & { authMode: "github" | "dev-bypass"; isAdmin: boolean }`.
+- `GET /api/templates/by-key/:key -> TemplateRecord` with `ownerId` applied in the database query.
+- `TemplateRecord` and `TemplateSummary` include `key: string`; create responses must return the generated key.
+- Database additions: `Template.key String @unique @default(cuid())` and
+  `DemoUserState(userId PK/FK, resetDate, updatedAt)`.
+- Canonical Web routes: `/design/:key/:slug` and `/preview/:key/:slug`; integer IDs remain internal
+  mutation/version identifiers.
+
+### 3. Contracts
+
+- `PTD_ADMIN_EMAILS`: optional comma-separated emails, trimmed and lowercased; empty means no administrators.
+- `PTD_DEMO_MODE`: optional strict `true|false`, default `false`.
+- Demo false: `/` is the compact login surface; no automatic visitor template replacement.
+- Demo true: `/` is the product landing page; each non-admin receives one deterministic example per UTC day.
+- Reset scope is exactly owned `Template` plus cascading `TemplateVersion`. Preserve `User`, `Account`,
+  `Session` and every current administrator template.
+- The key is authoritative and the slug is cosmetic. Key lookup never removes the `ownerId` predicate.
+- Legacy `/app?new=blank` and `/app?template=<positive-int>` are migration inputs only and must be
+  replaced by a canonical route after successful load.
+
+### 4. Validation & Error Matrix
+
+| Condition                                     | Required result                                                    |
+| --------------------------------------------- | ------------------------------------------------------------------ |
+| `PTD_DEMO_MODE` is not empty/`true`/`false`   | Server startup error naming the variable                           |
+| `PTD_ADMIN_EMAILS` contains a malformed email | Server startup error; never silently ignore the entry              |
+| Protected endpoint has no Cookie session      | `401 Unauthorized`                                                 |
+| Template key is outside `[A-Za-z0-9_-]{8,64}` | `400 Bad Request`                                                  |
+| Key exists for another owner                  | `404 Not Found`, not `403` and no metadata leak                    |
+| Same visitor is claimed twice on one UTC date | Second claim returns no row and performs no delete/create          |
+| Demo reset transaction fails                  | Claim and template replacement roll back together                  |
+| Web receives malformed `/api/runtime` payload | Treat runtime configuration as unavailable; do not guess demo mode |
+
+### 5. Good / Base / Bad Cases
+
+- Good: demo enabled with one configured administrator; visitors are restored to one example at 00:00 UTC,
+  while administrator templates and all sessions survive.
+- Base: demo disabled and no administrator emails; every valid GitHub identity can log in and keeps its data.
+- Bad: treating an opaque key as a public sharing token, deleting users/sessions during restore, using local
+  midnight, or relying only on an in-process timer without first-access/startup compensation.
+
+### 6. Tests Required
+
+- Access-policy unit tests: normalization, duplicates, empty admin list and malformed email rejection.
+- Auth-config tests: strict demo boolean/default and administrator computation.
+- Demo lifecycle tests: UTC boundary, admin exclusion, same-day no-op, next-day claim and example paper bounds.
+- PostgreSQL integration: exactly one example/version, transaction rollback behavior, user/session preservation
+  and concurrent claims executing replacement once.
+- Template API integration: list/create/get include key, by-key read succeeds for owner and is 404 cross-owner.
+- Web tests: strict runtime parser, key routing/slug canonicalization, legacy ID migration, direct key load and
+  design-to-preview controller preservation.
+- Dev Bypass regression: deleting the fixed user while the watcher remains alive is repaired on the next request.
+
+### 7. Wrong vs Correct
+
+#### Wrong
+
+```ts
+// A key is not authorization, and a demo reset must not erase identity/session state.
+await prisma.user.delete({ where: { id: visitorId } })
+return prisma.template.findUnique({ where: { key } })
+```
+
+#### Correct
+
+```ts
+await transaction.template.deleteMany({ where: { ownerId: visitorId } })
+return prisma.template.findFirst({ where: { key, ownerId } })
+```
+
+The date claim and the template delete/create belong to the same transaction; the Guard invokes this service
+after resolving the authoritative session user.
+
 ## HTTP and Concurrency Contract
 
 - The template API accepts complete template JSON bodies up to **4 MiB**. Express JSON parsing and Nginx
@@ -85,6 +192,8 @@
 - Controllers accept request bodies as `unknown`; pure contract parsers enforce the runtime shape.
 - IDs and version route parameters must be positive integers within Prisma `Int` range
   (`1..2_147_483_647`).
+- Template URL keys accept only the bounded opaque key alphabet; slug segments are cosmetic Web concerns
+  and are never used for authorization or lookup.
 - Malformed input returns 400, missing resources return 404, and stale writes return 409.
 - Create, update and restore are transactions. Every successful current version has exactly one
   immutable snapshot.
@@ -128,6 +237,8 @@ For Server persistence changes, verify at minimum:
 9. Verify Core schema validation rejects `sampleRecords` above 512 KiB even when the complete request is
    below 4 MiB, and that no Server-only shallow validation path can accept it.
 10. Regression-test GitHub login and callback requests with Better Auth mounted before the JSON parser.
+11. For demo-mode changes, verify same-day idempotency, next-day replacement, administrator exclusion,
+    preservation of users/sessions, one example plus version 1, and cross-owner key lookup returning 404.
 
 `prisma migrate reset --force` is destructive even for an isolated PostgreSQL test database. Agents must not bypass
 Prisma's safety gate; run it only after explicit user authorization identifies the exact isolated

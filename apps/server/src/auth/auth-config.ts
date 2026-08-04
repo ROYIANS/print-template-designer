@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { parseAllowedEmails } from './allowlist.js'
+import { isAdminEmail, parseAdminEmails } from './access-policy.js'
 
 export type AuthMode = 'github' | 'dev-bypass'
 
@@ -7,6 +7,8 @@ interface BaseAuthConfig {
   authMode: AuthMode
   baseUrl: string
   webOrigin: string
+  adminEmails: ReadonlySet<string>
+  demoMode: boolean
 }
 
 export interface DevBypassAuthConfig extends BaseAuthConfig {
@@ -75,6 +77,8 @@ export function parseAuthRuntimeConfig(env: NodeJS.ProcessEnv): AuthRuntimeConfi
   const devAuthBypass = parseBooleanEnv(env, 'PTD_DEV_AUTH_BYPASS')
   const baseUrl = parseHttpOrigin(env, 'BETTER_AUTH_URL')
   const webOrigin = parseHttpOrigin(env, 'PTD_WEB_ORIGIN')
+  const adminEmails = parseAdminEmails(env.PTD_ADMIN_EMAILS)
+  const demoMode = parseBooleanEnv(env, 'PTD_DEMO_MODE')
 
   if (devAuthBypass) {
     if (env.NODE_ENV?.trim().toLowerCase() === 'production') {
@@ -86,17 +90,19 @@ export function parseAuthRuntimeConfig(env: NodeJS.ProcessEnv): AuthRuntimeConfi
       authMode: 'dev-bypass',
       baseUrl: baseUrl.origin,
       webOrigin: webOrigin.origin,
+      adminEmails,
+      demoMode,
     }
   }
 
   const secret = requiredEnv(env, 'BETTER_AUTH_SECRET')
   if (secret.length < 32) throw new Error('BETTER_AUTH_SECRET must be at least 32 characters')
-  parseAllowedEmails(env.PTD_ALLOWED_EMAILS)
-
   return {
     authMode: 'github',
     baseUrl: baseUrl.origin,
     webOrigin: webOrigin.origin,
+    adminEmails,
+    demoMode,
     secret,
     githubClientId: requiredEnv(env, 'GITHUB_CLIENT_ID'),
     githubClientSecret: requiredEnv(env, 'GITHUB_CLIENT_SECRET'),
@@ -109,5 +115,17 @@ export class AuthConfigService {
 
   get authMode(): AuthMode {
     return this.value.authMode
+  }
+
+  get demoMode(): boolean {
+    return this.value.demoMode
+  }
+
+  get adminEmails(): ReadonlySet<string> {
+    return this.value.adminEmails
+  }
+
+  isAdmin(email: string): boolean {
+    return isAdminEmail(email, this.adminEmails)
   }
 }

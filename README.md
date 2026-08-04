@@ -42,7 +42,7 @@ Foliq 不是一个只能独立运行的页面 Demo，也没有把技术路线限
 
 - 框架无关的 `TemplateSchema`、canonical Datasource v2、页面配置、序列化、安全数据绑定和组件注册表。
 - 原生 DOM 渲染组件：文本、表格、图像、二维码、条码和基础图形。
-- NestJS + Prisma + PostgreSQL 多用户模板 API，支持 GitHub OAuth、Allowlist、owner 隔离、不可变版本快照、恢复和乐观并发控制。
+- NestJS + Prisma + PostgreSQL 多用户模板 API，支持开放 GitHub OAuth、owner 隔离、可选演示数据恢复、不可变版本快照、恢复和乐观并发控制。
 - GitHub Actions 构建 Web/Server 镜像并发布到 GHCR；Compose 管理 PostgreSQL、migration、Server 和同源 Web 入口。
 - `@ptd/export` 将模板编译为显式派生页，支持 Page Master、页码、明细表智能分页与续页重复表头。
 - Web 提供与设计器同主题的多页打印预览；认证 Server 使用固定 Playwright Chromium 输出保留文字对象的 PDF。
@@ -123,7 +123,7 @@ corepack pnpm dev:all
 
 ### 启动模板服务
 
-Web 的登录与准入检查依赖 Server。复制 `apps/server/.env.example` 并配置 PostgreSQL/GitHub OAuth 后，可单独启动 API：
+Web 的登录与账户检查依赖 Server。复制 `apps/server/.env.example` 并配置 PostgreSQL/GitHub OAuth 后，可单独启动 API：
 
 ```bash
 corepack pnpm --filter server prisma:migrate:deploy

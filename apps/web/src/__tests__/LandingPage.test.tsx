@@ -51,6 +51,7 @@ describe('Landing page brand hero', () => {
               email: 'foliq@example.test',
               image: null,
               authMode: 'dev-bypass',
+              isAdmin: false,
             },
           }}
           onEnterApp={vi.fn()}
