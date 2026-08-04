@@ -96,6 +96,33 @@ Run: `corepack pnpm lint`
 
 Implemented library packages use **Vitest** for unit tests.
 
+### Landing-page current-state copy contract
+
+`apps/web/src/LandingPage.tsx` is a public implementation surface, not a historical marketing
+snapshot. Whenever authentication/access policy, demo reset behavior, persistence/versioning,
+Datasource, preview/output, deployment environment variables, or licensing changes, audit every
+landing-page section in the same change.
+
+- Verify claims against live code and the nearest current README; archived task documents are not
+  current-state authority.
+- Distinguish shipped capabilities, partial vertical slices, and roadmap items explicitly. Do not
+  describe an implemented preview/PDF/data-binding path as unavailable, or a planned Word/batch
+  path as shipped.
+- Security and hosting copy must name real external dependencies. Self-hosted template storage does
+  not mean “no third party” while GitHub OAuth still provides identity.
+- `PTD_ADMIN_EMAILS` identifies administrators; it is not a login allowlist. Public copy must not
+  reintroduce the removed allowlist model.
+- Add or update a LandingPage regression test that asserts the new current-state claim and rejects
+  the stale claim being replaced.
+
+```tsx
+// Wrong: a broad promise that drifts as features change.
+<p>设计模板需要的，都在这里。</p>
+
+// Correct: current shipped boundary plus an explicit adjacent limitation.
+<p>打印预览与服务端 PDF 已上线；Word 与批量输出仍在建设。</p>
+```
+
 ### vitest.config.ts (required in every package)
 
 Default for pure logic packages (no DOM):
