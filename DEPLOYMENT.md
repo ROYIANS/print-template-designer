@@ -21,8 +21,8 @@ Node slim，这是保留文字对象、固定 Chromium/字体和高保真 PDF �
 ## 首次部署
 
 ```bash
-git clone https://github.com/ROYIANS/print-template-designer.git
-cd print-template-designer
+git clone https://github.com/ROYIANS/foliq-print-template-designer.git
+cd foliq-print-template-designer
 cp .env.example .env
 ```
 
@@ -139,8 +139,8 @@ Cookie 或数据库环境，只允许精确 render origin 的 document/script/st
 默认镜像：
 
 ```text
-ghcr.io/royians/print-template-designer-web
-ghcr.io/royians/print-template-designer-server
+    ghcr.io/royians/foliq-print-template-designer-web
+    ghcr.io/royians/foliq-print-template-designer-server
 ```
 
 两个镜像由同一次 workflow 发布相同标签：

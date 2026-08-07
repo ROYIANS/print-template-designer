@@ -25,7 +25,7 @@ describe('DemoModeNotice', () => {
     expect(container.textContent).toContain('每日 08:00（北京时间）')
     expect(container.textContent).toContain('管理员内容不受影响')
     const link = container.querySelector<HTMLAnchorElement>('a')!
-    expect(link.href).toBe('https://github.com/royians/print-template-designer')
+    expect(link.href).toBe('https://github.com/ROYIANS/foliq-print-template-designer')
     expect(link.textContent).toContain('Fork')
   })
 
