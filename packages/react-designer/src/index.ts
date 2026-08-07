@@ -1,3 +1,5 @@
+import '@ptd/react-ui/styles.css'
+
 export { Designer } from './components/Designer'
 export type { DesignerProps } from './components/Designer'
 export { TemplatePreview } from './components/TemplatePreview'

@@ -141,7 +141,7 @@ describe('floating tool dock workspace composition', () => {
       'utf8',
     )
     const themeCss = readFileSync(
-      resolve(process.cwd(), 'src/components/Theme/Theme.module.css'),
+      resolve(process.cwd(), '../react-ui/src/theme/Theme.module.css'),
       'utf8',
     )
     const designerCss = readFileSync(

@@ -24,6 +24,7 @@ import {
   type TextColumnFill,
 } from '@ptd/core'
 import { RiDeleteBinLine, RiLandscapeLine, RiRuler2Line, RiUpload2Line } from '@remixicon/react'
+import { PtdSegmented, PtdSelect } from '@ptd/react-ui'
 import {
   CJK_FONT_FAMILY_OPTIONS,
   composeFontFamily,
@@ -315,7 +316,7 @@ function PageInspector() {
       </InspectorSection>
 
       <InspectorSection title="页面方向" meta={page.pageDirection === 'p' ? '纵向' : '横向'}>
-        <SegmentedInput
+        <PtdSegmented
           label="页面方向"
           value={page.pageDirection}
           options={[
@@ -326,27 +327,25 @@ function PageInspector() {
             },
             { value: 'l', label: '横向', icon: <RiLandscapeLine aria-hidden="true" /> },
           ]}
-          onValue={(value) => store.setPageDirection(value as 'p' | 'l')}
+          onValueChange={(value) => store.setPageDirection(value as 'p' | 'l')}
         />
       </InspectorSection>
 
       <InspectorSection title="页面规格" meta={pageMetric}>
         <div className={styles.fieldGrid}>
-          <SelectInput
+          <PtdSelect
             label="纸张规格"
             wide
             value={page.pageSize}
-            disabled={false}
             options={[
-              ...Object.values(PAGE_SIZES).map(
-                (size) =>
-                  [size.name, `${size.name} · ${size.w} × ${size.h} mm`] as [string, string],
-              ),
-              ['custom', '自定义尺寸'],
+              ...Object.values(PAGE_SIZES).map((size) => ({
+                value: size.name,
+                label: `${size.name} · ${size.w} × ${size.h} mm`,
+              })),
+              { value: 'custom', label: '自定义尺寸' },
             ]}
-            onStart={start}
-            onFinish={finish}
-            onValue={(value) => updatePageSize(value as PageSize)}
+            onOpenChange={(open) => (open ? start() : finish())}
+            onValueChange={(value) => updatePageSize(value as PageSize)}
           />
           {page.pageSize === 'custom' && (
             <>
@@ -381,7 +380,7 @@ function PageInspector() {
 
       <InspectorSection title="内容安全区" meta={marginsLinked ? '四边联动' : '独立设置'}>
         <div className={styles.fieldGrid}>
-          <SegmentedInput
+          <PtdSegmented
             label="边距模式"
             value={marginsLinked ? 'linked' : 'separate'}
             wide
@@ -389,7 +388,7 @@ function PageInspector() {
               { value: 'linked', label: '四边联动' },
               { value: 'separate', label: '独立设置' },
             ]}
-            onValue={(value) => setMarginsLinked(value === 'linked')}
+            onValueChange={(value) => setMarginsLinked(value === 'linked')}
           />
           {(
             [
@@ -438,14 +437,12 @@ function PageInspector() {
             onCancel={cancel}
             onValue={(color) => update({ color })}
           />
-          <SelectInput
+          <PtdSelect
             label="默认字体"
             value={page.fontFamily}
-            disabled={false}
-            options={CJK_FONT_FAMILY_OPTIONS}
-            onStart={start}
-            onFinish={finish}
-            onValue={(fontFamily) => update({ fontFamily })}
+            options={CJK_FONT_FAMILY_OPTIONS.map(([value, label]) => ({ value, label }))}
+            onOpenChange={(open) => (open ? start() : finish())}
+            onValueChange={(fontFamily) => update({ fontFamily })}
           />
           <NumberInput
             label="默认字号"

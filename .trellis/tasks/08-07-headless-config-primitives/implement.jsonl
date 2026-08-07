@@ -1,0 +1,8 @@
+{"file":".trellis/spec/monorepo/package-conventions.md","reason":"新建 @ptd/react-ui workspace 包的 package.json、tsup、exports 和 CSS 子路径契约。"}
+{"file":".trellis/spec/monorepo/typescript-conventions.md","reason":"新包和 React primitive 公共 API 必须遵守 strict TypeScript 与 src/index.ts 导出规则。"}
+{"file":".trellis/spec/monorepo/styling-conventions.md","reason":"PTD theme token、CSS Modules 与 Portal 样式入口需要遵守既有样式边界。"}
+{"file":".trellis/spec/monorepo/directory-structure.md","reason":"新建独立 packages/react-ui 包并修改 react-designer 消费关系时需要遵守 monorepo 分层。"}
+{"file":".trellis/spec/monorepo/quality-guidelines.md","reason":"需要新增 Vitest 契约测试并通过 ESLint、Prettier、typecheck 和构建质量门禁。"}
+{"file":".trellis/spec/monorepo/ptd-ui-system.md","reason":"组件视觉与 Designer 交互边界必须保持 Foliq/PTD UI 系统契约。"}
+{"file":".trellis/spec/guides/code-reuse-thinking-guide.md","reason":"迁移 InspectorField/Select/Segmented 前需要识别可复用样式与现有组件模式。"}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"独立 UI 包、react-designer 与 PropertyInspector 之间存在跨包事件与 CSS 数据流。"}

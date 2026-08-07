@@ -109,6 +109,32 @@ Framework packages (react, preact) go in `peerDependencies`, not `dependencies`.
 > **Host rule**: peer dependencies are not inherited transitively. Every app consuming
 > `@ptd/react-designer` must declare `react`, `react-dom`, and `@preact/signals-react` itself.
 
+### Headless PTD primitive packages
+
+`@ptd/react-ui` is the store-agnostic home for PTD-styled React headless wrappers. Keep React and
+React DOM as peer dependencies; Radix primitives and icon packages are runtime dependencies of the
+wrapper package. The package must expose an explicit `./styles.css` subpath and keep all `--ptd-*`
+tokens and component CSS inside the package.
+
+```tsx
+import { PtdSelect } from '@ptd/react-ui'
+import '@ptd/react-ui/styles.css'
+
+<PtdSelect
+  label="纸张规格"
+  value={pageSize}
+  options={options}
+  onValueChange={setPageSize}
+  onOpenChange={(open) => (open ? beginGesture() : commitGesture())}
+/>
+```
+
+Primitives emit only standard controlled events and must not import Store/history or mutate
+`TemplateSchema`. The business host owns gesture/history and schema writes. When a PTD package bundles
+`@ptd/react-ui` into another CSS-extracted package (currently `@ptd/react-designer`), use tsup's
+`noExternal` for the UI package so the host keeps one public stylesheet entry; consumers of the
+standalone UI package still import its own CSS subpath.
+
 ### Extracted CSS package export
 
 React designer CSS is extracted by tsup and must be a public package subpath:

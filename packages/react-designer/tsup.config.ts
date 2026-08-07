@@ -11,6 +11,8 @@ export default defineConfig({
     // local-css preserves the class-name map consumed by default imports.
     '.css': 'local-css',
   },
+  // Bundle the UI package so react-designer's existing styles.css remains the single host CSS entry.
+  noExternal: ['@ptd/react-ui'],
   external: ['react', 'react-dom', '@preact/signals-react'],
   esbuildOptions(options) {
     options.jsx = 'automatic'

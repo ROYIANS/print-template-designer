@@ -3,7 +3,7 @@ import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 const themeCss = readFileSync(
-  resolve(process.cwd(), 'src/components/Theme/Theme.module.css'),
+  resolve(process.cwd(), '../react-ui/src/theme/Theme.module.css'),
   'utf8',
 )
 const inspectorCss = readFileSync(

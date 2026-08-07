@@ -1,0 +1,254 @@
+.field {
+  min-width: 0;
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  color: var(--ptd-text);
+}
+
+.field[data-wide='true'] {
+  grid-column: 1 / -1;
+}
+
+.fieldLabel {
+  min-width: 0;
+  color: var(--ptd-text-muted);
+  font-size: var(--ptd-text-10);
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.field[data-disabled='true'] .fieldLabel,
+.field[data-locked='true'] .fieldLabel {
+  color: var(--ptd-text-disabled);
+}
+
+.fieldError {
+  color: var(--ptd-danger);
+  font-size: var(--ptd-text-10);
+  line-height: 1.35;
+}
+
+.selectRoot,
+.segmentedRoot {
+  min-width: 0;
+}
+
+.selectTrigger {
+  width: 100%;
+  min-width: 0;
+  height: var(--ptd-control-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ptd-space-2);
+  box-sizing: border-box;
+  padding: 0 7px;
+  border: 0;
+  border-radius: var(--ptd-radius-control);
+  color: var(--ptd-text-strong);
+  background: var(--ptd-surface-field);
+  box-shadow: var(--ptd-shadow-field);
+  font: inherit;
+  font-size: 11px;
+  text-align: left;
+  transition:
+    background-color var(--ptd-duration-instant) var(--ptd-ease-out),
+    box-shadow var(--ptd-duration-instant) var(--ptd-ease-out);
+}
+
+.selectTrigger:hover:not(:disabled) {
+  box-shadow: var(--ptd-shadow-field-hover);
+}
+
+.selectTrigger:focus-visible,
+.segmentedItem:focus-visible {
+  outline: 2px solid var(--ptd-focus);
+  outline-offset: 1px;
+  box-shadow: var(--ptd-shadow-field-hover);
+}
+
+.selectTrigger:disabled {
+  color: var(--ptd-text-disabled);
+  background: var(--ptd-surface-sunken);
+  box-shadow: none;
+  cursor: default;
+}
+
+.selectValue {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.selectIcon {
+  flex: 0 0 auto;
+  color: var(--ptd-text-muted);
+  transition: transform var(--ptd-duration-instant) var(--ptd-ease-out);
+}
+
+.selectTrigger[data-state='open'] .selectIcon {
+  transform: rotate(180deg);
+}
+
+.selectContent {
+  z-index: var(--ptd-layer-floating);
+  min-width: var(--radix-select-trigger-width);
+  max-height: min(320px, var(--radix-select-content-available-height));
+  overflow: hidden;
+  border-radius: var(--ptd-radius-overlay);
+  background: var(--ptd-surface-raised);
+  box-shadow: var(--ptd-shadow-control);
+  animation: selectIn var(--ptd-duration-state) var(--ptd-ease-out);
+}
+
+.selectViewport {
+  padding: var(--ptd-space-1);
+}
+
+.selectItem {
+  min-height: var(--ptd-control-md);
+  display: flex;
+  align-items: center;
+  gap: var(--ptd-space-2);
+  position: relative;
+  padding: 0 var(--ptd-space-2);
+  border-radius: var(--ptd-radius-control-sm);
+  color: var(--ptd-text);
+  font-size: 11px;
+  line-height: 1.3;
+  outline: none;
+  user-select: none;
+}
+
+.selectItem[data-highlighted] {
+  color: var(--ptd-text-strong);
+  background: var(--ptd-action-subtle);
+}
+
+.selectItem[data-disabled] {
+  color: var(--ptd-text-disabled);
+  pointer-events: none;
+}
+
+.selectItemIndicator {
+  width: 14px;
+  flex: 0 0 14px;
+  color: var(--ptd-action);
+}
+
+.selectItemText {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.selectEmpty {
+  padding: var(--ptd-space-3);
+  color: var(--ptd-text-muted);
+  font-size: 11px;
+}
+
+.segmentedRoot {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(var(--ptd-segment-count, 2), minmax(0, 1fr));
+  gap: 1px;
+  padding: 2px;
+  box-sizing: border-box;
+  border-radius: var(--ptd-radius-surface);
+  background: var(--ptd-surface-field);
+  box-shadow: var(--ptd-shadow-field);
+}
+
+.segmentedRoot[data-count='3'] {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.segmentedRoot[data-count='4'] {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.segmentedItem {
+  min-width: 0;
+  min-height: calc(var(--ptd-control-md) - 4px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 6px;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: var(--ptd-radius-control);
+  color: var(--ptd-text-muted);
+  background: transparent;
+  font: inherit;
+  font-size: var(--ptd-text-10);
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.segmentedItem:hover:not(:disabled) {
+  color: var(--ptd-text-strong);
+  background: color-mix(in oklch, var(--ptd-surface-form) 58%, transparent);
+}
+
+.segmentedItem[data-state='on'] {
+  color: var(--ptd-selection-strong);
+  border-color: color-mix(in oklch, var(--ptd-border-subtle) 72%, transparent);
+  background: var(--ptd-surface-form);
+  box-shadow: none;
+}
+
+.segmentedItem:disabled {
+  color: var(--ptd-text-disabled);
+  cursor: default;
+}
+
+.segmentedItem svg {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 auto;
+}
+
+.segmentedLabel {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@keyframes selectIn {
+  from {
+    opacity: 0;
+    transform: translateY(-2px) scale(0.99);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (pointer: coarse) {
+  .selectTrigger {
+    min-height: var(--ptd-control-touch);
+  }
+
+  .segmentedItem {
+    min-height: calc(var(--ptd-control-touch) - 4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .selectContent,
+  .selectIcon,
+  .selectTrigger {
+    animation: none;
+    transition: none;
+  }
+}
