@@ -102,6 +102,9 @@ PDF 引擎使用 `@ptd/export` 生成显式派生页，再让 Chromium 只绘制
 就绪后测量普通/富文本文字溢出（`TEXT_OVERFLOW`，0.5px 容差），并检查资源阻断、空页与旋转页面 bounds。error
 诊断映射为 `422`，warning 诊断随成功响应的内部结果保留；诊断只包含稳定 code、页码、组件 ID 和安全消息。
 
+文本 frame 的 CSS 多列（1–6 栏、非负栏间距、`auto`/`balance` 填充）沿用 Web 的共享输出 bundle；Server
+不实现独立的列布局。超过固定 frame 的最后一栏仍在 PDF 生成前以 `TEXT_OVERFLOW` 阻断。
+
 本地需要显式提供 render bundle 和 Chromium：
 
 ```dotenv

@@ -61,6 +61,29 @@ describe('output preflight', () => {
       expect.objectContaining({ code: 'TEXT_OVERFLOW', sourceComponentId: 'chinese-long-text' }),
     )
   })
+
+  it('reports overflow from the final multi-column frame with its semantic source identity', () => {
+    const root = textFrame('ptd-simple-text__inner')
+    const content = root.querySelector<HTMLElement>('.ptd-simple-text__inner')!
+    content.dataset.ptdColumns = 'true'
+    content.style.setProperty('--ptd-column-count', '2')
+    content.style.setProperty('--ptd-column-gap', '16px')
+    dimensions(content, {
+      scrollWidth: 336,
+      clientWidth: 320,
+      scrollHeight: 120,
+      clientHeight: 120,
+    })
+
+    expect(measureTextOverflow(root)).toContainEqual(
+      expect.objectContaining({
+        code: 'TEXT_OVERFLOW',
+        sourceComponentId: 'chinese-long-text',
+        horizontalOverflowPx: 16,
+        verticalOverflowPx: 0,
+      }),
+    )
+  })
 })
 
 function textFrame(className: string): HTMLElement {

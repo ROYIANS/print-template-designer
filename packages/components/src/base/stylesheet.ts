@@ -36,6 +36,15 @@ const CSS = `
   text-decoration: var(--ptd-text-decoration);
   white-space: var(--ptd-white-space, pre-wrap);
   overflow-wrap: anywhere;
+  column-count: var(--ptd-column-count, 1);
+  column-gap: var(--ptd-column-gap, 24px);
+  column-fill: var(--ptd-column-fill, auto);
+}
+
+/* Flex alignment is retained for the legacy one-column mode. Multi-column flow
+ * requires a block formatting context so text can fragment between columns. */
+.ptd-simple-text__inner[data-ptd-columns='true'] {
+  display: block;
 }
 
 .ptd-text {
@@ -54,6 +63,9 @@ const CSS = `
   letter-spacing: var(--ptd-letter-spacing);
   font-size: var(--ptd-font-size);
   font-family: var(--ptd-font-family);
+  column-count: var(--ptd-column-count, 1);
+  column-gap: var(--ptd-column-gap, 24px);
+  column-fill: var(--ptd-column-fill, auto);
 }
 
 .ptd-text__inner table {

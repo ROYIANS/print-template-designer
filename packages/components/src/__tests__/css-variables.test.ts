@@ -90,6 +90,18 @@ describe('applyCssVars', () => {
     expect(el.style.getPropertyValue('--ptd-white-space')).toBe('pre-wrap')
   })
 
+  it('maps text column settings and applies stable legacy defaults', () => {
+    applyCssVars(el, baseStyle)
+    expect(el.style.getPropertyValue('--ptd-column-count')).toBe('1')
+    expect(el.style.getPropertyValue('--ptd-column-gap')).toBe('24px')
+    expect(el.style.getPropertyValue('--ptd-column-fill')).toBe('auto')
+
+    applyCssVars(el, { ...baseStyle, columnCount: 2, columnGap: 16, columnFill: 'balance' })
+    expect(el.style.getPropertyValue('--ptd-column-count')).toBe('2')
+    expect(el.style.getPropertyValue('--ptd-column-gap')).toBe('16px')
+    expect(el.style.getPropertyValue('--ptd-column-fill')).toBe('balance')
+  })
+
   it('uses inherit for default font-family', () => {
     applyCssVars(el, { ...baseStyle, fontFamily: 'default' })
     expect(el.style.getPropertyValue('--ptd-font-family')).toBe('inherit')

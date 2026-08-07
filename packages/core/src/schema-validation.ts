@@ -13,7 +13,7 @@ import type { TemplatePage, TemplateSchema } from './types/template-schema'
 import type { TemplateOutputDefinition } from './types/output'
 import { isDataPath } from './data-binding/path'
 import { validateRuntimeRecords } from './data-binding/validation'
-import type { PlainTextWhiteSpace } from './types/text'
+import type { PlainTextWhiteSpace, TextColumnFill } from './types/text'
 
 const COMPONENT_TYPES: ReadonlySet<string> = new Set<ComponentType>([
   'RoySimpleText',
@@ -70,6 +70,8 @@ const WHITE_SPACE_VALUES: ReadonlySet<PlainTextWhiteSpace> = new Set([
   'pre-line',
   'nowrap',
 ])
+
+const TEXT_COLUMN_FILL_VALUES: ReadonlySet<TextColumnFill> = new Set(['auto', 'balance'])
 
 const STYLE_BOOLEAN_KEYS = [
   'isUnderLine',
@@ -134,6 +136,24 @@ function isComponentStyle(value: unknown): value is ComponentStyle {
   if (
     value['whiteSpace'] !== undefined &&
     !WHITE_SPACE_VALUES.has(value['whiteSpace'] as PlainTextWhiteSpace)
+  ) {
+    return false
+  }
+  const columnCount = value['columnCount']
+  if (
+    columnCount !== undefined &&
+    (!isFiniteNumber(columnCount) ||
+      !Number.isInteger(columnCount) ||
+      columnCount < 1 ||
+      columnCount > 6)
+  ) {
+    return false
+  }
+  const columnGap = value['columnGap']
+  if (columnGap !== undefined && (!isFiniteNumber(columnGap) || columnGap < 0)) return false
+  if (
+    value['columnFill'] !== undefined &&
+    !TEXT_COLUMN_FILL_VALUES.has(value['columnFill'] as TextColumnFill)
   ) {
     return false
   }

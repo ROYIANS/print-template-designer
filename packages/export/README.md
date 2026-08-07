@@ -30,6 +30,9 @@ TemplateSchema + RenderContext + OutputOptions
 - 等待字体、嵌入图片、二维码、条码与连续两帧布局稳定。
 - 统一 preflight 在 readiness 后测量普通/富文本 `TEXT_OVERFLOW`（0.5px 容差），并检查空页与旋转后的页面边界；
   fatal diagnostics 阻止 PDF，warning diagnostics 可继续输出。
+- 普通文本与富文本共享同一套 CSS 多列变量：`columnCount`（1–6）、`columnGap`（非负画布像素）和
+  `columnFill`（`auto` / `balance`）。多列仍属于单个固定 frame；超过最后一栏由统一 preflight 报告
+  `TEXT_OVERFLOW`，不会自动创建跨页文本流。
 - 非嵌入图片在创建网络请求前被阻止，并返回 `REMOTE_RESOURCE_BLOCKED`。
 - 稳定 `data-ptd-output-*` 标记与显式 `destroy()`，供预览、内部 render bundle 和测试使用。
 

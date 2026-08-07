@@ -91,6 +91,8 @@ corepack pnpm --filter web build
   不进入 `@ptd/react-designer`。
 - 打印预览必须调用 `@ptd/export` 的 `preflightOutputDocument()`；它统一 compiler、字体/组件/图片 readiness、
   `TEXT_OVERFLOW`、资源阻断、空页和页面 bounds 诊断。预览会显示页码与 source component，error 诊断禁止导出。
+- `RoySimpleText` 与 `RoyText` 的 `columnCount`、`columnGap`、`columnFill` 由共享 Components DOM/CSS 渲染，
+  Web 预览不维护第二套多列实现；调整后仍保留单一组件 ID 和统一溢出诊断。
 - Web/Server 持久化的是 canonical Datasource v2 定义、结构化绑定和用户明确保存的受限 sample records；
   临时 Host 运行时记录默认不写入模板。
 - `<Designer renderContext={...}>` 是 Host 注入临时运行时数据、当前记录、locale、timeZone 和显式 `now`

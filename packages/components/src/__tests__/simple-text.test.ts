@@ -82,6 +82,22 @@ describe('RoySimpleText', () => {
     expect(inner?.innerHTML).toBe('updated')
   })
 
+  it('marks multi-column frames while preserving the semantic inner element', () => {
+    const schema = {
+      ...makeSchema('two columns'),
+      style: { ...makeSchema('two columns').style, columnCount: 2 },
+    }
+    const comp = new RoySimpleText(schema)
+    const parent = document.createElement('div')
+    comp.mount(parent)
+    const inner = parent.querySelector('.ptd-simple-text__inner')
+    expect(inner?.getAttribute('data-ptd-columns')).toBe('true')
+    expect(inner?.textContent).toBe('two columns')
+
+    comp.update(makeSchema('one column'))
+    expect(inner?.getAttribute('data-ptd-columns')).toBeNull()
+  })
+
   it('destroys and removes from DOM', () => {
     const schema = makeSchema('bye')
     const comp = new RoySimpleText(schema)

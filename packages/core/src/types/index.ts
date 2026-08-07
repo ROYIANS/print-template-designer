@@ -12,11 +12,14 @@ export type {
   ComponentCreationMode,
 } from './component-schema'
 export {
+  DEFAULT_TEXT_COLUMN_COUNT,
+  DEFAULT_TEXT_COLUMN_GAP,
+  DEFAULT_TEXT_COLUMN_FILL,
   DEFAULT_PLAIN_TEXT_WHITE_SPACE,
   normalizePlainText,
   normalizePlainTextWhiteSpace,
 } from './text'
-export type { PlainTextWhiteSpace } from './text'
+export type { PlainTextWhiteSpace, TextColumnFill } from './text'
 export {
   BAR_CODE_FORMATS,
   DEFAULT_BAR_CODE_PROPS,

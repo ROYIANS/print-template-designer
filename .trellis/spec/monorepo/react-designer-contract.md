@@ -227,6 +227,10 @@ import '@ptd/react-designer/styles.css'
 
 #### Inspector controls and color state
 
+- `RoySimpleText` and `RoyText` expose bounded `columnCount` (1–6), non-negative `columnGap` and
+  `columnFill` (`auto` / `balance`) controls in Single Inspector. Each interaction uses the existing transient
+  gesture boundary, preserves one component identity and commits at most one history entry; non-text components do
+  not expose these controls.
 - Page, Single, Multi and free-table business panels compose the shared `InspectorControls` layer;
   native input/select/textarea/color elements are implementation details of that layer rather than
   independently styled business fields.

@@ -83,8 +83,10 @@ preflightOutputDocument(
 
 - Preflight order is compiler diagnostics → fonts/component/image readiness → two stable frames → text overflow → page
   bounds/empty-page checks.
-- `RoySimpleText` and `RoyText` content frames are measured with a default `0.5px` tolerance. Unspecified overflow policy
-  is fatal (`severity: 'error'`); there is no multi-column or cross-page text flow in this milestone.
+- `RoySimpleText` and `RoyText` content frames are measured with a default `0.5px` tolerance. Their in-frame CSS
+  multi-column settings (`columnCount` 1–6, non-negative `columnGap`, `columnFill` auto/balance) are measured on the
+  final rendered DOM; content beyond the final column remains fatal `TEXT_OVERFLOW`. Cross-page text flow is still
+  deferred.
 - Web displays safe code/message plus page/component identity. Server blocks PDF bytes on error diagnostics and returns
   warning codes in `X-PTD-Output-Warnings`; neither surface exposes remote URLs, cookies, secrets or local paths.
 

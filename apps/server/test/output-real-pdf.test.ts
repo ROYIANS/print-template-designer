@@ -122,6 +122,23 @@ function overflowingRichTextInput(): OutputPdfInput {
   ])
 }
 
+function twoColumnInput(lineCount: number): OutputPdfInput {
+  const value = Array.from(
+    { length: lineCount },
+    (_, index) => `第 ${index + 1} 行：多列中文输出验收`,
+  ).join('\n')
+  const component = textComponent('two-column-text', value, 120)
+  component.style.height = 180
+  component.style.fontSize = 14
+  component.style.lineHeight = '1.4'
+  component.style.columnCount = 2
+  component.style.columnGap = 24
+  component.style.columnFill = 'auto'
+  return outputInput(lineCount > 12 ? '双栏溢出验收' : '双栏适配验收', [
+    { id: 'two-column-page', componentData: [component] },
+  ])
+}
+
 describe.skipIf(!RUN_REAL_PDF)('real Chromium PDF output', () => {
   const service = new OutputBrowserService(chromium as OutputBrowserType, new OutputConfigService())
   const controller = new OutputController(service)
@@ -165,6 +182,20 @@ describe.skipIf(!RUN_REAL_PDF)('real Chromium PDF output', () => {
     },
     30_000,
   )
+
+  it('renders a fitting two-column Chinese frame through the shared Chromium DOM', async () => {
+    const result = await service.renderPdf(twoColumnInput(12))
+    expect(result.pdf.subarray(0, 5).toString('ascii')).toBe('%PDF-')
+    expect(result.pageCount).toBe(1)
+    expect(result.diagnostics.filter((diagnostic) => diagnostic.severity === 'error')).toEqual([])
+  }, 30_000)
+
+  it('reports final-column overflow as TEXT_OVERFLOW before PDF bytes', async () => {
+    await expect(service.renderPdf(twoColumnInput(30))).rejects.toMatchObject({
+      kind: 'layout',
+      diagnosticCodes: expect.arrayContaining(['TEXT_OVERFLOW']),
+    })
+  }, 30_000)
 
   it('maps a real overflow to HTTP 422 without sending PDF bytes', async () => {
     let responseStatus: number | undefined

@@ -2,7 +2,8 @@
 
 > Milestone A (2026-08) implemented the P0 text correctness slice: Corepack/pnpm 11.18 CI ordering,
 > plain-text newline/`white-space` parity, rich blank-paragraph canonicalization, unified browser preflight,
-> and DOM-backed `TEXT_OVERFLOW` diagnostics. The remaining roadmap items below are future capabilities.
+> and DOM-backed `TEXT_OVERFLOW` diagnostics. Milestone B1 (2026-08) implemented bounded in-frame columns for
+> `RoySimpleText` and `RoyText`; the remaining roadmap items below are future capabilities.
 
 > Status: **Proposed**. This document records implementation-ready capability decisions learned from building
 > complex report and editorial templates. It is a roadmap, not a statement that the capabilities already exist.
@@ -651,7 +652,7 @@ detect.
 
 ### Milestone B — Editorial composition
 
-1. Add in-frame columns to both text types.
+1. **Implemented (B1):** add in-frame columns to both text types.
 2. Add named paragraph/character styles.
 3. Add first-line indent, paragraph spacing and keep-with-next.
 4. Add image focal point and effective-DPI preflight.

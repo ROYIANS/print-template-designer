@@ -71,6 +71,65 @@ describe('serialization', () => {
     )
   })
 
+  it('round-trips explicit text column settings without materializing legacy defaults', () => {
+    const template: TemplateSchema = {
+      ...sampleTemplate,
+      pages: [
+        {
+          id: 'page-1',
+          componentData: [
+            {
+              id: 'plain',
+              component: 'RoySimpleText',
+              propValue: '两列内容',
+              style: {
+                width: 240,
+                height: 80,
+                rotate: 0,
+                opacity: 1,
+                columnCount: 2,
+                columnGap: 16,
+                columnFill: 'balance',
+              },
+              groupStyle: {},
+              position: {},
+            },
+          ],
+        },
+      ],
+    }
+    const restored = deserialize(serialize(template))
+    expect(restored.pages[0]!.componentData[0]!.style).toMatchObject({
+      columnCount: 2,
+      columnGap: 16,
+      columnFill: 'balance',
+    })
+
+    const legacy = deserialize(
+      JSON.stringify({
+        ...sampleTemplate,
+        pages: [
+          {
+            id: 'legacy-page',
+            componentData: [
+              {
+                id: 'legacy-text',
+                component: 'RoySimpleText',
+                propValue: 'legacy',
+                style: { width: 100, height: 40, rotate: 0, opacity: 1 },
+                groupStyle: {},
+                position: {},
+              },
+            ],
+          },
+        ],
+      }),
+    )
+    expect(legacy.pages[0]!.componentData[0]!.style.columnCount).toBeUndefined()
+    expect(legacy.pages[0]!.componentData[0]!.style.columnGap).toBeUndefined()
+    expect(legacy.pages[0]!.componentData[0]!.style.columnFill).toBeUndefined()
+  })
+
   it('round-trips an optional default page master', () => {
     const withOutput: TemplateSchema = {
       ...sampleTemplate,

@@ -22,6 +22,11 @@ export class RoySimpleText extends BaseComponent {
       this.container.appendChild(inner)
     }
     this.inner = inner
+    if ((this.schema.style.columnCount ?? 1) > 1) {
+      inner.dataset.ptdColumns = 'true'
+    } else {
+      delete inner.dataset.ptdColumns
+    }
     const text = this.resolveText()
     inner.textContent = text
   }

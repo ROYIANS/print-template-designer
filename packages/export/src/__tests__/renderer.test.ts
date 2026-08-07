@@ -107,6 +107,51 @@ describe('output DOM renderer', () => {
     expect(container.childElementCount).toBe(0)
   })
 
+  it('preserves one semantic text component while applying shared multi-column variables', () => {
+    const plain: ComponentSchema = {
+      id: 'columns-plain',
+      component: 'RoySimpleText',
+      propValue: '第一栏内容\n第二栏内容',
+      style: {
+        width: 320,
+        height: 120,
+        rotate: 0,
+        opacity: 1,
+        columnCount: 2,
+        columnGap: 16,
+        columnFill: 'balance',
+      },
+      groupStyle: {},
+      position: { x: 20, y: 30 },
+    }
+    const rich: ComponentSchema = {
+      ...plain,
+      id: 'columns-rich',
+      component: 'RoyText',
+      propValue: '<p>富文本第一栏</p><p>富文本第二栏</p>',
+    }
+    const container = document.createElement('div')
+    document.body.append(container)
+
+    const mounted = mountOutputDocument(container, output([fragment(plain), fragment(rich)]))
+    const plainInner = container.querySelector<HTMLElement>('.ptd-simple-text__inner')!
+    const richInner = container.querySelector<HTMLElement>('.ptd-text__inner')!
+    expect(plainInner.dataset.ptdColumns).toBe('true')
+    expect(richInner).not.toBeNull()
+    expect(container.querySelectorAll('[data-ptd-source-component]')).toHaveLength(2)
+    expect(
+      container
+        .querySelector<HTMLElement>('[data-ptd-source-component="columns-plain"] .ptd-component')
+        ?.style.getPropertyValue('--ptd-column-count'),
+    ).toBe('2')
+    expect(
+      container
+        .querySelector<HTMLElement>('[data-ptd-source-component="columns-rich"] .ptd-component')
+        ?.style.getPropertyValue('--ptd-column-fill'),
+    ).toBe('balance')
+    mounted.destroy()
+  })
+
   it('renders semantic detail fragments with an explicit repeated table header', () => {
     const props: DetailTableFragmentProps = {
       kind: 'foliq-detail-table-fragment',
