@@ -868,3 +868,38 @@ Opened GitHub OAuth access, added admin-aware demo restoration, keyed design and
 ### Next Steps
 
 - None - task complete
+
+
+## Session 26: Output correctness Milestone A
+
+**Date**: 2026-08-07
+**Task**: Output correctness Milestone A
+**Branch**: `feature/refc`
+
+### Summary
+
+统一 pnpm/CI 基线，修复普通与富文本空白一致性，新增 TEXT_OVERFLOW 与统一 preflight，并通过真实 Chromium 422 阻断验收。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `aaf3b30` | (see git log) |
+| `e48d0af` | (see git log) |
+| `04d9094` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
