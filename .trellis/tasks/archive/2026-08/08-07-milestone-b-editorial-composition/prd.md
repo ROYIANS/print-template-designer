@@ -20,7 +20,14 @@ contract.
 - The roadmap defines `columnCount`, `columnGap`, `columnFill`, optional column rules and an explicit future
   `overflowPolicy`; cross-page linked text flow remains a later Milestone D capability.
 
-## Assumptions (temporary)
+## Decision
+
+The first delivery is **B1: in-frame columns only**. It includes `columnCount`, `columnGap` and `columnFill` for
+plain/rich text, shared rendering and Inspector controls, plus overflow and real Chromium coverage. Named typography
+styles, paragraph spacing and keep-with-next are deferred to B2 so the first new layout mode stays compatible with the
+recently stabilized serialization, history and preflight contracts.
+
+## Assumptions
 
 - This first slice uses CSS multi-column layout inside the existing fixed frame; it does not create persisted child
   components or output fragments for individual columns.
@@ -31,8 +38,7 @@ contract.
 
 ## Open Questions
 
-- Should the first Milestone B delivery include only in-frame columns, or also named typography styles and paragraph
-  spacing/keep-with-next controls?
+- None for B1. B2 scope remains intentionally deferred until the B1 vertical slice is verified.
 
 ## Requirements (evolving)
 
@@ -49,18 +55,26 @@ contract.
 - Add Core, Components, React Designer, Export and real Chromium regression coverage for valid values, invalid values,
   layout declarations, history behavior, parity and overflow.
 
+## Implementation Plan
+
+1. Extend the Core style contract, validation and serialization round-trip tests.
+2. Add shared Components CSS variables and multi-column declarations for both text renderers.
+3. Add Property Inspector controls with one gesture/history mutation and React Designer regression tests.
+4. Verify Export/Web/Server parity, overflow diagnostics and real Chromium fitting/overflow smoke.
+5. Update the nearest README/spec contract and run the full quality gate.
+
 ## Acceptance Criteria (evolving)
 
-- [ ] Core accepts `columnCount` integers from 1–6, finite non-negative `columnGap`, and `columnFill` values `auto` or
+- [x] Core accepts `columnCount` integers from 1–6, finite non-negative `columnGap`, and `columnFill` values `auto` or
       `balance`; invalid values are rejected or normalized at the canonical boundary.
-- [ ] A plain-text and a rich-text component with two columns preserve one component ID and render deterministic
+- [x] A plain-text and a rich-text component with two columns preserve one component ID and render deterministic
       column declarations in proof and output DOM.
-- [ ] `columnFill: auto` has sequential reading order and `columnFill: balance` is explicitly represented in CSS.
-- [ ] Changing column settings is one controlled history gesture and survives serialize/deserialize round-trip.
-- [ ] Content exceeding the final column produces `TEXT_OVERFLOW` with the existing source component/page identity.
-- [ ] Web and Server use the same renderer/preflight path; no second column implementation is introduced in Server.
-- [ ] Core/Components/Export/React Designer/Web/Server tests, typecheck, lint and build remain green.
-- [ ] A real Chromium smoke covers a fitting two-column Chinese fixture and an overflowing final-column fixture.
+- [x] `columnFill: auto` has sequential reading order and `columnFill: balance` is explicitly represented in CSS.
+- [x] Changing column settings is one controlled history gesture and survives serialize/deserialize round-trip.
+- [x] Content exceeding the final column produces `TEXT_OVERFLOW` with the existing source component/page identity.
+- [x] Web and Server use the same renderer/preflight path; no second column implementation is introduced in Server.
+- [x] Core/Components/Export/React Designer/Web/Server tests, typecheck, lint and build remain green.
+- [x] A real Chromium smoke covers a fitting two-column Chinese fixture and an overflowing final-column fixture.
 
 ## Definition of Done (team quality bar)
 
