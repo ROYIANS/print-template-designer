@@ -7,7 +7,7 @@ ENV PATH="$PNPM_HOME:$PATH"
 
 RUN corepack enable \
     && corepack prepare pnpm@11.18.0 --activate \
-    && test "$(pnpm --version)" = "11.18.0"
+    && test "$(corepack pnpm --version)" = "11.18.0"
 
 WORKDIR /app
 
@@ -20,7 +20,7 @@ COPY packages/export/package.json packages/export/
 COPY packages/react-designer/package.json packages/react-designer/
 COPY apps/web/package.json apps/web/
 
-RUN pnpm install --frozen-lockfile
+RUN corepack pnpm install --frozen-lockfile
 
 FROM dependencies AS build
 
@@ -30,11 +30,11 @@ COPY packages/export packages/export
 COPY packages/react-designer packages/react-designer
 COPY apps/web apps/web
 
-RUN pnpm --filter @ptd/core build \
-    && pnpm --filter @ptd/components build \
-    && pnpm --filter @ptd/export build \
-    && pnpm --filter @ptd/react-designer build \
-    && pnpm --filter web build
+RUN corepack pnpm --filter @ptd/core build \
+    && corepack pnpm --filter @ptd/components build \
+    && corepack pnpm --filter @ptd/export build \
+    && corepack pnpm --filter @ptd/react-designer build \
+    && corepack pnpm --filter web build
 
 FROM nginx:1.27-alpine AS runtime
 

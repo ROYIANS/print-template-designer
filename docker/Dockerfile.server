@@ -10,7 +10,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* \
     && corepack enable \
     && corepack prepare pnpm@11.18.0 --activate \
-    && test "$(pnpm --version)" = "11.18.0"
+    && test "$(corepack pnpm --version)" = "11.18.0"
 
 WORKDIR /app
 
@@ -20,7 +20,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json .npmrc .
 COPY packages/core/package.json packages/core/
 COPY apps/server/package.json apps/server/
 
-RUN pnpm install --frozen-lockfile --filter server...
+RUN corepack pnpm install --frozen-lockfile --filter server...
 
 FROM dependencies AS build
 
@@ -28,8 +28,8 @@ COPY packages/core packages/core
 COPY apps/server apps/server
 
 RUN export DATABASE_URL="postgresql://prisma:prisma@localhost:5432/prisma" \
-    && pnpm --filter @ptd/core build \
-    && pnpm --filter server build
+    && corepack pnpm --filter @ptd/core build \
+    && corepack pnpm --filter server build
 
 FROM base AS production-dependencies
 
@@ -37,7 +37,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 COPY packages/core/package.json packages/core/
 COPY apps/server/package.json apps/server/
 
-RUN pnpm install --prod --frozen-lockfile --filter server...
+RUN corepack pnpm install --prod --frozen-lockfile --filter server...
 
 FROM mcr.microsoft.com/playwright:v1.62.0-noble AS runtime
 

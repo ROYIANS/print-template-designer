@@ -34,7 +34,7 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: corepack pnpm install --frozen-lockfile
 
       - name: Validate Bash and Compose deployment files
         shell: bash
@@ -59,25 +59,28 @@ jobs:
 
       - name: Typecheck and build frontend dependencies
         run: |
-          pnpm --filter @ptd/core typecheck
-          pnpm --filter @ptd/core build
-          pnpm --filter @ptd/components typecheck
-          pnpm --filter @ptd/components build
-          pnpm --filter @ptd/react-designer typecheck
-          pnpm --filter @ptd/react-designer build
-          pnpm --filter web typecheck
+          corepack pnpm --filter @ptd/core typecheck
+          corepack pnpm --filter @ptd/core build
+          corepack pnpm --filter @ptd/components typecheck
+          corepack pnpm --filter @ptd/components build
+          corepack pnpm --filter @ptd/export typecheck
+          corepack pnpm --filter @ptd/export build
+          corepack pnpm --filter @ptd/react-designer typecheck
+          corepack pnpm --filter @ptd/react-designer build
+          corepack pnpm --filter web typecheck
 
       - name: Test frontend packages
         run: |
-          pnpm --filter @ptd/core test
-          pnpm --filter @ptd/components test
-          pnpm --filter @ptd/react-designer test
+          corepack pnpm --filter @ptd/core test
+          corepack pnpm --filter @ptd/components test
+          corepack pnpm --filter @ptd/export test
+          corepack pnpm --filter @ptd/react-designer test
 
       - name: Lint frontend
-        run: pnpm lint:frontend
+        run: corepack pnpm lint:frontend
 
       - name: Build web
-        run: pnpm --filter web build
+        run: corepack pnpm --filter web build
 
   server-quality:
     name: Server quality (PostgreSQL)
@@ -118,20 +121,20 @@ jobs:
           node-version: 22
           cache: pnpm
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: corepack pnpm install --frozen-lockfile
       - name: Build core dependency
-        run: pnpm --filter @ptd/core build
+        run: corepack pnpm --filter @ptd/core build
       - name: Validate and deploy PostgreSQL migration
         run: |
-          pnpm --filter server prisma:validate
-          pnpm --filter server prisma:migrate:deploy
-          pnpm --filter server prisma:generate
+          corepack pnpm --filter server prisma:validate
+          corepack pnpm --filter server prisma:migrate:deploy
+          corepack pnpm --filter server prisma:generate
       - name: Check and test Server
         run: |
-          pnpm --filter server lint
-          pnpm --filter server typecheck
-          pnpm --filter server test
-          pnpm --filter server build
+          corepack pnpm --filter server lint
+          corepack pnpm --filter server typecheck
+          corepack pnpm --filter server test
+          corepack pnpm --filter server build
 
   container-quality:
     name: Container build

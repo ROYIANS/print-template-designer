@@ -12,20 +12,20 @@
     "type": "git",
     "url": "git://github.com/royians/print-template-designer.git"
   },
-  "packageManager": "pnpm@11.20.0",
+  "packageManager": "pnpm@11.18.0",
   "type": "module",
   "engines": {
     "node": ">=20",
-    "pnpm": ">=11"
+    "pnpm": ">=11.18.0 <12"
   },
   "scripts": {
-    "build": "pnpm -r build",
+    "build": "corepack pnpm -r build",
     "dev": "corepack pnpm run dev:web",
     "dev:web": "corepack pnpm --filter @ptd/core build && corepack pnpm --filter @ptd/components build && corepack pnpm --filter @ptd/export build && corepack pnpm --filter @ptd/react-designer build && corepack pnpm --parallel --filter @ptd/core --filter @ptd/components --filter @ptd/export --filter @ptd/react-designer --filter web dev",
     "dev:all": "corepack pnpm --filter @ptd/core build && corepack pnpm --filter @ptd/components build && corepack pnpm --filter @ptd/export build && corepack pnpm --filter @ptd/react-designer build && corepack pnpm --parallel --filter @ptd/core --filter @ptd/components --filter @ptd/export --filter @ptd/react-designer --filter web --filter server dev",
     "lint": "eslint .",
     "lint:frontend": "eslint packages/core/src packages/components/src packages/react-designer/src apps/web/src --max-warnings=0",
-    "typecheck": "pnpm -r typecheck"
+    "typecheck": "corepack pnpm -r typecheck"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
