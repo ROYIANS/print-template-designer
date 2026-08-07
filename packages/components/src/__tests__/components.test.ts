@@ -91,4 +91,22 @@ describe('All components smoke test', () => {
 
     component.destroy()
   })
+
+  it('maps explicit rich-text paragraph attributes to shared CSS variables', () => {
+    const component = new RoyText(
+      makeSchema(
+        'RoyText',
+        '<p data-ptd-space-before="8" data-ptd-space-after="12" data-ptd-first-line-indent="24">正文</p>',
+      ),
+    )
+    const parent = document.createElement('div')
+    component.mount(parent)
+
+    const paragraph = parent.querySelector('p') as HTMLElement
+    expect(paragraph.style.getPropertyValue('--ptd-paragraph-space-before')).toBe('8px')
+    expect(paragraph.style.getPropertyValue('--ptd-paragraph-space-after')).toBe('12px')
+    expect(paragraph.style.getPropertyValue('--ptd-paragraph-first-line-indent')).toBe('24px')
+
+    component.destroy()
+  })
 })

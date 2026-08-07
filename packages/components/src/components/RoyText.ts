@@ -1,6 +1,7 @@
 import type { ComponentSchema } from '@ptd/core'
 import { BaseComponent } from '../base/base-component'
 import { canonicalizeRichTextHtml } from './richTextHtml'
+import { applyRichTextParagraphStyles } from './richTextParagraph'
 
 export class RoyText extends BaseComponent {
   private inner: HTMLDivElement | null = null
@@ -21,11 +22,13 @@ export class RoyText extends BaseComponent {
     this.inner = inner
     const html = typeof this.schema.propValue === 'string' ? this.schema.propValue : ''
     inner.innerHTML = canonicalizeRichTextHtml(html)
+    applyRichTextParagraphStyles(inner)
   }
 
   setContent(html: string): void {
     if (this.inner) {
       this.inner.innerHTML = canonicalizeRichTextHtml(html)
+      applyRichTextParagraphStyles(this.inner)
     }
   }
 }

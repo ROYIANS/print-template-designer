@@ -14,6 +14,14 @@ describe('sanitizeRichTextHtml', () => {
     expect(canonicalizeRichTextHtml('<script>alert(1)</script><p></p>')).toBe('<p><br></p>')
   })
 
+  it('removes editor-only trailing breaks without changing the number of paragraphs', () => {
+    expect(
+      canonicalizeRichTextHtml(
+        '<p>第一行</p><p><br class="ProseMirror-trailingBreak"></p><p>第三行</p>',
+      ),
+    ).toBe('<p>第一行</p><p><br></p><p>第三行</p>')
+  })
+
   it('keeps the supported semantic formatting subset', () => {
     expect(
       sanitizeRichTextHtml(
@@ -51,5 +59,23 @@ describe('sanitizeRichTextHtml', () => {
     expect(sanitizeRichTextHtml('<p><span style="font-size: 10.5pt">正文</span></p>')).toBe(
       '<p><span style="font-size: 10.5pt">正文</span></p>',
     )
+  })
+
+  it('keeps only bounded explicit paragraph layout attributes in canonical order', () => {
+    expect(
+      canonicalizeRichTextHtml(
+        '<p data-ptd-first-line-indent="24" data-ptd-space-after="12" data-ptd-space-before="8">正文</p>',
+      ),
+    ).toBe(
+      '<p data-ptd-space-before="8" data-ptd-space-after="12" data-ptd-first-line-indent="24">正文</p>',
+    )
+  })
+
+  it('drops malformed, negative and oversized paragraph layout values', () => {
+    expect(
+      canonicalizeRichTextHtml(
+        '<p data-ptd-space-before="-1" data-ptd-space-after="Infinity" data-ptd-first-line-indent="1001">正文</p>',
+      ),
+    ).toBe('<p>正文</p>')
   })
 })

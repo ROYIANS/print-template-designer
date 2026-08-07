@@ -1,4 +1,0 @@
-{"file": ".trellis/spec/monorepo/package-conventions.md", "reason": "tsup 构建配置、package.json exports 约定，@ptd/export 包结构规范"}
-{"file": ".trellis/spec/monorepo/typescript-conventions.md", "reason": "strict TS、禁止 as any、公共 API 只通过 index.ts 导出"}
-{"file": ".trellis/spec/monorepo/directory-structure.md", "reason": "packages/export 目录结构，与 apps/server 的关系"}
-{"file": ".trellis/spec/monorepo/quality-guidelines.md", "reason": "ESLint/Prettier/Node >=20 约定"}

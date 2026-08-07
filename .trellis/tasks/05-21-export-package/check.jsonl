@@ -1,3 +1,0 @@
-{"file": ".trellis/spec/monorepo/quality-guidelines.md", "reason": "ESLint/Prettier 规范，检查代码风格合规性"}
-{"file": ".trellis/spec/monorepo/typescript-conventions.md", "reason": "strict TS 合规检查：禁止 as any、@ts-ignore，公共 API 导出规范"}
-{"file": ".trellis/spec/monorepo/package-conventions.md", "reason": "package.json exports 字段顺序、构建输出验证"}

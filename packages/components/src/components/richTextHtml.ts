@@ -1,3 +1,5 @@
+import { canonicalParagraphAttributes } from './richTextParagraph'
+
 const ALLOWED_TAGS = new Set([
   'A',
   'BLOCKQUOTE',
@@ -73,15 +75,23 @@ function sanitizeChildren(parent: ParentNode): void {
 
 function sanitizeElement(element: Element): void {
   const style = sanitizeStyle(element.getAttribute('style') ?? '')
+  const paragraphAttributes = isParagraphElement(element) ? canonicalParagraphAttributes(element) : {}
   const href = element.tagName === 'A' ? sanitizeLink(element.getAttribute('href') ?? '') : null
   const target =
     element.tagName === 'A' && element.getAttribute('target') === '_blank' ? '_blank' : null
   for (const attribute of Array.from(element.attributes)) element.removeAttribute(attribute.name)
   if (style) element.setAttribute('style', style)
+  for (const [attribute, value] of Object.entries(paragraphAttributes)) {
+    element.setAttribute(attribute, value)
+  }
   if (!href) return
   element.setAttribute('href', href)
   element.setAttribute('rel', 'noopener noreferrer')
   if (target) element.setAttribute('target', target)
+}
+
+function isParagraphElement(element: Element): boolean {
+  return ['P', 'H1', 'H2', 'H3', 'H4'].includes(element.tagName)
 }
 
 function sanitizeStyle(styleText: string): string {

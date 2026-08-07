@@ -87,6 +87,10 @@ preflightOutputDocument(
   multi-column settings (`columnCount` 1–6, non-negative `columnGap`, `columnFill` auto/balance) are measured on the
   final rendered DOM; content beyond the final column remains fatal `TEXT_OVERFLOW`. Cross-page text flow is still
   deferred.
+- `RoyText` paragraph and heading blocks persist bounded canvas-pixel layout values through the explicit
+  `data-ptd-space-before`, `data-ptd-space-after` and `data-ptd-first-line-indent` attributes. Canonicalization drops
+  malformed, negative or greater-than-1000 values; the shared component renderer maps valid attributes to CSS custom
+  properties in Designer proof, Web preview and Server output. Missing attributes preserve zero spacing/indent.
 - Web displays safe code/message plus page/component identity. Server blocks PDF bytes on error diagnostics and returns
   warning codes in `X-PTD-Output-Warnings`; neither surface exposes remote URLs, cookies, secrets or local paths.
 

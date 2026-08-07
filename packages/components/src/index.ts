@@ -7,6 +7,16 @@ export { createComponentInstance } from './componentFactory'
 export { RoySimpleText } from './components/RoySimpleText'
 export { RoyText } from './components/RoyText'
 export { canonicalizeRichTextHtml, sanitizeRichTextHtml } from './components/richTextHtml'
+export {
+  applyRichTextParagraphStyles,
+  canonicalParagraphAttributes,
+  DEFAULT_RICH_TEXT_PARAGRAPH_LAYOUT,
+  normalizeRichTextParagraphLayout,
+  paragraphAttributesFromLayout,
+  parseRichTextParagraphPx,
+  RICH_TEXT_PARAGRAPH_ATTRIBUTES,
+} from './components/richTextParagraph'
+export type { RichTextParagraphAttribute, RichTextParagraphLayout } from './components/richTextParagraph'
 export { RoyLine } from './components/RoyLine'
 export { RoyRect } from './components/RoyRect'
 export { RoyCircle } from './components/RoyCircle'
