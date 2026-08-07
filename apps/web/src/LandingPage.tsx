@@ -923,7 +923,7 @@ export function LandingPage({ access, notice, onEnterApp, onRetry }: LandingPage
                 </ul>
                 <a
                   className={styles.pricingAction}
-                  href="https://github.com/ROYIANS/print-template-designer"
+                  href="https://github.com/ROYIANS/foliq-print-template-designer"
                   target="_blank"
                   rel="noreferrer"
                 >
@@ -1033,7 +1033,7 @@ export function LandingPage({ access, notice, onEnterApp, onRetry }: LandingPage
             <p>联系与源码</p>
             <a href="mailto:royians@vidorra.life">royians@vidorra.life</a>
             <a
-              href="https://github.com/ROYIANS/print-template-designer"
+              href="https://github.com/ROYIANS/foliq-print-template-designer"
               rel="noreferrer"
               target="_blank"
             >
