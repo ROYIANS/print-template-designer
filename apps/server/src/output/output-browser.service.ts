@@ -21,6 +21,8 @@ const DIAGNOSTIC_CODES = new Set<OutputDiagnosticCode>([
   'UNSUPPORTED_TABLE_SPAN',
   'UNBREAKABLE_FRAGMENT',
   'PAGE_LIMIT_EXCEEDED',
+  'PAGE_BOUNDS_EXCEEDED',
+  'EMPTY_PAGE',
   'MISSING_FONT',
   'IMAGE_LOAD_FAILED',
   'REMOTE_RESOURCE_BLOCKED',
@@ -62,6 +64,14 @@ function renderDiagnostic(value: unknown): OutputDiagnostic {
   const sourceComponentId = value['sourceComponentId']
   const pageNumber = diagnosticIndex(value['pageNumber'], 'pageNumber')
   const fragmentIndex = diagnosticIndex(value['fragmentIndex'], 'fragmentIndex')
+  const horizontalOverflowPx = diagnosticMeasurement(
+    value['horizontalOverflowPx'],
+    'horizontalOverflowPx',
+  )
+  const verticalOverflowPx = diagnosticMeasurement(
+    value['verticalOverflowPx'],
+    'verticalOverflowPx',
+  )
   if (sourceComponentId !== undefined && typeof sourceComponentId !== 'string') {
     throw new OutputEngineError('browser', 'Render diagnostic source is invalid')
   }
@@ -72,12 +82,22 @@ function renderDiagnostic(value: unknown): OutputDiagnostic {
     ...(sourceComponentId === undefined ? {} : { sourceComponentId }),
     ...(pageNumber === undefined ? {} : { pageNumber }),
     ...(fragmentIndex === undefined ? {} : { fragmentIndex }),
+    ...(horizontalOverflowPx === undefined ? {} : { horizontalOverflowPx }),
+    ...(verticalOverflowPx === undefined ? {} : { verticalOverflowPx }),
   }
 }
 
 function diagnosticIndex(value: unknown, field: string): number | undefined {
   if (value === undefined) return undefined
   if (typeof value !== 'number' || !Number.isInteger(value) || value < 0) {
+    throw new OutputEngineError('browser', `Render diagnostic ${field} is invalid`)
+  }
+  return value
+}
+
+function diagnosticMeasurement(value: unknown, field: string): number | undefined {
+  if (value === undefined) return undefined
+  if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) {
     throw new OutputEngineError('browser', `Render diagnostic ${field} is invalid`)
   }
   return value

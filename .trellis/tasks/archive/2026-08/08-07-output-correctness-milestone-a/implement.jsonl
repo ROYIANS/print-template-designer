@@ -1,0 +1,11 @@
+{"file": ".trellis/spec/monorepo/package-conventions.md", "reason": "pnpm/Corepack、clean CI 依赖顺序、tsup dist 消费合同"}
+{"file": ".trellis/spec/monorepo/typescript-conventions.md", "reason": "跨 Core/Components/Export/Web/Server 的 strict TypeScript 与公共 API 约束"}
+{"file": ".trellis/spec/monorepo/styling-conventions.md", "reason": "Canvas renderer 必须用共享 CSS variables/stylesheet 保持编辑与输出 parity"}
+{"file": ".trellis/spec/monorepo/directory-structure.md", "reason": "输出 preflight 的分层所有权和 package 依赖边界"}
+{"file": ".trellis/spec/monorepo/quality-guidelines.md", "reason": "测试、Lint、构建和 pnpm 11 质量门"}
+{"file": ".trellis/spec/monorepo/react-designer-contract.md", "reason": "直接内容编辑、controlled history、proof 和 derived output 不写回模板的合同"}
+{"file": ".trellis/spec/monorepo/server-architecture.md", "reason": "Server PDF fatal diagnostics 到 422 的稳定映射和安全边界"}
+{"file": ".trellis/spec/monorepo/output-architecture.md", "reason": "compiler/readiness/output DOM/Chromium 的权威确定性输出合同"}
+{"file": ".trellis/spec/monorepo/print-composition-capability-roadmap.md", "reason": "Milestone A whitespace、TEXT_OVERFLOW 和统一 preflight 的已决策方案"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "同一诊断跨 Core、Components、Export、Web、Server 的完整数据流"}
+{"file": ".trellis/spec/guides/code-reuse-thinking-guide.md", "reason": "避免 Web/Server 或 editor/output 重复规范化和 preflight 逻辑"}

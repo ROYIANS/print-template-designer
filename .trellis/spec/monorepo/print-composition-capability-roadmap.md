@@ -1,5 +1,11 @@
 # Print Composition Capability Roadmap
 
+> Milestone A (2026-08) implemented the P0 text correctness slice: Corepack/pnpm 11.18 CI ordering,
+> plain-text newline/`white-space` parity, rich blank-paragraph canonicalization, unified browser preflight,
+> and DOM-backed `TEXT_OVERFLOW` diagnostics. Milestone B1 (2026-08) implemented bounded in-frame columns for
+> `RoySimpleText` and `RoyText`. Milestone B2 (2026-08) implemented explicit paragraph spacing and first-line indent
+> attributes for `RoyText`; named styles, keep rules and the remaining roadmap items below are future capabilities.
+
 > Status: **Proposed**. This document records implementation-ready capability decisions learned from building
 > complex report and editorial templates. It is a roadmap, not a statement that the capabilities already exist.
 > The currently implemented output contract remains authoritative in
@@ -647,11 +653,12 @@ detect.
 
 ### Milestone B — Editorial composition
 
-1. Add in-frame columns to both text types.
-2. Add named paragraph/character styles.
-3. Add first-line indent, paragraph spacing and keep-with-next.
-4. Add image focal point and effective-DPI preflight.
-5. Rebuild the magazine demo using one component per section as the acceptance fixture.
+1. **Implemented (B1):** add in-frame columns to both text types.
+2. **Implemented (B2):** add bounded paragraph spacing and first-line indent to `RoyText` paragraph/heading blocks.
+3. Add named paragraph/character styles.
+4. Add keep-with-next and the remaining editorial pagination rules.
+5. Add image focal point and effective-DPI preflight.
+6. Rebuild the magazine demo using one component per section as the acceptance fixture.
 
 ### Milestone C — Print data visualization
 

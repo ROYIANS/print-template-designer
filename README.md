@@ -200,8 +200,8 @@ GitHub Actions → 前后端质量/容器构建 → GHCR Web + Server 镜像
 服务器不需要 Node.js 或 pnpm：
 
 ```bash
-git clone https://github.com/ROYIANS/print-template-designer.git
-cd print-template-designer
+git clone https://github.com/ROYIANS/foliq-print-template-designer.git
+cd foliq-print-template-designer
 cp .env.example .env
 # 编辑 .env 中所有 CHANGE_ME、公开 origin 和 GitHub OAuth 配置
 ./deploy.sh
@@ -263,4 +263,4 @@ Vue 2 时代的源码、资源和实现记录保存在 [`legacy/`](./legacy/) �
 
 [MIT](./LICENSE) © ROYIANS
 
-[![Star History Chart](https://api.star-history.com/svg?repos=ROYIANS/print-template-designer&type=Date)](https://star-history.com/#ROYIANS/print-template-designer&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=ROYIANS/foliq-print-template-designer&type=Date)](https://star-history.com/#ROYIANS/foliq-print-template-designer&Date)

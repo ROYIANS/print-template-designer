@@ -69,7 +69,7 @@ describe('ComponentRegistry', () => {
 
   it('keeps new text content empty so editor placeholders never persist into templates', () => {
     expect(defaultRegistry.get('RoySimpleText')?.defaultProps).toBe('')
-    expect(defaultRegistry.get('RoyText')?.defaultProps).toBe('<p></p>')
+    expect(defaultRegistry.get('RoyText')?.defaultProps).toBe('<p><br></p>')
   })
 
   it('gives media and code components usable structured defaults', () => {

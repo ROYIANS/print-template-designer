@@ -1,4 +1,10 @@
-import type { ComponentStyle } from '@ptd/core'
+import {
+  DEFAULT_TEXT_COLUMN_COUNT,
+  DEFAULT_TEXT_COLUMN_FILL,
+  DEFAULT_TEXT_COLUMN_GAP,
+  normalizePlainTextWhiteSpace,
+  type ComponentStyle,
+} from '@ptd/core'
 
 export type ComponentCssVariables = Record<`--ptd-${string}`, string>
 
@@ -46,6 +52,10 @@ export function componentStyleToCssVariables(style: ComponentStyle): ComponentCs
     '--ptd-font-style': style.fontStyle ?? 'normal',
     '--ptd-line-height': style.lineHeight ?? '1',
     '--ptd-letter-spacing': `${style.letterSpacing ?? 0}px`,
+    '--ptd-white-space': normalizePlainTextWhiteSpace(style.whiteSpace),
+    '--ptd-column-count': String(style.columnCount ?? DEFAULT_TEXT_COLUMN_COUNT),
+    '--ptd-column-gap': `${style.columnGap ?? DEFAULT_TEXT_COLUMN_GAP}px`,
+    '--ptd-column-fill': style.columnFill ?? DEFAULT_TEXT_COLUMN_FILL,
     '--ptd-padding': `${style.padding ?? 0}px`,
     '--ptd-margin': `${style.margin ?? 0}px`,
     '--ptd-border': computeBorder(style),

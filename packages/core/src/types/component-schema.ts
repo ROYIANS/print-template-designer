@@ -1,4 +1,5 @@
 import type { ComponentBinding } from './data-source'
+import type { PlainTextWhiteSpace, TextColumnFill } from './text'
 
 export type ComponentType =
   | 'RoySimpleText'
@@ -43,6 +44,14 @@ export interface ComponentStyle {
   margin?: string
   lineHeight?: string
   letterSpacing?: string
+  /** Plain-text whitespace policy; omitted legacy values default to pre-wrap. */
+  whiteSpace?: PlainTextWhiteSpace
+  /** Number of columns in a text frame; omitted legacy values default to one. */
+  columnCount?: number
+  /** Gap between text columns in canvas pixels. */
+  columnGap?: number
+  /** CSS multi-column fill strategy. */
+  columnFill?: TextColumnFill
   justifyContent?: string
   alignItems?: string
   fontWeight?: string

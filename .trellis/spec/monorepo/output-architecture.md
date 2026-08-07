@@ -58,6 +58,82 @@ v1 output images must be embedded `data:image/*`. Relative, remote, file and oth
 before an `<img>` request is created and return `REMOTE_RESOURCE_BLOCKED` with a source component id. Render code must
 not expose the rejected URL in logs or diagnostics.
 
+## Scenario: Unified Text-Accuracy Preflight
+
+### 1. Scope / Trigger
+
+- Trigger: any Web proof or Server Chromium PDF output after `compileOutputDocument()` and `mountOutputDocument()`.
+- `@ptd/export` owns the browser-side orchestration so Web and Server cannot drift in readiness, overflow, or page-bound
+  behavior.
+
+### 2. Signatures
+
+```ts
+preflightOutputDocument(
+  root: HTMLElement,
+  output: OutputDocument,
+  options?: { timeoutMs?: number; overflowTolerancePx?: number },
+): Promise<readonly OutputDiagnostic[]>
+```
+
+`OutputDiagnostic` text overflow fields are `horizontalOverflowPx`, `verticalOverflowPx`, `sourceComponentId`,
+`pageNumber` and `fragmentIndex`.
+
+### 3. Contracts
+
+- Preflight order is compiler diagnostics → fonts/component/image readiness → two stable frames → text overflow → page
+  bounds/empty-page checks.
+- `RoySimpleText` and `RoyText` content frames are measured with a default `0.5px` tolerance. Their in-frame CSS
+  multi-column settings (`columnCount` 1–6, non-negative `columnGap`, `columnFill` auto/balance) are measured on the
+  final rendered DOM; content beyond the final column remains fatal `TEXT_OVERFLOW`. Cross-page text flow is still
+  deferred.
+- `RoyText` paragraph and heading blocks persist bounded canvas-pixel layout values through the explicit
+  `data-ptd-space-before`, `data-ptd-space-after` and `data-ptd-first-line-indent` attributes. Canonicalization drops
+  malformed, negative or greater-than-1000 values; the shared component renderer maps valid attributes to CSS custom
+  properties in Designer proof, Web preview and Server output. Missing attributes preserve zero spacing/indent.
+- Web displays safe code/message plus page/component identity. Server blocks PDF bytes on error diagnostics and returns
+  warning codes in `X-PTD-Output-Warnings`; neither surface exposes remote URLs, cookies, secrets or local paths.
+
+### 4. Validation & Error Matrix
+
+| Condition                                                                  | Required result                                       |
+| -------------------------------------------------------------------------- | ----------------------------------------------------- |
+| `scrollWidth/clientWidth` or `scrollHeight/clientHeight` exceeds tolerance | `TEXT_OVERFLOW` error with both amounts               |
+| Difference is ≤ 0.5 CSS px                                                 | no overflow diagnostic                                |
+| Fragment bounding box exceeds physical page after rotation                 | `PAGE_BOUNDS_EXCEEDED` error                          |
+| Output page has no fragments                                               | `EMPTY_PAGE` warning                                  |
+| Readiness deadline expires or renderer/image fails                         | existing stable readiness diagnostic; no PDF on error |
+
+### 5. Good/Base/Bad Cases
+
+- Good: a Chinese long-text fixture fits its frame and produces no overflow; the same fixture with a smaller frame reports
+  its component ID, page and horizontal/vertical amounts in Web and Server.
+- Base: a warning-only empty page still produces PDF with `X-PTD-Output-Warnings: EMPTY_PAGE`.
+- Bad: Web concatenates compiler/readiness results while Server measures a different DOM selector, causing silent clipping
+  or a false-success PDF.
+
+### 6. Tests Required
+
+1. Export tests cover plain and rich text overflow, 0.5px tolerance, unified diagnostic ordering and page identity.
+2. Web tests assert preflight is the only readiness call and that page/component context is rendered.
+3. Server tests assert fatal codes map to 422 and warning codes are returned only through a safe response header.
+4. Real Chromium smoke should include one fitting and one intentionally overflowing Chinese text frame.
+
+### 7. Wrong vs Correct
+
+#### Wrong
+
+```ts
+const readiness = await waitForOutputReady(mounted.root)
+setDiagnostics([...output.diagnostics, ...readiness])
+```
+
+#### Correct
+
+```ts
+const diagnostics = await preflightOutputDocument(mounted.root, output)
+```
+
 ## Scenario: Async Code Renderers and Physical Print Canvas Isolation
 
 ### 1. Scope / Trigger
@@ -249,7 +325,7 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends openssl \
     && rm -rf /var/lib/apt/lists/* \
     && corepack prepare pnpm@11.18.0 --activate \
-    && test "$(pnpm --version)" = "11.18.0"
+    && test "$(corepack pnpm --version)" = "11.18.0"
 
 FROM mcr.microsoft.com/playwright:v1.62.0-noble AS runtime
 RUN apt-get update \

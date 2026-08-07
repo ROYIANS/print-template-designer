@@ -1,5 +1,4 @@
-import type { ComponentSchema } from '@ptd/core'
-import { DataBindingEngine } from '@ptd/core'
+import { DataBindingEngine, normalizePlainText, type ComponentSchema } from '@ptd/core'
 import { BaseComponent } from '../base/base-component'
 
 export class RoySimpleText extends BaseComponent {
@@ -23,6 +22,11 @@ export class RoySimpleText extends BaseComponent {
       this.container.appendChild(inner)
     }
     this.inner = inner
+    if ((this.schema.style.columnCount ?? 1) > 1) {
+      inner.dataset.ptdColumns = 'true'
+    } else {
+      delete inner.dataset.ptdColumns
+    }
     const text = this.resolveText()
     inner.textContent = text
   }
@@ -30,13 +34,13 @@ export class RoySimpleText extends BaseComponent {
   private resolveText(): string {
     const raw = typeof this.schema.propValue === 'string' ? this.schema.propValue : ''
     // If no data binding context, return raw value
-    return raw
+    return normalizePlainText(raw)
   }
 
   resolveWithData(engine: DataBindingEngine): void {
     const raw = typeof this.schema.propValue === 'string' ? this.schema.propValue : ''
     if (this.inner) {
-      this.inner.textContent = engine.resolve(raw)
+      this.inner.textContent = normalizePlainText(engine.resolve(raw))
     }
   }
 }

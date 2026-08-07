@@ -93,6 +93,7 @@ function mountFragment(
   wrapper.dataset.ptdOutputFragment = fragment.id
   wrapper.dataset.ptdSourceComponent = fragment.sourceComponentId
   wrapper.dataset.ptdContinuation = fragment.continuation
+  wrapper.dataset.ptdFragmentIndex = String(fragment.fragmentIndex)
   // Fragment bounds are page-relative logical canvas coordinates.
   setBounds(wrapper, fragment.bounds)
   wrapper.style.transform = `rotate(${finite(fragment.component.style.rotate)}deg)`

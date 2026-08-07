@@ -3,7 +3,10 @@ import { RoySimpleText } from '../components/RoySimpleText'
 import { DataBindingEngine } from '@ptd/core'
 import type { ComponentSchema } from '@ptd/core'
 
-function makeSchema(propValue: string): ComponentSchema {
+function makeSchema(
+  propValue: string,
+  style: Partial<ComponentSchema['style']> = {},
+): ComponentSchema {
   return {
     id: 'test-1',
     component: 'RoySimpleText',
@@ -17,6 +20,7 @@ function makeSchema(propValue: string): ComponentSchema {
       color: '#212121',
       background: 'transparent',
       borderType: 'none',
+      ...style,
     },
     groupStyle: {},
     position: {},
@@ -61,6 +65,44 @@ describe('RoySimpleText', () => {
     expect(comp['container'].style.getPropertyValue('--ptd-height')).toBe('40px')
   })
 
+  it('applies the configured font family and italic style to the text frame', () => {
+    const schema = makeSchema('Styled text', {
+      fontFamily: 'Arial, sans-serif',
+      fontStyle: 'italic',
+      fontWeight: 'bold',
+    })
+    const comp = new RoySimpleText(schema)
+    const parent = document.createElement('div')
+    comp.mount(parent)
+
+    const inner = parent.querySelector<HTMLElement>('.ptd-simple-text__inner')
+    expect(comp['container'].style.getPropertyValue('--ptd-font-family')).toBe('Arial, sans-serif')
+    expect(comp['container'].style.getPropertyValue('--ptd-font-style')).toBe('italic')
+    expect(inner).toBeTruthy()
+    expect(document.getElementById('ptd-components-styles')?.textContent).toContain(
+      '.ptd-simple-text__inner',
+    )
+    expect(document.getElementById('ptd-components-styles')?.textContent).toContain(
+      'font-family: var(--ptd-font-family)',
+    )
+    expect(document.getElementById('ptd-components-styles')?.textContent).toContain(
+      'font-style: var(--ptd-font-style)',
+    )
+    expect(document.getElementById('ptd-components-styles')?.textContent).toContain(
+      'font-synthesis: weight style',
+    )
+  })
+
+  it('normalizes only platform newlines and keeps repeated spaces', () => {
+    const schema = makeSchema('  第一行\r\n第二行\r第三行  ')
+    const comp = new RoySimpleText(schema)
+    const parent = document.createElement('div')
+    comp.mount(parent)
+    expect(parent.querySelector('.ptd-simple-text__inner')?.textContent).toBe(
+      '  第一行\n第二行\n第三行  ',
+    )
+  })
+
   it('updates on schema change', () => {
     const schema = makeSchema('initial')
     const comp = new RoySimpleText(schema)
@@ -70,6 +112,22 @@ describe('RoySimpleText', () => {
     comp.update(makeSchema('updated'))
     const inner = parent.querySelector('.ptd-simple-text__inner')
     expect(inner?.innerHTML).toBe('updated')
+  })
+
+  it('marks multi-column frames while preserving the semantic inner element', () => {
+    const schema = {
+      ...makeSchema('two columns'),
+      style: { ...makeSchema('two columns').style, columnCount: 2 },
+    }
+    const comp = new RoySimpleText(schema)
+    const parent = document.createElement('div')
+    comp.mount(parent)
+    const inner = parent.querySelector('.ptd-simple-text__inner')
+    expect(inner?.getAttribute('data-ptd-columns')).toBe('true')
+    expect(inner?.textContent).toBe('two columns')
+
+    comp.update(makeSchema('one column'))
+    expect(inner?.getAttribute('data-ptd-columns')).toBeNull()
   })
 
   it('destroys and removes from DOM', () => {

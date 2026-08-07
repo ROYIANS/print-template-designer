@@ -20,7 +20,7 @@ services:
       retries: 12
 
   migrate:
-    image: ${SERVER_IMAGE_REPOSITORY:-ghcr.io/royians/print-template-designer-server}:${IMAGE_TAG:-latest}
+    image: ${SERVER_IMAGE_REPOSITORY:-ghcr.io/royians/foliq-print-template-designer-server}:${IMAGE_TAG:-latest}
     build:
       context: .
       dockerfile: docker/Dockerfile.server
@@ -35,7 +35,7 @@ services:
       disable: true
 
   server:
-    image: ${SERVER_IMAGE_REPOSITORY:-ghcr.io/royians/print-template-designer-server}:${IMAGE_TAG:-latest}
+    image: ${SERVER_IMAGE_REPOSITORY:-ghcr.io/royians/foliq-print-template-designer-server}:${IMAGE_TAG:-latest}
     build:
       context: .
       dockerfile: docker/Dockerfile.server
@@ -71,7 +71,7 @@ services:
       retries: 8
 
   web:
-    image: ${WEB_IMAGE_REPOSITORY:-ghcr.io/royians/print-template-designer-web}:${IMAGE_TAG:-latest}
+    image: ${WEB_IMAGE_REPOSITORY:-ghcr.io/royians/foliq-print-template-designer-web}:${IMAGE_TAG:-latest}
     build:
       context: .
       dockerfile: docker/Dockerfile.web

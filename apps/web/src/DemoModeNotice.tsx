@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { RiCloseLine, RiGithubFill, RiRefreshLine } from '@remixicon/react'
 import styles from './DemoModeNotice.module.css'
 
-const REPOSITORY_URL = 'https://github.com/royians/print-template-designer'
+const REPOSITORY_URL = 'https://github.com/ROYIANS/foliq-print-template-designer'
 const COMPACT_DISMISSED_KEY = 'foliq.demo-notice-dismissed'
 
 function compactNoticeDismissed(): boolean {

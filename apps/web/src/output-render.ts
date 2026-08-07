@@ -2,7 +2,7 @@ import type { OutputOptions, RenderContext, TemplateSchema } from '@ptd/core'
 import {
   compileOutputDocument,
   mountOutputDocument,
-  waitForOutputReady,
+  preflightOutputDocument,
   type MountedOutputDocument,
 } from '@ptd/export'
 
@@ -14,7 +14,7 @@ export interface OutputRenderJob {
 
 export interface OutputRenderResult {
   readonly pageCount: number
-  readonly diagnostics: Awaited<ReturnType<typeof waitForOutputReady>>
+  readonly diagnostics: Awaited<ReturnType<typeof preflightOutputDocument>>
 }
 
 declare global {
@@ -32,8 +32,7 @@ window.__FOLIQ_OUTPUT_RENDER__ = async (job) => {
   mounted?.destroy()
   const output = await compileOutputDocument(job)
   mounted = mountOutputDocument(root, output)
-  const readiness = await waitForOutputReady(mounted.root)
-  const diagnostics = [...output.diagnostics, ...readiness]
+  const diagnostics = await preflightOutputDocument(mounted.root, output)
   document.documentElement.dataset.foliqOutputReady = diagnostics.some(
     (diagnostic) => diagnostic.severity === 'error',
   )

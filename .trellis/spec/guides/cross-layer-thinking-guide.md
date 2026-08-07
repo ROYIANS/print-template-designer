@@ -160,3 +160,54 @@ Create detailed flow docs when:
 - Multiple teams are involved
 - Data format is complex
 - Feature has caused bugs before
+
+## Rich-Text Editor Boundary Contract
+
+The PTD rich-text editor has three representations that must be treated as separate layers:
+
+```
+ProseMirror state → editor DOM → canonical HTML → RoyText output DOM
+```
+
+Keep these rules when changing the editor:
+
+- Use the ProseMirror document (`doc.textBetween(...)`) as the source of truth for empty-state and
+  placeholder decisions. DOM-only markers such as `ProseMirror-trailingBreak` are transient and can
+  change during IME composition or selection updates.
+- `canonicalizeRichTextHtml` is the boundary contract for persisted/output HTML. It may remove
+  editor-only attributes (for example trailing-break classes), but it must preserve paragraph count
+  and blank paragraphs as exactly one `<p><br></p>` each.
+- Verify edit and output modes with the same paragraph layout variables and a round-trip test. A
+  shared `.ptd-text__inner` selector must not accidentally apply display-only spacing to a different
+  editor structure.
+- BubbleMenu is a Portal. Every toolbar descendant needs the `data-ptd-editor-interactive` boundary,
+  and selection-preserving handlers must cover both pointer buttons and native focus controls such as
+  `<select>`. Native controls must restore the saved selection on `change`, not while their popup is
+  opening; dispatching a ProseMirror transaction during `pointerdown` can close the browser's native
+  dropdown immediately. A `shouldShow` predicate that only checks `from !== to` will hide the menu
+  when a native control receives focus.
+
+### Rich-text boundary checklist
+
+- [ ] Empty placeholder follows editor state, including CJK IME input.
+- [ ] Button, select, number input, color input and link controls preserve the selection.
+- [ ] Toolbar remains mounted through native control focus and option change.
+- [ ] `<p><br class="ProseMirror-trailingBreak"></p>` canonicalizes to one `<p><br></p>`.
+- [ ] The same blank-line and paragraph-spacing geometry is measured in editing and output modes.
+
+### Rich-text editor flow and overflow contract
+
+The rendered `.ptd-text__inner` stylesheet is shared with the editor for typography and paragraph
+tokens, but its CSS multi-column rules must not silently become the editor's one-column flow model.
+When `columnCount` is `1`, the editor must opt out of CSS columns (`column-count: auto`) so a fixed
+component height produces vertical overflow rather than synthetic horizontal columns. The editor
+should use the component's external width as its inline constraint and expose only vertical scrolling;
+otherwise a large inline font can put later paragraphs beside the first one and look like a phantom
+leading blank line.
+
+- [ ] Rich editor DOM carries an explicit `data-ptd-columns` mode derived from the schema.
+- [ ] One-column edit mode overrides shared column CSS with a higher-specificity editor selector.
+- [ ] Editor frame uses `overflow-x: hidden` and `overflow-y: auto`.
+- [ ] Verify `scrollWidth === clientWidth` after applying a large font to a multi-paragraph selection.
+- [ ] Inspect paragraph top coordinates; later paragraphs must stack below earlier paragraphs, not share
+  the same top coordinate in a horizontal overflow column.

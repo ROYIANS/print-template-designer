@@ -86,7 +86,7 @@ const BUILT_IN_COMPONENTS = [
       creationMode: 'draw',
     },
     defaultStyle: { width: 500, height: 200, fontSize: 12, rotate: 0, opacity: 1 },
-    defaultProps: '<p></p>',
+    defaultProps: '<p><br></p>',
     bindingTargets: [
       {
         kind: 'rich-text',

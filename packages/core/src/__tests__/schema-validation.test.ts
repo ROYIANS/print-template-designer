@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { DEFAULT_PAGE_CONFIG } from '../types/page-config'
 import { isTemplateSchema } from '../schema-validation'
+import type { ComponentStyle } from '../types/component-schema'
 
 function template() {
   return {
@@ -163,5 +164,42 @@ describe('TemplateSchema runtime validation', () => {
         ],
       }),
     ).toBe(true)
+  })
+
+  it('validates the plain-text whitespace policy when it is present', () => {
+    const valid = template()
+    ;(valid.pages[0]!.componentData[0]!.style as ComponentStyle).whiteSpace = 'pre-line'
+    expect(isTemplateSchema(valid)).toBe(true)
+    const invalid = template()
+    ;(invalid.pages[0]!.componentData[0]!.style as Record<string, unknown>).whiteSpace =
+      'break-spaces'
+    expect(isTemplateSchema(invalid)).toBe(false)
+  })
+
+  it('validates bounded text column settings when they are present', () => {
+    const valid = template()
+    const style = valid.pages[0]!.componentData[0]!.style as ComponentStyle
+    style.columnCount = 2
+    style.columnGap = 0
+    style.columnFill = 'balance'
+    expect(isTemplateSchema(valid)).toBe(true)
+
+    for (const columnCount of [0, 7, 1.5, Number.NaN, Number.POSITIVE_INFINITY]) {
+      const invalid = template()
+      ;(invalid.pages[0]!.componentData[0]!.style as Record<string, unknown>).columnCount =
+        columnCount
+      expect(isTemplateSchema(invalid)).toBe(false)
+    }
+
+    for (const columnGap of [-1, Number.NaN, Number.POSITIVE_INFINITY]) {
+      const invalid = template()
+      ;(invalid.pages[0]!.componentData[0]!.style as Record<string, unknown>).columnGap = columnGap
+      expect(isTemplateSchema(invalid)).toBe(false)
+    }
+
+    const invalidFill = template()
+    ;(invalidFill.pages[0]!.componentData[0]!.style as Record<string, unknown>).columnFill =
+      'stretch'
+    expect(isTemplateSchema(invalidFill)).toBe(false)
   })
 })

@@ -320,6 +320,26 @@ describe('EditorStore history and ownership', () => {
     expect(store.components.value[0]?.style.left).toBe(0)
   })
 
+  it('commits a multi-column style edit as one history entry and preserves component identity', () => {
+    const store = new EditorStore(template())
+    store.selectComponent('a')
+    store.beginGesture()
+    store.updateComponentStyle('a', { columnCount: 2 }, true)
+    store.updateComponentStyle('a', { columnGap: 16 }, true)
+    store.updateComponentStyle('a', { columnFill: 'balance' }, true)
+    store.commitGesture()
+
+    expect(store.history.value).toHaveLength(2)
+    expect(store.components.value[0]?.id).toBe('a')
+    expect(store.components.value[0]?.style).toMatchObject({
+      columnCount: 2,
+      columnGap: 16,
+      columnFill: 'balance',
+    })
+    store.undo()
+    expect(store.components.value[0]?.style.columnCount).toBeUndefined()
+  })
+
   it('ignores delayed echoes from every transient gesture update', () => {
     const emitted: TemplateSchema[] = []
     const store = new EditorStore(template(), {

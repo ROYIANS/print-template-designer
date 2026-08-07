@@ -1,0 +1,8 @@
+{"file": ".trellis/spec/monorepo/quality-guidelines.md", "reason": "全 workspace 类型检查、测试、Lint 和构建质量门"}
+{"file": ".trellis/spec/monorepo/typescript-conventions.md", "reason": "strict public contract、无 any/ignore、正确导出"}
+{"file": ".trellis/spec/monorepo/styling-conventions.md", "reason": "共享 Canvas CSS 与 CSS Modules 边界"}
+{"file": ".trellis/spec/monorepo/package-conventions.md", "reason": "pnpm/Corepack、CI 顺序和 dist clean-runner 合同"}
+{"file": ".trellis/spec/monorepo/react-designer-contract.md", "reason": "编辑、proof、history 和 derived output parity 检查"}
+{"file": ".trellis/spec/monorepo/server-architecture.md", "reason": "Server 422、网络隔离和输出错误安全映射检查"}
+{"file": ".trellis/spec/monorepo/output-architecture.md", "reason": "统一 preflight、readiness、diagnostics 和真实 PDF 验收"}
+{"file": ".trellis/spec/monorepo/print-composition-capability-roadmap.md", "reason": "Milestone A 验收矩阵与禁止提前实现的范围"}

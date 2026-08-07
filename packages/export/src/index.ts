@@ -16,3 +16,6 @@ export type {
 export { mountOutputDocument } from './renderer'
 export type { MountedOutputDocument } from './renderer'
 export { waitForOutputReady } from './readiness'
+export { preflightOutputDocument } from './preflight'
+export type { OutputPreflightOptions } from './preflight'
+export { measureTextOverflow, TEXT_OVERFLOW_TOLERANCE_PX } from './textOverflow'

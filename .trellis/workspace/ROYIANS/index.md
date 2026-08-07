@@ -8,8 +8,8 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 25
-- **Last Active**: 2026-08-04
+- **Total Sessions**: 27
+- **Last Active**: 2026-08-07
 <!-- @@@/auto:current-status -->
 
 ---
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~870 | Active |
+| `journal-1.md` | ~938 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,8 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 27 | 2026-08-07 | Milestone B2 富文本排版与工具条收官 | `92d1211` | `feature/refc` |
+| 26 | 2026-08-07 | Output correctness Milestone A | `aaf3b30`, `e48d0af`, `04d9094` | `feature/refc` |
 | 25 | 2026-08-04 | Public demo mode and canonical document routes | `e97ff47` | `feature/refc` |
 | 24 | 2026-08-04 | Editorial magazine template and print capability roadmap | `24bfa17` | `feature/refc` |
 | 23 | 2026-08-04 | Refine designer UI and electricity retail report export | `490b2c9`, `10873ff`, `dcb0975`, `69082f5` | `feature/refc` |

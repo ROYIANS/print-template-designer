@@ -27,6 +27,11 @@
 - Server 增加认证 `POST /api/output/pdf`、固定 Playwright Chromium、并发上限、超时/取消清理、
   Browser crash 单次重建、网络默认拒绝和确定性 PDF metadata。
 - `/app` 工作台及相关 Sheet/Dialog 的交互图标统一为 Remix Icon，移除字符和手写 SVG 伪图标。
+- Milestone A 收敛到 pnpm 11.18.0/Corepack CI 基线；普通文本只规范化 CRLF/孤立 CR 并默认 `pre-wrap`，
+  富文本空段落 canonicalize 为 `<p><br></p>`；Web 与 Server 共用 preflight，真实文字溢出以 `TEXT_OVERFLOW`
+  阻断静默裁剪。
+- Milestone B1 增加文本 frame 内多列：`RoySimpleText` 与 `RoyText` 支持 1–6 栏、栏间距和 `auto`/`balance`
+  填充；Designer、Web 预览与 Server Chromium 复用同一 DOM/CSS，最后一栏溢出继续由 `TEXT_OVERFLOW` 阻断。
 
 ### Changed
 

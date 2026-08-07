@@ -227,6 +227,10 @@ import '@ptd/react-designer/styles.css'
 
 #### Inspector controls and color state
 
+- `RoySimpleText` and `RoyText` expose bounded `columnCount` (1–6), non-negative `columnGap` and
+  `columnFill` (`auto` / `balance`) controls in Single Inspector. Each interaction uses the existing transient
+  gesture boundary, preserves one component identity and commits at most one history entry; non-text components do
+  not expose these controls.
 - Page, Single, Multi and free-table business panels compose the shared `InspectorControls` layer;
   native input/select/textarea/color elements are implementation details of that layer rather than
   independently styled business fields.
@@ -377,7 +381,7 @@ The Designer shell uses three grid rows and mounts the floating controls inside 
 
 #### Direct content editing
 
-- Empty rich text remains a valid semantic document such as `<p></p>`; product placeholders are
+- Empty rich text remains a valid semantic document canonicalized as `<p><br></p>`; product placeholders are
   authoring-only UI and must never be persisted as component content.
 - The rich editor wrapper and its ProseMirror surface must fill the complete drawn component frame.
   Entering a newly drawn empty rich-text component focuses the editor immediately, and clicking any
@@ -599,7 +603,7 @@ The Designer shell uses three grid rows and mounts the floating controls inside 
 - Browser assertion: right-click target resolution, blank/component command sets, locked disabled
   states, positioned paste + one-step Undo, clickable layer submenu and `Shift+F10` keyboard entry
   all work without Designer root focus capture dismissing a menu.
-- Rich-text assertion: sanitized `<p></p>` remains valid; an empty editor fills the drawn frame,
+- Rich-text assertion: sanitized `<p></p>` canonicalizes to `<p><br></p>`; an empty editor fills the drawn frame,
   focuses on creation and accepts input from any point inside the frame without persisting placeholder
   text.
 - Verification ordering: finish the designer package build before starting the host build.

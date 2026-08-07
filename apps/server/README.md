@@ -98,6 +98,13 @@ PDF 引擎使用 `@ptd/export` 生成显式派生页，再让 Chromium 只绘制
 `window.print()`、`html2canvas` 或整页图片。默认并发 2、单任务截止 30 秒、PDF 上限 64 MiB；并发满时
 立即返回可重试错误，不建立无界 Page 队列。
 
+在生成 PDF 字节前，render bundle 会运行与 Web 预览相同的 `preflightOutputDocument()`。字体、组件、图片和两帧布局
+就绪后测量普通/富文本文字溢出（`TEXT_OVERFLOW`，0.5px 容差），并检查资源阻断、空页与旋转页面 bounds。error
+诊断映射为 `422`，warning 诊断随成功响应的内部结果保留；诊断只包含稳定 code、页码、组件 ID 和安全消息。
+
+文本 frame 的 CSS 多列（1–6 栏、非负栏间距、`auto`/`balance` 填充）沿用 Web 的共享输出 bundle；Server
+不实现独立的列布局。超过固定 frame 的最后一栏仍在 PDF 生成前以 `TEXT_OVERFLOW` 阻断。
+
 本地需要显式提供 render bundle 和 Chromium：
 
 ```dotenv
@@ -211,16 +218,16 @@ Content-Type: application/json
 
 ## 错误语义
 
-| HTTP 状态                  | 场景                                                   |
-| -------------------------- | ------------------------------------------------------ |
-| `400 Bad Request`          | 非法 ID、请求体、标题、Schema 外形或 `expectedVersion` |
-| `401 Unauthorized`         | 未登录                                                 |
-| `404 Not Found`            | 模板、指定历史版本不存在，或资源属于其他用户           |
-| `409 Conflict`             | `expectedVersion` 已过期，或并发写入抢先完成           |
-| `422 Unprocessable Entity` | fatal 输出诊断，如超高行、页数上限或受阻资源           |
-| `429 Too Many Requests`    | Chromium 并发池已满，可稍后重试                        |
-| `503 Service Unavailable`  | Chromium 无法启动或崩溃后重建失败                      |
-| `504 Gateway Timeout`      | 输出任务超过应用级截止时间                             |
+| HTTP 状态                  | 场景                                                             |
+| -------------------------- | ---------------------------------------------------------------- |
+| `400 Bad Request`          | 非法 ID、请求体、标题、Schema 外形或 `expectedVersion`           |
+| `401 Unauthorized`         | 未登录                                                           |
+| `404 Not Found`            | 模板、指定历史版本不存在，或资源属于其他用户                     |
+| `409 Conflict`             | `expectedVersion` 已过期，或并发写入抢先完成                     |
+| `422 Unprocessable Entity` | fatal 输出诊断，如文字溢出、组件越界、超高行、页数上限或受阻资源 |
+| `429 Too Many Requests`    | Chromium 并发池已满，可稍后重试                                  |
+| `503 Service Unavailable`  | Chromium 无法启动或崩溃后重建失败                                |
+| `504 Gateway Timeout`      | 输出任务超过应用级截止时间                                       |
 
 创建、更新和恢复通过事务保持当前模板与版本快照一致。`TemplateVersion` 只追加，不原地更新。
 

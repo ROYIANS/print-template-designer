@@ -12,6 +12,8 @@ export type OutputDiagnosticCode =
   | 'UNSUPPORTED_TABLE_SPAN'
   | 'UNBREAKABLE_FRAGMENT'
   | 'PAGE_LIMIT_EXCEEDED'
+  | 'PAGE_BOUNDS_EXCEEDED'
+  | 'EMPTY_PAGE'
   | 'MISSING_FONT'
   | 'IMAGE_LOAD_FAILED'
   | 'REMOTE_RESOURCE_BLOCKED'
@@ -104,6 +106,9 @@ export interface OutputDiagnostic {
   readonly sourceComponentId?: string
   readonly pageNumber?: number
   readonly fragmentIndex?: number
+  /** Measured overflow beyond the text frame's content box. */
+  readonly horizontalOverflowPx?: number
+  readonly verticalOverflowPx?: number
 }
 
 export interface OutputDocument {

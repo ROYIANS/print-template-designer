@@ -21,6 +21,7 @@ import {
   type PageConfig,
   type PageSize,
   type QRCodeProps,
+  type TextColumnFill,
 } from '@ptd/core'
 import { RiDeleteBinLine, RiLandscapeLine, RiRuler2Line, RiUpload2Line } from '@remixicon/react'
 import {
@@ -149,6 +150,7 @@ const TYPOGRAPHY_COMPONENTS = new Set<ComponentSchema['component']>([
   'RoyText',
   'RoyComplexTable',
 ])
+const TEXT_COLUMN_COMPONENTS = new Set<ComponentSchema['component']>(['RoySimpleText', 'RoyText'])
 const ALIGNMENT_COMPONENTS = new Set<ComponentSchema['component']>(['RoySimpleText'])
 const BACKGROUND_COMPONENTS = new Set<ComponentSchema['component']>([
   'RoySimpleText',
@@ -506,6 +508,7 @@ function SingleInspector({ component }: { component: ComponentSchema }) {
   const configurableContent = isConfigurableContentComponent(component)
   const showsContent = CONTENT_COMPONENTS.has(component.component)
   const showsTypography = TYPOGRAPHY_COMPONENTS.has(component.component)
+  const showsTextColumns = TEXT_COLUMN_COMPONENTS.has(component.component)
   const showsAlignment = ALIGNMENT_COMPONENTS.has(component.component)
   const showsTextColor = TYPOGRAPHY_COMPONENTS.has(component.component)
   const showsBackground = BACKGROUND_COMPONENTS.has(component.component)
@@ -771,6 +774,45 @@ function SingleInspector({ component }: { component: ComponentSchema }) {
               onCancel={cancel}
               onCanvasValue={(value) => updateStyle('padding', String(value))}
             />
+            {showsTextColumns && (
+              <>
+                <NumberInput
+                  label="文字分栏"
+                  value={numeric(component.style.columnCount ?? 1)}
+                  min={1}
+                  max={6}
+                  step={1}
+                  disabled={locked}
+                  onStart={start}
+                  onFinish={finish}
+                  onCancel={cancel}
+                  onValue={(value) => updateStyle('columnCount', Math.round(value))}
+                />
+                <NumberInput
+                  label="栏间距"
+                  value={numeric(component.style.columnGap ?? 24)}
+                  unit="px"
+                  min={0}
+                  step={1}
+                  disabled={locked}
+                  onStart={start}
+                  onFinish={finish}
+                  onCancel={cancel}
+                  onValue={(value) => updateStyle('columnGap', value)}
+                />
+                <SegmentedInput
+                  label="分栏填充"
+                  value={text(component.style.columnFill, 'auto')}
+                  disabled={locked}
+                  wide
+                  options={[
+                    { value: 'auto', label: '顺序填充' },
+                    { value: 'balance', label: '均衡填充' },
+                  ]}
+                  onValue={(value) => updateDiscreteStyle('columnFill', value as TextColumnFill)}
+                />
+              </>
+            )}
             {showsAlignment && (
               <>
                 <SegmentedInput

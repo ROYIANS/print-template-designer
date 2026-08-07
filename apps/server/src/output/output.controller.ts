@@ -67,6 +67,12 @@ export class OutputController {
       response.setHeader('Content-Length', String(result.pdf.byteLength))
       response.setHeader('Cache-Control', 'no-store')
       response.setHeader('X-Content-Type-Options', 'nosniff')
+      const warningCodes = result.diagnostics
+        .filter((diagnostic) => diagnostic.severity === 'warning')
+        .map((diagnostic) => diagnostic.code)
+      if (warningCodes.length > 0) {
+        response.setHeader('X-PTD-Output-Warnings', [...new Set(warningCodes)].join(','))
+      }
       response.send(result.pdf)
     } catch (error) {
       if (error instanceof OutputEngineError) throw outputException(error)

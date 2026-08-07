@@ -16,8 +16,12 @@ const CSS = `
   background: var(--ptd-background);
   border: var(--ptd-border);
   border-radius: var(--ptd-border-radius);
+  /* Allow synthetic bold/italic when the selected family has no matching face. */
+  font-synthesis: weight style;
   font-size: var(--ptd-font-size);
   font-family: var(--ptd-font-family);
+  font-style: var(--ptd-font-style);
+  font-weight: var(--ptd-font-weight);
 }
 
 .ptd-simple-text__inner {
@@ -31,9 +35,22 @@ const CSS = `
   padding: var(--ptd-padding);
   line-height: var(--ptd-line-height);
   letter-spacing: var(--ptd-letter-spacing);
+  font-size: var(--ptd-font-size);
+  font-family: var(--ptd-font-family);
   font-weight: var(--ptd-font-weight);
   font-style: var(--ptd-font-style);
   text-decoration: var(--ptd-text-decoration);
+  white-space: var(--ptd-white-space, pre-wrap);
+  overflow-wrap: anywhere;
+  column-count: var(--ptd-column-count, 1);
+  column-gap: var(--ptd-column-gap, 24px);
+  column-fill: var(--ptd-column-fill, auto);
+}
+
+/* Flex alignment is retained for the legacy one-column mode. Multi-column flow
+ * requires a block formatting context so text can fragment between columns. */
+.ptd-simple-text__inner[data-ptd-columns='true'] {
+  display: block;
 }
 
 .ptd-text {
@@ -41,6 +58,8 @@ const CSS = `
   background: var(--ptd-background);
   border-radius: var(--ptd-border-radius);
   border: var(--ptd-border);
+  /* Allow synthetic bold/italic when the selected family has no matching face. */
+  font-synthesis: weight style;
 }
 
 .ptd-text__inner {
@@ -52,6 +71,9 @@ const CSS = `
   letter-spacing: var(--ptd-letter-spacing);
   font-size: var(--ptd-font-size);
   font-family: var(--ptd-font-family);
+  column-count: var(--ptd-column-count, 1);
+  column-gap: var(--ptd-column-gap, 24px);
+  column-fill: var(--ptd-column-fill, auto);
 }
 
 .ptd-text__inner table {
@@ -73,8 +95,9 @@ const CSS = `
 .ptd-text__inner h2,
 .ptd-text__inner h3,
 .ptd-text__inner h4 {
-  margin-block-start: 0;
-  margin-block-end: 0;
+  margin-block-start: var(--ptd-paragraph-space-before, 0px);
+  margin-block-end: var(--ptd-paragraph-space-after, 0px);
+  text-indent: var(--ptd-paragraph-first-line-indent, 0px);
 }
 
 .ptd-text__inner ul,
