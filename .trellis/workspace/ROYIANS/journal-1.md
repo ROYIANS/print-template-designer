@@ -903,3 +903,36 @@ Opened GitHub OAuth access, added admin-aware demo restoration, keyed design and
 ### Next Steps
 
 - None - task complete
+
+
+## Session 27: Milestone B2 富文本排版与工具条收官
+
+**Date**: 2026-08-07
+**Task**: Milestone B2 富文本排版与工具条收官
+**Branch**: `feature/refc`
+
+### Summary
+
+完成富文本 headless 工具条、颜色/高亮/链接 selection 保持、三行布局、字体合成、placeholder、段落空行和一列编辑流修复；真实 Chromium smoke、React Designer 161 tests、components 61 tests、typecheck、lint、build 均通过。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `92d1211` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
