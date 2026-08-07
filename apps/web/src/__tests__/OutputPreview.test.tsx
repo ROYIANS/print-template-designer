@@ -9,13 +9,13 @@ import { INITIAL_TEMPLATE } from '../templates'
 const exportMocks = vi.hoisted(() => ({
   compile: vi.fn(),
   mount: vi.fn(),
-  wait: vi.fn(),
+  preflight: vi.fn(),
 }))
 
 vi.mock('@ptd/export', () => ({
   compileOutputDocument: exportMocks.compile,
   mountOutputDocument: exportMocks.mount,
-  waitForOutputReady: exportMocks.wait,
+  preflightOutputDocument: exportMocks.preflight,
 }))
 
 const NOW = '2026-08-03T08:30:00.000Z'
@@ -95,7 +95,11 @@ describe('OutputPreview', () => {
     vi.stubGlobal('ResizeObserver', ResizeObserverStub)
 
     exportMocks.compile.mockReset().mockResolvedValue(output())
-    exportMocks.wait.mockReset().mockResolvedValue([])
+    exportMocks.preflight
+      .mockReset()
+      .mockImplementation((_root: HTMLElement, current: OutputDocument) =>
+        Promise.resolve(current.diagnostics),
+      )
     exportMocks.mount.mockReset().mockImplementation((host: HTMLElement) => {
       const outputRoot = document.createElement('div')
       outputRoot.dataset.ptdOutputDocument = ''
@@ -173,6 +177,8 @@ describe('OutputPreview', () => {
           severity: 'error',
           code: 'ROW_TOO_TALL',
           message: '明细行高于完整正文区域。',
+          sourceComponentId: 'detail-table',
+          pageNumber: 2,
         },
       ]),
     )
@@ -181,6 +187,7 @@ describe('OutputPreview', () => {
 
     expect(container.textContent).toContain('发现阻止导出的排版问题')
     expect(container.textContent).toContain('ROW_TOO_TALL')
+    expect(container.textContent).toContain('第 2 页 · detail-table')
     const exportButton = Array.from(container.querySelectorAll<HTMLButtonElement>('button')).find(
       (button) => button.textContent === '导出 PDF',
     )

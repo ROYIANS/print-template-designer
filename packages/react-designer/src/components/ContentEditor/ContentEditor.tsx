@@ -11,10 +11,10 @@ import {
 import {
   componentStyleToCssVariables,
   injectStylesheet,
-  sanitizeRichTextHtml,
+  canonicalizeRichTextHtml,
   type ComponentCssVariables,
 } from '@ptd/components'
-import type { ComponentSchema } from '@ptd/core'
+import { normalizePlainText, type ComponentSchema } from '@ptd/core'
 import { Color } from '@tiptap/extension-color'
 import FontFamily from '@tiptap/extension-font-family'
 import Highlight from '@tiptap/extension-highlight'
@@ -100,14 +100,14 @@ function PlainTextEditor({ schema }: ContentEditorProps) {
   const store = useEditorStore()
   const frameRef = useRef<HTMLDivElement>(null)
   const editableRef = useRef<HTMLDivElement>(null)
-  const draftRef = useRef(textValue(schema.propValue))
+  const draftRef = useRef(normalizePlainText(textValue(schema.propValue)))
   const composingRef = useRef(false)
   const settledRef = useRef(false)
 
   const commit = useCallback(() => {
     if (settledRef.current) return
     settledRef.current = true
-    store.commitContentEditing(schema.id, draftRef.current)
+    store.commitContentEditing(schema.id, normalizePlainText(draftRef.current))
   }, [schema.id, store])
   const cancel = useCallback(() => {
     if (settledRef.current) return
@@ -143,7 +143,7 @@ function PlainTextEditor({ schema }: ContentEditorProps) {
         aria-multiline="true"
         spellCheck
         onInput={(event: FormEvent<HTMLDivElement>) => {
-          draftRef.current = event.currentTarget.innerText.replace(/\r\n/g, '\n')
+          draftRef.current = normalizePlainText(event.currentTarget.innerText)
         }}
         onCompositionStart={() => {
           composingRef.current = true
@@ -174,9 +174,7 @@ function RichTextEditor({ schema }: ContentEditorProps) {
   const rootRef = useRef<HTMLDivElement>(null)
   const settledRef = useRef(false)
   const composingRef = useRef(false)
-  const [initialContent] = useState(
-    () => sanitizeRichTextHtml(textValue(schema.propValue)) || '<p></p>',
-  )
+  const [initialContent] = useState(() => canonicalizeRichTextHtml(textValue(schema.propValue)))
   const [revision, setRevision] = useState(0)
   const [linkEditorOpen, setLinkEditorOpen] = useState(false)
   const [linkDraft, setLinkDraft] = useState('https://')
@@ -213,7 +211,7 @@ function RichTextEditor({ schema }: ContentEditorProps) {
     if (settledRef.current) return
     settledRef.current = true
     const html = editor?.getHTML() ?? initialContent
-    store.commitContentEditing(schema.id, sanitizeRichTextHtml(html) || '<p></p>')
+    store.commitContentEditing(schema.id, canonicalizeRichTextHtml(html))
   }, [editor, initialContent, schema.id, store])
   const cancel = useCallback(() => {
     if (settledRef.current) return

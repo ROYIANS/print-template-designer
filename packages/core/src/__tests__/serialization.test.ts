@@ -43,6 +43,34 @@ describe('serialization', () => {
     expect(restored.pages[0]?.id).toBe('page-1')
   })
 
+  it('normalizes plain-text line endings at JSON import/save while preserving spaces', () => {
+    const template: TemplateSchema = {
+      ...sampleTemplate,
+      pages: [
+        {
+          id: 'page-1',
+          componentData: [
+            {
+              id: 'plain',
+              component: 'RoySimpleText',
+              propValue: '  第一行\r\n第二行\r第三行  ',
+              style: { width: 100, height: 40, rotate: 0, opacity: 1 },
+              groupStyle: {},
+              position: {},
+            },
+          ],
+        },
+      ],
+    }
+    const restored = deserialize(JSON.stringify(template))
+    const component = restored.pages[0]!.componentData[0]!
+    expect(component.propValue).toBe('  第一行\n第二行\n第三行  ')
+    expect(component.style.whiteSpace).toBeUndefined()
+    expect(JSON.parse(serialize(restored)).pages[0].componentData[0].propValue).toBe(
+      '  第一行\n第二行\n第三行  ',
+    )
+  })
+
   it('round-trips an optional default page master', () => {
     const withOutput: TemplateSchema = {
       ...sampleTemplate,

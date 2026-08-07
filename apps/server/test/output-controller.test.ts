@@ -102,6 +102,22 @@ describe('output PDF controller', () => {
     )
   })
 
+  it('returns safe warning diagnostic codes with a successful PDF', async () => {
+    renderPdf.mockResolvedValueOnce({
+      pdf: Buffer.from('%PDF-1.7\nFoliq'),
+      pageCount: 1,
+      diagnostics: [
+        { severity: 'warning', code: 'EMPTY_PAGE', message: '输出页面没有可打印组件。' },
+        { severity: 'warning', code: 'EMPTY_PAGE', message: '输出页面没有可打印组件。' },
+      ],
+    })
+    const response = await request(app.getHttpServer())
+      .post('/api/output/pdf')
+      .send(body())
+      .expect(200)
+    expect(response.headers['x-ptd-output-warnings']).toBe('EMPTY_PAGE')
+  })
+
   it.each([
     ['layout', new OutputEngineError('layout', 'Fatal layout', ['ROW_TOO_TALL']), 422, false],
     ['saturated', new OutputEngineError('saturated', 'Busy'), 429, true],

@@ -34,6 +34,8 @@ const CSS = `
   font-weight: var(--ptd-font-weight);
   font-style: var(--ptd-font-style);
   text-decoration: var(--ptd-text-decoration);
+  white-space: var(--ptd-white-space, pre-wrap);
+  overflow-wrap: anywhere;
 }
 
 .ptd-text {

@@ -1,4 +1,4 @@
-import type { ComponentStyle } from '@ptd/core'
+import { normalizePlainTextWhiteSpace, type ComponentStyle } from '@ptd/core'
 
 export type ComponentCssVariables = Record<`--ptd-${string}`, string>
 
@@ -46,6 +46,7 @@ export function componentStyleToCssVariables(style: ComponentStyle): ComponentCs
     '--ptd-font-style': style.fontStyle ?? 'normal',
     '--ptd-line-height': style.lineHeight ?? '1',
     '--ptd-letter-spacing': `${style.letterSpacing ?? 0}px`,
+    '--ptd-white-space': normalizePlainTextWhiteSpace(style.whiteSpace),
     '--ptd-padding': `${style.padding ?? 0}px`,
     '--ptd-margin': `${style.margin ?? 0}px`,
     '--ptd-border': computeBorder(style),

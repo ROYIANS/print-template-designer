@@ -13,6 +13,7 @@ import type { TemplatePage, TemplateSchema } from './types/template-schema'
 import type { TemplateOutputDefinition } from './types/output'
 import { isDataPath } from './data-binding/path'
 import { validateRuntimeRecords } from './data-binding/validation'
+import type { PlainTextWhiteSpace } from './types/text'
 
 const COMPONENT_TYPES: ReadonlySet<string> = new Set<ComponentType>([
   'RoySimpleText',
@@ -62,6 +63,13 @@ const STYLE_STRING_KEYS = [
   'fontStyle',
   'elementPosition',
 ] as const satisfies readonly (keyof ComponentStyle)[]
+
+const WHITE_SPACE_VALUES: ReadonlySet<PlainTextWhiteSpace> = new Set([
+  'normal',
+  'pre-wrap',
+  'pre-line',
+  'nowrap',
+])
 
 const STYLE_BOOLEAN_KEYS = [
   'isUnderLine',
@@ -120,6 +128,12 @@ function isComponentStyle(value: unknown): value is ComponentStyle {
     !isFiniteNumber(value['height']) ||
     !isFiniteNumber(value['rotate']) ||
     !isFiniteNumber(value['opacity'])
+  ) {
+    return false
+  }
+  if (
+    value['whiteSpace'] !== undefined &&
+    !WHITE_SPACE_VALUES.has(value['whiteSpace'] as PlainTextWhiteSpace)
   ) {
     return false
   }

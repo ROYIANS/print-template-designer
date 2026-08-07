@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { DEFAULT_PAGE_CONFIG } from '../types/page-config'
 import { isTemplateSchema } from '../schema-validation'
+import type { ComponentStyle } from '../types/component-schema'
 
 function template() {
   return {
@@ -163,5 +164,15 @@ describe('TemplateSchema runtime validation', () => {
         ],
       }),
     ).toBe(true)
+  })
+
+  it('validates the plain-text whitespace policy when it is present', () => {
+    const valid = template()
+    ;(valid.pages[0]!.componentData[0]!.style as ComponentStyle).whiteSpace = 'pre-line'
+    expect(isTemplateSchema(valid)).toBe(true)
+    const invalid = template()
+    ;(invalid.pages[0]!.componentData[0]!.style as Record<string, unknown>).whiteSpace =
+      'break-spaces'
+    expect(isTemplateSchema(invalid)).toBe(false)
   })
 })

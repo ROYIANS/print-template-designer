@@ -61,6 +61,16 @@ describe('RoySimpleText', () => {
     expect(comp['container'].style.getPropertyValue('--ptd-height')).toBe('40px')
   })
 
+  it('normalizes only platform newlines and keeps repeated spaces', () => {
+    const schema = makeSchema('  第一行\r\n第二行\r第三行  ')
+    const comp = new RoySimpleText(schema)
+    const parent = document.createElement('div')
+    comp.mount(parent)
+    expect(parent.querySelector('.ptd-simple-text__inner')?.textContent).toBe(
+      '  第一行\n第二行\n第三行  ',
+    )
+  })
+
   it('updates on schema change', () => {
     const schema = makeSchema('initial')
     const comp = new RoySimpleText(schema)

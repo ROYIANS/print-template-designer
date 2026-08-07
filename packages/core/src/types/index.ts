@@ -12,6 +12,12 @@ export type {
   ComponentCreationMode,
 } from './component-schema'
 export {
+  DEFAULT_PLAIN_TEXT_WHITE_SPACE,
+  normalizePlainText,
+  normalizePlainTextWhiteSpace,
+} from './text'
+export type { PlainTextWhiteSpace } from './text'
+export {
   BAR_CODE_FORMATS,
   DEFAULT_BAR_CODE_PROPS,
   DEFAULT_IMAGE_PROPS,

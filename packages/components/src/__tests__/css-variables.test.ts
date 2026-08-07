@@ -77,6 +77,19 @@ describe('applyCssVars', () => {
     expect(el.style.getPropertyValue('--ptd-font-family')).toBe('Arial')
   })
 
+  it.each(['normal', 'pre-wrap', 'pre-line', 'nowrap'] as const)(
+    'maps plain text whitespace mode %s to the shared CSS variable',
+    (whiteSpace) => {
+      applyCssVars(el, { ...baseStyle, whiteSpace })
+      expect(el.style.getPropertyValue('--ptd-white-space')).toBe(whiteSpace)
+    },
+  )
+
+  it('defaults legacy plain text whitespace to pre-wrap', () => {
+    applyCssVars(el, baseStyle)
+    expect(el.style.getPropertyValue('--ptd-white-space')).toBe('pre-wrap')
+  })
+
   it('uses inherit for default font-family', () => {
     applyCssVars(el, { ...baseStyle, fontFamily: 'default' })
     expect(el.style.getPropertyValue('--ptd-font-family')).toBe('inherit')

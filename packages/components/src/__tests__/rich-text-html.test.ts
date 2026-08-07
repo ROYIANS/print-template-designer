@@ -1,9 +1,17 @@
 import { describe, expect, it } from 'vitest'
-import { sanitizeRichTextHtml } from '../components/richTextHtml'
+import { canonicalizeRichTextHtml, sanitizeRichTextHtml } from '../components/richTextHtml'
 
 describe('sanitizeRichTextHtml', () => {
-  it('preserves an empty paragraph as a valid editable rich-text document', () => {
+  it('keeps sanitizer output separate from the canonical blank-paragraph representation', () => {
     expect(sanitizeRichTextHtml('<p></p>')).toBe('<p></p>')
+    expect(canonicalizeRichTextHtml('<p></p>')).toBe('<p><br></p>')
+    expect(canonicalizeRichTextHtml('<p>  </p><p>正文</p><p>\n</p>')).toBe(
+      '<p><br></p><p>正文</p><p><br></p>',
+    )
+  })
+
+  it('sanitizes before canonicalizing blank paragraphs', () => {
+    expect(canonicalizeRichTextHtml('<script>alert(1)</script><p></p>')).toBe('<p><br></p>')
   })
 
   it('keeps the supported semantic formatting subset', () => {

@@ -28,7 +28,7 @@
 .plainEditor {
   display: block;
   text-align: var(--ptd-text-align, left);
-  white-space: pre-wrap;
+  white-space: var(--ptd-white-space, pre-wrap);
   overflow-wrap: anywhere;
 }
 

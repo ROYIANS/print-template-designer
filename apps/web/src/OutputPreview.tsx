@@ -18,7 +18,7 @@ import {
 import {
   compileOutputDocument,
   mountOutputDocument,
-  waitForOutputReady,
+  preflightOutputDocument,
   type MountedOutputDocument,
 } from '@ptd/export'
 import styles from './OutputPreview.module.css'
@@ -109,9 +109,8 @@ export function OutputPreview({
         if (cancelled) return
         const mounted = mountOutputDocument(host, output)
         mountedRef.current = mounted
-        const readiness = await waitForOutputReady(mounted.root)
+        const diagnostics = await preflightOutputDocument(mounted.root, output)
         if (cancelled) return
-        const diagnostics = [...output.diagnostics, ...readiness]
         setResult({ pageCount: output.pages.length, diagnostics })
       })
       .catch(() => {
@@ -280,7 +279,11 @@ export function OutputPreview({
                 {result.diagnostics.map((diagnostic, index) => (
                   <li key={`${diagnostic.code}-${index}`} data-severity={diagnostic.severity}>
                     <code>{diagnostic.code}</code>
-                    <span>{diagnostic.message}</span>
+                    <span>
+                      {diagnostic.pageNumber ? `第 ${diagnostic.pageNumber} 页 · ` : ''}
+                      {diagnostic.sourceComponentId ? `${diagnostic.sourceComponentId} · ` : ''}
+                      {diagnostic.message}
+                    </span>
                   </li>
                 ))}
               </ul>

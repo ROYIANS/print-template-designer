@@ -1,4 +1,5 @@
 import type { ComponentBinding } from './data-source'
+import type { PlainTextWhiteSpace } from './text'
 
 export type ComponentType =
   | 'RoySimpleText'
@@ -43,6 +44,8 @@ export interface ComponentStyle {
   margin?: string
   lineHeight?: string
   letterSpacing?: string
+  /** Plain-text whitespace policy; omitted legacy values default to pre-wrap. */
+  whiteSpace?: PlainTextWhiteSpace
   justifyContent?: string
   alignItems?: string
   fontWeight?: string

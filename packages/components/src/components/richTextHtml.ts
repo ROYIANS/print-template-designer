@@ -38,6 +38,22 @@ export function sanitizeRichTextHtml(html: string): string {
   return template.innerHTML
 }
 
+/** Sanitizes rich text and gives every visually blank paragraph one explicit line box. */
+export function canonicalizeRichTextHtml(html: string): string {
+  const sanitized = sanitizeRichTextHtml(html)
+  if (!sanitized) return '<p><br></p>'
+  const template = document.createElement('template')
+  template.innerHTML = sanitized
+  for (const paragraph of Array.from(template.content.querySelectorAll('p'))) {
+    if (isBlankParagraph(paragraph)) paragraph.replaceChildren(document.createElement('br'))
+  }
+  return template.innerHTML || '<p><br></p>'
+}
+
+function isBlankParagraph(paragraph: HTMLParagraphElement): boolean {
+  return (paragraph.textContent ?? '').trim() === ''
+}
+
 function sanitizeChildren(parent: ParentNode): void {
   for (const child of Array.from(parent.childNodes)) {
     if (!(child instanceof Element)) continue
