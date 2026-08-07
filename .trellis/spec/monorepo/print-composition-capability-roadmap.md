@@ -1,5 +1,9 @@
 # Print Composition Capability Roadmap
 
+> Milestone A (2026-08) implemented the P0 text correctness slice: Corepack/pnpm 11.18 CI ordering,
+> plain-text newline/`white-space` parity, rich blank-paragraph canonicalization, unified browser preflight,
+> and DOM-backed `TEXT_OVERFLOW` diagnostics. The remaining roadmap items below are future capabilities.
+
 > Status: **Proposed**. This document records implementation-ready capability decisions learned from building
 > complex report and editorial templates. It is a roadmap, not a statement that the capabilities already exist.
 > The currently implemented output contract remains authoritative in

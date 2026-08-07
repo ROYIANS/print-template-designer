@@ -89,6 +89,8 @@ corepack pnpm --filter web build
 - Host 必须持有 `TemplateSchema`，并决定何时保存、载入和处理错误。
 - 打印预览可在浏览器运行 framework-free compiler/renderer；PDF HTTP、认证和下载只属于 Web Host，
   不进入 `@ptd/react-designer`。
+- 打印预览必须调用 `@ptd/export` 的 `preflightOutputDocument()`；它统一 compiler、字体/组件/图片 readiness、
+  `TEXT_OVERFLOW`、资源阻断、空页和页面 bounds 诊断。预览会显示页码与 source component，error 诊断禁止导出。
 - Web/Server 持久化的是 canonical Datasource v2 定义、结构化绑定和用户明确保存的受限 sample records；
   临时 Host 运行时记录默认不写入模板。
 - `<Designer renderContext={...}>` 是 Host 注入临时运行时数据、当前记录、locale、timeZone 和显式 `now`
